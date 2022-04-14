@@ -1,0 +1,17 @@
+{
+  "name": "pont-spec",
+  "version": "0.0.1",
+  "description": "pont spec",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "pretest": "npm run build",
+    "watch": "tsc -w",
+    "build": "rm -rf lib && tsc"
+  },
+  "dependencies": {},
+  "files": [],
+  "keywords": [],
+  "author": "jasonHzq",
+  "license": "MIT"
+}

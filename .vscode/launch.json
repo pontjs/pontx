@@ -1,0 +1,18 @@
+{
+	"type": "node",
+	"request": "launch",
+	"configurations": [
+		{
+			"type": "node",
+			"name": "Debug Pont CLI",
+			"request": "launch",
+			"program": "${workspaceRoot}/packages/pont-cli/lib/index.js",
+			"args": [
+					"generate"
+			],
+			"cwd": "${workspaceFolder}/examples/hooks-app",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "protocol": "inspector"
+	}]
+}

@@ -1,0 +1,20 @@
+{
+  "name": "pont-cli",
+  "version": "0.0.1",
+  "description": "Pont CLI",
+  "bin": {
+    "pont2": "bin/init.js"
+  },
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "pretest": "npm run build",
+    "watch": "tsc -w",
+    "build": "rm -rf lib && tsc"
+  },
+  "dependencies": {},
+  "files": [],
+  "keywords": [],
+  "author": "jasonHzq",
+  "license": "MIT"
+}

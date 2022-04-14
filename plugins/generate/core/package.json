@@ -1,0 +1,21 @@
+{
+  "name": "pont-generate-core",
+  "version": "0.0.1",
+  "description": "OpenAPI pont spec",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "pretest": "npm run build",
+    "dev": "tsc -w",
+    "watch": "tsc -w",
+    "build": "rm -rf lib && tsc"
+  },
+  "dependencies": {
+    "@types/prettier": "^2.4.4",
+    "prettier": "^2.6.2"
+  },
+  "files": [],
+  "keywords": [],
+  "author": "jasonHzq",
+  "license": "MIT"
+}

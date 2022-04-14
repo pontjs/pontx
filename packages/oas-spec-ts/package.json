@@ -1,0 +1,19 @@
+{
+  "name": "oas-spec-ts",
+  "version": "0.0.1",
+  "description": "OpenAPI Spec",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "pretest": "npm run build",
+		"dev": "tsc -p ./scripts/tsconfig.json -w",
+		"generate": "node ./scripts/lib/generateCode.js ./src/oas2.0/definition.json ./src/oas2.0/swagger2.0.ts",
+    "watch": "tsc -w",
+    "build": "rm -rf lib && tsc"
+  },
+  "dependencies": {},
+  "files": [],
+  "keywords": [],
+  "author": "jasonHzq",
+  "license": "MIT"
+}
