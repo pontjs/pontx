@@ -1,0 +1,1 @@
+export { PontDictManager } from "./LocalDictManager";

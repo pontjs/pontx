@@ -1,0 +1,14 @@
+{
+  "outDir": "../src/services",
+  "origins": [
+    {
+      "name": "assert"
+    }
+  ],
+  "plugins": {
+    "generate": {
+      "assert": {},
+      "sdf": {}
+    }
+  }
+}
