@@ -16,7 +16,10 @@ export class PontJsonSchema {
 
   /** 生成表达式，用于预览读取类型信息 */
   static toString(schema: PontJsonSchema) {
-    if (typeof schema.templateIndex === 'number' && schema.templateIndex !== -1) {
+    if (
+      typeof schema.templateIndex === "number" &&
+      schema.templateIndex !== -1
+    ) {
       return `T${schema.templateIndex}`;
     }
 
@@ -26,15 +29,15 @@ export class PontJsonSchema {
         .join(" | ");
     }
 
-		if (schema.isDefsType) {
-			if (schema.templateArgs?.length) {
-				return `defs.${schema.typeName}<${schema.templateArgs
-					.map((arg) => arg.generateCode(arg))
-					.join(", ")}>`;
-			}
+    if (schema.isDefsType) {
+      if (schema.templateArgs?.length) {
+        return `defs.${schema.typeName}<${schema.templateArgs
+          .map((arg) => PontJsonSchema.toString(arg))
+          .join(", ")}>`;
+      }
 
-			return `defs.${schema.typeName}`;
-		}
+      return `defs.${schema.typeName}`;
+    }
 
     return schema?.typeName || "any";
   }

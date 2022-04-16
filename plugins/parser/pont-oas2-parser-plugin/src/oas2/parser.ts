@@ -29,29 +29,24 @@ export function parseOAS2Interface(
     name = getIdentifierFromOperatorId(inter.operationId);
   }
 
-  const responseSchema = _.get(
-    inter,
-    "responses.200.schema",
-    {}
-  ) as OAS2.SchemaObject;
-  const response = parseJsonSchema(responseSchema, context);
+  const responses = _.mapValues(inter.responses, (response) => {
+    const responseSchema = response.schema
+      ? parseJsonSchema(response.schema, context)
+      : new PontSpec.PontJsonSchema();
+    return { ...response, schema: responseSchema };
+  });
 
-  const parameters = (inter.parameters || []).map(
-    (param) => {
-      const { name, required, schema, ...rest } = param;
-			const paramSchema = { ...rest, ...(schema || {}) };
+  const parameters = (inter.parameters || []).map((param) => {
+    const { name, required, schema, ...rest } = param;
+    const paramSchema = { ...rest, ...(schema || {}) };
 
-      return {
-        in: param.in as any,
-        name: name.includes("/") ? name.split("/").join("") : name,
-        schema: parseJsonSchema(
-          paramSchema as any as OAS2.SchemaObject,
-          context
-        ),
-        required,
-      } as PontSpec.Parameter;
-    }
-  );
+    return {
+      in: param.in as any,
+      name: name.includes("/") ? name.split("/").join("") : name,
+      schema: parseJsonSchema(paramSchema as any as OAS2.SchemaObject, context),
+      required,
+    } as PontSpec.Parameter;
+  });
 
   let interDesc = inter.summary;
 
@@ -69,7 +64,7 @@ export function parseOAS2Interface(
     name,
     method,
     path,
-    response,
+    responses,
     /** 后端返回的参数可能重复 */
     parameters: _.unionBy(parameters, "name"),
   } as PontSpec.Interface;
@@ -153,7 +148,11 @@ export function parseSwagger2Mods(
       });
       processDuplicateInterfaceName(standardInterfaces, samePath);
 
-      return processMod(standardInterfaces, tag);
+      const processedMod = processMod(standardInterfaces, tag);
+      return {
+        ...processedMod,
+        interfaces: _.sortBy(processedMod.interfaces, (api) => api.name),
+      };
     })
     .filter((mod) => {
       return mod.interfaces.length;
@@ -161,7 +160,7 @@ export function parseSwagger2Mods(
 
   processDuplicateModName(mods);
 
-  return mods;
+  return _.sortBy(mods, (mod) => mod.name);
 }
 
 export function parseOAS2(
@@ -184,7 +183,7 @@ export function parseOAS2(
   });
   const defNames = draftClasses.map((clazz) => clazz.name);
 
-  const baseClasses = draftClasses.map((clazz) => {
+  let baseClasses = draftClasses.map((clazz) => {
     const dataType = parseAst2PontJsonSchema(clazz.defNameAst, {
       classTemplateArgs: [],
       defNames,
@@ -208,7 +207,7 @@ export function parseOAS2(
       name: clazz.name,
     } as PontSpec.BaseClass;
   });
-  deleteDuplicateBaseClass(baseClasses);
+  baseClasses = deleteDuplicateBaseClass(baseClasses);
 
   const pontDs = {
     baseClasses,

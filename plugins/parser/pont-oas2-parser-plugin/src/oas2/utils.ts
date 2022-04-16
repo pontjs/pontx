@@ -32,7 +32,7 @@ export class JsonSchemaContext {
       );
       const index = codes.indexOf(PontJsonSchema.toString(schema));
 
-      schema.templateArgs.forEach((arg) =>
+      (schema.templateArgs || []).forEach((arg) =>
         JsonSchemaContext.handleContext(context, arg)
       );
       schema.templateIndex = index;
@@ -248,7 +248,7 @@ export function deleteDuplicateBaseClass(baseClasses: BaseClass[]) {
         : 1;
     }
 
-    return next.name > pre.name ? 1 : -1;
+    return next.name > pre.name ? -1 : 1;
   });
 
   return _.unionBy(baseClasses, (clazz) => clazz.name);

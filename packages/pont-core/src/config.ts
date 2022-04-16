@@ -41,6 +41,12 @@ export class PontParserPlugin extends PontPlugin {
   }
 }
 
+export class PontTransformPlugin extends PontPlugin {
+  async apply(spec: PontSpec, options?: any): Promise<PontSpec> {
+    return null;
+  }
+}
+
 export class PontGeneratorPlugin extends PontPlugin {
   apply(manager: PontManager, options?: any): void {}
 }
@@ -57,6 +63,7 @@ type PluginItem<T extends PontPlugin> = { instance: T; options: any };
 
 export class PontPlugins {
   fetch: PluginItem<PontFetchPlugin>;
+  transform: PluginItem<PontTransformPlugin>;
   parser: PluginItem<PontParserPlugin>;
   mocks: PluginItem<PontMocksPlugin>;
   generate: PluginItem<PontGeneratorPlugin>;
@@ -75,9 +82,11 @@ export class PontPublicManagerConfig {
   envs: any;
   origins? = [] as PublicOriginConfig[];
   origin?: PublicOriginConfig = new PublicOriginConfig();
+  url: string;
   outDir: string;
   plugins: {
     fetch: PluginConfig;
+    transform: PluginConfig;
     parser: PluginConfig;
     mocks: PluginConfig;
     generate: PluginConfig;
@@ -203,7 +212,14 @@ export class PontInnerManagerConfig {
     logger: PontLogger,
     configDir: string
   ): PontInnerManagerConfig {
-    const origins = config.origins?.length ? config.origins : [config.origin];
+    let origins = config.origins;
+    if (!origins?.length) {
+      if (typeof config.url === "string" && config.url) {
+        origins = [{ url: config.url } as PublicOriginConfig];
+      } else {
+        origins = [config.origin];
+      }
+    }
 
     if (!origins?.length) {
       logger.error("pont 配置文件错误！未配置数据源信息");
