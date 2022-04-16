@@ -23,7 +23,7 @@ export function parseJsonSchema(
     }
 
     resultSchema = parseAst2PontJsonSchema(ast, context);
-		resultSchema.isDefsType = true;
+    resultSchema.isDefsType = context.defNames.includes(resultSchema.typeName);
   } else if (type === "array" && items) {
     resultSchema = {
       ...resultSchema,

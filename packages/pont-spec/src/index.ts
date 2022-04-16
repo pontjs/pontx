@@ -1,3 +1,4 @@
+import { OAS2 } from "oas-spec-ts";
 import { PontJsonSchema } from "./dataType";
 import { Parameter } from "./parameter";
 import { getDuplicateById } from "./utils";
@@ -5,11 +6,17 @@ const _ = require("lodash");
 
 export { PontJsonSchema, Parameter };
 
+type ResponseObject = {
+  schema: PontJsonSchema;
+  headers: OAS2.HeadersObject;
+};
 export class Interface {
   consumes: string[];
   parameters: Parameter[];
   description: string;
-  response: PontJsonSchema;
+  responses: {
+    [key: string]: ResponseObject;
+  };
   method: string;
   name: string;
   path: string;

@@ -1,14 +1,4 @@
 {
   "outDir": "../src/services",
-  "origins": [
-    {
-      "name": "assert"
-    }
-  ],
-  "plugins": {
-    "generate": {
-      "assert": {},
-      "sdf": {}
-    }
-  }
+  "url": "https://petstore.swagger.io/v2/swagger.json"
 }

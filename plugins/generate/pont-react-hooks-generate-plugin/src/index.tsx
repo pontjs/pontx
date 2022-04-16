@@ -5,6 +5,7 @@ import {
   CodeGenerator,
   FileGenerator,
   FileStructure,
+  indentation,
 } from "pont-generate-core";
 
 class MyCodeGenerator extends CodeGenerator {
@@ -17,8 +18,10 @@ export namespace ${api.name} {
 	type HooksParams = (() => Params) | Params;
 	function mutate(params?: HooksParams, newValue?: any, shouldRevalidate = true);
 
-	export ${this.generateAPIParametersTsCode(api)}
-	export type Response = ${this.generateJsonSchemaCode(api.response)};
+${indentation(2)(`export ${this.generateAPIParametersTsCode(api)}`)}
+	export type Response = ${this.generateJsonSchemaCode(
+    api.responses?.[200]?.schema
+  )};
 	export function request(${this.genereateAPIRequestParamsTsCode(
     api
   )}): Promise<Response>;

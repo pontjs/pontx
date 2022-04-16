@@ -16,6 +16,8 @@ npm run watch
 
 Select "Debug Pont CLI" in VSCode Debug Panel, and click Debug button.
 
+## Code Style
+
 ## pont architecture
 
 ![architecture image](https://img.alicdn.com/imgextra/i2/O1CN01qfxgje261ldyXx5rl_!!6000000007602-2-tps-1504-370.png)
