@@ -22,7 +22,7 @@ Select "Debug Pont CLI" in VSCode Debug Panel, and click Debug button.
 
 ![architecture image](https://img.alicdn.com/imgextra/i2/O1CN01qfxgje261ldyXx5rl_!!6000000007602-2-tps-1504-370.png)
 
-### basement
+### kernel
 
 * pont-spec
 描述 Pont 标准数据源的类型，提供 Pont 标准数据源的常用数据处理方法。
