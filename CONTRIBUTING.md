@@ -18,7 +18,19 @@ Select "Debug Pont CLI" in VSCode Debug Panel, and click Debug button.
 
 ## Code Style
 
-## pont architecture
+## 为什么做 Pont2 升级
+
+* 1、原 Pont Spec 设计不合理，Pont2 拥抱行业标准，在 Spec 设计上拥抱 JSON Schema 和 OAS，以降低 parser 和其它插件的开发成本。
+* 2、Pont 在不同功能的定制化需求多样，社区需要一个插件化的 Pont，以低成本，标准化的方式，开发和贡献可贡献的 Pont 插件库。
+* 3、升级 Pont 在部分技术细节上的设计。详情见各插件和模块说明。
+
+## 设计理念
+
+拥抱标准、插件化、合理分包，每个包可单独引用。
+
+## 规划
+
+## pont2 architecture
 
 ![architecture image](https://img.alicdn.com/imgextra/i2/O1CN01qfxgje261ldyXx5rl_!!6000000007602-2-tps-1504-370.png)
 
@@ -30,6 +42,10 @@ Select "Debug Pont CLI" in VSCode Debug Panel, and click Debug button.
 
 * pont-core
 pont 核心包，包括配置文件解析、不同生命周期的插件加载和执行
+
+* pont-ui
+
+以 pont-spec 元数据渲染的 API 工具页。 包括 API 搜素、目录、文档、试用&调试、mocks编辑等基本组件。用以组装可部署的 pont-platform，或以 webview 为基础的 vscode、intellj idea 插件。
 
 ### plugins
 
@@ -47,7 +63,7 @@ pont 在不同生命周期提供的能力，目前都已进行插件化改造。
 
 * generate
   * pont-generate-core
-		提供 SDK 生成的基本方法
+		提供 SDK 生成的基本方法，提供调用示例的 snippet。
 
   * pont-react-hooks-generate-plugin
 		生成前端 SDK。包含 React Hooks 的调用方法（use-swr）。

@@ -53,7 +53,9 @@ export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
             value={currSpec.name}
             onChange={(e) => {
               changeCurrSpec(
-                props.specs.find((spec) => spec.name === e.target.value)
+                props.specs.find(
+                  (spec) => spec.name === e.target.value
+                ) as PontSpec.PontSpec
               );
             }}
             options={props.specs.map((spec) => spec.name)}

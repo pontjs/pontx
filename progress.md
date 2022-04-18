@@ -1,8 +1,16 @@
-## 下一步
+# progress
+## todo
+### 核心层
 
-* 任务分配
-* 自动化测试
-* Core Diff
-* UI
-* VSCode
-	* WEB 化
+* 测试用例
+* spec diff
+
+### 插件
+
+* OAS2 parser 翻译
+* OAS3 parser
+* ng generate
+* responses filter transform
+* pont UI => pont platform => vscode pont
+* mocks, mocks in sdk
+* usage-report
