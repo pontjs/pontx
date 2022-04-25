@@ -1,12 +1,19 @@
 {
   "name": "pont-ui",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "watch": "tsc -w",
+    "less": "find src -name '*.less'  -or -name '*.css' -exec rsync -R '{}' lib \\; && cp -R lib/src/* lib/ && rm -rf lib/src",
+    "build": "tsc && npm run less",
     "preview": "vite preview"
   },
+  "files": [
+    "lib",
+    "dist"
+  ],
   "dependencies": {
     "@blueprintjs/core": "^4.1.2",
     "react": "^17.0.2",

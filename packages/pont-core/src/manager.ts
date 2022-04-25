@@ -243,4 +243,21 @@ export class PontManager {
       };
     }
   }
+
+  // 辅助方法
+  static getCurrentSpec(manager: PontManager): PontSpec {
+    if (manager.localPontSpecs?.length) {
+      if (manager?.currentOriginName) {
+        const foundSpec = manager.localPontSpecs.find(
+          (spec) => spec.name === manager.currentOriginName
+        );
+
+        if (foundSpec) {
+          return foundSpec;
+        }
+      }
+      return manager.localPontSpecs[0];
+    }
+    return null;
+  }
 }

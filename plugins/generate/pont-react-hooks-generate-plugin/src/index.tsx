@@ -6,6 +6,7 @@ import {
   FileGenerator,
   FileStructure,
   indentation,
+  Snippet,
 } from "pont-generate-core";
 
 class MyCodeGenerator extends CodeGenerator {
@@ -94,6 +95,34 @@ class PontReactHooksGeneratorPlugin extends PontGeneratorPlugin {
       manager.localPontSpecs[0],
       baseDir
     );
+  }
+
+  providerSnippets(api: Interface, originName = ""): Snippet[] {
+    const apiName = originName
+      ? `API.${originName}.${api.name}`
+      : `API.${api.name}`;
+    return [
+      {
+        name: "useRequest",
+        code: `const { data, isLoading, error } = ${apiName}.useRequest({ });`,
+      },
+      {
+        name: "request promise",
+        code: `${apiName}.request({}).then(data => {
+
+				}, err => {
+
+				})`,
+      },
+      {
+        name: "request async",
+        code: `try {
+					const result = await ${apiName}.request({ });
+				} catch (err) {
+
+				}`,
+      },
+    ];
   }
 }
 

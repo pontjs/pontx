@@ -1,0 +1,72 @@
+{
+  "name": "vscode-pont2",
+  "displayName": "pont2",
+  "description": "",
+  "version": "0.0.1",
+  "publisher": "jasonHzq",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.47.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./out/extension",
+  "contributes": {
+    "jsonValidation": [
+      {
+        "fileMatch": "pont-config.json",
+        "url": "./configSchema.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "pont.findInterface",
+        "title": "find pont interface"
+      },
+      {
+        "command": "pont.openPontUI",
+        "title": "open pont tab"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "pont.findInterface",
+        "key": "cmd+ctrl+p",
+        "mac": "cmd+ctrl+p"
+      },
+      {
+        "command": "pont.refreshMocks",
+        "key": "cmd+ctrl+m",
+        "mac": "cmd+ctrl+m"
+      }
+    ],
+    "menus": {
+      "editor/context": []
+    }
+  },
+  "scripts": {
+    "build": "rimraf ./out && tsc",
+    "watch": "tsc -watch -p ./",
+    "test": "npm run build && node ../../node_modules/vscode/bin/test"
+  },
+  "dependencies": {
+    "@types/fs-extra": "^5.1.0",
+    "fs-extra": "^7.0.1",
+    "mockjs": "^1.0.1-beta3"
+  },
+  "devDependencies": {
+    "rimraf": "^3.0.2",
+    "vsce": "^1.50.0",
+    "@types/vscode-webview": "^1.57.0",
+    "@types/vscode": "^1.47.0"
+  },
+  "icon": "logo.png",
+  "repository": {
+    "url": "git@github.com:pont2/pont.git",
+    "type": "git"
+  }
+}

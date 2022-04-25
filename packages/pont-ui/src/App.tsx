@@ -11,6 +11,7 @@ export const App: React.FC<AppProps> = (props) => {
   return (
     <div className='pont-ui'>
       <LeftMenu specs={[]}></LeftMenu>
+      hello world
     </div>
   );
 };
