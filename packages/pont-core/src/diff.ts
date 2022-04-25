@@ -1,3 +1,29 @@
+export enum DiffEntityType {
+  api = "api",
+
+  baseClass = "baseClass",
+}
+
+export enum DiffType {
+  Update = "update",
+
+  Increase = "increase",
+
+  Delete = "delete",
+}
+
+export class PontSpecDiff {
+  entityType: DiffEntityType;
+
+  diffType: DiffType;
+
+  /** class 时为类名，api时为 modName.apiName */
+  entityId = "";
+
+  /** 新数据源对应 entity 的 Meta */
+  diffMeta: any;
+}
+
 // import { Mod, Interface, BaseClass } from "./standard";
 // import * as _ from "lodash";
 

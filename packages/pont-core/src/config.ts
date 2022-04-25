@@ -1,5 +1,5 @@
 import * as path from "path";
-import { PontSpec } from "pont-spec";
+import { PontSpec, Interface } from "pont-spec";
 import { PontManager } from "./manager";
 import { PontLogger } from "./logger";
 
@@ -47,8 +47,22 @@ export class PontTransformPlugin extends PontPlugin {
   }
 }
 
+export class Snippet {
+  code = "";
+  name = "";
+  description? = "";
+}
+
 export class PontGeneratorPlugin extends PontPlugin {
   apply(manager: PontManager, options?: any): void {}
+
+  providerSnippets(
+    api: Interface,
+    originName: string,
+    options?: any
+  ): Snippet[] {
+    return [];
+  }
 }
 
 export class PontMocksPlugin extends PontPlugin {

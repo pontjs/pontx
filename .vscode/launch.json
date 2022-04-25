@@ -1,18 +1,41 @@
 {
-	"type": "node",
-	"request": "launch",
-	"configurations": [
-		{
-			"type": "node",
-			"name": "Debug Pont CLI",
-			"request": "launch",
-			"program": "${workspaceRoot}/packages/pont-cli/lib/index.js",
-			"args": [
-					"generate"
-			],
-			"cwd": "${workspaceFolder}/examples/hooks-app",
+  "type": "node",
+  "request": "launch",
+  "configurations": [
+    {
+      "type": "node",
+      "name": "Debug Pont CLI",
+      "request": "launch",
+      "program": "${workspaceRoot}/packages/pont-cli/lib/index.js",
+      "args": ["generate"],
+      "cwd": "${workspaceFolder}/examples/hooks-app",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "protocol": "inspector"
-	}]
+    },
+    {
+      "name": "Extension",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceRoot}/packages/vscode-pont"
+      ],
+      "stopOnEntry": false,
+      "sourceMaps": true,
+      "outFiles": ["${workspaceRoot}/packages/vscode-pont/out/**/*.js"]
+    },
+    {
+      "name": "Extension Tests",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceRoot}",
+        "--extensionTestsPath=${workspaceRoot}/out/test"
+      ],
+      "stopOnEntry": false,
+      "sourceMaps": true
+    }
+  ]
 }
