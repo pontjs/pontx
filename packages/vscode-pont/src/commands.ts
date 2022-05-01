@@ -91,6 +91,7 @@ export class PontCommands {
 
           const snippets = pontManager.innerManagerConfig.plugins.generate?.instance?.providerSnippets?.(
             apiMeta,
+            modName,
             pontSpec.name,
           );
 

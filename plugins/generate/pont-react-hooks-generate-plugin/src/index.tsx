@@ -21,14 +21,13 @@ export namespace ${api.name} {
 
 ${indentation(2)(`export ${this.generateAPIParametersTsCode(api)}`)}
 	export type Response = ${this.generateJsonSchemaCode(
-    api.responses?.[200]?.schema
-  )};
+      api.responses?.[200]?.schema
+    )};
 	export function request(${this.genereateAPIRequestParamsTsCode(
-    api
-  )}): Promise<Response>;
-	export function ${
-    api.method?.toUpperCase() === "GET" ? "useRequest" : "useDeprecatedRequest"
-  }(params?: HooksParams, options?: ConfigInterface): { isLoading: boolean; data: Response, error: Error, mutate: typeof mutate };
+      api
+    )}): Promise<Response>;
+	export function ${api.method?.toUpperCase() === "GET" ? "useRequest" : "useDeprecatedRequest"
+      }(params?: HooksParams, options?: ConfigInterface): { isLoading: boolean; data: Response, error: Error, mutate: typeof mutate };
 }`;
   }
 
@@ -97,10 +96,13 @@ class PontReactHooksGeneratorPlugin extends PontGeneratorPlugin {
     );
   }
 
-  providerSnippets(api: Interface, originName = ""): Snippet[] {
+  providerSnippets(api: Interface, modName: string, originName = ''): Snippet[] {
     const apiName = originName
-      ? `API.${originName}.${api.name}`
-      : `API.${api.name}`;
+      ? `API.${originName}.${modName}.${api.name}`
+      : `API.${modName}.${api.name}`;
+
+    const isGet = api?.method?.toUpperCase() === 'GET';
+
     return [
       {
         name: "useRequest",
