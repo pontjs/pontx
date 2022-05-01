@@ -55,7 +55,7 @@ export class Snippet {
 export class PontGeneratorPlugin extends PontPlugin {
   apply(manager: PontManager, options?: any): void {}
 
-  providerSnippets(api: Interface, originName: string, options?: any): Snippet[] {
+  providerSnippets(api: Interface, modName: string, originName: string, options?: any): Snippet[] {
     return [];
   }
 }
