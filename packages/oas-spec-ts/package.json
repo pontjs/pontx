@@ -6,12 +6,14 @@
   "typings": "lib/index.d.ts",
   "scripts": {
     "pretest": "npm run build",
-		"dev": "tsc -p ./scripts/tsconfig.json -w",
-		"generate": "node ./scripts/lib/generateCode.js ./src/oas2.0/definition.json ./src/oas2.0/swagger2.0.ts",
+    "dev": "tsc -p ./scripts/tsconfig.json -w",
+    "generate": "node ./scripts/lib/generateCode.js ./src/oas2.0/definition.json ./src/oas2.0/swagger2.0.ts",
     "watch": "tsc -w",
     "build": "rm -rf lib && tsc"
   },
-  "dependencies": {},
+  "dependencies": {
+    "pont-core": "*"
+  },
   "files": [],
   "keywords": [],
   "author": "jasonHzq",

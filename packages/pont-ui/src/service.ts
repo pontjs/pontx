@@ -1,5 +1,5 @@
 import { PontSpec } from "pont-spec";
-import { PontSpecDiff } from "pont-core/lib/diff";
+import { PontSpecDiff } from "pont-core";
 
 /** 不同使用场景，各自注册服务来源 */
 export const PontUIService = {
@@ -32,15 +32,8 @@ export const PontUIService = {
   updateMod: async (modName: string, specName = ""): Promise<void> => {},
 
   /** 更新本地 API */
-  updateAPI: async (
-    modName: string,
-    apiName: string,
-    specName = ""
-  ): Promise<void> => {},
+  updateAPI: async (modName: string, apiName: string, specName = ""): Promise<void> => {},
 
   /** 更新类 */
-  updateBaseClass: async (
-    className: string,
-    specName = ""
-  ): Promise<void> => {},
+  updateBaseClass: async (className: string, specName = ""): Promise<void> => {},
 };

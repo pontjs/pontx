@@ -48,19 +48,17 @@ export class PontCommands {
               };
 
               try {
-                updatePontManger(
-                  PontManager.switchOriginName(pontManager, item.label)
-                );
+                updatePontManger(PontManager.switchOriginName(pontManager, item.label));
               } catch (e) {
                 vscode.window.showErrorMessage(e.message);
               }
-              pontManager.logger = new VSCodeLogger
-            }
+              pontManager.logger = new VSCodeLogger();
+            },
           );
         },
         (e) => {
           vscode.window.showErrorMessage(e.message);
-        }
+        },
       );
     });
 
@@ -73,7 +71,7 @@ export class PontCommands {
               label: `[${inter.method}] ${inter.path}`,
               detail: `${mod.name}.${inter.name}`,
               description: `${inter.description}`,
-            } as vscode.QuickPickItem;
+            };
           });
         })
         .reduce((pre, next) => pre.concat(next), []);
@@ -83,23 +81,18 @@ export class PontCommands {
           matchOnDescription: true,
           matchOnDetail: true,
         })
-        .then((item) => {
+        .then((item: any) => {
           if (!item) {
             return;
           }
           const [modName, apiName] = item.detail.split(".");
-          const modMeta = PontManager.getCurrentSpec(pontManager).mods.find(
-            (mod) => mod.name === modName
-          );
-          const apiMeta = modMeta?.interfaces?.find(
-            (api) => api.name === apiName
-          );
+          const modMeta = PontManager.getCurrentSpec(pontManager).mods.find((mod) => mod.name === modName);
+          const apiMeta = modMeta?.interfaces?.find((api) => api.name === apiName);
 
-          const snippets =
-            pontManager.innerManagerConfig.plugins.generate?.instance?.providerSnippets?.(
-              apiMeta,
-              pontSpec.name
-            );
+          const snippets = pontManager.innerManagerConfig.plugins.generate?.instance?.providerSnippets?.(
+            apiMeta,
+            pontSpec.name,
+          );
 
           if (snippets?.length) {
             if (snippets.length === 1) {
@@ -117,12 +110,10 @@ export class PontCommands {
                 {
                   matchOnDescription: true,
                   matchOnDetail: true,
-                }
+                },
               )
               .then((snippet) => {
-                const foundSnippet = snippets.find(
-                  (inst) => inst.name === snippet.label
-                );
+                const foundSnippet = snippets.find((inst) => inst.name === snippet.label);
                 if (foundSnippet) {
                   insertCode(foundSnippet.code);
                 }

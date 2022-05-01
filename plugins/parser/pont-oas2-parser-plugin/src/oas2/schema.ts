@@ -4,10 +4,7 @@ import { JsonSchemaContext, PrimitiveTypeMap } from "./utils";
 import * as PontSpec from "pont-spec";
 import * as _ from "lodash";
 
-export function parseJsonSchema(
-  schema: OAS2.SchemaObject,
-  context = new JsonSchemaContext()
-): PontSpec.PontJsonSchema {
+export function parseJsonSchema(schema: OAS2.SchemaObject, context = new JsonSchemaContext()): PontSpec.PontJsonSchema {
   const { items, $ref, type, additionalProperties, properties } = schema;
 
   let resultSchema = {
@@ -28,22 +25,19 @@ export function parseJsonSchema(
     resultSchema = {
       ...resultSchema,
       items: parseJsonSchema(items, context),
-    };
+    } as PontSpec.PontJsonSchema;
   } else if (type === "object" && properties) {
     resultSchema = {
       ...resultSchema,
       properties: _.mapValues(properties, (value, key) => {
         return parseJsonSchema(value, context);
       }),
-    };
+    } as PontSpec.PontJsonSchema;
   } else if (additionalProperties) {
     resultSchema = {
       ...resultSchema,
-      additionalProperties: parseJsonSchema(
-        schema.additionalProperties,
-        context
-      ),
-    };
+      additionalProperties: parseJsonSchema(schema.additionalProperties, context),
+    } as PontSpec.PontJsonSchema;
   }
 
   JsonSchemaContext.handleContext(context, resultSchema);
