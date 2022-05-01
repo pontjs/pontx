@@ -5,11 +5,12 @@ import * as vscode from "vscode";
 import { PontManager } from "pont-core";
 import * as path from "path";
 import { pontService } from "./Service";
+import { VSCodeLogger } from "./utils";
 
 export async function activate(context: vscode.ExtensionContext) {
   console.log('Congratulations, your extension "pont" is now active!');
   const pontManager = await PontManager.constructorFromRootDir(
-    vscode.workspace.rootPath
+    vscode.workspace.rootPath, new VSCodeLogger
   );
   if (pontManager) {
     pontService.start(pontManager, context);

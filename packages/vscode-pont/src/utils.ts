@@ -1,4 +1,4 @@
-import { PontManager } from "pont-core";
+import { PontLogger, PontManager } from "pont-core";
 import * as vscode from "vscode";
 
 export function showProgress(
@@ -31,4 +31,14 @@ export function wait(ttl = 500) {
   return new Promise((resolve) => {
     setTimeout(resolve, ttl);
   });
+}
+
+export class VSCodeLogger extends PontLogger {
+  log(message: string, logType?: string): void {
+    if (logType === 'error') {
+      vscode.window.showErrorMessage(message);
+    } else {
+      vscode.window.showInformationMessage(message);
+    }
+  }
 }

@@ -1,7 +1,7 @@
 import { PontManager } from "pont-core";
 import * as _ from "lodash";
 import * as vscode from "vscode";
-import { showProgress, wait } from "./utils";
+import { showProgress, VSCodeLogger, wait } from "./utils";
 import { PontWebView } from "./webview";
 
 const insertCode = (code: string) => {
@@ -54,6 +54,7 @@ export class PontCommands {
               } catch (e) {
                 vscode.window.showErrorMessage(e.message);
               }
+              pontManager.logger = new VSCodeLogger
             }
           );
         },

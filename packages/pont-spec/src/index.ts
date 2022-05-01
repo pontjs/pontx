@@ -100,4 +100,12 @@ export class PontSpec {
       mods: [] as Mod[],
     } as PontSpec;
   }
+
+  static isEmptySpec(spec: PontSpec) {
+    if (spec?.mods?.length || spec?.baseClasses?.length) {
+      return false;
+    }
+
+    return true;
+  }
 }
