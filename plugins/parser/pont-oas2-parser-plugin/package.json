@@ -9,7 +9,10 @@
     "watch": "tsc -w",
     "build": "rm -rf lib && tsc"
   },
-  "dependencies": {},
+  "dependencies": {
+    "pont-core": "*",
+    "pont-spec": "*"
+  },
   "files": [],
   "keywords": [],
   "author": "jasonHzq",

@@ -22,19 +22,15 @@ export class JsonSchemaContext {
   samePath? = "";
 
   static handleContext(context: JsonSchemaContext, schema: PontJsonSchema) {
-    if (context?.defNames?.includes(schema.name)) {
+    if (context?.defNames?.includes(schema.typeName)) {
       schema.isDefsType = true;
     }
 
     if (context?.classTemplateArgs?.length) {
-      const codes = (context?.classTemplateArgs || []).map((arg) =>
-        PontJsonSchema.toString(arg)
-      );
+      const codes = (context?.classTemplateArgs || []).map((arg) => PontJsonSchema.toString(arg));
       const index = codes.indexOf(PontJsonSchema.toString(schema));
 
-      (schema.templateArgs || []).forEach((arg) =>
-        JsonSchemaContext.handleContext(context, arg)
-      );
+      (schema.templateArgs || []).forEach((arg) => JsonSchemaContext.handleContext(context, arg));
       schema.templateIndex = index;
     }
   }
@@ -44,11 +40,7 @@ export function toUpperFirstLetter(text: string) {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
-export function getIdentifierFromUrl(
-  url: string,
-  requestType: string,
-  samePath = ""
-) {
+export function getIdentifierFromUrl(url: string, requestType: string, samePath = "") {
   const currUrl = url.slice(samePath.length).match(/([^\.]+)/)[0];
 
   return (
@@ -75,13 +67,7 @@ export function getIdentifierFromUrl(
 
 /** some reversed keyword in js but not in java */
 const TS_KEYWORDS = ["delete", "export", "import", "new", "function"];
-const REPLACE_WORDS = [
-  "remove",
-  "exporting",
-  "importing",
-  "create",
-  "functionLoad",
-];
+const REPLACE_WORDS = ["remove", "exporting", "importing", "create", "functionLoad"];
 
 export function getIdentifierFromOperatorId(operationId: string) {
   const identifier = operationId.replace(/(.+)(Using.+)/, "$1");
@@ -122,14 +108,10 @@ export function getMaxSamePath(paths: string[], samePath = "") {
     return { firstSeg, restSegs };
   });
 
-  if (
-    segs.every(
-      (seg, index) => index === 0 || seg.firstSeg === segs[index - 1].firstSeg
-    )
-  ) {
+  if (segs.every((seg, index) => index === 0 || seg.firstSeg === segs[index - 1].firstSeg)) {
     return getMaxSamePath(
       segs.map((seg) => seg.restSegs.join("/")),
-      samePath + "/" + segs[0].firstSeg
+      samePath + "/" + segs[0].firstSeg,
     );
   }
 
@@ -141,7 +123,7 @@ export function hasChinese(str: string) {
   return (
     str &&
     str.match(
-      /[\u4E00-\u9FCC\u3400-\u4DB5\uFA0E\uFA0F\uFA11\uFA13\uFA14\uFA1F\uFA21\uFA23\uFA24\uff1a\uff0c\uFA27-\uFA29]|[\ud840-\ud868][\udc00-\udfff]|\ud869[\udc00-\uded6\udf00-\udfff]|[\ud86a-\ud86c][\udc00-\udfff]|\ud86d[\udc00-\udf34\udf40-\udfff]|\ud86e[\udc00-\udc1d]|[\uff01-\uff5e\u3000-\u3009\u2026]/
+      /[\u4E00-\u9FCC\u3400-\u4DB5\uFA0E\uFA0F\uFA11\uFA13\uFA14\uFA1F\uFA21\uFA23\uFA24\uff1a\uff0c\uFA27-\uFA29]|[\ud840-\ud868][\udc00-\udfff]|\ud869[\udc00-\uded6\udf00-\udfff]|[\ud86a-\ud86c][\udc00-\udfff]|\ud86d[\udc00-\udf34\udf40-\udfff]|\ud86e[\udc00-\udc1d]|[\uff01-\uff5e\u3000-\u3009\u2026]/,
     )
   );
 }
@@ -183,23 +165,16 @@ export function transformCamelCase(name: string) {
 export function processDuplicateModName(mods: Mod[]) {
   mods.forEach((mod, modIndex) => {
     const currName = mod.name;
-    const sameMods = mods
-      .slice(modIndex)
-      .filter((mod) => mod.name.toLowerCase() === currName.toLowerCase());
+    const sameMods = mods.slice(modIndex).filter((mod) => mod.name.toLowerCase() === currName.toLowerCase());
 
     if (sameMods.length > 1) {
-      sameMods.forEach(
-        (dupMod, dupIndex) => (dupMod.name = dupMod.name + ("" + dupIndex + 1))
-      );
+      sameMods.forEach((dupMod, dupIndex) => (dupMod.name = dupMod.name + ("" + dupIndex + 1)));
     }
   });
 }
 
 /** 处理接口名重复 */
-export function processDuplicateInterfaceName(
-  interfaces: Interface[],
-  samePath: string
-) {
+export function processDuplicateInterfaceName(interfaces: Interface[], samePath: string) {
   const names = [] as string[];
 
   interfaces.forEach((inter) => {
@@ -231,21 +206,15 @@ export function processMod(interfaces: Interface[], tag: OAS2.TagObject) {
 
 export function deleteDuplicateBaseClass(baseClasses: BaseClass[]) {
   baseClasses.sort((pre, next) => {
-    if (
-      pre.name === next.name &&
-      pre.schema.templateArgs?.length === next.schema.templateArgs?.length
-    ) {
-      return pre.schema?.templateArgs.filter(({ isDefsType }) => isDefsType)
-        .length >
+    if (pre.name === next.name && pre.schema.templateArgs?.length === next.schema.templateArgs?.length) {
+      return pre.schema?.templateArgs.filter(({ isDefsType }) => isDefsType).length >
         next.schema?.templateArgs.filter(({ isDefsType }) => isDefsType).length
         ? -1
         : 1;
     }
 
     if (pre.name === next.name) {
-      return pre.schema?.templateArgs.length > next.schema?.templateArgs.length
-        ? -1
-        : 1;
+      return pre.schema?.templateArgs.length > next.schema?.templateArgs.length ? -1 : 1;
     }
 
     return next.name > pre.name ? -1 : 1;

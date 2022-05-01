@@ -11,6 +11,7 @@
     "build": "rm -rf lib && tsc"
   },
   "dependencies": {
+    "pont-spec": "*",
     "@types/prettier": "^2.4.4",
     "prettier": "^2.6.2"
   },

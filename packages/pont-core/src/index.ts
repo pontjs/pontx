@@ -13,3 +13,4 @@ export {
 } from "./config";
 export { PontManager } from "./manager";
 export * from "./logger";
+export * from "./diff";
