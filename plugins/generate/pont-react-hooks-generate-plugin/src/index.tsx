@@ -88,6 +88,7 @@ class PontReactHooksGeneratorPlugin extends PontGeneratorPlugin {
         manager.localPontSpecs,
         baseDir
       );
+      return;
     }
 
     return PontReactHooksGeneratorPlugin.generateSingleSpec(
@@ -112,17 +113,17 @@ class PontReactHooksGeneratorPlugin extends PontGeneratorPlugin {
         name: "request promise",
         code: `${apiName}.request({}).then(data => {
 
-				}, err => {
+  }, err => {
 
-				})`,
+  })`,
       },
       {
         name: "request async",
         code: `try {
-					const result = await ${apiName}.request({ });
-				} catch (err) {
+    const result = await ${apiName}.request({ });
+  } catch (err) {
 
-				}`,
+  }`,
       },
     ];
   }

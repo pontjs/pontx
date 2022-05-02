@@ -14,8 +14,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "baseUrl": ".",
-    "paths": {
-    },
+    "paths": {},
     "allowSyntheticDefaultImports": true,
     "lib": ["dom", "es6", "es2017", "dom.iterable", "scripthost"]
   },

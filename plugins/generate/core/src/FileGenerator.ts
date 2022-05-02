@@ -3,7 +3,7 @@ import * as fs from "fs-extra";
 import * as _ from "lodash";
 import * as PontSpec from "pont-spec";
 import { CodeGenerator } from "./CodeGenerator";
-import prettier from 'prettier';
+import prettier from "prettier";
 
 export class FileStructure {
   [fileName: string]: string | FileStructure;
@@ -15,10 +15,10 @@ export class FileStructure {
       if (typeof value === "string") {
         return fs.writeFile(currPath, value, "utf8");
       } else {
-				await fs.mkdir(currPath);
+        await fs.mkdir(currPath);
 
-				return this.generateFiles(value, currPath);
-			}
+        return this.generateFiles(value, currPath);
+      }
     });
 
     return Promise.all(promises);
@@ -26,15 +26,15 @@ export class FileStructure {
 
   static constructorFromCodeGenerator<T extends CodeGenerator>(
     spec: PontSpec.PontSpec,
-    generator: T = new CodeGenerator() as any
+    generator: T = new CodeGenerator() as any,
   ): FileStructure {
-		generator.specName = spec.name;
-		const mods = spec.mods.reduce((result, mod) => {
-			return { ...result, [mod.name + '.js']: generator.generateModJsCode(mod) };
-		}, {} as FileStructure);
-		mods['index.js'] = generator.generateModsIndexJsCode(spec);
+    generator.specName = spec.name;
+    const mods = spec.mods.reduce((result, mod) => {
+      return { ...result, [mod.name + ".js"]: generator.generateModJsCode(mod) };
+    }, {} as FileStructure);
+    mods["index.js"] = generator.generateModsIndexJsCode(spec);
 
-		return {
+    return {
       "index.d.ts": generator.generateSpecIndexTsCode(spec),
       "api-lock.json": generator.generateLockCode(spec),
       mods,
@@ -44,55 +44,39 @@ export class FileStructure {
 
   static constructorSpecsFromCodeGenerator<T extends CodeGenerator>(
     specs: PontSpec.PontSpec[],
-    generator: T = new CodeGenerator() as any
-  ) {
-    generator.generateModsIndexTsCode = (spec: PontSpec.PontSpec) => {
-      return `export namespace API {
-	${generator.generateModsIndexTsCode(spec)}
-			}`;
-    };
-    generator.generateBaseClassesTsCode = (spec: PontSpec.PontSpec) => {
-      return `export namespace defs {
-	${generator.generateBaseClassesTsCode(spec)}
-			}`;
-    };
-
+    generator: T = new CodeGenerator() as any,
+  ): FileStructure {
     const specsFiles = specs.reduce((result, spec) => {
       return {
         ...result,
-        [spec.name]: FileStructure.constructorFromCodeGenerator(
-          spec,
-          generator
-        ),
+        [spec.name]: FileStructure.constructorFromCodeGenerator(spec, generator),
       };
     }, {});
 
     return {
       ...specsFiles,
       ["index.js"]: generator.generateSpecsIndexJsCode(specs),
-      ["index.d.ts"]: specs
-        .map((spec) => `/// <reference path="./${spec.name}/index.d.ts" />`)
-        .join("\n"),
+      ["index.d.ts"]: specs.map((spec) => `/// <reference path="./${spec.name}/index.d.ts" />`).join("\n"),
     };
   }
 
-	static async applyFormat(fileStructure: FileStructure, options: prettier.Options) {
-		return Object.keys(fileStructure || {}).reduce((result, filename) => {
-			const value = fileStructure[filename];
+  static async applyFormat(fileStructure: FileStructure, options: prettier.Options) {
+    return Object.keys(fileStructure || {}).reduce((result, filename) => {
+      const value = fileStructure[filename];
 
-			if (typeof value === 'string') {
-				return {
-					...result,
-					[filename]: prettier.format(value, options)
-				}
-			} else {
-				return {
-					...result,
-					[filename]: FileStructure.applyFormat(value, options),
-				}
-			}
-		}, {} as FileStructure);
-	}
+      if (typeof value === "string") {
+        return {
+          ...result,
+          [filename]: prettier.format(value, options),
+        };
+      } else {
+        return {
+          ...result,
+          [filename]: FileStructure.applyFormat(value, options),
+        };
+      }
+    }, {} as FileStructure);
+  }
 }
 
 export class FileGenerator {
@@ -109,10 +93,7 @@ export class FileGenerator {
   static async generateFiles(fileGenerator: FileGenerator) {
     FileGenerator.clearBasePath(fileGenerator);
     await fs.mkdir(fileGenerator.basePath);
-    await FileStructure.generateFiles(
-      fileGenerator.fileStructure,
-      fileGenerator.basePath
-    );
+    await FileStructure.generateFiles(fileGenerator.fileStructure, fileGenerator.basePath);
   }
 
   // todo 按需增量重新生成文件，类似 React DOM diff
