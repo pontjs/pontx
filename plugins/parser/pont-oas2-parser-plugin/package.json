@@ -6,15 +6,19 @@
   "typings": "lib/index.d.ts",
   "scripts": {
     "pretest": "npm run build",
-    "watch": "tsc -w",
-    "build": "rm -rf lib && tsc"
+    "watch": "tsc --build --watch",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "build": "npm run clean && tsc --build"
   },
   "dependencies": {
-    "pont-core": "*",
-    "pont-spec": "*"
+    "pont-manager": "file:../../../packages/pont-core",
+    "pont-spec": "file:../../../packages/pont-spec"
   },
   "files": [],
   "keywords": [],
   "author": "jasonHzq",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.6.4"
+  }
 }

@@ -1,4 +1,4 @@
-import { InnerOriginConfig, PontGeneratorPlugin, PontManager } from "pont-core";
+import { InnerOriginConfig, PontGeneratorPlugin, PontManager } from "pont-manager";
 import { Interface, PontSpec } from "pont-spec";
 import * as path from "path";
 import {

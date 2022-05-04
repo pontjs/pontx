@@ -1,28 +1,29 @@
 {
+  "extends": "../../../tsconfig.build.json",
   "compilerOptions": {
     "module": "commonjs",
-    "noImplicitAny": false,
-    "declaration": true,
-    "skipDefaultLibCheck": true,
-    "skipLibCheck": true,
     "target": "es6",
     "removeComments": true,
     "preserveConstEnums": true,
-    "strict": false,
-    "sourceMap": true,
     "useDefineForClassFields": true,
     "outDir": "lib",
     "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
     "strictPropertyInitialization": false,
     "forceConsistentCasingInFileNames": true,
     "noStrictGenericChecks": true,
     "baseUrl": ".",
     "paths": {},
-    "allowSyntheticDefaultImports": true,
-    "lib": ["dom", "es6", "es2017", "dom.iterable", "scripthost"]
+    "composite": true,
+    "rootDir": "./src"
   },
   "include": ["./src/**/*"],
-  "exclude": ["node_modules", "build"]
+  "exclude": ["node_modules", "build"],
+  "references": [
+    {
+      "path": "../../../packages/pont-manager"
+    },
+    {
+      "path": "../../../packages/pont-spec"
+    }
+  ]
 }

@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+const { defineConfig } = require("vite");
 import react from "@vitejs/plugin-react";
 
 // https://vitejs.dev/config/

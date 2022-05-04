@@ -1,20 +1,22 @@
 {
-  "name": "pont-react-hooks-generate-plugin",
+  "name": "pont-manager",
   "version": "0.0.1",
-  "description": "OpenAPI pont spec",
+  "description": "pont manager",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
-    "pretest": "npm run build",
     "watch": "tsc --build --watch",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "build": "npm run clean && tsc --build"
   },
   "dependencies": {
-    "pont-generate-core": "file:../core",
-    "pont-spec": "file:../../../packages/pont-spec"
+    "fs-extra": "^10.1.0",
+    "lodash": "*",
+    "pont-spec": "file:../pont-spec"
   },
-  "files": [],
+  "files": [
+    "lib"
+  ],
   "keywords": [],
   "author": "jasonHzq",
   "license": "MIT",

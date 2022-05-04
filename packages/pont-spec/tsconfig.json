@@ -1,24 +1,18 @@
 {
+  "extends": "../../tsconfig.build.json",
   "compilerOptions": {
     "module": "commonjs",
-    "noImplicitAny": false,
-    "declaration": true,
-    "skipDefaultLibCheck": true,
-    "skipLibCheck": true,
     "target": "es6",
     "removeComments": true,
     "preserveConstEnums": true,
-    "sourceMap": true,
     "outDir": "lib",
     "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
     "baseUrl": ".",
-    "paths": {
-    },
-    "allowSyntheticDefaultImports": true,
-    "lib": ["dom", "es6", "es2017", "dom.iterable", "scripthost"]
+    "paths": {},
+    "rootDir": "./src",
+    "composite": true
   },
   "include": ["./src/**/*"],
-  "exclude": ["node_modules", "build"]
+  "exclude": ["node_modules", "build"],
+  "references": [{ "path": "../oas-spec-ts" }]
 }

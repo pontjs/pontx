@@ -29,10 +29,7 @@ export const ${inter.name} = {
 };
 `;
 
-export const apiTsTemplate = (
-  api: PontSpec.Interface,
-  generator: CodeGenerator
-) => `/**
+export const apiTsTemplate = (api: PontSpec.Interface, generator: CodeGenerator) => `/**
  * @path: ${api.path}${
   api.description
     ? `
@@ -42,12 +39,8 @@ export const apiTsTemplate = (
  */
 export namespace ${api.name} {
 ${indentation(2)(`export ${generator.generateAPIParametersTsCode(api)}`)}
-	export type Response = ${generator.generateJsonSchemaCode(
-    api.responses["200"]?.schema
-  )};
-	export function request(${generator.genereateAPIRequestParamsTsCode(
-    api
-  )}): Promise<Response>;
+	export type Response = ${generator.generateJsonSchemaCode(api.responses["200"]?.schema)};
+	export function request(${generator.genereateAPIRequestParamsTsCode(api)}): Promise<Response>;
 }
 `;
 
@@ -69,9 +62,7 @@ const modTsTemplate = (mod: PontSpec.Mod, generator: CodeGenerator) => `
  * ${mod.name}
  */
 export namespace ${mod.name} {
-${indentation(2)(
-  mod.interfaces.map((inter) => generator.generateAPITsCode(inter)).join("\n\n")
-)}
+${indentation(2)(mod.interfaces.map((inter) => generator.generateAPITsCode(inter)).join("\n\n"))}
 }
 `;
 
@@ -93,10 +84,7 @@ ${spec.name ? `export const ${spec.name}` : "window.API ="} {
 };
 `;
 
-const modsIndexTsTemplate = (
-  spec: PontSpec.PontSpec,
-  generator: CodeGenerator
-) => `
+const modsIndexTsTemplate = (spec: PontSpec.PontSpec, generator: CodeGenerator) => `
 ${
   spec.name
     ? `/**
@@ -112,7 +100,7 @@ ${indentation(2)(
     .map((mod) => {
       return generator.generateModTsCode(mod);
     })
-    .join("\n")
+    .join("\n"),
 )}
 }
 `;
@@ -121,31 +109,23 @@ export class CodeGenerator {
   specName = "";
 
   generateJsonSchemaCode(schema: PontSpec.PontJsonSchema) {
-    if (
-      typeof schema.templateIndex === "number" &&
-      schema.templateIndex !== -1
-    ) {
+    if (!schema) {
+      return "any";
+    }
+    if (typeof schema?.templateIndex === "number" && schema?.templateIndex !== -1) {
       return `T${schema.templateIndex}`;
     }
 
     if (schema.enum?.length) {
-      return schema.enum
-        .map((el) => (typeof el === "string" ? `'${el}'` : el))
-        .join(" | ");
+      return schema.enum.map((el) => (typeof el === "string" ? `'${el}'` : el)).join(" | ");
     }
 
     if (schema.templateArgs?.length) {
       const defName = schema.isDefsType
-        ? `defs.${
-            this.specName
-              ? `${this.specName}.${schema.typeName}`
-              : schema.typeName
-          }`
+        ? `defs.${this.specName ? `${this.specName}.${schema.typeName}` : schema.typeName}`
         : schema.typeName;
       if (schema.templateArgs?.length) {
-        return `${defName}<${schema.templateArgs
-          .map((arg) => this.generateJsonSchemaCode(arg))
-          .join(", ")}>`;
+        return `${defName}<${schema.templateArgs.map((arg) => this.generateJsonSchemaCode(arg)).join(", ")}>`;
       }
       return defName;
     }
@@ -161,9 +141,7 @@ export class CodeGenerator {
       case "Array":
       case "array": {
         if (schema.items) {
-          return `Array<${this.generateJsonSchemaCode(
-            schema.items as PontSpec.PontJsonSchema
-          )}>`;
+          return `Array<${this.generateJsonSchemaCode(schema.items as PontSpec.PontJsonSchema)}>`;
         }
 
         return "[]";
@@ -173,7 +151,7 @@ export class CodeGenerator {
           return `{ ${Object.keys(schema.properties)
             .map((propName) => {
               return `${propName}: ${this.generateJsonSchemaCode(
-                schema.properties?.[propName] as PontSpec.PontJsonSchema
+                schema.properties?.[propName] as PontSpec.PontJsonSchema,
               )}`;
             })
             .join("; ")} }`;
@@ -192,41 +170,27 @@ export class CodeGenerator {
       name = `'${name}'`;
     }
 
-    const fieldTypeDeclaration = `${optionalSignal}: ${this.generateJsonSchemaCode(
-      parameter.schema
-    )}`;
-    const desc = parameter.schema?.description
-      ? `/** ${parameter.schema?.description} */\n`
-      : "";
+    const fieldTypeDeclaration = `${optionalSignal}: ${this.generateJsonSchemaCode(parameter.schema)}`;
+    const desc = parameter.schema?.description ? `/** ${parameter.schema?.description} */\n` : "";
 
     return `${desc}${name}${fieldTypeDeclaration};`;
   }
 
   genereateAPIRequestParamsTsCode(api: PontSpec.Interface): string {
-    const bodyParamSchema = api.parameters?.find(
-      (param) => param.in === "body"
-    )?.schema;
-    const bodyParamCode = bodyParamSchema
-      ? this.generateJsonSchemaCode(bodyParamSchema)
-      : "";
-    return bodyParamCode
-      ? `params: Params, bodyParams: ${bodyParamCode}`
-      : `params: Params`;
+    const bodyParamSchema = api.parameters?.find((param) => param.in === "body")?.schema;
+    const bodyParamCode = bodyParamSchema ? this.generateJsonSchemaCode(bodyParamSchema) : "";
+    return bodyParamCode ? `params: Params, bodyParams: ${bodyParamCode}` : `params: Params`;
   }
 
   generateAPIParametersTsCode(api: PontSpec.Interface): string {
-    const normalParams = api.parameters.filter(
-      (param) => param.in === "path" || param.in === "query"
-    );
+    const normalParams = api.parameters.filter((param) => param.in === "path" || param.in === "query");
 
     if (!api.parameters?.length) {
       return "class Params { }";
     }
 
     return `class Params {
-${indentation(2)(
-  normalParams.map((param) => this.generateParameterTsCode(param)).join("\n")
-)}
+${indentation(2)(normalParams.map((param) => this.generateParameterTsCode(param)).join("\n"))}
 }
 		`;
   }
@@ -250,11 +214,7 @@ ${indentation(2)(
   generateBaseClassesTsCode(spec: PontSpec.PontSpec): string {
     return `
 export namespace ${spec.name || "defs"} {
-${indentation(2)(
-  spec.baseClasses
-    .map((baseClass) => this.generateBaseClassTsCode(baseClass))
-    .join("\n\n")
-)}
+${indentation(2)(spec.baseClasses.map((baseClass) => this.generateBaseClassTsCode(baseClass)).join("\n\n"))}
 }`;
   }
 
@@ -266,9 +226,7 @@ ${this.generateModsIndexTsCode(spec)}
   }
 
   generateSpecsIndexJsCode(specs: PontSpec.PontSpec[]): string {
-    return `${specs
-      .map((spec) => `import * as ${spec.name} from './${spec}';`)
-      .join("\n")}
+    return `${specs.map((spec) => `import * as ${spec.name} from './${spec}';`).join("\n")}
 
 window.API = {
 	${specs.map((spec) => spec.name).join(",\n")}

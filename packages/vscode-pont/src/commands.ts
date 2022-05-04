@@ -1,4 +1,4 @@
-import { PontManager } from "pont-core";
+import { PontManager } from "pont-manager";
 import * as _ from "lodash";
 import * as vscode from "vscode";
 import { showProgress, VSCodeLogger, wait } from "./utils";

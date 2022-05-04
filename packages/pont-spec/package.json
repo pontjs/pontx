@@ -5,13 +5,24 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
-    "pretest": "npm run build",
-    "watch": "tsc -w",
-    "build": "rm -rf lib && tsc"
+    "watch": "tsc --build --watch",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "build": "npm run clean && tsc --build"
   },
-  "dependencies": {},
-  "files": [],
+  "peerDependencies": {
+    "lodash": "*"
+  },
+  "dependencies": {
+    "oas-spec-ts": "file:../oas-spec-ts"
+  },
+  "files": [
+    "lib/",
+    "*.md"
+  ],
   "keywords": [],
   "author": "jasonHzq",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.6.4"
+  }
 }

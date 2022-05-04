@@ -3,15 +3,12 @@
   "private": true,
   "version": "1.0.12",
   "license": "MIT",
-  "workspaces": [
-    "plugins/**",
-    "packages/**"
-  ],
   "scripts": {
+    "prepare": "node ./scripts/configure-references.js",
     "test": "jest pont",
     "changelog": "node -r esm scripts/changelog.js",
-    "build": "lerna run build",
-    "watch": "lerna run watch",
+    "build": "lerna exec --stream -- tsc --build --verbose",
+    "start": "tsc --build -w",
     "clean": "lerna clean && rimraf ./node_modules",
     "lint": "prettier --write --parser typescript \"packages/**/*.ts\"",
     "release:all": "npm run release && npm run release:vscode",
@@ -39,26 +36,26 @@
     ]
   },
   "devDependencies": {
-    "@types/chai": "^4.1.7",
-    "@types/fs-extra": "^5.0.5",
-    "@types/http-server": "^0.10.0",
-    "@types/jest": "latest",
-    "@types/lodash": "^4.14.110",
-    "@types/node": "^10.3.6",
-    "@types/react": "^16.9.23",
-    "@types/semver": "^6.2.0",
-    "enquirer": "^2.3.2",
-    "esm": "^3.2.25",
-    "http-server": "^0.11.1",
-    "jest": "^24.9.0",
-    "lerna": "^3.22.1",
-    "lint-staged": "^9.4.2",
-    "minimist": "^1.2.0",
-    "react": "^16.13.0",
-    "semver": "^7.1.1",
-    "swr": "^0.1.18",
-    "ts-jest": "^24.0.2",
-    "typescript": "^3.7.3",
-    "yorkie": "^2.0.0"
+    "@types/commander": "^2.12.2",
+    "@types/fs-extra": "^5.1.0",
+    "commander": "^9.2.0",
+    "lerna": "^4.0.0",
+    "lodash": "*",
+    "rimraf": "3.0.2",
+    "typescript": "^4.6.4"
+  },
+  "dependencies": {
+    "oas-spec-ts": "file:packages/oas-spec-ts",
+    "pont-cli": "file:packages/pont-cli",
+    "pont-generate-core": "file:plugins/generate/core",
+    "pont-manager": "file:packages/pont-manager",
+    "pont-meta-fetch-plugin": "file:plugins/fetch/pont-meta-fetch-plugin",
+    "pont-oas2-parser-plugin": "file:plugins/parser/pont-oas2-parser-plugin",
+    "pont-react-hooks-generate-plugin": "file:plugins/generate/pont-react-hooks-generate-plugin",
+    "pont-report-plugin": "file:plugins/report/pont-report-plugin",
+    "pont-spec": "file:packages/pont-spec",
+    "pont-ui": "file:packages/pont-ui",
+    "vscode-pont-ui": "file:packages/vscode-pont-ui",
+    "vscode-pont2": "file:packages/vscode-pont"
   }
 }

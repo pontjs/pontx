@@ -1,24 +1,15 @@
 {
+  "extends": "../../tsconfig.build.json",
   "compilerOptions": {
+    "composite": true,
     "module": "es6",
-    "noImplicitAny": false,
-    "declaration": true,
-    "skipDefaultLibCheck": true,
-    "skipLibCheck": true,
-    "target": "es6",
-    "removeComments": true,
-    "preserveConstEnums": true,
-    "sourceMap": true,
-    "outDir": "lib",
+    "target": "es5",
     "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
     "baseUrl": ".",
-    "paths": {
-    },
-    "allowSyntheticDefaultImports": true,
-    "lib": ["dom", "es6", "es2017", "dom.iterable", "scripthost"]
+    "paths": {},
+    "rootDir": "./src",
+    "outDir": "./lib"
   },
-  "include": ["./src/**/*"],
-  "exclude": ["node_modules", "build"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "lib"]
 }

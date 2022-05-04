@@ -4,20 +4,13 @@
     "module": "commonjs",
     "target": "es6",
     "removeComments": true,
-    "preserveConstEnums": true,
+    "composite": true,
     "outDir": "lib",
-    "moduleResolution": "node",
-    "esModuleInterop": false,
     "baseUrl": ".",
     "paths": {},
-    "rootDir": "./src",
-    "composite": true
+    "rootDir": "./src"
   },
   "include": ["./src/**/*"],
   "exclude": ["node_modules", "build"],
-  "references": [
-    {
-      "path": "../pont-manager"
-    }
-  ]
+  "references": [{ "path": "../pont-spec" }]
 }

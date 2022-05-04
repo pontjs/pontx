@@ -1,5 +1,5 @@
 import { parseOAS2 } from "./parser";
-import { PontParserPlugin } from "pont-core";
+import { PontParserPlugin } from "pont-manager";
 import { PontSpec } from "pont-spec";
 
 export class PontOAS2ParserPlugin extends PontParserPlugin {
