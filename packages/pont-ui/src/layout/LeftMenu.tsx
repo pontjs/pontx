@@ -67,7 +67,7 @@ export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
 
   const [inputValue, changeInputValue] = React.useState("");
   const [searchValue, _changeSearchValue] = React.useState("");
-  const changeSearchValue = React.useCallback((val) => {
+  const changeSearchValue = React.useCallback((val: any) => {
     return _.debounce(_changeSearchValue)(val);
   }, []);
 

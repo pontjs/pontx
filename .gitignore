@@ -27,3 +27,4 @@ packages/vscode-pont/out/
 .vscode-test/
 packages/vscode-pont/dist/assets
 packages/vscode-pont/dist/index.html
+tsconfig.tsbuildinfo

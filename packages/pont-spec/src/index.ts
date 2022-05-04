@@ -2,7 +2,7 @@ import { OAS2 } from "oas-spec-ts";
 import { PontJsonSchema } from "./dataType";
 import { Parameter } from "./parameter";
 import { getDuplicateById } from "./utils";
-const _ = require("lodash");
+import * as _ from "lodash";
 
 export { PontJsonSchema, Parameter };
 
@@ -41,6 +41,8 @@ export class PontSpec {
   public name: string;
   public baseClasses: BaseClass[] = [];
   public mods: Mod[] = [];
+  /** 扩展字段 */
+  public ext?: any;
 
   static reOrder(ds: PontSpec): PontSpec {
     return {

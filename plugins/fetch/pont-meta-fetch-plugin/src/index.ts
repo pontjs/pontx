@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import * as _ from "lodash";
-import { InnerOriginConfig, PontFetchPlugin } from "pont-core";
+import { InnerOriginConfig, PontFetchPlugin } from "pont-manager";
 
 export default class PontMetaFetchPlugin extends PontFetchPlugin {
   /** 翻译中文类名等 */
@@ -54,9 +54,7 @@ export default class PontMetaFetchPlugin extends PontFetchPlugin {
 
   async apply(originConf: InnerOriginConfig) {
     try {
-      const remoteStr = await fetch(originConf.url, {}).then((res) =>
-        res.text()
-      );
+      const remoteStr = await fetch(originConf.url, {}).then((res) => res.text());
       // const metaStr = await PontMetaFetchPlugin.translateChinese(remoteStr);
       const metaStr = remoteStr;
       this.logger.info("远程数据中非法中文已翻译成功");
@@ -66,7 +64,9 @@ export default class PontMetaFetchPlugin extends PontFetchPlugin {
     } catch (e) {
       this.logger.error({
         originName: originConf.name,
-        message: `远程数据获取失败，请确认您配置的 pont origin url(${originConf.url || ''})，在您当前的网络环境中允许访问`,
+        message: `远程数据获取失败，请确认您配置的 pont origin url(${
+          originConf.url || ""
+        })，在您当前的网络环境中允许访问`,
         processType: "fetch",
       });
     }

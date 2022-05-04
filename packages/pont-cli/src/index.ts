@@ -1,9 +1,8 @@
-import * as program from "commander";
+import { program } from "commander";
 import * as path from "path";
 import * as fs from "fs-extra";
-import { PontManager } from "pont-core";
+import { PontManager, PontLogger } from "pont-manager";
 import { cliLog, error } from "./debugLog";
-import { PontLogger } from "pont-core";
 import "pont-meta-fetch-plugin";
 import "pont-oas2-parser-plugin";
 import "pont-react-hooks-generate-plugin";
@@ -25,9 +24,7 @@ program.description("powerful api code generator");
 
     let manager = await PontManager.constructorFromRootDir(rootDir, logger);
 
-    manager = await PontManager.readLocalPontMeta(manager).then(
-      PontManager.fetchRemotePontMeta
-    );
+    manager = await PontManager.readLocalPontMeta(manager).then(PontManager.fetchRemotePontMeta);
 
     program
       .command("check")
@@ -43,22 +40,14 @@ program.description("powerful api code generator");
       .command("ls")
       .description("查看数据源")
       .action(() => {
-        manager.logger.info(
-          manager.innerManagerConfig.origins
-            .map((origin) => origin.name)
-            .join("\n")
-        );
+        manager.logger.info(manager.innerManagerConfig.origins.map((origin) => origin.name).join("\n"));
       });
 
     program
       .command("ls")
       .description("查看数据源")
       .action(() => {
-        manager.logger.info(
-          manager.innerManagerConfig.origins
-            .map((origin) => origin.name)
-            .join("\n")
-        );
+        manager.logger.info(manager.innerManagerConfig.origins.map((origin) => origin.name).join("\n"));
       });
 
     // program

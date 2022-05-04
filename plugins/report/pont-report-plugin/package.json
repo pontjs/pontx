@@ -9,9 +9,11 @@
     "watch": "tsc -w",
     "build": "rm -rf lib && tsc"
   },
-  "dependencies": {},
   "files": [],
   "keywords": [],
   "author": "jasonHzq",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.6.4"
+  }
 }

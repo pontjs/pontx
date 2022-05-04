@@ -8,14 +8,15 @@
     "pretest": "npm run build",
     "dev": "tsc -p ./scripts/tsconfig.json -w",
     "generate": "node ./scripts/lib/generateCode.js ./src/oas2.0/definition.json ./src/oas2.0/swagger2.0.ts",
-    "watch": "tsc -w",
-    "build": "rm -rf lib && tsc"
-  },
-  "dependencies": {
-    "pont-core": "*"
+    "watch": "tsc --build --watch",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "build": "npm run clean && tsc --build"
   },
   "files": [],
   "keywords": [],
   "author": "jasonHzq",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.6.4"
+  }
 }

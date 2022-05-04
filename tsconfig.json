@@ -1,0 +1,53 @@
+{
+  "compilerOptions": {
+    "jsx": "react",
+    "outDir": "lib",
+    "baseUrl": ".",
+    "paths": {
+      "pont-spec": ["packages/pont-spec"],
+      "pont-manager": ["packages/pont-manager"],
+      "oas-spec-ts": ["packages/oas-spec-ts"],
+      "pont-cli": ["packages/pont-cli"],
+      "pont-ui": ["packages/pont-ui"],
+      "vscode-pont2": ["packages/vscode-pont"],
+      "pont-meta-fetch-plugin": ["plugins/fetch/pont-meta-fetch-plugin"],
+      "pont-generate-core": ["plugins/generate/core"],
+      "pont-react-hooks-generate-plugin": ["plugins/generate/pont-react-hooks-generate-plugin"],
+      "pont-oas2-parser-plugin": ["plugins/parser/pont-oas2-parser-plugin"]
+    }
+  },
+  "include": ["packages/", "plugins/"],
+  "exclude": ["node_modules/", "packages/pont-ui/node_modules/"],
+  "references": [
+    {
+      "path": "packages/pont-spec"
+    },
+    {
+      "path": "packages/pont-manager"
+    },
+    {
+      "path": "packages/oas-spec-ts"
+    },
+    {
+      "path": "packages/pont-cli"
+    },
+    {
+      "path": "packages/pont-ui"
+    },
+    {
+      "path": "packages/vscode-pont"
+    },
+    {
+      "path": "plugins/fetch/pont-meta-fetch-plugin"
+    },
+    {
+      "path": "plugins/generate/core"
+    },
+    {
+      "path": "plugins/generate/pont-react-hooks-generate-plugin"
+    },
+    {
+      "path": "plugins/parser/pont-oas2-parser-plugin"
+    }
+  ]
+}

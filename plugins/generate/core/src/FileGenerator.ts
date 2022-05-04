@@ -1,4 +1,3 @@
-import path from "path";
 import * as fs from "fs-extra";
 import * as _ from "lodash";
 import * as PontSpec from "pont-spec";

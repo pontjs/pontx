@@ -1,7 +1,12 @@
 import { PontSpec } from "pont-spec";
 import { PontUIService } from "pont-ui";
 import * as _ from "lodash";
-const vscode = acquireVsCodeApi<VscodeState>();
+import { WebviewApi } from "vscode-webview";
+
+
+declare let acquireVsCodeApi: any;
+
+const vscode: WebviewApi<VscodeState> = acquireVsCodeApi();
 
 type VscodeState = {
   specs: PontSpec[];

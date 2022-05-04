@@ -1,4 +1,4 @@
-import { PontManager } from "pont-core";
+import { PontManager } from "pont-manager";
 import * as vscode from "vscode";
 import * as path from "path";
 import { PontCommands } from "./commands";
@@ -20,11 +20,7 @@ export class PontService {
 
     this.pontManager = manager;
     if (!this.hasCommandsRegistered) {
-      PontCommands.registerCommands(
-        this.pontManager,
-        this.updatePontManger,
-        context
-      );
+      PontCommands.registerCommands(this.pontManager, this.updatePontManger, context);
       this.hasCommandsRegistered = true;
     }
     new PontVSCodeUI().create();
@@ -34,7 +30,7 @@ export class PontService {
       path.join(config.outDir, PontManager.lockFilename),
       true,
       false,
-      true
+      true,
     );
     this.watcherDispose = lockWatcher.onDidChange(async () => {
       this.pontManager = await PontManager.readLocalPontMeta(this.pontManager);

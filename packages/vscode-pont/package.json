@@ -49,24 +49,25 @@
     }
   },
   "scripts": {
-    "build": "rimraf ./out && tsc",
-    "watch": "tsc -watch -p ./",
+    "watch": "tsc --build --watch",
+    "clean": "rimraf oub && rimraf tsconfig.tsbuildinfo",
+    "build": "npm run clean && tsc --build",
     "test": "npm run build && node ../../node_modules/vscode/bin/test"
   },
   "dependencies": {
-    "@types/fs-extra": "^5.1.0",
     "fs-extra": "^7.0.1",
-    "mockjs": "^1.0.1-beta3"
-  },
-  "devDependencies": {
-    "rimraf": "^3.0.2",
-    "vsce": "^1.50.0",
-    "@types/vscode-webview": "^1.57.0",
-    "@types/vscode": "^1.47.0"
+    "mockjs": "^1.0.1-beta3",
+    "pont-manager": "file:../pont-manager"
   },
   "icon": "logo.png",
   "repository": {
     "url": "git@github.com:pont2/pont.git",
     "type": "git"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.47.0",
+    "@types/vscode-webview": "^1.57.0",
+    "typescript": "^4.6.4",
+    "vsce": "^2.7.0"
   }
 }

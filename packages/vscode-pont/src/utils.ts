@@ -1,10 +1,10 @@
-import { PontLogger, PontManager } from "pont-core";
+import { PontLogger, PontManager } from "pont-manager";
 import * as vscode from "vscode";
 
 export function showProgress(
   title: string,
   manager: PontManager,
-  task: (report?: (info: string) => any) => Thenable<any>
+  task: (report?: (info: string) => any) => Thenable<any>,
 ) {
   return vscode.window.withProgress(
     {
@@ -23,7 +23,7 @@ export function showProgress(
       } catch (e) {
         vscode.window.showErrorMessage(e.toString());
       }
-    }
+    },
   );
 }
 
@@ -35,7 +35,7 @@ export function wait(ttl = 500) {
 
 export class VSCodeLogger extends PontLogger {
   log(message: string, logType?: string): void {
-    if (logType === 'error') {
+    if (logType === "error") {
       vscode.window.showErrorMessage(message);
     } else {
       vscode.window.showInformationMessage(message);

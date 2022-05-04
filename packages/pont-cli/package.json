@@ -8,15 +8,23 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
-    "pretest": "npm run build",
-    "watch": "tsc -w",
-    "build": "rm -rf lib && tsc"
+    "watch": "tsc --build --watch",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "build": "npm run clean && tsc --build"
+  },
+  "peerDependencies": {
+    "fs-extra": "^10.1.0",
+    "lodash": "*"
   },
   "dependencies": {
-    "pont-core": "*"
+    "chalk": "^4.1.2",
+    "pont-manager": "file:../pont-manager"
   },
   "files": [],
   "keywords": [],
   "author": "jasonHzq",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.6.4"
+  }
 }

@@ -1,5 +1,5 @@
 import { PontSpec } from "pont-spec";
-import { PontSpecDiff } from "pont-core";
+// import { PontSpecDiff } from "pont-manager";
 
 /** 不同使用场景，各自注册服务来源 */
 export const PontUIService = {
@@ -14,7 +14,8 @@ export const PontUIService = {
   /** 获取 本地/远程 的diff信息 */
   useDiffs: () => {
     return {
-      data: {} as PontSpecDiff[],
+      // data: {} as PontSpecDiff[],
+      data: {} as any,
       loading: false,
     };
   },
