@@ -28,3 +28,7 @@ packages/vscode-pont/out/
 packages/vscode-pont/dist/assets
 packages/vscode-pont/dist/index.html
 tsconfig.tsbuildinfo
+*.tsbuildinfo
+packages/vscode-pont-ui/out/
+packages/pont-ui/out/
+packages/pont-ui/src/mocks/spec.json

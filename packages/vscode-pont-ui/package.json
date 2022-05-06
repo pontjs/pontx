@@ -1,7 +1,8 @@
 {
   "name": "vscode-pont-ui",
-  "version": "0.0.0",
-  "main": "index.js",
+  "version": "0.0.5",
+  "main": "out/index.js",
+  "typings": "out/index.d.ts",
   "scripts": {
     "dev": "vite",
     "watch": "tsc -w && vite build",
@@ -16,6 +17,10 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },
+  "files": [
+    "dist",
+    "out"
+  ],
   "devDependencies": {
     "@types/lodash": "^4.14.182",
     "@types/react": "^18.0.8",

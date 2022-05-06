@@ -1,0 +1,54 @@
+@import url(./utils.less);
+
+.pont-ui {
+  .main-content {
+    height: calc(100vh - 60px);
+    display: flex;
+    align-items: center;
+  }
+
+  .pont-action-btn {
+    min-height: 24px;
+    min-width: 24px;
+    padding: 0 7px;
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
+    justify-content: center;
+    text-align: left;
+    vertical-align: middle;
+    color: #182026;
+
+    &.disabled {
+      cursor: disabled;
+    }
+
+    .next-icon {
+      &,
+      &::before {
+        width: 12px;
+        font-size: 12px;
+        height: 12px;
+        margin-top: -6px;
+      }
+    }
+
+    &:hover {
+      color: #182026;
+      text-decoration: none;
+      background: rgba(115, 134, 148, 0.3);
+      box-shadow: none;
+    }
+  }
+
+  a:link,
+  a:visited,
+  a:hover,
+  a:active {
+    text-decoration: underline;
+  }
+}

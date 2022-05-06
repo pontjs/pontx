@@ -9,6 +9,7 @@
       "oas-spec-ts": ["packages/oas-spec-ts"],
       "pont-cli": ["packages/pont-cli"],
       "pont-ui": ["packages/pont-ui"],
+      "vscode-pont-ui": ["packages/vscode-pont-ui"],
       "vscode-pont2": ["packages/vscode-pont"],
       "pont-meta-fetch-plugin": ["plugins/fetch/pont-meta-fetch-plugin"],
       "pont-generate-core": ["plugins/generate/core"],
@@ -17,7 +18,7 @@
     }
   },
   "include": ["packages/", "plugins/"],
-  "exclude": ["node_modules/", "packages/pont-ui/node_modules/"],
+  "exclude": ["node_modules/", "packages/pont-ui/node_modules/", "packages/oas-spec-ts/scripts/"],
   "references": [
     {
       "path": "packages/pont-spec"
@@ -36,6 +37,9 @@
     },
     {
       "path": "packages/vscode-pont"
+    },
+    {
+      "path": "packages/vscode-pont-ui"
     },
     {
       "path": "plugins/fetch/pont-meta-fetch-plugin"
