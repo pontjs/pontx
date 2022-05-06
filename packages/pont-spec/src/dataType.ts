@@ -16,29 +16,68 @@ export class PontJsonSchema {
 
   /** 生成表达式，用于预览读取类型信息 */
   static toString(schema: PontJsonSchema) {
-    if (
-      typeof schema.templateIndex === "number" &&
-      schema.templateIndex !== -1
-    ) {
+    if (!schema) {
+      return "any";
+    }
+    if (typeof schema?.templateIndex === "number" && schema?.templateIndex !== -1) {
       return `T${schema.templateIndex}`;
     }
 
     if (schema.enum?.length) {
-      return schema.enum
-        .map((el) => (typeof el === "string" ? `'${el}'` : el))
-        .join(" | ");
+      return schema.enum.map((el) => (typeof el === "string" ? `'${el}'` : el)).join(" | ");
     }
 
-    if (schema.isDefsType) {
+    if (schema.templateArgs?.length) {
+      const defName = schema.isDefsType ? `defs.${schema.typeName}` : schema.typeName;
       if (schema.templateArgs?.length) {
-        return `defs.${schema.typeName}<${schema.templateArgs
-          .map((arg) => PontJsonSchema.toString(arg))
-          .join(", ")}>`;
+        return `${defName}<${schema.templateArgs.map((arg) => PontJsonSchema.toString(arg)).join(", ")}>`;
       }
+      return defName;
+    }
 
-      return `defs.${schema.typeName}`;
+    switch (schema?.typeName) {
+      case "long":
+      case "integer": {
+        return "number";
+      }
+      case "file": {
+        return "File";
+      }
+      case "Array":
+      case "array": {
+        if (schema.items) {
+          return `Array<${PontJsonSchema.toString(schema.items as PontJsonSchema)}>`;
+        }
+
+        return "[]";
+      }
+      case "object": {
+        if (schema?.properties) {
+          return `{ ${Object.keys(schema.properties)
+            .map((propName) => {
+              return `${propName}: ${PontJsonSchema.toString(schema.properties?.[propName] as PontJsonSchema)}`;
+            })
+            .join("; ")} }`;
+        }
+        if (schema?.additionalProperties) {
+          return `map<string, ${PontJsonSchema.toString(schema?.additionalProperties as PontJsonSchema)}>`;
+        }
+      }
     }
 
     return schema?.typeName || "any";
   }
+
+  static create() {
+    return { type: "string" } as PontJsonSchema;
+  }
+
+  static checkIsMap(schema: PontJsonSchema) {
+    if (schema?.type === "object" && !schema.properties) {
+      return true;
+    }
+    return false;
+  }
+
+  static getDescription(schema: PontJsonSchema) {}
 }

@@ -1,0 +1,93 @@
+.pont-ui-schema-editor {
+  background-color: rgba(167, 182, 194, 0.15);
+  border: 1px solid #d6dde9;
+  border-radius: 3px;
+
+  > div {
+    overflow-y: overlay !important;
+  }
+
+  .schema-row {
+    display: flex;
+    align-items: center;
+    padding-right: 24px;
+    color: rgb(38, 38, 38);
+    font-size: 12px;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system;
+    font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, Courier, monospace;
+
+    .desc {
+      margin-left: 55px;
+      color: #444;
+      font-style: italic;
+    }
+
+    .next-button.disabled {
+      &:hover {
+        color: #182026;
+        text-decoration: none;
+        background: none;
+        box-shadow: none;
+        cursor: not-allowed;
+      }
+    }
+
+    .next-input:focus,
+    .next-input.bp3-active {
+      box-shadow: 0 0 0 0 rgb(19, 124, 189), 0 0 0 0 rgb(19, 124, 189), inset 0 0 0 1px rgba(16, 22, 26, 0.15),
+        inset 0 1px 1px rgb(16, 22, 26, 0.2);
+    }
+
+    input[disabled] {
+      cursor: not-allowed;
+    }
+
+    .next-icon {
+      color: #9eadb9;
+    }
+
+    .row-container {
+      align-items: center;
+
+      .next-select.pos-select {
+        width: 97px;
+        select {
+          width: 97px;
+        }
+      }
+
+      input {
+        padding-right: 1px;
+        color: rgb(38, 38, 38);
+        font-size: 12px;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system;
+
+        &:focus {
+          background-color: rgba(0, 0, 0, 0.06);
+        }
+      }
+    }
+
+    .actions {
+      visibility: hidden;
+
+      .next-button {
+        &:hover {
+          color: #182026;
+          text-decoration: none;
+          background: rgba(115, 134, 148, 0.3);
+          box-shadow: none;
+        }
+      }
+    }
+
+    &:hover .actions {
+      visibility: visible;
+    }
+  }
+
+  .outline-none {
+    border: 0;
+    outline: none;
+  }
+}

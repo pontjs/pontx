@@ -57,6 +57,7 @@
   "dependencies": {
     "fs-extra": "^7.0.1",
     "mockjs": "^1.0.1-beta3",
+    "vscode-pont-ui": "file:../vscode-pont-ui",
     "pont-manager": "file:../pont-manager"
   },
   "icon": "logo.png",
@@ -65,6 +66,7 @@
     "type": "git"
   },
   "devDependencies": {
+    "vscode-pont-ui": "^0.0.5",
     "@types/vscode": "^1.47.0",
     "@types/vscode-webview": "^1.57.0",
     "typescript": "^4.6.4",

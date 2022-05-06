@@ -1,0 +1,70 @@
+.pont-ui-api {
+  .header {
+    background-color: #d6e0e5;
+    border: 1px solid #89a6b5;
+    border-radius: 2px;
+    padding: 8px 18px;
+    // display: flex;
+    line-height: 28px;
+
+    .method {
+      border-radius: 2px;
+      background-color: #2f84ae;
+      color: white;
+      font-size: 14px;
+      display: inline-block;
+      width: 80px;
+      line-height: 28px;
+      text-align: center;
+    }
+
+    .path {
+      display: inline-block;
+      color: black;
+      margin-left: 10px;
+      font-weight: bold;
+    }
+
+    .desc {
+      margin-left: 10px;
+      display: inline-block;
+      font-style: italic;
+    }
+
+    .title {
+      float: right;
+      color: black;
+      font-weight: bold;
+    }
+  }
+
+  .content .mod {
+    border: 1px solid #89a6b5;
+    border-radius: 2px;
+    margin-top: 20px;
+
+    .mod-title {
+      background-color: #d6e0e5;
+      border-top-left-radius: 2px;
+      border-top-right-radius: 2px;
+      padding: 8px 18px;
+      // display: flex;
+      line-height: 28px;
+    }
+
+    .next-table {
+      .param-name {
+        .name {
+          color: black;
+          font-weight: bold;
+        }
+
+        &.required .name::before {
+          content: "*";
+          color: red;
+          font-weight: normal;
+        }
+      }
+    }
+  }
+}

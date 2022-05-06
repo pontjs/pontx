@@ -1,37 +1,35 @@
 import * as vscode from "vscode";
-import { getHTMLForVSCode, getRootUri } from "vscode-pont-ui";
+const { getHTMLForVSCode, getRootUri } = require("vscode-pont-ui");
 
-const path = require("path");
-const fs = require("fs");
+// const path = require("path");
+// const fs = require("fs");
 
-const getHTMLForVSCode = (urlJoin, cspSource) => {
-  const scriptUri = urlJoin("dist/assets/index.js");
-  const styleResetUri = urlJoin("dist/assets/index.css");
-  const html = fs.readFileSync(
-    path.join(__dirname, "../dist/index.html"),
-    "utf8"
-  );
+// const getHTMLForVSCode = (urlJoin, cspSource) => {
+//   const scriptUri = urlJoin("dist/assets/index.js");
+//   const styleResetUri = urlJoin("dist/assets/index.css");
+//   const html = fs.readFileSync(
+//     path.join(__dirname, "../dist/index.html"),
+//     "utf8"
+//   );
 
-  const htmlResult = html
-    .replace("/assets/index.js", scriptUri)
-    .replace("/assets/index.css", styleResetUri)
-    .replace(/\{cspSource\}/g, cspSource);
+//   const htmlResult = html
+//     .replace("/assets/index.js", scriptUri)
+//     .replace("/assets/index.css", styleResetUri)
+//     .replace(/\{cspSource\}/g, cspSource);
 
-  return htmlResult;
-};
+//   return htmlResult;
+// };
 
-const getRootUri = () => {
-  return vscode.Uri.file(path.join(__dirname, "../dist"));
-};
+// const getRootUri = () => {
+//   return vscode.Uri.file(path.join(__dirname, "../dist"));
+// };
 
 export class PontWebView {
   static viewType = "pont-ui";
   static webviewPanel = null as vscode.WebviewPanel;
 
   openTab(extensionUri: vscode.Uri) {
-    const column = vscode.window.activeTextEditor
-      ? vscode.window.activeTextEditor.viewColumn
-      : undefined;
+    const column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : undefined;
 
     // If we already have a panel, show it.
     if (PontWebView.webviewPanel) {
@@ -48,8 +46,8 @@ export class PontWebView {
         // Enable javascript in the webview
         enableScripts: true,
         // And restrict the webview to only loading content from our extension's `media` directory.
-        localResourceRoots: [getRootUri()],
-      }
+        localResourceRoots: [vscode.Uri.file(getRootUri())],
+      },
     );
     PontWebView.webviewPanel.onDidDispose(() => {
       PontWebView.webviewPanel.dispose();
@@ -58,9 +56,9 @@ export class PontWebView {
     PontWebView.webviewPanel.webview.html = getHTMLForVSCode(
       (path) =>
         PontWebView.webviewPanel.webview.asWebviewUri(
-          vscode.Uri.joinPath(extensionUri, path)
+          vscode.Uri.joinPath(extensionUri, "node_modules/vscode-pont-ui", path),
         ),
-      PontWebView.webviewPanel.webview.cspSource
+      PontWebView.webviewPanel.webview.cspSource,
     );
   }
 }

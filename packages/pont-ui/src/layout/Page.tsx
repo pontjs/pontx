@@ -4,27 +4,23 @@
  */
 import * as React from "react";
 import * as PontSpec from "pont-spec";
+import { LayoutContext } from "./context";
+import "./Page.less";
+import { Table } from "@alicloud/console-components";
+import { API } from "../pages/API";
+import { BaseClass } from "../pages/BaseClass";
 
-export class PageProps {
-  api: PontSpec.Interface;
-}
+export class PageProps {}
 
 export const Page: React.FC<PageProps> = (props) => {
+  const { selectedMeta } = LayoutContext.useContainer();
+
   return (
-    <div className='pont-ui-page'>
-      <div className='header'>
-        <div className='title'>{props.api.name}</div>
-        <div className='desc'>
-          {props.api.method?.toUpperCase()} {props.api.path}{" "}
-          {props.api.description}
-        </div>
-      </div>
-      <div className='content'>
-        <div className='mod'>
-          <div className='mod-title'>Request Syntax</div>
-          <div className='mod-content'></div>
-        </div>
-      </div>
+    <div className="pont-ui-page">
+      {(selectedMeta as PontSpec.Interface)?.path ? <API selectedApi={selectedMeta as PontSpec.Interface} /> : null}
+      {(selectedMeta as PontSpec.BaseClass)?.schema ? (
+        <BaseClass selectedClass={selectedMeta as PontSpec.BaseClass} />
+      ) : null}
     </div>
   );
 };

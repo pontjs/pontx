@@ -1,5 +1,5 @@
-const path = require("path");
-const fs = require("fs");
+import * as fs from "fs";
+import * as path from "path";
 
 const generateClassCode = (clazz: {
   description: string;
@@ -22,11 +22,7 @@ ${clazz.description
    */
 `
     : "";
-  const bodyCode = `export class ${
-    clazz.name === "SchemaObject"
-      ? "SchemaObject extends JsonSchema"
-      : clazz.name
-  } {
+  const bodyCode = `export class ${clazz.name === "SchemaObject" ? "SchemaObject extends JsonSchema" : clazz.name} {
 ${clazz.properties
   .map((prop) => {
     return `

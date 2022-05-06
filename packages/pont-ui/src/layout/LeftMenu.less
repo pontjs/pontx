@@ -1,0 +1,79 @@
+@menu-width: 350px;
+
+.pont-ui-left-menu {
+  width: @menu-width;
+  position: relative;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.16);
+  border-right: 1px solid #e7e7e7;
+  max-height: calc(100vh - 60px);
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  .search-area {
+    width: 100%;
+    padding: 8px 24px 0 12px;
+
+    .next-input {
+      width: @menu-width - 24px - 12px;
+    }
+  }
+
+  .next-menu.next-ver {
+    width: @menu-width - 1px;
+    box-shadow: none;
+    border: 0;
+    padding-right: 20px;
+
+    .next-menu-item {
+      height: 40px;
+      line-height: 40px;
+
+      > .next-menu-item-inner {
+        height: 100%;
+      }
+
+      &.selected {
+        background-color: #d6e0e5;
+      }
+    }
+
+    .mod-name {
+      display: inline-block;
+      line-height: 1;
+      margin-top: 7px;
+
+      .desc {
+        font-size: 14px;
+        display: block;
+        color: #111;
+      }
+      .name {
+        display: block;
+        font-size: 12px;
+        font-size: 12px;
+        color: #555;
+        font-style: italic;
+      }
+    }
+
+    .api-name {
+      display: inline-block;
+      line-height: 1;
+      margin-top: 7px;
+
+      .name {
+        font-size: 14px;
+        display: block;
+        color: #111;
+      }
+
+      .desc {
+        display: block;
+        font-size: 12px;
+        font-size: 12px;
+        color: #555;
+        font-style: italic;
+      }
+    }
+  }
+}
