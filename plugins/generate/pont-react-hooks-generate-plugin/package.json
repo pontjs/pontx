@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "pont-generate-core": "*",
+    "pont-manager": "*",
     "pont-spec": "*"
   },
   "files": [],
