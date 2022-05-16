@@ -12,8 +12,5 @@
   "files": [],
   "keywords": [],
   "author": "jasonHzq",
-  "license": "MIT",
-  "devDependencies": {
-    "typescript": "^4.6.4"
-  }
+  "license": "MIT"
 }
