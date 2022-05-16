@@ -20,6 +20,7 @@ export class Interface {
   method: string;
   name: string;
   path: string;
+  deprecated: boolean;
 }
 
 export class Mod {
