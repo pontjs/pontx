@@ -1,7 +1,7 @@
 {
   "name": "oas-spec-ts",
   "version": "0.0.1",
-  "description": "OpenAPI Spec",
+  "description": "OpenAPI Spec OAS TS Typescript",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
@@ -12,7 +12,11 @@
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "build": "npm run clean && tsc --build"
   },
-  "files": [],
+  "files": [
+    "lib",
+    "package.json",
+    "*.md"
+  ],
   "keywords": [],
   "author": "jasonHzq",
   "license": "MIT",

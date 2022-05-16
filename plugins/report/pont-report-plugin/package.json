@@ -11,6 +11,9 @@
   },
   "files": [],
   "keywords": [],
+  "devDependencies": {
+    "@types/node": "*"
+  },
   "author": "jasonHzq",
   "license": "MIT"
 }
