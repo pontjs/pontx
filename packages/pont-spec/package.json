@@ -13,7 +13,7 @@
     "lodash": "*"
   },
   "dependencies": {
-    "oas-spec-ts": "file:../oas-spec-ts"
+    "oas-spec-ts": "*"
   },
   "files": [
     "lib/",

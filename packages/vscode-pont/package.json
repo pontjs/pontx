@@ -57,8 +57,8 @@
   "dependencies": {
     "fs-extra": "^7.0.1",
     "mockjs": "^1.0.1-beta3",
-    "vscode-pont-ui": "file:../vscode-pont-ui",
-    "pont-manager": "file:../pont-manager"
+    "vscode-pont-ui": "*",
+    "pont-manager": "*"
   },
   "icon": "logo.png",
   "repository": {

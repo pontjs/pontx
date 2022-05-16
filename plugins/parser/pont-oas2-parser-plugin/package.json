@@ -11,8 +11,8 @@
     "build": "npm run clean && tsc --build"
   },
   "dependencies": {
-    "pont-manager": "file:../../../packages/pont-core",
-    "pont-spec": "file:../../../packages/pont-spec"
+    "pont-manager": "*",
+    "pont-spec": "*"
   },
   "files": [],
   "keywords": [],

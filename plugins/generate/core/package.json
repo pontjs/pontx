@@ -11,10 +11,10 @@
     "build": "npm run clean && tsc --build"
   },
   "dependencies": {
-    "pont-spec": "file:../../../packages/pont-spec",
+    "pont-spec": "*",
     "prettier": "^2.6.2"
   },
-  "files": [],
+  "files": ["lib"],
   "keywords": [],
   "author": "jasonHzq",
   "license": "MIT",
