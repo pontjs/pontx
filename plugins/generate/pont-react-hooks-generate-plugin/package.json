@@ -11,8 +11,8 @@
     "build": "npm run clean && tsc --build"
   },
   "dependencies": {
-    "pont-generate-core": "file:../core",
-    "pont-spec": "file:../../../packages/pont-spec"
+    "pont-generate-core": "*",
+    "pont-spec": "*"
   },
   "files": [],
   "keywords": [],
