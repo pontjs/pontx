@@ -1,6 +1,6 @@
 {
   "name": "pont-cli",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Pont CLI",
   "bin": {
     "pont2": "bin/init.js"
@@ -18,9 +18,16 @@
   },
   "dependencies": {
     "chalk": "^4.1.2",
-    "pont-manager": "*"
+    "commander": "^9.2.0",
+    "pont-manager": "*",
+    "pont-meta-fetch-plugin": "^0.0.1",
+    "pont-oas2-parser-plugin": "^0.0.1",
+    "pont-react-hooks-generate-plugin": "^0.0.1"
   },
-  "files": [],
+  "files": [
+    "bin",
+    "lib"
+  ],
   "keywords": [],
   "author": "jasonHzq",
   "license": "MIT",

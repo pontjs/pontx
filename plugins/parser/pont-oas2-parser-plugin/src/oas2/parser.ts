@@ -1,5 +1,5 @@
 import * as PontSpec from "pont-spec";
-import { OAS2 } from "oas-spec-ts/src";
+import { OAS2 } from "oas-spec-ts";
 import {
   getIdentifierFromOperatorId,
   getIdentifierFromUrl,
@@ -17,7 +17,7 @@ import { parseJsonSchema } from "./schema";
 
 export function parseOAS2Interface(
   inter: OAS2.OperationObject & { path: string; method: string },
-  context = new JsonSchemaContext()
+  context = new JsonSchemaContext(),
 ) {
   const { samePath, defNames = [], compileTemplateKeyword } = context;
   const { path, method } = inter;
@@ -30,9 +30,7 @@ export function parseOAS2Interface(
   }
 
   const responses = _.mapValues(inter.responses, (response) => {
-    const responseSchema = response.schema
-      ? parseJsonSchema(response.schema, context)
-      : new PontSpec.PontJsonSchema();
+    const responseSchema = response.schema ? parseJsonSchema(response.schema, context) : new PontSpec.PontJsonSchema();
     return { ...response, schema: responseSchema };
   });
 
@@ -65,6 +63,7 @@ export function parseOAS2Interface(
     method,
     path,
     responses,
+    deprecated: inter.deprecated,
     /** 后端返回的参数可能重复 */
     parameters: _.unionBy(parameters, "name"),
   } as PontSpec.Interface;
@@ -72,11 +71,7 @@ export function parseOAS2Interface(
   return standardInterface;
 }
 
-export function parseSwagger2Mods(
-  swagger: OAS2.SwaggerObject,
-  defNames: string[],
-  compileTemplateKeyword?: string
-) {
+export function parseSwagger2Mods(swagger: OAS2.SwaggerObject, defNames: string[], compileTemplateKeyword?: string) {
   const tags = [
     ...(swagger.tags || []),
     {
@@ -84,24 +79,14 @@ export function parseSwagger2Mods(
       description: "common",
     },
   ] as OAS2.TagObject[];
-  const allSwaggerInterfaces = [] as Array<
-    OAS2.OperationObject & { path: string; method: string }
-  >;
+  const allSwaggerInterfaces = [] as Array<OAS2.OperationObject & { path: string; method: string }>;
 
   Object.keys(swagger.paths).forEach((path) => {
     const methodInters = swagger.paths[path];
 
     // methodInters.parameters
 
-    const methods = [
-      "put",
-      "get",
-      "delete",
-      "patch",
-      "post",
-      "options",
-      "head",
-    ];
+    const methods = ["put", "get", "delete", "patch", "post", "options", "head"];
     methods.forEach((method) => {
       const inter = methodInters[method] as OAS2.OperationObject;
       if (!inter) {
@@ -112,11 +97,7 @@ export function parseSwagger2Mods(
         path,
         method,
         tags: inter.tags || ["common"],
-        parameters: _.unionBy(
-          inter.parameters,
-          methodInters.parameters || [],
-          "name"
-        ),
+        parameters: _.unionBy(inter.parameters, methodInters.parameters || [], "name"),
       });
     });
   });
@@ -134,9 +115,7 @@ export function parseSwagger2Mods(
         );
       });
 
-      const samePath = getMaxSamePath(
-        modInterfaces.map((inter) => inter.path.slice(1))
-      );
+      const samePath = getMaxSamePath(modInterfaces.map((inter) => inter.path.slice(1)));
 
       const standardInterfaces = modInterfaces.map((inter) => {
         return parseOAS2Interface(inter, {
@@ -163,10 +142,7 @@ export function parseSwagger2Mods(
   return _.sortBy(mods, (mod) => mod.name);
 }
 
-export function parseOAS2(
-  swagger: OAS2.SwaggerObject,
-  name = ""
-): PontSpec.PontSpec {
+export function parseOAS2(swagger: OAS2.SwaggerObject, name = ""): PontSpec.PontSpec {
   const compileTemplateKeyword = "#/definitions/";
   const draftClasses = _.map(swagger.definitions, (schema, defName) => {
     const defNameAst = compileTemplate(defName);

@@ -16,9 +16,7 @@ yarn-error.log*
 lena-debug.log*
 services/
 lib/services/
-/examples/demo1/node_modules/
 .mocks/
-examples/hooks/node_modules
 .idea/
 test/services/
 lib/
@@ -31,4 +29,6 @@ tsconfig.tsbuildinfo
 *.tsbuildinfo
 packages/vscode-pont-ui/out/
 packages/pont-ui/out/
-packages/pont-ui/src/mocks/spec.json
+packages/pont-ui/src/mocks/*
+packages/pont-spec/es6/*
+package-lock.json

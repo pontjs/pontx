@@ -68,7 +68,7 @@ export class PontReportPlugin extends PontPlugin {
   apply(manager: PontManager, options?: any): void {}
 }
 
-type PluginItem<T extends PontPlugin> = { instance: T; options: any };
+type PluginItem<T extends PontPlugin> = { instance: Promise<T>; options: any };
 
 export class PontPlugins {
   fetch: PluginItem<PontFetchPlugin>;
@@ -130,10 +130,13 @@ export class PontInnerManagerConfig {
         ? path.join(configDir, pluginConfig.use)
         : pluginConfig.use;
     try {
+      // const pluginInstance = require(requirePath).then((LoadedPlugin) => {
+      //   return new LoadedPlugin.default();
+      // });
       const LoadedPlugin = require(requirePath);
 
       return {
-        instance: new LoadedPlugin.default(),
+        instance: LoadedPlugin.default,
         options: pluginConfig.options,
       };
     } catch (e) {}
