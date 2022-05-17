@@ -2,12 +2,13 @@
   "name": "pont-spec",
   "version": "0.0.1",
   "description": "pont spec",
+  "module": "es6/index.js",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
     "watch": "tsc --build --watch",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
-    "build": "npm run clean && tsc --build"
+    "build": "npm run clean && tsc --build && tsc -m esnext --outDir es6"
   },
   "peerDependencies": {
     "lodash": "*"

@@ -15,7 +15,9 @@
     "pont-manager": "*",
     "pont-spec": "*"
   },
-  "files": [],
+  "files": [
+    "lib"
+  ],
   "keywords": [],
   "author": "jasonHzq",
   "license": "MIT",

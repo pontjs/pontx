@@ -1,4 +1,4 @@
-import { OAS2 } from "oas-spec-ts/src";
+import { OAS2 } from "oas-spec-ts";
 import { compileTemplate, parseAst2PontJsonSchema } from "./compiler";
 import { JsonSchemaContext, PrimitiveTypeMap } from "./utils";
 import * as PontSpec from "pont-spec";
