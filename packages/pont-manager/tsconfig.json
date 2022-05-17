@@ -1,11 +1,12 @@
 {
   "extends": "../../tsconfig.build.json",
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es6",
+    "module": "CommonJS",
+    "target": "ES2015",
     "removeComments": true,
     "composite": true,
     "outDir": "lib",
+    "moduleResolution": "Node",
     "baseUrl": ".",
     "paths": {},
     "rootDir": "./src"

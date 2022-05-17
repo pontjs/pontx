@@ -11,6 +11,10 @@
     "build": "npm run clean && tsc --build"
   },
   "files": [],
+  "dependencies": {
+    "node-fetch": "^3.2.4",
+    "pont-manager": "^0.0.1"
+  },
   "keywords": [],
   "author": "jasonHzq",
   "license": "MIT",
