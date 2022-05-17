@@ -3,6 +3,7 @@
   "displayName": "pont2",
   "description": "",
   "version": "0.0.1",
+  "private": true,
   "publisher": "jasonHzq",
   "license": "MIT",
   "engines": {
