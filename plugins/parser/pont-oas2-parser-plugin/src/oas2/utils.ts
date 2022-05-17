@@ -1,4 +1,4 @@
-import { OAS2 } from "oas-spec-ts/src";
+import { OAS2 } from "oas-spec-ts";
 import { BaseClass, Interface, Mod, PontJsonSchema } from "pont-spec";
 import * as _ from "lodash";
 

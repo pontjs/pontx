@@ -1,5 +1,5 @@
 import { PontSpec } from "pont-spec";
-import { InnerOriginConfig, PontInnerManagerConfig } from "./config";
+import { InnerOriginConfig, PontInnerManagerConfig, PontPublicManagerConfig } from "./config";
 import * as path from "path";
 import * as fs from "fs-extra";
 import { PontLogger, PontLoggerSpec } from "./logger";
@@ -59,6 +59,39 @@ export class PontManager {
       } else {
         logger.error("未找到 Pont 配置文件");
       }
+    } catch (e) {
+      logger.error("Pont 创建失败:" + e.message);
+    }
+  }
+
+  static async constructorFromPontConfig(
+    publicConfig: PontPublicManagerConfig,
+    configPathname: string,
+    logger = new PontLogger(),
+  ) {
+    try {
+      let manager = new PontManager();
+      manager.logger = logger;
+      manager.innerManagerConfig = PontInnerManagerConfig.constructorFromPublicConfig(
+        publicConfig,
+        logger,
+        path.resolve(configPathname, "../"),
+      );
+
+      manager = await PontManager.readLocalPontMeta(manager);
+      manager = await PontManager.fetchRemotePontMeta(manager);
+
+      // 自动用远程 spec，替换本地为空的 spec
+      manager.localPontSpecs = manager.localPontSpecs.map((localSpec, specIndex) => {
+        if (PontSpec.isEmptySpec(localSpec)) {
+          const remoteSpec = manager.remotePontSpecs?.find((spec) => spec.name === localSpec.name);
+
+          return remoteSpec || manager?.remotePontSpecs?.[specIndex] || localSpec;
+        }
+
+        return localSpec;
+      });
+      return manager;
     } catch (e) {
       logger.error("Pont 创建失败:" + e.message);
     }
@@ -143,14 +176,16 @@ export class PontManager {
   /** 流程方法：拉取并解析远程元数据 */
   static async fetchRemotePontMeta(manager: PontManager): Promise<PontManager> {
     const remoteSpecPromises = manager.innerManagerConfig.origins.map(async (origin) => {
-      const metaStr = await origin.plugins.fetch.instance.apply(origin, origin.plugins.fetch.options);
+      const fetchPlugin = await Promise.resolve(origin.plugins.fetch.instance);
+      const metaStr = await fetchPlugin.apply(origin, origin.plugins.fetch.options);
 
       if (!metaStr) {
         // manager.logger.error("未获取到远程数据");
         return;
       }
 
-      const spec = await origin.plugins.parser.instance.apply(metaStr, origin.plugins.parser.options);
+      const parserPlugin = await Promise.resolve(origin.plugins.parser.instance);
+      const spec = await parserPlugin.apply(metaStr, origin.plugins.parser.options);
 
       if (!spec) {
         manager.logger.error("远程数据未解析成功！");
@@ -184,8 +219,8 @@ export class PontManager {
   }
 
   static async generateCode(manager: PontManager) {
-    const generatorPlugin = manager.innerManagerConfig.plugins.generate;
-    return Promise.resolve(generatorPlugin.instance.apply(manager, generatorPlugin.options));
+    const generatorPlugin = await Promise.resolve(manager.innerManagerConfig.plugins.generate.instance);
+    return Promise.resolve(generatorPlugin.apply(manager, manager.innerManagerConfig.plugins.generate.options));
   }
 
   // 展示方法
