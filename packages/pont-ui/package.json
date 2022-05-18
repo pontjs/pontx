@@ -6,8 +6,8 @@
   "scripts": {
     "start": "vite",
     "watch": "tsc -w",
-    "less": "find src -name '*.less'  -or -name '*.css' -exec rsync -R '{}' lib \\; && cp -R lib/src/* lib/ && rm -rf lib/src",
-    "build": "tsc && npm run less",
+    "copy-files": "copyfiles -u 1 src/**/*.less src/**/*.css src/*.less src/*.css lib",
+    "build": "tsc --build && npm run copy-files",
     "preview": "vite preview"
   },
   "files": [
@@ -33,6 +33,7 @@
     "@types/react": "^17.0.44",
     "@types/react-dom": "^17.0.16",
     "@vitejs/plugin-react": "^1.3.2",
+    "copyfiles": "^2.4.1",
     "less": "^4.1.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

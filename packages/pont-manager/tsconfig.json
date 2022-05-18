@@ -9,6 +9,7 @@
     "moduleResolution": "Node",
     "baseUrl": ".",
     "paths": {},
+    "esModuleInterop": true,
     "rootDir": "./src"
   },
   "include": ["./src/**/*"],
