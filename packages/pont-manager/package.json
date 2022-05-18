@@ -10,6 +10,9 @@
     "build": "npm run clean && tsc --build"
   },
   "dependencies": {
+    "pont-meta-fetch-plugin": "*",
+    "pont-react-hooks-generate-plugin": "*",
+    "pont-oas2-parser-plugin": "*",
     "fs-extra": "^10.1.0",
     "lodash": "*",
     "pont-spec": "*"

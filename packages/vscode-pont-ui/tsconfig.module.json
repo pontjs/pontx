@@ -5,6 +5,8 @@
     "outDir": "out",
     "moduleResolution": "node",
     "esModuleInterop": false,
+    "declaration": true,
+    "sourceMap": true,
     "baseUrl": ".",
     "paths": {},
     "composite": true
