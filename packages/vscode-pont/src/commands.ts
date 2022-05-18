@@ -89,43 +89,41 @@ export class PontCommands {
           const modMeta = PontManager.getCurrentSpec(pontManager).mods.find((mod) => mod.name === modName);
           const apiMeta = modMeta?.interfaces?.find((api) => api.name === apiName);
 
-          const snippets = pontManager.innerManagerConfig.plugins.generate?.instance?.providerSnippets?.(
-            apiMeta,
-            modName,
-            pontSpec.name,
-          );
+          Promise.resolve(pontManager.innerManagerConfig.plugins.generate?.instance).then((generatePlugin) => {
+            const snippets = generatePlugin?.providerSnippets?.(apiMeta, modName, pontSpec.name);
 
-          if (snippets?.length) {
-            if (snippets.length === 1) {
-              insertCode[snippets[0].code];
+            if (snippets?.length) {
+              if (snippets.length === 1) {
+                insertCode[snippets[0].code];
+              }
+
+              return vscode.window
+                .showQuickPick(
+                  snippets.map((snippet) => {
+                    return {
+                      label: snippet.name,
+                      description: snippet.description,
+                    };
+                  }),
+                  {
+                    matchOnDescription: true,
+                    matchOnDetail: true,
+                  },
+                )
+                .then((snippet) => {
+                  const foundSnippet = snippets.find((inst) => inst.name === snippet.label);
+                  if (foundSnippet) {
+                    insertCode(foundSnippet.code);
+                  }
+                });
             }
 
-            return vscode.window
-              .showQuickPick(
-                snippets.map((snippet) => {
-                  return {
-                    label: snippet.name,
-                    description: snippet.description,
-                  };
-                }),
-                {
-                  matchOnDescription: true,
-                  matchOnDetail: true,
-                },
-              )
-              .then((snippet) => {
-                const foundSnippet = snippets.find((inst) => inst.name === snippet.label);
-                if (foundSnippet) {
-                  insertCode(foundSnippet.code);
-                }
-              });
-          }
-
-          let code = `API.${item.detail}.`;
-          if (pontSpec.name) {
-            code = `API.${pontSpec.name}.${item.detail}`;
-          }
-          insertCode(code);
+            let code = `API.${item.detail}.`;
+            if (pontSpec.name) {
+              code = `API.${pontSpec.name}.${item.detail}`;
+            }
+            insertCode(code);
+          });
         });
     });
 

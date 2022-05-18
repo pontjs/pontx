@@ -1,6 +1,8 @@
 /**
  * @author jasonHzq
  * @description LeftMenu
+ *
+ * 菜单组件： https://fusion.design/pc/component/menu?themeid=2
  */
 import * as React from "react";
 import "./LeftMenu.less";
@@ -36,7 +38,7 @@ export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
 
   // 简单、复杂模式切换、搜索、折叠
   const menus = (
-    <Menu selectedKeys={[selectedMeta?.name]}>
+    <Menu selectedKeys={[selectedMeta?.name]} mode="inline">
       {(currSpec?.mods || []).map((mod) => {
         return (
           <Menu.SubMenu

@@ -6,14 +6,15 @@
   "typings": "out/index.d.ts",
   "scripts": {
     "dev": "vite",
-    "watch": "tsc -w && vite build",
-    "build": "vite build",
+    "watch": "tsc -w && npm run dev",
+    "build": "vite build && cp -r ./dist/ ../vscode-pont/node_modules/vscode-pont-ui/dist/",
     "preview": "vite preview"
   },
   "peerDependencies": {
     "lodash": "^4.17.21"
   },
   "dependencies": {
+    "pont-spec": "*",
     "pont-ui": "*",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
@@ -29,6 +30,7 @@
     "@types/vscode-webview": "^1.57.0",
     "@vitejs/plugin-react": "^1.3.2",
     "typescript": "^4.6.4",
-    "vite": "^2.9.7"
+    "vite": "^2.9.7",
+    "vite-plugin-html-template": "^1.1.3"
   }
 }
