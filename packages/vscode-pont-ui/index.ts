@@ -10,7 +10,7 @@ export const getHTMLForVSCode = (urlJoin: Function, cspSource) => {
     .replace("/assets/index.js", scriptUri)
     .replace("/assets/index.css", styleResetUri)
     .replace(
-      /\{cspSource\}/g,
+      /\$\{cspSource\}/g,
       `<meta
     http-equiv="Content-Security-Policy"
     content="default-src 'none'; img-src ${cspSource} https:; script-src ${cspSource}; style-src ${cspSource};"

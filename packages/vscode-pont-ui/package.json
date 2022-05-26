@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite",
     "watch": "tsc -w && npm run dev",
-    "build": "vite build && cp -r ./dist/ ../vscode-pont/node_modules/vscode-pont-ui/dist/",
+    "build": "vite build && cp -r ./dist/ ../vscode-pont/media/",
     "preview": "vite preview"
   },
   "peerDependencies": {
@@ -15,8 +15,8 @@
   },
   "dependencies": {
     "pont-spec": "*",
-    "pont-ui": "*",
     "react": "^18.0.0",
+    "pont-ui": "*",
     "react-dom": "^18.0.0"
   },
   "files": [
