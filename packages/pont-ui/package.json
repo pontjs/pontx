@@ -6,7 +6,7 @@
   "scripts": {
     "start": "vite",
     "watch": "tsc -w",
-    "copy-files": "copyfiles -u 1 src/**/*.less src/**/*.css src/*.less src/*.css lib",
+    "copy-files": "copyfiles -u 1 src/**/*.less src/**/*.css src/*.less src/*.css lib && cp -r src/style/ lib/style/",
     "build": "tsc --build && npm run copy-files",
     "preview": "vite preview"
   },

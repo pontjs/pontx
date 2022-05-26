@@ -9,6 +9,7 @@
     "build": "lerna exec --stream -- tsc --build --verbose",
     "start": "tsc --build -w",
     "vs-ui": "cd packages/vscode-pont-ui && npm run dev",
+    "vs-ui:build": "cd packages/vscode-pont-ui && npm run build",
     "clean": "lerna clean && rimraf ./node_modules",
     "lint": "prettier --write --parser typescript \"packages/**/*.ts\"",
     "release:all": "npm run release && npm run release:vscode",

@@ -87,6 +87,19 @@ export class PontPlugins {
   }
 }
 
+export function requireModule(pluginPath: string, configDir: string) {
+  let requirePath =
+    pluginPath.startsWith("./") || pluginPath.startsWith("../")
+      ? path.join(configDir, pluginPath)
+      : path.join(configDir, "node_modules", pluginPath);
+
+  if (["pont-meta-fetch-plugin", "pont-react-hooks-generate-plugin", "pont-oas2-parser-plugin"].includes(pluginPath)) {
+    requirePath = pluginPath;
+  }
+
+  return require(requirePath);
+}
+
 export class PontPublicManagerConfig {
   origins? = [] as PublicOriginConfig[];
   origin?: PublicOriginConfig = new PublicOriginConfig();
@@ -125,18 +138,14 @@ export class PontInnerManagerConfig {
   }
 
   static loadPlugin(pluginConfig: SimplePluginConfig, configDir: string) {
-    const requirePath =
-      pluginConfig.use.startsWith("./") || pluginConfig.use.startsWith("../")
-        ? path.join(configDir, pluginConfig.use)
-        : pluginConfig.use;
+    const requiredModule = requireModule(pluginConfig.use, configDir);
+
     try {
-      // const pluginInstance = require(requirePath).then((LoadedPlugin) => {
-      //   return new LoadedPlugin.default();
-      // });
-      const LoadedPlugin = require(requirePath);
+      const LoadedPlugin = requiredModule.default;
+      const instance = new LoadedPlugin() as PontPlugin;
 
       return {
-        instance: LoadedPlugin.default,
+        instance,
         options: pluginConfig.options,
       };
     } catch (e) {}
@@ -159,10 +168,9 @@ export class PontInnerManagerConfig {
         );
       })
       .map((plugin, pluginIndex) => {
-        const requirePath =
-          plugin.use.startsWith("./") || plugin.use.startsWith("../") ? path.join(configDir, plugin.use) : plugin.use;
         try {
-          const LoadedPlugin = require(requirePath).default;
+          const requiredModule = requireModule(plugin.use, configDir);
+          const LoadedPlugin = requiredModule.default;
           const instance = new LoadedPlugin() as PontPlugin;
           if (instance) {
             instance.logger = logger;
