@@ -5,7 +5,7 @@
 import * as React from "react";
 import { LeftMenu } from "./layout/LeftMenu";
 import "bootstrap/dist/css/bootstrap.css";
-import "@alicloud/console-components/dist/xconsole.css";
+import "@alicloud/console-components/dist/wind-without-icon-font.css";
 import { Nav } from "./layout/Nav";
 import { Page } from "./layout/Page";
 import { LayoutContext } from "./layout/context";

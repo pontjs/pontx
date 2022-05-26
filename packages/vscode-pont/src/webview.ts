@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
-const { getHTMLForVSCode, getRootUri } = require("vscode-pont-ui");
+import { getHTMLForVSCode, getRootUri } from "./utils";
 import * as path from "path";
+import { pontService } from "./Service";
 
 // const path = require("path");
 // const fs = require("fs");
@@ -47,7 +48,7 @@ export class PontWebView {
         // Enable javascript in the webview
         enableScripts: true,
         // And restrict the webview to only loading content from our extension's `media` directory.
-        localResourceRoots: [vscode.Uri.file(path.join(__dirname, "../node_modules/vscode-pont-ui/dist"))],
+        localResourceRoots: [vscode.Uri.file(path.join(__dirname, "../media"))],
       },
     );
     PontWebView.webviewPanel.onDidDispose(() => {
@@ -55,11 +56,15 @@ export class PontWebView {
       PontWebView.webviewPanel = null;
     });
     PontWebView.webviewPanel.webview.html = getHTMLForVSCode(
-      (path) =>
-        PontWebView.webviewPanel.webview.asWebviewUri(
-          vscode.Uri.joinPath(extensionUri, "node_modules/vscode-pont-ui", path),
-        ),
+      (path) => PontWebView.webviewPanel.webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "media", path)),
       PontWebView.webviewPanel.webview.cspSource,
     );
+    PontWebView.webviewPanel.webview.onDidReceiveMessage((message) => {
+      if (message.type && message.requestId) {
+        pontService.exectService(message).then((result) => {
+          PontWebView.webviewPanel.webview.postMessage(result);
+        });
+      }
+    });
   }
 }

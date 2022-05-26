@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.build.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "es6",
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "outDir": "lib",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {},
+    "rootDir": "./src",
+    "composite": true
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules", "build"],
+  "references": [{ "path": "../pont-spec" }]
+}

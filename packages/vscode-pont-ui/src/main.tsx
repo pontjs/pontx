@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
-// import "./registerService";
+import "./registerService";
 import { App } from "pont-ui";
 import "./index.css";
 
