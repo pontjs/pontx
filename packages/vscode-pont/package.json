@@ -25,12 +25,28 @@
     ],
     "commands": [
       {
+        "command": "pont.switchOrigin",
+        "title": "switchOrigin pont current origin"
+      },
+      {
         "command": "pont.findInterface",
         "title": "find pont interface"
       },
       {
         "command": "pont.openPontUI",
         "title": "open pont tab"
+      },
+      {
+        "command": "pont.pont.regenerate",
+        "title": "regenerate local spec sdk code"
+      },
+      {
+        "command": "pont.diff",
+        "title": "diff pont local and remote specs"
+      },
+      {
+        "command": "pont.restart",
+        "title": "restart vscode-pont"
       }
     ],
     "keybindings": [
@@ -58,8 +74,9 @@
   "dependencies": {
     "fs-extra": "^7.0.1",
     "mockjs": "^1.0.1-beta3",
-    "vscode-pont-ui": "*",
-    "pont-manager": "*"
+    "pont-manager": "*",
+    "pont-spec": "*",
+    "pont-spec-diff": "*"
   },
   "icon": "logo.png",
   "repository": {
@@ -67,7 +84,6 @@
     "type": "git"
   },
   "devDependencies": {
-    "vscode-pont-ui": "^0.0.5",
     "@types/fs-extra": "^5.1.0",
     "@types/vscode": "^1.47.0",
     "@types/vscode-webview": "^1.57.0",

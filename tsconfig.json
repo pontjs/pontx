@@ -7,10 +7,11 @@
     "skipLibCheck": true,
     "paths": {
       "pont-spec": ["packages/pont-spec"],
+      "pont-spec-diff": ["packages/pont-spec-diff"],
       "pont-manager": ["packages/pont-manager"],
       "oas-spec-ts": ["packages/oas-spec-ts"],
       "pont-cli": ["packages/pont-cli"],
-      // "pont-ui": ["packages/pont-ui"],
+      "pont-ui": ["packages/pont-ui"],
       "vscode-pont-ui": ["packages/vscode-pont-ui"],
       "vscode-pont2": ["packages/vscode-pont"],
       "pont-meta-fetch-plugin": ["plugins/fetch/pont-meta-fetch-plugin"],
@@ -40,9 +41,12 @@
     {
       "path": "packages/pont-cli"
     },
-    // {
-    //   "path": "packages/pont-ui"
-    // },
+    {
+      "path": "packages/pont-spec-diff"
+    },
+    {
+      "path": "packages/pont-ui"
+    },
     {
       "path": "packages/vscode-pont"
     },

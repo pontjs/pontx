@@ -18,6 +18,9 @@
     },
     {
       "path": "../vscode-pont-ui"
+    },
+    {
+      "path": "../pont-spec-diff"
     }
   ]
 }

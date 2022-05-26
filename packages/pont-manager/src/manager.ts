@@ -102,7 +102,11 @@ export class PontManager {
     const origins = manager.innerManagerConfig.origins;
 
     if (origins?.length === 1) {
-      let lockFile = path.join(manager.innerManagerConfig.outDir, PontManager.lockFilename);
+      let lockFile = path.join(
+        manager.innerManagerConfig.configDir,
+        manager.innerManagerConfig.outDir,
+        PontManager.lockFilename,
+      );
       const isExists = fs.existsSync(lockFile);
       if (isExists) {
         const localDataStr = await fs.readFile(lockFile, {
@@ -122,7 +126,12 @@ export class PontManager {
       return [new PontSpec()];
     } else {
       const allFilePromises = manager.innerManagerConfig.origins.map(async (config) => {
-        const filePath = path.join(manager.innerManagerConfig.outDir, config.name, PontManager.lockFilename);
+        const filePath = path.join(
+          manager.innerManagerConfig.configDir,
+          manager.innerManagerConfig.outDir,
+          config.name,
+          PontManager.lockFilename,
+        );
         const isExists = fs.existsSync(filePath);
         if (isExists) {
           const localDataStr = await fs.readFile(filePath, {

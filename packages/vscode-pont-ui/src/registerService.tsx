@@ -3,7 +3,6 @@ import { PontUIService } from "pont-ui";
 import * as _ from "lodash";
 import { WebviewApi } from "vscode-webview";
 
-
 declare let acquireVsCodeApi: any;
 
 const vscode: WebviewApi<VscodeState> = acquireVsCodeApi();
@@ -12,31 +11,24 @@ type VscodeState = {
   specs: PontSpec[];
 };
 
-export function requestPostMessage<T>(message: {
-  type: string;
-  value?: any;
-}): Promise<T> {
+export function requestPostMessage<T>(message: { type: string; value?: any }): Promise<T> {
   const requestId = _.uniqueId();
   vscode.postMessage({ ...message, requestId });
 
   return new Promise((resove, reject) => {
     window.addEventListener("message", (event) => {
       const responseMessage = event.data;
-      if (
-        responseMessage?.type === message.type &&
-        responseMessage?.requestId === requestId
-      ) {
-        return resove(responseMessage.value as T);
+      if (responseMessage?.type === message.type && responseMessage?.requestId === requestId) {
+        return resove(responseMessage.data as T);
       }
     });
   });
 }
 
-PontUIService.usePontSpecs = () => {
-  return {
-    loading: false,
-    data: vscode.getState()?.specs || [],
-  };
+PontUIService.requestPontSpecs = () => {
+  return requestPostMessage<PontSpec[]>({
+    type: "requestPontSpecs",
+  });
 };
 
 PontUIService.syncRemoteSpec = (specNames = "") => {

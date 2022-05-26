@@ -1,5 +1,7 @@
 import { PontLogger, PontManager } from "pont-manager";
 import * as vscode from "vscode";
+import * as path from "path";
+import * as fs from "fs";
 
 export function showProgress(
   title: string,
@@ -42,3 +44,26 @@ export class VSCodeLogger extends PontLogger {
     }
   }
 }
+
+export const getHTMLForVSCode = (urlJoin: Function, cspSource) => {
+  const scriptUri = urlJoin("assets/index.js");
+  const styleResetUri = urlJoin("assets/index.css");
+  const html = fs.readFileSync(path.join(__dirname, "../media/index.html"), "utf8");
+
+  const htmlResult = html
+    .replace("/assets/index.js", scriptUri)
+    .replace("/assets/index.css", styleResetUri)
+    .replace(
+      /\$\{cspSource\}/g,
+      `<meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; img-src ${cspSource} https:; script-src ${cspSource}; style-src ${cspSource};"
+  />`,
+    );
+
+  return htmlResult;
+};
+
+export const getRootUri = () => {
+  return path.join(__dirname, "../media/assets");
+};
