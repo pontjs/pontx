@@ -5,6 +5,25 @@ import * as fs from "fs-extra";
 import { PontLogger, PontLoggerSpec } from "./logger";
 import { lookForFiles } from "./scan";
 import immutableSet from "lodash/fp/set";
+import * as _ from "lodash";
+import { mapifyGet, mapifyImmutableOperate } from "./utils";
+
+const enhancedImmutableUpdate = (path: any[], updator, value) => {
+  if (!path?.length) {
+    return updator(value);
+  }
+
+  const [currentPath, ...restPaths] = path;
+  if (typeof currentPath === "function") {
+    const truePath = currentPath(value);
+
+    return enhancedImmutableUpdate(restPaths, updator, _.get(value, truePath));
+  }
+};
+
+const getSpecByName = (specs: PontSpec[], specName: string) => {
+  return specs?.find((spec) => spec.name === specName) || specs?.[0];
+};
 
 export class PontManager {
   innerManagerConfig = new PontInnerManagerConfig();
@@ -234,8 +253,55 @@ export class PontManager {
 
   // 展示方法
   static showDiffs(manager: PontManager) {}
-  static syncMod(manager: PontManager) {}
-  static syncBaseClass(manager: PontManager) {}
+
+  static syncMod(manager: PontManager, modName: string, specName = "") {
+    const remoteSpec = getSpecByName(manager.remotePontSpecs, specName);
+    const remoteMod = mapifyGet(remoteSpec, ["mods", modName]);
+
+    if (remoteMod) {
+      return mapifyImmutableOperate(manager, "assign", ["localPontSpecs", specName, "mods", modName], remoteMod);
+    } else {
+      return mapifyImmutableOperate(manager, "delete", ["localPontSpecs", specName, "mods", modName]);
+    }
+  }
+  static syncBaseClass(manager: PontManager, baseClassName: string, specName = "") {
+    const remoteSpec = getSpecByName(manager.remotePontSpecs, specName);
+    const remoteClass = mapifyGet(remoteSpec, ["baseClasses", baseClassName]);
+
+    if (remoteClass) {
+      return mapifyImmutableOperate(
+        manager,
+        "assign",
+        ["localPontSpecs", specName, "baseClasses", baseClassName],
+        remoteClass,
+      );
+    } else {
+      return mapifyImmutableOperate(manager, "delete", ["localPontSpecs", specName, "baseClasses", baseClassName]);
+    }
+  }
+
+  static syncInterface(manager: PontManager, apiName: string, modName: string, specName = "") {
+    const remoteSpec = getSpecByName(manager.remotePontSpecs, specName);
+    const remoteApi = mapifyGet(remoteSpec, ["mods", modName, "interfaces", apiName]);
+
+    if (remoteApi) {
+      return mapifyImmutableOperate(
+        manager,
+        "assign",
+        ["localPontSpecs", specName, "mods", modName, "interfaces", apiName],
+        remoteApi,
+      );
+    } else {
+      return mapifyImmutableOperate(manager, "delete", [
+        "localPontSpecs",
+        specName,
+        "mods",
+        modName,
+        "interfaces",
+        apiName,
+      ]);
+    }
+  }
 
   /** 流程方法：同步远程元数据 */
   static syncAll(manager: PontManager): PontManager {
@@ -271,7 +337,7 @@ export class PontManager {
   static getCurrentSpec(manager: PontManager): PontSpec {
     if (manager.localPontSpecs?.length) {
       if (manager?.currentOriginName) {
-        const foundSpec = manager.localPontSpecs.find((spec) => spec.name === manager.currentOriginName);
+        const foundSpec = getSpecByName(manager.localPontSpecs, manager.currentOriginName);
 
         if (foundSpec) {
           return foundSpec;
