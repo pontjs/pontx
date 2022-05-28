@@ -22,7 +22,7 @@
     "isolatedModules": true,
     "jsx": "react"
   },
-  "include": ["src", "./src/mocks/spec.json"],
+  "include": ["src", "./src/mocks/*.json"],
   "exclude": ["node_modules"],
   "references": [
     { "path": "./tsconfig.node.json" },

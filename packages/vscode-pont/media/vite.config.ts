@@ -1,6 +1,5 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import htmlTemplate from "vite-plugin-html-template";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -17,6 +16,7 @@ export default defineConfig({
     //   data: { cspSource: "" },
     // }),
   ],
+  root: "",
   build: {
     rollupOptions: {
       output: {

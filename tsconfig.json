@@ -12,7 +12,6 @@
       "oas-spec-ts": ["packages/oas-spec-ts"],
       "pont-cli": ["packages/pont-cli"],
       "pont-ui": ["packages/pont-ui"],
-      "vscode-pont-ui": ["packages/vscode-pont-ui"],
       "vscode-pont2": ["packages/vscode-pont"],
       "pont-meta-fetch-plugin": ["plugins/fetch/pont-meta-fetch-plugin"],
       "pont-generate-core": ["plugins/generate/core"],
@@ -49,9 +48,6 @@
     },
     {
       "path": "packages/vscode-pont"
-    },
-    {
-      "path": "packages/vscode-pont-ui"
     },
     {
       "path": "plugins/fetch/pont-meta-fetch-plugin"

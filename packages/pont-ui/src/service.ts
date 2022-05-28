@@ -1,11 +1,16 @@
 import { PontSpec } from "pont-spec";
+import testSpec from "./mocks/spec.json";
+import remoteSpec from "./mocks/remoteSpec.json";
 // import { PontSpecDiff } from "pont-spec-diff";
 
 /** 不同使用场景，各自注册服务来源 */
 export const PontUIService = {
   /** 获取本地元数据列表 */
   requestPontSpecs: async () => {
-    return [] as PontSpec[];
+    return {
+      localSpecs: [testSpec] as PontSpec[],
+      remoteSpecs: [remoteSpec] as PontSpec[],
+    };
   },
 
   /** 获取 本地/远程 的diff信息 */
