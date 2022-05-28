@@ -69,7 +69,10 @@
     "watch": "tsc --build --watch",
     "clean": "rimraf oub && rimraf tsconfig.tsbuildinfo",
     "build": "npm run clean && tsc --build",
-    "test": "npm run build && node ../../node_modules/vscode/bin/test"
+    "test": "npm run build && node ../../node_modules/vscode/bin/test",
+    "media": "cd media && vite --mode browser",
+    "build:media": "cd media && vite build",
+    "preview": "cd media && vite build --watch"
   },
   "dependencies": {
     "fs-extra": "^7.0.1",
@@ -85,9 +88,18 @@
   },
   "devDependencies": {
     "@types/fs-extra": "^5.1.0",
+    "@types/lodash": "^4.14.182",
+    "@types/react": "^18.0.8",
+    "@types/react-dom": "^18.0.3",
     "@types/vscode": "^1.47.0",
     "@types/vscode-webview": "^1.57.0",
+    "@vitejs/plugin-react": "^1.3.2",
+    "@vscode/codicons": "^0.0.30",
+    "pont-ui": "*",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
     "typescript": "^4.6.4",
+    "vite": "^2.9.7",
     "vsce": "^2.7.0"
   }
 }

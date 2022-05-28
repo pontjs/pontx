@@ -1,0 +1,10 @@
+{
+  "private": "true",
+  "name": "vscode-pont-media",
+  "module": "esnext",
+  "scripts": {
+    "start": "vite --mode browser",
+    "build": "vite build --config ./vite.config.ts",
+    "preview": "vite build --watch"
+  }
+}

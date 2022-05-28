@@ -11,16 +11,16 @@
     "rootDir": "./src",
     "composite": true
   },
-  "exclude": ["node_modules", ".vscode-test", "out"],
+  "exclude": ["node_modules", ".vscode-test", "out", "media"],
   "references": [
     {
       "path": "../pont-manager"
     },
     {
-      "path": "../vscode-pont-ui"
+      "path": "../pont-spec-diff"
     },
     {
-      "path": "../pont-spec-diff"
+      "path": "./media/tsconfig.node.json"
     }
   ]
 }

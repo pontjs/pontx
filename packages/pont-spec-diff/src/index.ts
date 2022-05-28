@@ -1,5 +1,6 @@
 import { PontSpec } from "pont-spec";
-import { diffList, diffMap, DiffSchemaType, getDiffMethod } from "./diff";
+import { diffList, diffMap, DiffSchemaType, getDiffMethod, Diffs } from "./diff";
+import { diffPontSpec } from "./newDiff";
 
 export function diffSpecs(currentSpecs: PontSpec[], newSpecs: PontSpec[]) {
   // if (currentSpecs?.length < 2 && newSpecs.length < 2) {
@@ -41,3 +42,5 @@ export function diffSpec(currentSpec: PontSpec, newSpec: PontSpec) {
     preSchema: currentSpec,
   });
 }
+
+export { DiffSchemaType, Diffs, diffPontSpec };

@@ -1,15 +1,63 @@
+@import url(../style/themes.less);
 @main-width: 1420px;
 
 .pont-ui-nav {
-  height: 60px;
+  height: 54px;
   display: flex;
   align-items: center;
   background-color: white;
   border-bottom: 1px solid #e7e7e7;
 
+  .top-menu {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    height: 54px;
+    padding: 0;
+  }
+
+  .next-menu .next-menu-content {
+    height: 54px;
+    margin-left: 30px;
+    display: inline-flex;
+    align-items: center;
+
+    .next-menu-item {
+      height: 54px;
+      line-height: 54px;
+
+      &.selected {
+        background-color: #ebebeb;
+      }
+    }
+  }
+
+  .menu-header {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+  }
+
   .title {
     margin-left: 30px;
     font-size: 24px;
-    color: #ff6a00;
+    display: inline-block;
+    color: @primary-color;
+  }
+
+  .ops {
+    display: inline-block;
+    .op {
+      color: @primary-color;
+      cursor: pointer;
+
+      &:hover {
+        color: lighten(@primary-color, 10%);
+      }
+      &:focus,
+      &:active {
+        color: lighten(@primary-color, 20%);
+      }
+    }
   }
 }
