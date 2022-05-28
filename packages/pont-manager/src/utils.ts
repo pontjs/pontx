@@ -1,22 +1,8 @@
 import immutableSet from "lodash/fp/set";
 
-export function getDuplicateById<T>(arr: T[], idKey = "name"): null | T {
-  if (!arr || !arr.length) {
-    return null;
-  }
-
-  let result;
-
-  arr.forEach((item, itemIndex) => {
-    if (arr.slice(0, itemIndex).find((o) => o[idKey] === item[idKey])) {
-      result = item;
-      return;
-    }
-  });
-
-  return result;
-}
-
+/**
+ * 像 map 一样操作数组
+ */
 export function mapifyOperateList<T extends { name: string }>(
   operate: "assign" | "delete",
   name: string,
@@ -41,7 +27,6 @@ export function mapifyOperateList<T extends { name: string }>(
 }
 
 /**
- * 像 map 一样操作数组
  * @param pathes ['mods', 'modA', 'name']
  * @param newValue newModAName
  * @param obj spec
@@ -51,7 +36,7 @@ export function mapifyImmutableOperate(
   result: any,
   operate: "delete" | "assign",
   pathes: Array<string | number>,
-  newValue: any,
+  newValue?: any,
 ) {
   if (!pathes?.length) {
     return newValue;
@@ -79,4 +64,24 @@ export function mapifyImmutableOperate(
   const pathNewValue = mapifyImmutableOperate(result[currentPath], operate, restPathes, newValue);
 
   return immutableSet(currentPath, pathNewValue, result);
+}
+
+/**
+ * 像 map 一样操作数组
+ * @param pathes ['mods', 'modA', 'name']
+ * @param newValue newModAName
+ * @param obj spec
+ * @returns
+ */
+export function mapifyGet(result: any, pathes: Array<string | number>) {
+  if (!pathes?.length) {
+    return result;
+  }
+
+  let [currentPath, ...restPathes] = pathes;
+
+  if (Array.isArray(result) && typeof currentPath === "string") {
+    currentPath = result.findIndex((item) => item?.name === currentPath);
+  }
+  return mapifyGet(result[currentPath], restPathes);
 }

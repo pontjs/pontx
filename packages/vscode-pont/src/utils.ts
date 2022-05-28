@@ -45,25 +45,26 @@ export class VSCodeLogger extends PontLogger {
   }
 }
 
-export const getHTMLForVSCode = (urlJoin: Function, cspSource) => {
-  const scriptUri = urlJoin("assets/index.js");
-  const styleResetUri = urlJoin("assets/index.css");
-  const html = fs.readFileSync(path.join(__dirname, "../media/index.html"), "utf8");
-
-  const htmlResult = html
-    .replace("/assets/index.js", scriptUri)
-    .replace("/assets/index.css", styleResetUri)
-    .replace(
-      /\$\{cspSource\}/g,
-      `<meta
-    http-equiv="Content-Security-Policy"
-    content="default-src 'none'; img-src ${cspSource} https:; script-src ${cspSource}; style-src ${cspSource};"
-  />`,
-    );
-
-  return htmlResult;
-};
-
-export const getRootUri = () => {
-  return path.join(__dirname, "../media/assets");
+export const htmlTemplate = (context: { cspSource: string; getUri: (uri: string) => any }) => {
+  return `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pont UI</title>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; img-src ${context.cspSource} https:;font-src ${context.cspSource}; script-src ${
+    context.cspSource
+  }; style-src ${context.cspSource};"
+    />
+    <link href="${context.getUri("media/src/icon.css")}" rel="stylesheet" />
+    <script type="module" crossorigin src="${context.getUri("media/dist/assets/index.js")}"></script>
+    <link rel="stylesheet" href="${context.getUri("media/dist/assets/index.css")}">
+    <link href="${context.getUri("node_modules/@vscode/codicons/dist/codicon.css")}" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>`;
 };

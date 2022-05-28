@@ -24,6 +24,23 @@ export class PontService {
   async requestPontSpecs(): Promise<PontSpec[]> {
     return this.pontManager.localPontSpecs;
   }
+
+  async syncRemoteSpec(specNames = "") {
+    const manager = await PontManager.fetchRemotePontMeta(this.pontManager);
+    this.updatePontManger(manager);
+  }
+
+  async requestGenerateSdk() {
+    await PontManager.generateCode(this.pontManager);
+  }
+
+  updateAPI = ({ modName, apiName, specName }) => {
+    this.updatePontManger(PontManager.syncInterface(this.pontManager, apiName, modName, specName));
+  };
+
+  updateBaseClass = ({ baseClassName, specName = "" }) => {
+    this.updatePontManger(PontManager.syncBaseClass(this.pontManager, baseClassName, specName));
+  };
 }
 
 export const pontService = new PontService();

@@ -1,21 +1,19 @@
 /**
- * @author jasonHzq
- * @description LeftMenu
- *
- * 菜单组件： https://fusion.design/pc/component/menu?themeid=2
+ * @author 奇阳
+ * @description diff 管理
  */
+import { Input, Menu } from "@alicloud/console-components";
+import * as _ from "lodash";
 import * as React from "react";
-import "./LeftMenu.less";
+import { LayoutContext } from "../../layout/context";
 import * as PontSpec from "pont-spec";
-import { Select, Input, Menu, Message, Balloon } from "@alicloud/console-components";
-import _ from "lodash";
-import { LayoutContext } from "./context";
+import { diffPontSpec } from "pont-spec-diff";
 
-export class LeftMenuProps {}
+export class DiffManagerProps {}
 
-export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
-  const { selectedMeta, currSpec, changeCurrSpec, changeSelectedMeta, specs } = LayoutContext.useContainer();
-
+export const DiffManager: React.FC<DiffManagerProps> = (props) => {
+  const { selectedMeta, currSpec, changeCurrSpec, changeSelectedMeta, remoteSpecs } = LayoutContext.useContainer();
+  const diffs = diffPontSpec(currSpec, remoteSpecs?.find((spec) => spec.name === currSpec?.name) || remoteSpecs[0]);
   const [inputValue, changeInputValue] = React.useState("");
   const [searchValue, _changeSearchValue] = React.useState("");
   const changeSearchValue = React.useCallback((val: any) => {
@@ -36,10 +34,9 @@ export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
     </div>
   );
 
-  // 简单、复杂模式切换、搜索、折叠
   const menus = (
     <Menu selectedKeys={[selectedMeta?.name]} mode="inline">
-      {(currSpec?.mods || []).map((mod) => {
+      {(diffs?.mods || []).map((mod) => {
         return (
           <Menu.SubMenu
             key={mod.name}
@@ -105,13 +102,7 @@ export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
       ) : null}
     </Menu>
   );
-  return (
-    <div className="pont-ui-left-menu">
-      {searchArea}
-      {menus}
-      {!currSpec?.mods?.length && !currSpec?.baseClasses?.length ? <Message type="notice"></Message> : null}
-    </div>
-  );
+  return <div></div>;
 };
 
-LeftMenu.defaultProps = new LeftMenuProps();
+DiffManager.defaultProps = new DiffManagerProps();
