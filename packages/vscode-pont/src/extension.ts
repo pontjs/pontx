@@ -7,7 +7,7 @@ import * as path from "path";
 import { pontService } from "./Service";
 import { VSCodeLogger } from "./utils";
 import { PontCommands } from "./commands";
-import { PontVSCodeUI } from "./UI";
+import { pontUI } from "./UI";
 import { PontWebView } from "./webview";
 
 class VSCodePontManager {
@@ -25,7 +25,6 @@ class VSCodePontManager {
       PontCommands.registerCommands(context);
       this.hasCommandsRegistered = true;
     }
-    new PontVSCodeUI().create();
 
     const config = manager.innerManagerConfig;
     const lockWatcher = vscode.workspace.createFileSystemWatcher(
@@ -47,6 +46,7 @@ export async function activate(context: vscode.ExtensionContext) {
   console.log('Congratulations, your extension "pont" is now active!');
   const pontManager = await PontManager.constructorFromRootDir(vscode.workspace.rootPath, new VSCodeLogger());
   if (pontManager) {
+    pontUI.create();
     vscodePontManager.start(pontManager, context);
   }
 

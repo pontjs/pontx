@@ -26,8 +26,15 @@ if (import.meta.env.PROD) {
   };
 
   PontUIService.requestPontSpecs = () => {
-    return requestPostMessage<PontSpec[]>({
+    return requestPostMessage<{ localSpecs: PontSpec[]; remoteSpecs: PontSpec[]; currentOriginName: string }>({
       type: "requestPontSpecs",
+    });
+  };
+
+  PontUIService.updateLocalSpec = (pontSpec: PontSpec) => {
+    return requestPostMessage<void>({
+      type: "updateLocalSpec",
+      value: pontSpec,
     });
   };
 

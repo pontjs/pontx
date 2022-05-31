@@ -12,7 +12,8 @@
   },
   "files": [],
   "dependencies": {
-    "node-fetch": "^2.6.7"
+    "node-fetch": "^2.6.7",
+    "translation.js": "^0.7.15"
   },
   "peerDependencies": {
     "pont-manager": "^0.0.1"

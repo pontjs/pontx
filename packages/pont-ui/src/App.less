@@ -1,4 +1,5 @@
 @import url(./utils.less);
+@import url(./style/themes.less);
 
 @font-face {
   font-family: NextIcon;
@@ -7,8 +8,10 @@
 }
 
 .pont-ui {
+  height: 100vh;
+
   .main-content {
-    height: calc(100vh - 60px);
+    height: calc(100vh - @nav-height);
     display: flex;
     align-items: center;
   }
@@ -49,6 +52,12 @@
       background: rgba(115, 134, 148, 0.3);
       box-shadow: none;
     }
+  }
+
+  .pont-ui-page {
+    flex-grow: 1;
+    height: 100%;
+    padding: 20px;
   }
 
   .next-icon {

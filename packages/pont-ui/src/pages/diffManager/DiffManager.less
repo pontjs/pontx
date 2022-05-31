@@ -1,0 +1,154 @@
+@menu-width: 450px;
+
+.pont-ui-diff-menu {
+  width: @menu-width;
+  min-width: @menu-width;
+
+  .search-area {
+    .next-input {
+      width: @menu-width - 24px - 12px;
+    }
+  }
+
+  .next-menu.next-ver {
+    padding-top: 0;
+    width: @menu-width - 1px;
+
+    .desc {
+      margin-top: 3px;
+      opacity: 0.8;
+    }
+
+    .mod-name {
+      max-width: @menu-width - 70px;
+      width: @menu-width - 70px;
+
+      margin-top: 0;
+      .desc {
+        color: inherit;
+      }
+      .name {
+        color: inherit;
+      }
+    }
+
+    .api-name {
+      width: @menu-width - 70px - 25px;
+      max-width: @menu-width - 70px - 25px;
+      margin-top: 0;
+      .name {
+        color: inherit;
+      }
+
+      .desc {
+        color: inherit;
+      }
+    }
+  }
+
+  .top-area {
+    padding: 13px 13px 0px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .codicon {
+      margin-left: 4px;
+      cursor: pointer;
+      color: #424242;
+      padding: 3px;
+      border-radius: 3px;
+
+      &:hover {
+        background-color: #e1e1e1;
+      }
+    }
+  }
+
+  .next-menu-divider {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 6px;
+    .right-icons {
+      .codicon {
+        margin-left: 4px;
+        cursor: pointer;
+        color: #424242;
+        padding: 3px;
+        border-radius: 3px;
+
+        &:hover {
+          background-color: #e1e1e1;
+        }
+      }
+    }
+  }
+
+  .next-menu .diff-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-around;
+
+    width: 100%;
+    height: 40px;
+    cursor: pointer;
+
+    .delete {
+      color: #b01011;
+    }
+    .update {
+      color: #895503;
+    }
+    .create {
+      color: #007100;
+    }
+    .equal {
+      color: #616161;
+      font-size: 14px;
+      margin-left: 7px;
+      margin-right: 1px;
+    }
+
+    .item-label {
+      flex-grow: 1;
+    }
+
+    .item-label,
+    .diff-label {
+      display: inline-block;
+    }
+
+    .diff-label {
+      display: inline-flex;
+      align-items: center;
+
+      .codicon {
+        visibility: hidden;
+        margin-left: 4px;
+        cursor: pointer;
+        color: #424242;
+        padding: 3px;
+        border-radius: 3px;
+
+        &:hover {
+          background-color: #e1e1e1;
+        }
+      }
+      .next-icon::before {
+        font-size: 16px;
+      }
+      .diff-type {
+        margin-left: 8px;
+        font-weight: bold;
+      }
+    }
+
+    &:hover {
+      .diff-label .codicon {
+        visibility: visible;
+        cursor: pointer;
+      }
+    }
+  }
+}
