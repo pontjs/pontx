@@ -9,7 +9,7 @@ import "./LeftMenu.less";
 import * as PontSpec from "pont-spec";
 import { Select, Input, Menu, Message, Balloon } from "@alicloud/console-components";
 import _ from "lodash";
-import { LayoutContext } from "./context";
+import { LayoutContext } from "../../layout/context";
 
 export class LeftMenuProps {}
 
@@ -45,11 +45,11 @@ export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
             key={mod.name}
             label={
               <div className="mod-name">
-                <div className="desc" title={mod.description}>
-                  {mod.description}
-                </div>
                 <div className="name" title={mod.name}>
                   {mod.name}
+                </div>
+                <div className="desc" title={mod.description}>
+                  {mod.description}
                 </div>
               </div>
             }
@@ -108,8 +108,7 @@ export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
   return (
     <div className="pont-ui-left-menu">
       {searchArea}
-      {menus}
-      {!currSpec?.mods?.length && !currSpec?.baseClasses?.length ? <Message type="notice"></Message> : null}
+      {!currSpec?.mods?.length && !currSpec?.baseClasses?.length ? <Message type="notice"></Message> : menus}
     </div>
   );
 };

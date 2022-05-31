@@ -5,6 +5,7 @@
     "jsx": "react",
     "sourceMap": true,
     "strict": false,
+    "module": "esnext",
     "noImplicitAny": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,

@@ -1,3 +1,4 @@
+import * as PontSpec from "pont-spec";
 export {
   InnerOriginConfig,
   PluginConfig,
@@ -6,6 +7,8 @@ export {
   PontInnerManagerConfig,
   PontMocksPlugin,
   PontParserPlugin,
+  PontTransformPlugin,
+  Snippet,
   PontPlugin,
   PontPlugins,
   PontPublicManagerConfig,
@@ -13,4 +16,4 @@ export {
 } from "./config";
 export { PontManager } from "./manager";
 export * from "./logger";
-export * from "./diff";
+export { PontSpec };

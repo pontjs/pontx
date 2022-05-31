@@ -1,11 +1,11 @@
 {
   "extends": "../../tsconfig.build.json",
   "compilerOptions": {
-    "module": "CommonJS",
+    "module": "ESNext",
     "target": "es6",
     "removeComments": true,
     "preserveConstEnums": true,
-    "outDir": "lib",
+    "outDir": "es6",
     "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {},

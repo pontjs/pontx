@@ -26,7 +26,7 @@ export const Nav: React.FC<NavProps> = (props) => {
           <div className="menu-header">
             <div className="title">Pont UI</div>
 
-            {specs.length > 1 ? (
+            {specs?.length > 1 ? (
               <Select
                 value={currSpec.name}
                 onChange={(value) => {
@@ -62,14 +62,14 @@ export const Nav: React.FC<NavProps> = (props) => {
           key={PageType.Diff}
           onClick={() => changePage(PageType.Diff)}
         >
-          Diff管理
+          <i className="codicon codicon-diff"></i>Diff管理
         </Menu.Item>
         <Menu.Item
           className={page === PageType.Doc ? "selected" : ""}
           key={PageType.Doc}
           onClick={() => changePage(PageType.Doc)}
         >
-          API 文档
+          <i className="codicon codicon-book"></i>API 文档
         </Menu.Item>
       </Menu>
     </div>
