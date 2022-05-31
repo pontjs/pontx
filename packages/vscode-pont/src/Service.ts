@@ -1,9 +1,9 @@
 import { PontManager } from "pont-manager";
 import * as vscode from "vscode";
 import * as path from "path";
-import { PontCommands } from "./commands";
-import { PontVSCodeUI } from "./UI";
+import { pontUI } from "./UI";
 import { PontSpec } from "pont-spec";
+import { diffPontSpec } from "pont-spec-diff";
 
 export class PontService {
   pontManager: PontManager;
@@ -12,6 +12,7 @@ export class PontService {
 
   updatePontManger(pontManager: PontManager) {
     this.pontManager = pontManager;
+    pontUI.update(this.pontManager);
   }
 
   /** 执行 webview 事件 */
@@ -21,13 +22,30 @@ export class PontService {
     return { requestId: message.requestId, type: message.type, data: result };
   }
 
-  async requestPontSpecs(): Promise<PontSpec[]> {
-    return this.pontManager.localPontSpecs;
+  async requestPontSpecs(): Promise<{ localSpecs: PontSpec[]; remoteSpecs: PontSpec[]; currentOriginName: string }> {
+    return {
+      localSpecs: this.pontManager.localPontSpecs,
+      remoteSpecs: this.pontManager.remotePontSpecs,
+      currentOriginName: this.pontManager.currentOriginName,
+    };
   }
 
   async syncRemoteSpec(specNames = "") {
     const manager = await PontManager.fetchRemotePontMeta(this.pontManager);
     this.updatePontManger(manager);
+  }
+
+  async updateLocalSpec(pontSpec: PontSpec) {
+    const localPontSpecs = [...this.pontManager.localPontSpecs];
+    const specIndex = this.pontManager.localPontSpecs.findIndex((spec) => spec.name == pontSpec.name) || 0;
+    localPontSpecs[specIndex] = pontSpec;
+    const newPontManager = {
+      ...this.pontManager,
+      localPontSpecs,
+    };
+    this.updatePontManger(newPontManager);
+    PontManager.generateCode(this.pontManager);
+    return;
   }
 
   async requestGenerateSdk() {

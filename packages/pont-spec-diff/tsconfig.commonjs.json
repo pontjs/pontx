@@ -1,11 +1,11 @@
 {
   "extends": "../../tsconfig.build.json",
   "compilerOptions": {
-    "module": "ESNEXT",
+    "module": "CommonJS",
     "target": "es6",
     "removeComments": true,
     "preserveConstEnums": true,
-    "outDir": "es6",
+    "outDir": "lib",
     "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {},
@@ -14,5 +14,5 @@
   },
   "include": ["./src/**/*"],
   "exclude": ["node_modules", "build"],
-  "references": [{ "path": "../pont-spec" }, { "path": "./tsconfig.commonjs.json" }]
+  "references": [{ "path": "../pont-spec" }]
 }

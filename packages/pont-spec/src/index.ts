@@ -1,10 +1,10 @@
 import { OAS2 } from "oas-spec-ts";
 import { PontJsonSchema } from "./dataType";
 import { Parameter } from "./parameter";
-import { getDuplicateById } from "./utils";
+import { getDuplicateById, mapifyImmutableOperate, mapifyOperateList, mapifyGet } from "./utils";
 import * as _ from "lodash";
 
-export { PontJsonSchema, Parameter };
+export { PontJsonSchema, Parameter, mapifyImmutableOperate, mapifyOperateList, mapifyGet };
 
 type ResponseObject = {
   schema: PontJsonSchema;
@@ -110,5 +110,28 @@ export class PontSpec {
     }
 
     return true;
+  }
+
+  static findBaseClazz(spec: PontSpec, clazzName: string) {
+    for (let index = 0; index < spec.baseClasses?.length; index++) {
+      const clazz = spec.baseClasses?.[index];
+      if (clazz.name === clazzName) {
+        return clazz;
+      }
+    }
+  }
+
+  static findApi(spec: PontSpec, apiName: string) {
+    for (let index = 0; index < spec.mods?.length; index++) {
+      let mod = spec.mods?.[index];
+      const foundApi = (mod?.interfaces || []).find((inter) => {
+        if (inter.name === apiName) {
+          return inter;
+        }
+      });
+      if (foundApi) {
+        return foundApi;
+      }
+    }
   }
 }

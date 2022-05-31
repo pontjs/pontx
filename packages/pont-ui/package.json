@@ -6,7 +6,7 @@
   "scripts": {
     "start": "vite",
     "watch": "tsc -w",
-    "copy-files": "copyfiles -u 1 src/**/*.less src/**/*.css src/*.less src/*.css lib && cp -r src/style/ lib/style/",
+    "copy-files": "cd src && copyfiles -V \"./**/*.less\" ../lib && copyfiles -V \"./**/*.css\" ../lib && cd .. && cp -r src/style/ lib/style/",
     "build": "tsc --build && npm run copy-files",
     "preview": "vite preview"
   },
@@ -22,12 +22,13 @@
   },
   "dependencies": {
     "@alicloud/console-components": "^1.5.7",
+    "@vscode/codicons": "^0.0.30",
     "bootstrap": "^5.1.3",
     "classnames": "^2.3.1",
     "pont-spec": "*",
-    "pont-spec-diff": "*",
     "react-input-autosize": "^3.0.0",
     "react-window": "^1.8.7",
+    "pont-spec-diff": "*",
     "unstated-next": "^1.1.0"
   },
   "devDependencies": {

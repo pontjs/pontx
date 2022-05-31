@@ -3,13 +3,13 @@
  * @description
  */
 import * as React from "react";
-import { LeftMenu } from "./layout/LeftMenu";
 import "bootstrap/dist/css/bootstrap.css";
+import "@vscode/codicons/dist/codicon.css";
 import "@alicloud/console-components/dist/wind-without-icon-font.css";
 import { Nav } from "./layout/Nav";
-import { Page } from "./layout/Page";
-import { LayoutContext } from "./layout/context";
+import { LayoutContext, PageType } from "./layout/context";
 import "./App.less";
+import { Page } from "./layout/Page";
 
 export class AppProps {}
 
@@ -18,10 +18,7 @@ export const App: React.FC<AppProps> = (props) => {
     <LayoutContext.Provider>
       <div className="pont-ui">
         <Nav />
-        <div className="main-content">
-          <LeftMenu></LeftMenu>
-          <Page></Page>
-        </div>
+        <Page />
       </div>
     </LayoutContext.Provider>
   );

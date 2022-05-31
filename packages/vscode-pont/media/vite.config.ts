@@ -18,9 +18,9 @@ export default defineConfig({
   ],
   root: "",
   build: {
+    // minify: false,
     rollupOptions: {
       output: {
-        sourcemap: true,
         entryFileNames: `assets/[name].js`,
         chunkFileNames: `assets/[name].js`,
         assetFileNames: `assets/[name].[ext]`,

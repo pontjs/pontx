@@ -25,6 +25,7 @@
     "packages/pont-ui/node_modules/",
     "packages/oas-spec-ts/scripts/",
     "packages/pont-ui",
+    "packages/vscode-pont/media/",
     "packages/jsonschema-form"
   ],
   "references": [

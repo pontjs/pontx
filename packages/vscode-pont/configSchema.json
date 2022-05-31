@@ -4,88 +4,127 @@
   "type": "object",
   "definitions": {
     "originUrl": {
-      "description": "the API documents data request URL",
+      "description": "api spec remote url",
       "type": "string"
+    },
+    "originEnv": {
+      "description": "指定不同环境的配置信息，方便切换配置",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/originUrl"
+        },
+        {
+          "url": {
+            "$ref": "#/definitions/originUrl"
+          }
+        }
+      ]
+    },
+    "originConfig": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "有多个元数据来源时，指定每个数据元名称"
+        },
+        "url": {
+          "$ref": "#/definitions/originUrl"
+        },
+        "env": {
+          "type": "string",
+          "description": "指定使用 envs 当中，哪个环境配置"
+        },
+        "envs": {
+          "description": "配置不同环境的配置信息，方便高频切换配置",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/originEnv"
+          }
+        }
+      }
+    },
+    "simplePluginConfig": {
+      "type": "object",
+      "properties": {
+        "use": {
+          "type": "string",
+          "description": "指定使用的插件,您可以使用npm包名称，或者本地 js 插件代码的相对路径"
+        },
+        "options": {
+          "type": "object",
+          "description": "插件配置项"
+        }
+      }
+    },
+    "purePluginConfig": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/simplePluginConfig"
+        },
+        {
+          "type": "string",
+          "description": "指定使用的插件,您可以使用npm包名称，或者本地 js 插件代码的相对路径。"
+        }
+      ]
+    },
+    "pluginConfig": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/purePluginConfig"
+        },
+        {
+          "type": "object",
+          "description": "您可以对不同数据元来源，配置使用不同的插件",
+          "additionalProperties": {
+            "$ref": "#/definitions/purePluginConfig"
+          }
+        }
+      ]
     }
   },
   "properties": {
-    "originType": {
-      "description": "数据源类型",
-      "type": "string",
-      "default": "SwaggerV2",
-      "enum": ["SwaggerV2", "SwaggerV3"]
-    },
-    "templatePath": {
-      "description": "the code generator template, a ts file",
-      "type": "string",
-      "default": "./template"
-    },
     "outDir": {
       "description": "the directory code generated to, a relative path to the config file",
       "type": "string",
       "default": "./services"
     },
-    "originUrl": {
+    "url": {
       "$ref": "#/definitions/originUrl"
     },
-    "prettierConfig": {
+    "origin": {
+      "$ref": "#/definitions/originConfig"
+    },
+    "plugins": {
       "type": "object",
-      "properties": {}
-    },
-    "usingMultipleOrigins": {
-      "type": "boolean",
-      "description": "是否开启多数据源模式"
-    },
-    "surrounding": {
-      "type": "string",
-      "description": "pont生成代码的运行环境（无需更改）",
-      "enum": ["typeScript", "javaScript"]
-    },
-    "mocks": {
-      "type": "object",
-      "description": "自动化mock服务，mocks 数据可以在 .mocks/mocks.ts 下自定义编辑。",
+      "description": "进行插件开发请参考 https://github.com/pont2/pont/tree/main/packages/pont-manager/PluginContribution.md",
       "properties": {
-        "enable": {
-          "type": "boolean",
-          "default": true,
-          "description": "是否开启"
+        "fetch": {
+          "$ref": "#/definitions/pluginConfig",
+          "description": "请求元数据的插件"
         },
-        "port": {
-          "type": "number",
-          "default": 8080,
-          "description": "mock服务端口号"
+        "parser": {
+          "$ref": "#/definitions/pluginConfig",
+          "description": "元数据解析转换的插件，将您的元数据转换为 Pont 规范的元数据，官方内置 oas2/oas3 插件"
         },
-        "wrapper": {
-          "type": "string",
-          "description": "是否把接口返回的数据包在固定格式下, {response} 表示返回数据结构",
-          "default": "{\"code\": 0, \"data\": {response}, \"message\": \"\"}"
+        "generate": {
+          "$ref": "#/definitions/pluginConfig",
+          "description": "定制生成代码的插件"
         },
-        "basePath": {
-          "type": "string",
-          "default": "",
-          "description": "接口基础路径"
+        "transform": {
+          "$ref": "#/definitions/pluginConfig",
+          "description": "元数据处理插件，您可以在元数据使用前，进行事先过滤和处理"
+        },
+        "mocks": {
+          "$ref": "#/definitions/pluginConfig",
+          "description": "接口 mocks 插件。"
         }
       }
     },
-    "templateType": {
-      "type": "string",
-      "description": "可选的内置模板",
-      "enum": ["fetch", "hooks"]
-    },
     "origins": {
       "type": "array",
-      "description": "数据源列表",
+      "description": "元数据列表",
       "items": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "数据源名"
-          },
-          "originUrl": {
-            "$ref": "#/definitions/originUrl"
-          }
-        }
+        "$ref": "#/definitions/originConfig"
       }
     }
   }

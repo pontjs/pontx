@@ -1,3 +1,5 @@
+@import url(../../style/themes.less);
+
 .pont-ui-api {
   .header {
     background-color: #d6e0e5;
@@ -35,6 +37,30 @@
       float: right;
       color: black;
       font-weight: bold;
+    }
+  }
+
+  .diff-text {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 12px;
+  }
+
+  &.delete {
+    .diff-text {
+      color: @delete-color;
+    }
+  }
+
+  &.create {
+    .diff-text {
+      color: @create-color;
+    }
+  }
+
+  &.update {
+    .diff-text {
+      color: @update-color;
     }
   }
 

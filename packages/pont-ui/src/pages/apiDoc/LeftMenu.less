@@ -1,14 +1,16 @@
+@import url(../../style/themes.less);
 @menu-width: 350px;
+@left-menu-bgcolor: #f3f3f3;
 
 .pont-ui-left-menu {
   width: @menu-width;
+  min-width: @menu-width;
   position: relative;
   box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.16);
   border-right: 1px solid #e7e7e7;
-  max-height: calc(100vh - 60px);
-  overflow-y: auto;
-  overflow-x: hidden;
-  min-width: 350px;
+  height: calc(100vh - @nav-height);
+  background-color: @left-menu-bgcolor;
+  font-size: 12px;
 
   .search-area {
     width: 100%;
@@ -19,19 +21,45 @@
     }
   }
 
+  .next-menu .next-menu-icon-arrow.next-icon {
+    left: 0px;
+    right: auto;
+    transform: rotate(-90deg);
+
+    &.next-open {
+      transform: rotate(0deg);
+    }
+  }
+  .next-menu .next-menu-item-inner .next-menu-item-text {
+    padding-left: 14px;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
   .next-menu.next-ver {
     width: @menu-width - 1px;
     box-shadow: none;
     border: 0;
     padding-right: 20px;
-    height: calc(100vh - 100px);
+    background-color: @left-menu-bgcolor;
+    max-height: calc(100vh - @nav-height - 40px - 40px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-top: 0;
+    margin-top: 8px;
+    padding-right: 0;
 
     .next-menu-item {
       height: 40px;
+      cursor: pointer;
       line-height: 40px;
 
       > .next-menu-item-inner {
         height: 100%;
+        position: relative;
+        margin-right: 0;
+        width: fit-content;
       }
 
       &.selected {
@@ -45,16 +73,15 @@
       margin-top: 7px;
 
       .desc {
+        display: block;
+        font-style: italic;
+        color: #555;
+        font-size: 12px;
+      }
+      .name {
         font-size: 14px;
         display: block;
         color: #111;
-      }
-      .name {
-        display: block;
-        font-size: 12px;
-        font-size: 12px;
-        color: #555;
-        font-style: italic;
       }
     }
 

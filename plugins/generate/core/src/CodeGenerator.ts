@@ -24,8 +24,8 @@ export const apiJsTemplate = (inter: PontSpec.Interface) => `${
 }
 export const ${inter.name} = {
   path: '${inter.path}',
-	method: '${inter.method?.toUpperCase()}',
-	hasBody: ${inter.parameters.some((param) => param.in === "body")}
+  method: '${inter.method?.toUpperCase()}',
+  hasBody: ${inter.parameters.some((param) => param.in === "body")}
 };
 `;
 
@@ -39,8 +39,8 @@ export const apiTsTemplate = (api: PontSpec.Interface, generator: CodeGenerator)
  */
 export namespace ${api.name} {
 ${indentation(2)(`export ${generator.generateAPIParametersTsCode(api)}`)}
-	export type Response = ${generator.generateJsonSchemaCode(api.responses["200"]?.schema)};
-	export function request(${generator.genereateAPIRequestParamsTsCode(api)}): Promise<Response>;
+  export type Response = ${generator.generateJsonSchemaCode(api.responses["200"]?.schema)};
+  export function request(${generator.genereateAPIRequestParamsTsCode(api)}): Promise<Response>;
 }
 `;
 
@@ -69,9 +69,9 @@ ${indentation(2)(mod.interfaces.map((inter) => generator.generateAPITsCode(inter
 const modsIndexJsTemplate = (spec: PontSpec.PontSpec) => `${
   spec.name
     ? `/**
-	* @name: ${spec.name}
-	*/
-	`
+  * @name: ${spec.name}
+  */
+`
     : ""
 }${spec.mods
   .map((mod) => {
@@ -79,22 +79,14 @@ const modsIndexJsTemplate = (spec: PontSpec.PontSpec) => `${
   })
   .join("\n")}
 
-${spec.name ? `export const ${spec.name}` : "window.API ="} {
+${spec.name ? `export const ${spec.name} =` : "window.API ="} {
   ${spec.mods.map((mod) => mod.name).join(",\n  ")}
 };
 `;
 
-const modsIndexTsTemplate = (spec: PontSpec.PontSpec, generator: CodeGenerator) => `
-${
-  spec.name
-    ? `/**
-	* @name: ${spec.name}
-	*/
-	`
-    : ""
-}
-
-export namespace ${spec.name || "API"} {
+const modsIndexTsTemplate = (spec: PontSpec.PontSpec, generator: CodeGenerator) => `export namespace ${
+  spec.name || "API"
+} {
 ${indentation(2)(
   spec.mods
     .map((mod) => {
@@ -192,7 +184,7 @@ export class CodeGenerator {
     return `class Params {
 ${indentation(2)(normalParams.map((param) => this.generateParameterTsCode(param)).join("\n"))}
 }
-		`;
+    `;
   }
 
   generateAPITsCode(api: PontSpec.Interface): string {
@@ -212,8 +204,16 @@ ${indentation(2)(normalParams.map((param) => this.generateParameterTsCode(param)
   }
 
   generateBaseClassesTsCode(spec: PontSpec.PontSpec): string {
+    if (spec.name) {
+      return `
+declare namespace defs {
+  export namespace ${spec.name} {
+${indentation(4)(spec.baseClasses.map((baseClass) => this.generateBaseClassTsCode(baseClass)).join("\n\n"))}
+  }
+}`;
+    }
     return `
-export namespace ${spec.name || "defs"} {
+export namespace ${spec.name} {
 ${indentation(2)(spec.baseClasses.map((baseClass) => this.generateBaseClassTsCode(baseClass)).join("\n\n"))}
 }`;
   }
@@ -222,16 +222,20 @@ ${indentation(2)(spec.baseClasses.map((baseClass) => this.generateBaseClassTsCod
     return `${this.generateBaseClassesTsCode(spec)}
 
 ${this.generateModsIndexTsCode(spec)}
-		`;
+    `;
+  }
+
+  generateSpecIndexJsCode(spec: PontSpec.PontSpec): string {
+    return `export { ${spec.name} } from './mods/index';`;
   }
 
   generateSpecsIndexJsCode(specs: PontSpec.PontSpec[]): string {
-    return `${specs.map((spec) => `import * as ${spec.name} from './${spec}';`).join("\n")}
+    return `${specs.map((spec) => `import { ${spec.name} } from './${spec.name}';`).join("\n")}
 
 window.API = {
-	${specs.map((spec) => spec.name).join(",\n")}
+${indentation(2)(specs.map((spec) => spec.name).join(",\n"))}
 };
-		`;
+    `;
   }
 
   generateModsIndexJsCode(spec: PontSpec.PontSpec): string {
@@ -239,6 +243,11 @@ window.API = {
   }
 
   generateModsIndexTsCode(spec: PontSpec.PontSpec): string {
+    if (spec.name) {
+      return `declare namespace API {
+${indentation(2)(modsIndexTsTemplate(spec, this))}
+}`;
+    }
     return modsIndexTsTemplate(spec, this);
   }
 
