@@ -2,32 +2,40 @@
 @main-width: 1420px;
 
 .pont-ui-nav {
-  height: 54px;
+  height: @nav-height;
   display: flex;
   align-items: center;
-  background-color: white;
+  background-color: #dddddd;
   border-bottom: 1px solid #e7e7e7;
 
   .top-menu {
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    height: 54px;
+    height: @nav-height;
     padding: 0;
   }
 
   .next-menu .next-menu-content {
-    height: 54px;
+    height: @nav-height;
     margin-left: 30px;
     display: inline-flex;
     align-items: center;
 
     .next-menu-item {
-      height: 54px;
-      line-height: 54px;
+      height: @nav-height;
+      line-height: @nav-height;
 
       &.selected {
-        background-color: #ebebeb;
+        background-color: white;
+      }
+
+      .next-menu-item-text {
+        display: inline-flex;
+        align-items: center;
+        .codicon {
+          margin-right: 3px;
+        }
       }
     }
   }

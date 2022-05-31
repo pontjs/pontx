@@ -6,21 +6,33 @@ import * as React from "react";
 import * as PontSpec from "pont-spec";
 import { Table } from "@alicloud/console-components";
 import "./API.less";
+import classNames from "classnames";
+import { DiffResult } from "pont-spec-diff";
+import { getDiffs } from "../diffManager/utils";
+import { ParametersTable } from "./Parameters";
 
 export class APIProps {
   selectedApi: PontSpec.Interface;
+  diffs?: DiffResult<PontSpec.Interface>;
 }
 
 export const API: React.FC<APIProps> = (props) => {
-  const { selectedApi } = props;
+  const { selectedApi, diffs } = props;
 
   const responseSchema = selectedApi?.responses?.["200"]?.schema;
   const responses = responseSchema?.type;
+  const diffTextMap = {
+    update: "接口变更详情",
+    delete: "远程接口已删除",
+    create: "远程新增接口",
+  };
+  const diffText = diffTextMap[(diffs as any)?.type];
 
   return (
-    <div className="pont-ui-api">
+    <div className={classNames("pont-ui-api", (diffs as any)?.type)}>
       {selectedApi ? (
         <>
+          {diffText ? <div className="diff-text">{diffText}</div> : null}
           <div className="header">
             <div className="method">{selectedApi.method?.toUpperCase()}</div>
             <div className="path">{selectedApi.path}</div>
@@ -30,43 +42,7 @@ export const API: React.FC<APIProps> = (props) => {
           <div className="content">
             <div className="mod">
               <div className="mod-title">入参</div>
-              <Table
-                dataSource={selectedApi?.parameters}
-                emptyContent="当前接口无入参"
-                columns={[
-                  {
-                    title: "参数名",
-                    dataIndex: "name",
-                    cell: (value, index, record: PontSpec.Parameter) => {
-                      return (
-                        <div className={record.required ? "param-name" + " required" : "param-name"}>
-                          <div className="name">{record.name}</div>
-                          <div className="pos">({record.in})</div>
-                        </div>
-                      );
-                    },
-                  },
-                  {
-                    title: "类型",
-                    dataIndex: "schema",
-                    cell: (value, index, record: PontSpec.Parameter) => {
-                      return (
-                        <div className="param-type">
-                          {PontSpec.PontJsonSchema.toString(record.schema)}
-                          {record?.schema?.format ? `(${record.schema.format})` : ""}
-                        </div>
-                      );
-                    },
-                  },
-                  {
-                    dataIndex: "description",
-                    title: "描述",
-                    cell(value, index, record: PontSpec.Parameter) {
-                      return record.schema?.description || record.schema?.title;
-                    },
-                  },
-                ]}
-              ></Table>
+              <ParametersTable parameters={selectedApi?.parameters} diffParameters={props.diffs?.parameters as any} />
             </div>
             <div className="mod">
               <div className="mod-title">出参</div>
@@ -107,6 +83,12 @@ export const API: React.FC<APIProps> = (props) => {
                 ]}
               ></Table>
             </div>
+            {Object.keys(diffs?.diffs || {}).length && diffs?.type === "update" ? (
+              <div className="mod">
+                <div className="mod-title">变更内容</div>
+                {getDiffs(diffs)}
+              </div>
+            ) : null}
           </div>
         </>
       ) : null}

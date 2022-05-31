@@ -2,6 +2,7 @@ import { PontLogger, PontManager } from "pont-manager";
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
+import { pontUI } from "./UI";
 
 export function showProgress(
   title: string,
@@ -40,7 +41,10 @@ export class VSCodeLogger extends PontLogger {
     if (logType === "error") {
       vscode.window.showErrorMessage(message);
     } else {
-      vscode.window.showInformationMessage(message);
+      if (pontUI.pontBar) {
+        pontUI.pontBar.text = "Pont[" + message + "]";
+      }
+      // vscode.window.showInformationMessage(message);
     }
   }
 }

@@ -1,4 +1,4 @@
-import { PontSpec } from "pont-spec";
+import { PontSpec, mapifyGet, mapifyImmutableOperate } from "pont-spec";
 import { InnerOriginConfig, PontInnerManagerConfig, PontPublicManagerConfig } from "./config";
 import * as path from "path";
 import * as fs from "fs-extra";
@@ -6,7 +6,6 @@ import { PontLogger, PontLoggerSpec } from "./logger";
 import { lookForFiles } from "./scan";
 import immutableSet from "lodash/fp/set";
 import * as _ from "lodash";
-import { mapifyGet, mapifyImmutableOperate } from "./utils";
 
 const enhancedImmutableUpdate = (path: any[], updator, value) => {
   if (!path?.length) {
@@ -205,6 +204,7 @@ export class PontManager {
   static async fetchRemotePontMeta(manager: PontManager): Promise<PontManager> {
     const remoteSpecPromises = manager.innerManagerConfig.origins.map(async (origin) => {
       const fetchPlugin = await Promise.resolve(origin.plugins.fetch.instance);
+      const transformPlugin = await Promise.resolve(origin.plugins.transform?.instance);
       const metaStr = await fetchPlugin.apply(origin, origin.plugins.fetch.options);
 
       if (!metaStr) {
@@ -214,15 +214,15 @@ export class PontManager {
 
       const parserPlugin = await Promise.resolve(origin.plugins.parser.instance);
       const spec = await parserPlugin.apply(metaStr, origin.plugins.parser.options);
-
-      if (!spec) {
+      const transformedSpec = (await transformPlugin?.apply(spec, origin.plugins.transform?.options)) || spec;
+      if (!transformedSpec) {
         manager.logger.error("远程数据未解析成功！");
         return;
       }
 
-      spec.name = origin.name;
+      transformedSpec.name = origin.name;
 
-      return spec;
+      return transformedSpec;
     });
 
     const remoteSpecs = await Promise.all(remoteSpecPromises);
