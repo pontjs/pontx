@@ -10,13 +10,15 @@ import { SchemaRow } from "./SchemaRow";
 import { SchemaTableContext, SchemaTableNode } from "../model/SchemaTableNode";
 import { calculatePadding } from "../utils";
 import { SchemaDocRow } from "./SchemaDocRow";
+import { SchemaDocTableRow } from "./SchemaDocTableRow";
 
 export class SchemaTableRowProps {
   index: number;
-  style: React.CSSProperties;
+  style?: React.CSSProperties;
   isScrolling?: boolean;
   data: SchemaTableContext;
-  baseClasses = [] as PontSpec.BaseClass[];
+  useTableStyle? = false;
+  baseClasses? = [] as PontSpec.BaseClass[];
 }
 
 export const SchemaTableRow: React.FC<SchemaTableRowProps> = React.memo(
@@ -49,17 +51,36 @@ export const SchemaTableRow: React.FC<SchemaTableRowProps> = React.memo(
     });
     const isEvenRow = index % 2 === 0;
 
+    if (props.useTableStyle) {
+      return (
+        <SchemaDocTableRow
+          style={{
+            isEvenRow,
+            CSS: style || {},
+            isExpanded: !isFolded,
+            paddingLeft,
+            tableType,
+            readOnly,
+          }}
+          baseClasses={props.baseClasses || []}
+          node={row}
+          onSchemaRowAction={data.onSchemaRowAction}
+          {...row}
+        />
+      );
+    }
+
     return (
       <SchemaDocRow
         style={{
           isEvenRow,
-          CSS: style,
+          CSS: style || {},
           isExpanded: !isFolded,
           paddingLeft,
           tableType,
           readOnly,
         }}
-        baseClasses={props.baseClasses}
+        baseClasses={props.baseClasses || []}
         node={row}
         onSchemaRowAction={data.onSchemaRowAction}
         {...row}

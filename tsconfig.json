@@ -14,6 +14,7 @@
       "pont-ui": ["packages/pont-ui"],
       "vscode-pont2": ["packages/vscode-pont"],
       "pont-meta-fetch-plugin": ["plugins/fetch/pont-meta-fetch-plugin"],
+      "pont-mocks-plugin": ["plugins/mocks/pont-mocks-plugin"],
       "pont-generate-core": ["plugins/generate/core"],
       "pont-react-hooks-generate-plugin": ["plugins/generate/pont-react-hooks-generate-plugin"],
       "pont-oas2-parser-plugin": ["plugins/parser/pont-oas2-parser-plugin"]
@@ -55,6 +56,9 @@
     },
     {
       "path": "plugins/generate/core"
+    },
+    {
+      "path": "plugins/mocks/pont-mocks-plugin"
     },
     {
       "path": "plugins/generate/pont-react-hooks-generate-plugin"
