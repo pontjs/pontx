@@ -36,6 +36,7 @@ export class FileStructure {
     return {
       "index.d.ts": generator.generateSpecIndexTsCode(spec),
       "api-lock.json": generator.generateLockCode(spec),
+      "baseClasses.js": generator.generateBaseClassesJsCode(spec),
       mods,
       "index.js": generator.generateSpecIndexJsCode(spec),
     };

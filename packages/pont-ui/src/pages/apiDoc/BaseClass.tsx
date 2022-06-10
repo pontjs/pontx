@@ -28,7 +28,12 @@ export const BaseClass: React.FC<BaseClassProps> = (props) => {
     <div className={classNames("pont-ui-baseclass", (selectedClass as any)?.type)}>
       {diffText ? <div className="diff-text">{diffText}</div> : null}
       <div className="header">
-        <div className="title">数据结构 - {selectedClass?.name}</div>
+        <div className="title">
+          数据结构 - {selectedClass?.name}
+          {selectedClass?.schema?.templateArgs?.length
+            ? `<${selectedClass.schema?.templateArgs.map((arg, argIndex) => "T" + argIndex).join(", ")}>`
+            : ""}
+        </div>
       </div>
       <SchemaTable
         changeBaseClasss={() => {}}

@@ -9,6 +9,7 @@ import * as React from "react";
 import { PontJsonSchemaOp } from "../model/BaseClassSchema";
 import classNames from "classnames";
 import "./TypeSelector.less";
+import { SchemaExp } from "../../../pages/apiDoc/SchemaExp";
 
 const typeStyleMap = {
   text: {
@@ -188,28 +189,30 @@ export const TypeSelector: React.FC<TypeSelectorProps> = (props) => {
     </div>
   );
 
-  let typeValue = PontSpec.PontJsonSchema.toString(props.schema);
+  const typeValue = <SchemaExp schema={props.schema} isExp={false} />;
 
-  if (props.schema?.isDefsType && props.schema.typeName) {
-    typeValue = (
-      <a
-        href="javascript:;"
-        onClick={() => {
-          const comp = props.baseClasses?.find((comp) => comp.name === props.schema.typeName);
-          if (comp) {
-            // note
-            // openMetaDialog({
-            //   type: "BaseClass",
-            //   name: comp.name,
-            // });
-          }
-        }}
-        style={{ lineHeight: "20px" }}
-      >
-        {props.schema.typeName}
-      </a>
-    );
-  }
+  // let typeValue = PontSpec.PontJsonSchema.toString(props.schema);
+
+  // if (props.schema?.isDefsType && props.schema.typeName) {
+  //   typeValue = (
+  //     <a
+  //       href="javascript:;"
+  //       onClick={() => {
+  //         const comp = props.baseClasses?.find((comp) => comp.name === props.schema.typeName);
+  //         if (comp) {
+  //           // note
+  //           // openMetaDialog({
+  //           //   type: "BaseClass",
+  //           //   name: comp.name,
+  //           // });
+  //         }
+  //       }}
+  //       style={{ lineHeight: "20px" }}
+  //     >
+  //       {props.schema.typeName}
+  //     </a>
+  //   );
+  // }
 
   if (props.disabled) {
     return (
