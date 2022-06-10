@@ -13,7 +13,7 @@ import { SchemaName } from "./SchemaName";
 import { TypeSelector } from "./TypeSelector";
 import * as PontSpec from "pont-spec";
 
-export class SchemaDocRowProps {
+export class SchemaDocTableRowProps {
   node: SchemaTableNode;
   style: {
     isExpanded: boolean;
@@ -28,7 +28,7 @@ export class SchemaDocRowProps {
   onSchemaRowAction: SchemaTableContext["onSchemaRowAction"];
 }
 
-export const SchemaDocRow: React.FC<SchemaDocRowProps> = (props) => {
+export const SchemaDocTableRow: React.FC<SchemaDocTableRowProps> = (props) => {
   const [schema, changeSchema] = React.useState(props.node.schema);
   const [rootParam, changeRootParam] = React.useState(props.node.rootParameter);
   const { isEvenRow, isExpanded, paddingLeft, tableType, readOnly } = props.style;
@@ -47,37 +47,41 @@ export const SchemaDocRow: React.FC<SchemaDocRowProps> = (props) => {
     }
   }, [props.node?.rootParameter]);
 
-  const classes = classNames("flex schema-row", {
+  const classes = classNames("schema-table-row", {
     "bg-white bg-opacity-5": isEvenRow,
   });
 
-  const styles = { paddingLeft: `${paddingLeft}px` };
+  const styles = { paddingLeft: `${paddingLeft}px`, display: "inline-block" };
 
   return React.useMemo(() => {
     return (
-      <div role="schema-row" data-key={keys.join("/")} className={classes} style={props.style.CSS}>
-        <div className="flex flex-1 items-center">
-          <div className="flex flex-1 bp3-control-group row-container" style={styles}>
-            {schema.type === "object" || schema.type === "array" ? (
-              <div
-                className="relative flex items-center justify-center cursor-pointer rounded hover:bg-darken-3"
-                style={{
-                  marginLeft: -23.5,
-                  width: 20,
-                  height: 20,
-                  marginRight: 3,
-                  textAlign: "center",
-                }}
-                onClick={() => {
-                  props.onSchemaRowAction(props.node, { type: isExpanded ? "Folded" : "UnFolded" });
-                }}
-              >
-                <i className={isExpanded ? "codicon codicon-chevron-down" : "codicon codicon-chevron-right"}></i>
-              </div>
-            ) : null}
-            {parentType !== "array" && !(tableType !== "parameters" && !prefixes?.length) && !props.node?.isParentMap
-              ? fieldName
-              : null}
+      <tr data-key={keys.join("/")} className={classes} style={props.style.CSS}>
+        <td>
+          <div style={{ display: "inline-flex", alignItems: "center", paddingRight: 12 }}>
+            <div style={styles}>
+              {schema.type === "object" || schema.type === "array" ? (
+                <div
+                  className="relative cursor-pointer rounded hover:bg-darken-3"
+                  style={{
+                    marginLeft: -23.5,
+                    width: 20,
+                    height: 20,
+                    marginRight: 3,
+                    display: "inline-block",
+                    verticalAlign: "middle",
+                    textAlign: "center",
+                  }}
+                  onClick={() => {
+                    props.onSchemaRowAction(props.node, { type: isExpanded ? "Folded" : "UnFolded" });
+                  }}
+                >
+                  <i className={isExpanded ? "codicon codicon-chevron-down" : "codicon codicon-chevron-right"}></i>
+                </div>
+              ) : null}
+              {parentType !== "array" && !(tableType !== "parameters" && !prefixes?.length) && !props.node?.isParentMap
+                ? fieldName
+                : null}
+            </div>
             {!!fieldName && parentType !== "array" && <span style={{ marginRight: 3 }}>:&nbsp;</span>}
             <TypeSelector schema={schema} baseClasses={baseClasses} disabled onSchemaChange={(newSchema) => {}} />
 
@@ -86,17 +90,17 @@ export const SchemaDocRow: React.FC<SchemaDocRowProps> = (props) => {
                 Object.keys(schema.properties || {}).length
               }}`}</span>
             ) : null}
-            {props.style?.tableType === "parameters" && props.node?.keys?.length === 1 ? (
-              <span style={{ marginLeft: 20 }}>{rootParam?.in}</span>
-            ) : null}
-
-            {schema.description || schema.title ? (
-              <span className="desc">{schema.description || schema.title}</span>
-            ) : null}
           </div>
-          <div className="row-container"></div>
-        </div>
-      </div>
+        </td>
+        {props.style?.tableType === "parameters" ? (
+          <td>{props.node?.keys?.length === 1 ? rootParam?.in : ""}</td>
+        ) : null}
+        <td>
+          {schema.description || schema.title ? (
+            <span className="desc">{schema.description || schema.title}</span>
+          ) : null}
+        </td>
+      </tr>
     );
   }, [
     schema,
@@ -114,4 +118,4 @@ export const SchemaDocRow: React.FC<SchemaDocRowProps> = (props) => {
   ]);
 };
 
-SchemaDocRow.defaultProps = new SchemaDocRowProps();
+SchemaDocTableRow.defaultProps = new SchemaDocTableRowProps();

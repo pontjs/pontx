@@ -16,7 +16,9 @@ export const ApiDoc: React.FC<ApiDocProps> = (props) => {
   const { selectedMeta, page } = LayoutContext.useContainer();
   const apiDoc = (
     <>
-      {(selectedMeta as PontSpec.Interface)?.path ? <API selectedApi={selectedMeta as PontSpec.Interface} /> : null}
+      {(selectedMeta as PontSpec.Interface)?.parameters || (selectedMeta as PontSpec.Interface)?.responses ? (
+        <API selectedApi={selectedMeta as PontSpec.Interface} />
+      ) : null}
       {(selectedMeta as PontSpec.BaseClass)?.schema ? (
         <BaseClass selectedClass={selectedMeta as PontSpec.BaseClass} />
       ) : null}
