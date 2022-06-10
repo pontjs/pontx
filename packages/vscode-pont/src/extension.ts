@@ -44,6 +44,10 @@ const vscodePontManager = new VSCodePontManager();
 
 export async function activate(context: vscode.ExtensionContext) {
   console.log('Congratulations, your extension "pont" is now active!');
+  if (!vscode.workspace.rootPath) {
+    return;
+  }
+
   const pontManager = await PontManager.constructorFromRootDir(vscode.workspace.rootPath, new VSCodeLogger());
   if (pontManager) {
     pontUI.create();
@@ -54,11 +58,17 @@ export async function activate(context: vscode.ExtensionContext) {
 
   fileWatcher.onDidCreate(async (uri) => {
     const manager = await PontManager.constructorFromRootDir(uri.toString());
-    pontService.updatePontManger(manager);
+    if (manager) {
+      pontUI.create();
+      vscodePontManager.start(pontManager, context);
+    }
   });
   fileWatcher.onDidChange(async (uri) => {
     const manager = await PontManager.constructorFromRootDir(uri.toString());
-    pontService.updatePontManger(manager);
+    if (manager) {
+      pontUI.create();
+      vscodePontManager.start(pontManager, context);
+    }
   });
 
   if (vscode.window.registerWebviewPanelSerializer) {

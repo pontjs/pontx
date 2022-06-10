@@ -10,6 +10,9 @@ import classNames from "classnames";
 import { DiffResult } from "pont-spec-diff";
 import { getDiffs } from "../diffManager/utils";
 import { ParametersTable } from "./Parameters";
+import { SchemaExp } from "./SchemaExp";
+import { PontJsonSchemaOp } from "../../components/SchemaTable/model/BaseClassSchema";
+import { SchemaTable } from "../../components/SchemaTable/comps/SchemaTable";
 
 export class APIProps {
   selectedApi: PontSpec.Interface;
@@ -46,7 +49,17 @@ export const API: React.FC<APIProps> = (props) => {
             </div>
             <div className="mod">
               <div className="mod-title">出参</div>
-              <Table
+
+              <SchemaTable
+                changeBaseClasss={() => {}}
+                changeResponseBody={() => {}}
+                changeRootApiSchema={() => {}}
+                keyword=""
+                readOnly
+                rows={PontJsonSchemaOp.genrateRows(selectedApi?.responses["200"]?.schema)}
+                tableType="response"
+              />
+              {/* <Table
                 dataSource={[selectedApi?.responses["200"]?.schema]}
                 emptyContent="当前接口无出参"
                 columns={[
@@ -67,7 +80,7 @@ export const API: React.FC<APIProps> = (props) => {
                     cell: (value, index, record: PontSpec.PontJsonSchema) => {
                       return (
                         <div className="param-type">
-                          {PontSpec.PontJsonSchema.toString(record)}
+                          <SchemaExp schema={record} />
                           {record?.format ? `(${record.format})` : ""}
                         </div>
                       );
@@ -81,7 +94,7 @@ export const API: React.FC<APIProps> = (props) => {
                     },
                   },
                 ]}
-              ></Table>
+              ></Table> */}
             </div>
             {Object.keys(diffs?.diffs || {}).length && diffs?.type === "update" ? (
               <div className="mod">

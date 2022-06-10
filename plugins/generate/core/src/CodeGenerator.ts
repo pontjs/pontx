@@ -100,6 +100,40 @@ ${indentation(2)(
 export class CodeGenerator {
   specName = "";
 
+  generateJsonSchemaInitValue(schema: PontSpec.PontJsonSchema) {
+    if (schema.typeName === "Array") {
+      return "[]";
+    }
+
+    if (schema.isDefsType) {
+      return `new ${schema.typeName}()`;
+    }
+
+    if (schema.templateIndex > -1) {
+      return "undefined";
+    }
+
+    if (schema.enum && schema.enum.length) {
+      const str = schema.enum[0];
+
+      if (typeof str === "string") {
+        return `'${str}'`;
+      }
+
+      return str + "";
+    }
+
+    if (schema.typeName === "string") {
+      return "''";
+    }
+
+    if (schema.typeName === "boolean") {
+      return "false";
+    }
+
+    return "undefined";
+  }
+
   generateJsonSchemaCode(schema: PontSpec.PontJsonSchema) {
     if (!schema) {
       return "any";
@@ -218,6 +252,20 @@ ${indentation(2)(spec.baseClasses.map((baseClass) => this.generateBaseClassTsCod
 }`;
   }
 
+  generateBaseClassesJsCode(spec: PontSpec.PontSpec): string {
+    const clsCodes = spec.baseClasses.map((base) => this.generateBaseClassJsCode(base));
+
+    if (this.specName) {
+      return `${clsCodes.join("\n\n")}
+export const ${this.specName} = {
+  ${spec.baseClasses.map((bs) => bs.name).join(",\n  ")}
+}
+      `;
+    }
+
+    return clsCodes.map((cls) => `export ${cls}`).join("\n\n");
+  }
+
   generateSpecIndexTsCode(spec: PontSpec.PontSpec): string {
     return `${this.generateBaseClassesTsCode(spec)}
 
@@ -226,16 +274,33 @@ ${this.generateModsIndexTsCode(spec)}
   }
 
   generateSpecIndexJsCode(spec: PontSpec.PontSpec): string {
-    return `export { ${spec.name} } from './mods/index';`;
+    if (!spec.name) {
+      return `import './mods/index';
+import * as defs from './baseClasses';
+
+window.defs = defs;
+`;
+    }
+
+    return `import { ${spec.name} } from './mods/index';
+import { ${spec.name} as baseClasses } from './baseClasses';
+
+if (window.API) {
+  window.API.${spec.name} = ${spec.name};
+} else {
+  window.API = { ${spec.name} };
+}
+
+if (window.defs) {
+  window.defs.${spec.name} = baseClasses;
+} else {
+  window.defs = { ${spec.name}: baseClasses };
+}
+`;
   }
 
   generateSpecsIndexJsCode(specs: PontSpec.PontSpec[]): string {
-    return `${specs.map((spec) => `import { ${spec.name} } from './${spec.name}';`).join("\n")}
-
-window.API = {
-${indentation(2)(specs.map((spec) => spec.name).join(",\n"))}
-};
-    `;
+    return `${specs.map((spec) => `import './${spec.name}/index';`).join("\n")}\n`;
   }
 
   generateModsIndexJsCode(spec: PontSpec.PontSpec): string {
@@ -249,6 +314,15 @@ ${indentation(2)(modsIndexTsTemplate(spec, this))}
 }`;
     }
     return modsIndexTsTemplate(spec, this);
+  }
+
+  generateBaseClassJsCode(baseClass: PontSpec.BaseClass) {
+    const propsCode = _.map(baseClass.schema?.properties, (prop, propName) => {
+      return `${propName} = ${this.generateJsonSchemaInitValue(prop as PontSpec.PontJsonSchema)};`;
+    }).join("\n");
+    const formattedProps = indentation(2)(propsCode);
+
+    return `class ${baseClass.name} {\n${formattedProps}\n}`;
   }
 
   generateBaseClassTsCode(baseClass: PontSpec.BaseClass) {
