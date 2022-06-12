@@ -15,6 +15,10 @@ export const indentation = (cnt = 2) => {
   };
 };
 
+export const needQuotationMark = (name: string) => {
+  return !name.match(/^[a-zA-Z_$][a-zA-Z0-9_$]*$/);
+};
+
 export const apiJsTemplate = (inter: PontSpec.Interface) => `${
   inter.description
     ? `/**
@@ -45,9 +49,13 @@ ${indentation(2)(`export ${generator.generateAPIParametersTsCode(api)}`)}
 `;
 
 const modJsTemplate = (mod: PontSpec.Mod, generator: CodeGenerator) => `/**
- * ${mod.description}
- * ${mod.name}
- */
+* ${mod.name}${
+  mod.description
+    ? `
+* ${mod.description}`
+    : ""
+}
+*/
 
 ${mod.interfaces
   .map((api) => {
@@ -192,7 +200,7 @@ export class CodeGenerator {
     const optionalSignal = parameter?.required ? "" : "?";
 
     let name = parameter.name;
-    if (!name.match(/^[a-zA-Z_$][a-zA-Z0-9_$]*$/)) {
+    if (needQuotationMark(name)) {
       name = `'${name}'`;
     }
 
@@ -247,7 +255,7 @@ ${indentation(4)(spec.baseClasses.map((baseClass) => this.generateBaseClassTsCod
 }`;
     }
     return `
-export namespace ${spec.name} {
+export namespace defs {
 ${indentation(2)(spec.baseClasses.map((baseClass) => this.generateBaseClassTsCode(baseClass)).join("\n\n"))}
 }`;
   }
@@ -329,7 +337,7 @@ ${indentation(2)(modsIndexTsTemplate(spec, this))}
     const propsCode = _.map(baseClass.schema?.properties, (prop, propName) => {
       const propDesc = prop.description || prop.title;
       const descCode = propDesc ? `/** ${propDesc} */\n` : "";
-      return `${descCode}${propName}${
+      return `${descCode}${needQuotationMark(propName) ? `'${propName}'` : propName}${
         baseClass.schema.required?.includes(propName) ? "" : "?"
       }: ${this.generateJsonSchemaCode(prop as any)};`;
     }).join("\n");
