@@ -220,7 +220,7 @@ export class PontManager {
         return;
       }
 
-      transformedSpec.name = origin.name;
+      transformedSpec.name = origin.name || transformedSpec.name;
 
       return transformedSpec;
     });
