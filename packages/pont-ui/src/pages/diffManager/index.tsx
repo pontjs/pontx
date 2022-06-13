@@ -15,7 +15,7 @@ export const DiffPage: React.FC<DiffPageProps> = (props) => {
   const { selectedMeta, currSpec, remoteSpec } = LayoutContext.useContainer();
 
   let doc = null as any;
-  if (selectedMeta?.["path"]) {
+  if (selectedMeta?.["parameters"] || selectedMeta?.["responses"]) {
     const selectedApi =
       PontSpec.PontSpec.findApi(currSpec, selectedMeta?.name) ||
       PontSpec.PontSpec.findApi(remoteSpec, selectedMeta?.name);
