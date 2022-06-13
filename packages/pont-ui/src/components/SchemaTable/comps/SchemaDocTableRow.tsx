@@ -7,11 +7,9 @@ import * as React from "react";
 import classNames from "classnames";
 import * as _ from "lodash";
 import { SchemaTableContext, SchemaTableNode } from "../model/SchemaTableNode";
-import { immutableSet } from "../../../utils/utils";
-import { Balloon, Button, Icon, Input, Select } from "@alicloud/console-components";
-import { SchemaName } from "./SchemaName";
 import { TypeSelector } from "./TypeSelector";
 import * as PontSpec from "pont-spec";
+import MarkdownPreview from "@uiw/react-markdown-preview";
 
 export class SchemaDocTableRowProps {
   node: SchemaTableNode;
@@ -97,7 +95,9 @@ export const SchemaDocTableRow: React.FC<SchemaDocTableRowProps> = (props) => {
         ) : null}
         <td>
           {schema.description || schema.title ? (
-            <span className="desc">{schema.description || schema.title}</span>
+            <span className="desc">
+              <MarkdownPreview linkTarget="_blank" sourcePos source={schema.description || schema.title} />
+            </span>
           ) : null}
         </td>
       </tr>

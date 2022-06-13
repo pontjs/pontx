@@ -1,5 +1,6 @@
 import * as fp from "lodash/fp";
 import * as _ from "lodash";
+import { PontSpec } from "pont-spec";
 
 export const immutableSet = (path, newValue, originValue?) => {
   if (originValue === undefined) {
@@ -42,3 +43,51 @@ export const immutableUpdate = (path, updater: (originValue) => any, originValue
   }
   return fp.set(path, updater(originPartValue), originValue);
 };
+
+function fuzzyMatch(texts: Array<string | undefined>, keyword: string) {
+  if (!keyword) {
+    return true;
+  }
+
+  return (texts || []).some((text) => {
+    if (!text) {
+      return false;
+    }
+
+    if (text?.toUpperCase()?.includes(keyword?.toUpperCase())) {
+      return true;
+    }
+
+    return false;
+  });
+}
+
+export function filterSpec(spec: PontSpec, searchKeyword: string): PontSpec {
+  if (!searchKeyword || !spec) {
+    return spec;
+  }
+
+  const mods = (spec?.mods || [])
+    .map((mod) => {
+      const apis = (mod.interfaces || []).filter((api) => {
+        return fuzzyMatch([api?.name, api?.description, api?.title, api?.path], searchKeyword);
+      });
+
+      // const modMatch = fuzzyMatch([mod.description, mod.name], searchKeyword);
+
+      if (apis?.length) {
+        return { ...mod, interfaces: apis };
+      }
+      return null;
+    })
+    .filter((mod) => mod) as any;
+  const baseClasses = (spec?.baseClasses || []).filter((base) => {
+    return fuzzyMatch([base?.name, base?.schema?.description, base?.schema?.title], searchKeyword);
+  });
+
+  return {
+    ...spec,
+    mods,
+    baseClasses,
+  };
+}

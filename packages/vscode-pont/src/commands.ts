@@ -161,6 +161,7 @@ export class PontCommands {
     });
 
     vscode.commands.registerCommand("pont.restart", async () => {
+      vscode.window.showInformationMessage("pont 重启中...");
       const pontManager = await PontManager.constructorFromRootDir(vscode.workspace.rootPath, new VSCodeLogger());
       pontService.updatePontManger(pontManager);
     });

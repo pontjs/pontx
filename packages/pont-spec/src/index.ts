@@ -19,6 +19,7 @@ export class Interface {
   };
   method: string;
   name: string;
+  title?: string;
   path: string;
   deprecated: boolean;
 }
