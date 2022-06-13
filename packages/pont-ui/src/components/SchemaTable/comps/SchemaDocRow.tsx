@@ -12,6 +12,7 @@ import { Balloon, Button, Icon, Input, Select } from "@alicloud/console-componen
 import { SchemaName } from "./SchemaName";
 import { TypeSelector } from "./TypeSelector";
 import * as PontSpec from "pont-spec";
+import MarkdownPreview from "@uiw/react-markdown-preview";
 
 export class SchemaDocRowProps {
   node: SchemaTableNode;
@@ -91,7 +92,9 @@ export const SchemaDocRow: React.FC<SchemaDocRowProps> = (props) => {
             ) : null}
 
             {schema.description || schema.title ? (
-              <span className="desc">{schema.description || schema.title}</span>
+              <span className="desc">
+                <MarkdownPreview linkTarget="_blank" sourcePos source={schema.description || schema.title} />
+              </span>
             ) : null}
           </div>
           <div className="row-container"></div>

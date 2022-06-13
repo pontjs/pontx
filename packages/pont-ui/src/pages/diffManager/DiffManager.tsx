@@ -521,7 +521,6 @@ export const DiffManager: React.FC<DiffManagerProps> = (props) => {
               <span style={{ marginLeft: 20 }}>数据结构变更共计({(diffs.baseClasses || []).length})</span>
             </span>
           </div>
-          {searchArea}
           {menus}
         </div>
       </>

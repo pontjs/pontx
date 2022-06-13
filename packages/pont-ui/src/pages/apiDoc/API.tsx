@@ -36,12 +36,17 @@ export const API: React.FC<APIProps> = (props) => {
       {selectedApi ? (
         <>
           {diffText ? <div className="diff-text">{diffText}</div> : null}
-          <div className="header">
+          <div className={"header " + (selectedApi?.deprecated ? "deprecated" : "")}>
             <div className="method">{selectedApi.method?.toUpperCase()}</div>
             <div className="path">{selectedApi.path}</div>
-            <div className="desc">{selectedApi.description}</div>
+            <div className="desc">{selectedApi.title}</div>
             <div className="title">{selectedApi?.name}</div>
           </div>
+          {selectedApi?.description ? (
+            <div className="desc-mod" style={{ margin: "12px 0", width: "100%" }}>
+              接口详情：{selectedApi?.description}
+            </div>
+          ) : null}
           <div className="content">
             <div className="mod">
               <div className="mod-title">入参</div>

@@ -10,6 +10,7 @@ import * as PontSpec from "pont-spec";
 import { Select, Input, Menu, Message, Balloon } from "@alicloud/console-components";
 import _ from "lodash";
 import { LayoutContext } from "../../layout/context";
+import { filterSpec } from "../../utils/utils";
 
 export class LeftMenuProps {}
 
@@ -21,6 +22,7 @@ export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
   const changeSearchValue = React.useCallback((val: any) => {
     return _.debounce(_changeSearchValue)(val);
   }, []);
+  const filteredCurrSpec = filterSpec(currSpec, searchValue);
 
   // 中英搜索
   const searchArea = (
@@ -38,8 +40,8 @@ export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
 
   // 简单、复杂模式切换、搜索、折叠
   const menus = (
-    <Menu selectedKeys={[selectedMeta?.name]} mode="inline">
-      {(currSpec?.mods || []).map((mod) => {
+    <Menu selectedKeys={[selectedMeta?.name]} defaultOpenKeys={[filteredCurrSpec?.mods?.[0]?.name]} mode="inline">
+      {(filteredCurrSpec?.mods || []).map((mod) => {
         return (
           <Menu.SubMenu
             key={mod.name}
@@ -79,9 +81,9 @@ export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
         );
       })}
 
-      {currSpec?.baseClasses?.length ? (
+      {filteredCurrSpec?.baseClasses?.length ? (
         <Menu.SubMenu key="pont-classes" label="数据结构">
-          {(currSpec?.baseClasses || []).map((clazz) => {
+          {(filteredCurrSpec?.baseClasses || []).map((clazz) => {
             return (
               <Menu.Item
                 className={clazz.name === selectedMeta?.name ? "selected" : ""}
@@ -108,7 +110,11 @@ export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
   return (
     <div className="pont-ui-left-menu">
       {searchArea}
-      {!currSpec?.mods?.length && !currSpec?.baseClasses?.length ? <Message type="notice"></Message> : menus}
+      {!filteredCurrSpec?.mods?.length && !filteredCurrSpec?.baseClasses?.length ? (
+        <Message type="notice"></Message>
+      ) : (
+        menus
+      )}
     </div>
   );
 };
