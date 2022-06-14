@@ -184,9 +184,8 @@ export class CodeGenerator {
         if (schema?.properties) {
           return `{ ${Object.keys(schema.properties)
             .map((propName) => {
-              return `${propName}: ${this.generateJsonSchemaCode(
-                schema.properties?.[propName] as PontSpec.PontJsonSchema,
-              )}`;
+              const key = needQuotationMark(propName) ? `'${propName}'` : propName;
+              return `${key}: ${this.generateJsonSchemaCode(schema.properties?.[key] as PontSpec.PontJsonSchema)}`;
             })
             .join("; ")} }`;
         }
@@ -326,7 +325,9 @@ ${indentation(2)(modsIndexTsTemplate(spec, this))}
 
   generateBaseClassJsCode(baseClass: PontSpec.BaseClass) {
     const propsCode = _.map(baseClass.schema?.properties, (prop, propName) => {
-      return `${propName} = ${this.generateJsonSchemaInitValue(prop as PontSpec.PontJsonSchema)};`;
+      return `${needQuotationMark(propName) ? `'${propName}'` : propName} = ${this.generateJsonSchemaInitValue(
+        prop as PontSpec.PontJsonSchema,
+      )};`;
     }).join("\n");
     const formattedProps = indentation(2)(propsCode);
 
