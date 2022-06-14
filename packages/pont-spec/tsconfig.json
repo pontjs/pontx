@@ -14,5 +14,5 @@
   },
   "include": ["./src/**/*"],
   "exclude": ["node_modules", "build"],
-  "references": [{ "path": "../oas-spec-ts" }]
+  "references": [{ "path": "../oas-spec-ts" }, { "path": "./tsconfig.lib.json" }]
 }

@@ -3,7 +3,6 @@ import * as _ from "lodash";
 import * as vscode from "vscode";
 import { showProgress, VSCodeLogger, wait } from "./utils";
 import { PontWebView } from "./webview";
-import { diffSpecs } from "pont-spec-diff";
 import { pontService } from "./Service";
 // import { PontService } from "./Service";
 const fs = require("fs");
@@ -148,16 +147,6 @@ export class PontCommands {
 
     vscode.commands.registerCommand("pont.openPontUI", () => {
       new PontWebView().openTab(context.extensionUri);
-    });
-
-    vscode.commands.registerCommand("pont.diff", () => {
-      const pontManager = service.pontManager;
-      const diffs = diffSpecs(pontManager.localPontSpecs, pontManager.remotePontSpecs);
-      fs.writeFileSync(
-        path.join(pontManager.innerManagerConfig.configDir, "record.json"),
-        JSON.stringify(diffs, null, 2),
-        "utf8",
-      );
     });
 
     vscode.commands.registerCommand("pont.restart", async () => {
