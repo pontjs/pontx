@@ -13,15 +13,19 @@
   "files": [],
   "dependencies": {
     "node-fetch": "^2.6.7",
+    "fs-extra": "*",
     "translation.js": "^0.7.15"
   },
   "peerDependencies": {
-    "pont-manager": "^0.0.1"
+    "pont-manager": "^0.0.1",
+    "lodash": "*"
   },
   "keywords": [],
   "author": "jasonHzq",
   "license": "MIT",
   "devDependencies": {
+    "@types/fs-extra": "*",
+    "@types/lodash": "*",
     "typescript": "^4.6.4"
   }
 }

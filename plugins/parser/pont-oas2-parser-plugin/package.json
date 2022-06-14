@@ -15,7 +15,8 @@
     "pont-spec": "*"
   },
   "peerDependencies": {
-    "pont-manager": "*"
+    "pont-manager": "*",
+    "lodash": "*"
   },
   "files": [
     "lib"
@@ -24,6 +25,7 @@
   "author": "jasonHzq",
   "license": "MIT",
   "devDependencies": {
+    "@types/lodash": "*",
     "typescript": "^4.6.4"
   }
 }

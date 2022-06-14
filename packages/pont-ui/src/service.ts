@@ -1,9 +1,10 @@
 import { PontSpec } from "pont-spec";
-import testSpec from "./mocks/spec.json";
-import remoteSpec from "./mocks/remoteSpec.json";
+// import testSpec from "./mocks/spec.json";
+// import remoteSpec from "./mocks/remoteSpec.json";
 // import { PontSpecDiff } from "pont-spec-diff";
 
-let localSpec = testSpec as any;
+// let localSpec = testSpec as any;
+// let localSpec = null;
 
 /** 不同使用场景，各自注册服务来源 */
 export const PontUIService = {
@@ -18,10 +19,10 @@ export const PontUIService = {
     }
 
     return {
-      localSpecs: [localSpec] as any[] as PontSpec[],
-      remoteSpecs: [remoteSpec] as any[] as PontSpec[],
-      // localSpecs: [] as any[] as PontSpec[],
-      // remoteSpecs: [] as any[] as PontSpec[],
+      // localSpecs: [localSpec] as any[] as PontSpec[],
+      // remoteSpecs: [remoteSpec] as any[] as PontSpec[],
+      localSpecs: [] as any[] as PontSpec[],
+      remoteSpecs: [] as any[] as PontSpec[],
     };
   },
 
@@ -38,7 +39,7 @@ export const PontUIService = {
 
   updateLocalSpec: async (spec: PontSpec): Promise<void> => {
     if (!import.meta.env.PROD) {
-      localSpec = spec;
+      // localSpec = spec;
     }
   },
 

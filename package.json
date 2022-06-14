@@ -8,7 +8,7 @@
     "changelog": "node -r esm scripts/changelog.js",
     "build": "lerna exec --stream -- tsc --build --verbose",
     "start": "tsc --build -w",
-    "vs-ui": "cd packages/pont-ui && npm run build && cd ../vscode-pont && npm run build:media",
+    "vs-ui": "cd packages/pont-ui && npm run build && cd ../vscode-pont/media && npm run build",
     "clean": "lerna clean && rimraf ./node_modules",
     "lint": "prettier --write --parser typescript \"packages/**/*.ts\"",
     "release:all": "npm run release && npm run release:vscode",

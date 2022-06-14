@@ -7,12 +7,13 @@
     "preserveConstEnums": true,
     "outDir": "es6",
     "moduleResolution": "node",
+    "noEmit": false,
     "baseUrl": ".",
     "paths": {},
     "rootDir": "./src",
     "composite": true
   },
-  "include": ["./src/**/*"],
-  "exclude": ["node_modules", "build"],
+  "include": ["src"],
+  "exclude": ["node_modules", "build", "lib"],
   "references": [{ "path": "../pont-spec" }, { "path": "./tsconfig.commonjs.json" }]
 }
