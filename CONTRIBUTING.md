@@ -10,11 +10,14 @@ cd pont
 lerna bootstrap
 
 npm start
+
+npm run vs-ui
 ```
 
 ## Debug with VSCode
 
-Select "Debug Pont CLI" in VSCode Debug Panel, and click Debug button.
+Debug pont-cli by select "Debug Pont CLI" in VSCode Debug Panel.
+Debug vscode-pont by select "Debug Extension" in VSCode Debug Panel.
 
 ## Code Style
 
