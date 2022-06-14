@@ -12,13 +12,19 @@
   },
   "dependencies": {
     "pont-spec": "*",
+    "fs-extra": "*",
+    "lodash": "*",
     "prettier": "^2.6.2"
   },
-  "files": ["lib"],
+  "files": [
+    "lib"
+  ],
   "keywords": [],
   "author": "jasonHzq",
   "license": "MIT",
   "devDependencies": {
+    "@types/lodash": "*",
+    "@types/fs-extra": "*",
     "typescript": "^4.6.4"
   }
 }

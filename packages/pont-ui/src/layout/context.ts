@@ -3,7 +3,6 @@ import * as React from "react";
 // import * as spec from "../mocks/spec.json";
 import { PontSpec, Interface, BaseClass } from "pont-spec";
 import { PontUIService } from "../service";
-import { diffPontSpec, diffSpec } from "pont-spec-diff";
 
 export enum PageType {
   Doc = "doc",
