@@ -24,6 +24,8 @@
   "author": "jasonHzq",
   "license": "MIT",
   "devDependencies": {
+    "@types/lodash": "*",
+    "@types/fs-extra": "*",
     "typescript": "^4.6.4"
   }
 }

@@ -7,7 +7,7 @@
   "typings": "lib/index.d.ts",
   "scripts": {
     "watch": "tsc --build --watch",
-    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "clean": "rm -rf lib && rm tsconfig.tsbuildinfo",
     "build": "npm run clean && tsc --build && tsc -m CommonJS --outDir lib"
   },
   "peerDependencies": {
@@ -24,6 +24,8 @@
   "author": "jasonHzq",
   "license": "MIT",
   "devDependencies": {
-    "typescript": "^4.6.4"
+    "@types/lodash": "*",
+    "lodash": "*",
+    "typescript": "^4.7.2"
   }
 }
