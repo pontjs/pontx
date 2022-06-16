@@ -7,12 +7,12 @@
     "preserveConstEnums": true,
     "outDir": "lib",
     "moduleResolution": "node",
-    "baseUrl": ".",
+    "baseUrl": "./src",
     "paths": {},
     "rootDir": "./src",
     "composite": true
   },
   "include": ["./src/**/*"],
-  "exclude": ["node_modules", "build"],
+  "exclude": ["node_modules", "es6", "tests", "lib"],
   "references": []
 }

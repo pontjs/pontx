@@ -24,7 +24,6 @@
   "author": "jasonHzq",
   "license": "MIT",
   "devDependencies": {
-    "pont-manager": "*",
     "@types/fs-extra": "*",
     "@types/lodash": "*",
     "typescript": "^4.6.4"

@@ -6,8 +6,10 @@
   "scripts": {
     "test": "jest pont",
     "changelog": "node -r esm scripts/changelog.js",
+    "build:commonjs": "lerna exec --stream -- npm run build:commonjs",
     "build": "lerna exec --stream -- tsc --build --verbose",
     "start": "tsc --build -w",
+    "ui": "cd packages/pont-ui && npm run start",
     "vs-ui": "cd packages/pont-ui && npm run build && cd ../vscode-pont/media && npm run build",
     "clean": "lerna clean && rimraf ./node_modules",
     "lint": "prettier --write --parser typescript \"packages/**/*.ts\"",
@@ -26,7 +28,7 @@
   "homepage": "https://github.com/alibaba/pont#readme",
   "gitHooks": {
     "commit-msg": "node ./scripts/verifyCommit.js",
-    "post-merge": "yarn",
+    "post-merge": "lerna bootstrap",
     "pre-commit": "lint-staged"
   },
   "lint-staged": {

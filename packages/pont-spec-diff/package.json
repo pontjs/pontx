@@ -8,7 +8,9 @@
   "scripts": {
     "watch": "tsc --build --watch",
     "clean": "rm -rf lib && rm tsconfig.tsbuildinfo",
-    "build": "npm run clean && tsc --build && tsc -m CommonJS --outDir lib"
+    "build:commonjs": "npm run clean && tsc -m CommonJS --outDir lib",
+    "build": "npm run clean && tsc --build && tsc -m CommonJS --outDir lib",
+    "test": "tsc -p tests/tsconfig.json"
   },
   "peerDependencies": {
     "lodash": "*"

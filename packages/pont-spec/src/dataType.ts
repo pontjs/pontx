@@ -1,4 +1,4 @@
-import { JsonSchema } from "oas-spec-ts";
+import { JsonSchema, SimpleTypes } from "oas-spec-ts";
 
 export interface PontJsonSchema extends JsonSchema {}
 /**
@@ -13,6 +13,7 @@ export class PontJsonSchema {
   templateArgs?: PontJsonSchema[] = [];
   /** 被拆解出来的类名、处理后的怪异类型等 */
   typeName: string;
+  example?: string;
 
   /** 生成表达式，用于预览读取类型信息 */
   static toString(schema: PontJsonSchema) {

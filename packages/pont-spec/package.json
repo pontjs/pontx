@@ -18,6 +18,7 @@
   },
   "files": [
     "lib/",
+    "es6/",
     "*.md"
   ],
   "keywords": [],
