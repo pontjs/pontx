@@ -8,6 +8,7 @@ import { LayoutContext } from "../../layout/context";
 import { API } from "../apiDoc/API";
 import { BaseClass } from "../apiDoc/BaseClass";
 import { DiffManager } from "./DiffManager";
+import { DiffContent } from "./DiffContent";
 
 export class DiffPageProps {}
 
@@ -15,16 +16,32 @@ export const DiffPage: React.FC<DiffPageProps> = (props) => {
   const { selectedMeta, currSpec, remoteSpec } = LayoutContext.useContainer();
 
   let doc = null as any;
-  if (selectedMeta?.["parameters"] || selectedMeta?.["responses"]) {
-    const selectedApi =
-      PontSpec.PontSpec.findApi(currSpec, selectedMeta?.name) ||
-      PontSpec.PontSpec.findApi(remoteSpec, selectedMeta?.name);
-    doc = <API selectedApi={selectedApi as any} diffs={selectedMeta as any} />;
-  } else if (selectedMeta?.["schema"]) {
+  if (selectedMeta?.type === "api") {
+    const localApi = PontSpec.PontSpec.findApi(currSpec, selectedMeta.modName!, selectedMeta.name);
+    const remoteApi = PontSpec.PontSpec.findApi(remoteSpec, selectedMeta.modName!, selectedMeta.name);
+    if (!localApi) {
+      doc = <API selectedApi={remoteApi} />;
+    } else if (!remoteApi) {
+      doc = <API selectedApi={localApi} />;
+    } else {
+      doc = <DiffContent localMeta={localApi} remoteMeta={remoteApi} type="api" />;
+    }
+  } else if (selectedMeta?.type === "baseClass") {
     const selectedClazz =
       PontSpec.PontSpec.findBaseClazz(currSpec, selectedMeta?.name) ||
       PontSpec.PontSpec.findBaseClazz(remoteSpec, selectedMeta?.name);
-    doc = <BaseClass selectedClass={selectedClazz as any} diffs={selectedMeta as any} />;
+    doc = <BaseClass selectedClass={selectedClazz as any} />;
+
+    const localClazz = PontSpec.PontSpec.findBaseClazz(currSpec, selectedMeta?.name);
+    const remoteClazz = PontSpec.PontSpec.findBaseClazz(remoteSpec, selectedMeta?.name);
+
+    if (!localClazz) {
+      doc = <BaseClass selectedClass={remoteClazz!} />;
+    } else if (!remoteClazz) {
+      doc = <BaseClass selectedClass={localClazz} />;
+    } else {
+      doc = <DiffContent localMeta={localClazz} remoteMeta={remoteClazz} type="baseclass" />;
+    }
   }
 
   return (

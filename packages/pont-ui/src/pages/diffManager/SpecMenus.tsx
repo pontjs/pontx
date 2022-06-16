@@ -28,7 +28,18 @@ export const SpecMenus = (props: SpecMenusProps) => {
           const newApi = { ...api, type: (api as any).type || (mod as any).type };
 
           return (
-            <Menu.Item key={api.name} id={api.name} onClick={() => props.changeSelectedMeta(newApi)}>
+            <Menu.Item
+              key={api.name}
+              id={api.name}
+              onClick={() =>
+                props.changeSelectedMeta({
+                  type: "api",
+                  name: api.name,
+                  modName: mod.name,
+                  spec: api,
+                })
+              }
+            >
               {renderApiLabel(mod as any, newApi as any)}
             </Menu.Item>
           );
@@ -41,7 +52,17 @@ export const SpecMenus = (props: SpecMenusProps) => {
     <Menu.SubMenu key={props.key + "/" + "pont-classes"} label="数据结构">
       {pontSpec.baseClasses.map((clazz) => {
         return (
-          <Menu.Item key={clazz.name} id={clazz.name} onClick={() => props.changeSelectedMeta(clazz)}>
+          <Menu.Item
+            key={clazz.name}
+            id={clazz.name}
+            onClick={() =>
+              props.changeSelectedMeta({
+                type: "baseClass",
+                name: clazz.name,
+                spec: clazz,
+              })
+            }
+          >
             {renderClazzLabel(clazz as any)}
           </Menu.Item>
         );

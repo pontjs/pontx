@@ -1,9 +1,20 @@
 import * as _ from "lodash";
 import { getCopyName, isEmptyFieldName } from "../utils";
 import * as PontSpec from "pont-spec";
+import { PontJsonSchema } from "pont-spec";
 import { SchemaTableNode } from "./SchemaTableNode";
+import { DiffResult } from "pont-spec-diff";
 
-export class PontJsonSchemaOp extends PontSpec.PontJsonSchema {
+export type SchemaDiffNode = {
+  fieldName: string;
+  fieldValue: string;
+  fieldType: string;
+  indentCnt: number;
+  order: number;
+  diffType: "create" | "delete" | "update" | "equal";
+};
+
+export class PontJsonSchemaOp extends PontJsonSchema {
   static changeType(schema: PontSpec.PontJsonSchema, newType: string, $ref = ""): PontSpec.PontJsonSchema {
     if (newType === schema?.type) {
       // 除非是 map 改成 object。这种情况需要继续处理。否则直接返回

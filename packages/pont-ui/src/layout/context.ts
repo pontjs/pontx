@@ -2,7 +2,7 @@ import { createContainer } from "unstated-next";
 import * as React from "react";
 // import * as spec from "../mocks/spec.json";
 import { PontSpec, Interface, BaseClass } from "pont-spec";
-import { PontUIService } from "../service";
+import { PontUIService } from "../service.local";
 
 export enum PageType {
   Doc = "doc",
@@ -22,11 +22,18 @@ const getLocalSpec = (specs: PontSpec[], specName: string) => {
   }
 };
 
+export type Meta = {
+  modName?: string;
+  name: string;
+  type: "api" | "baseClass";
+  spec?: any;
+};
+
 const useContext = () => {
   const [localSpecs, changeSpecs] = React.useState([] as PontSpec[]);
   const [remoteSpecs, changeRemoteSpecs] = React.useState([] as PontSpec[]);
   // const specs = [spec as any] as PontSpec[];
-  const [selectedMeta, changeSelectedMeta] = React.useState(null as any as Interface | BaseClass);
+  const [selectedMeta, changeSelectedMeta] = React.useState(null as any as Meta);
   const [currSpec, changeCurrSpec] = React.useState(localSpecs?.[0]);
   const [page, changePage] = React.useState(PageType.Diff);
   const remoteSpec = remoteSpecs?.find((spec) => spec.name === currSpec?.name) || remoteSpecs[0];
@@ -34,7 +41,7 @@ const useContext = () => {
   const fetchPontSpecs = React.useCallback(() => {
     return PontUIService.requestPontSpecs().then((result) => {
       changeSpecs(result.localSpecs);
-      changeCurrSpec(getLocalSpec(result.localSpecs, result.currentOriginName as any));
+      changeCurrSpec(getLocalSpec(result.localSpecs, result?.currentOriginName || ""));
       changeRemoteSpecs(result.remoteSpecs);
     });
   }, []);
