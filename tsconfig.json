@@ -27,6 +27,7 @@
     "packages/oas-spec-ts/scripts/",
     "packages/pont-ui",
     "packages/vscode-pont/media/",
+    "packages/pont-spec-diff/tests/",
     "packages/jsonschema-form"
   ],
   "references": [

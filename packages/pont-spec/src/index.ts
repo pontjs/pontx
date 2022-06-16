@@ -122,17 +122,7 @@ export class PontSpec {
     }
   }
 
-  static findApi(spec: PontSpec, apiName: string) {
-    for (let index = 0; index < spec.mods?.length; index++) {
-      let mod = spec.mods?.[index];
-      const foundApi = (mod?.interfaces || []).find((inter) => {
-        if (inter.name === apiName) {
-          return inter;
-        }
-      });
-      if (foundApi) {
-        return foundApi;
-      }
-    }
+  static findApi(spec: PontSpec, modName: string, apiName: string) {
+    return mapifyGet(spec, ["mods", modName, "interfaces", apiName]);
   }
 }

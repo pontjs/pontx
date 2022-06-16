@@ -11,6 +11,7 @@ lerna bootstrap
 
 npm start
 
+# 基于 pont-ui，构建 vscode-pont 的 webview ui
 npm run vs-ui
 ```
 
