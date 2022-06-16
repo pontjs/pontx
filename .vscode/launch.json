@@ -31,6 +31,16 @@
       "args": ["--extensionDevelopmentPath=${workspaceRoot}", "--extensionTestsPath=${workspaceRoot}/out/test"],
       "stopOnEntry": false,
       "sourceMaps": true
+    },
+    {
+      "type": "node",
+      "name": "Debug Pont Spec Diff Tests",
+      "request": "launch",
+      "preLaunchTask": "test:pont-spec-diff",
+      "program": "${workspaceRoot}/packages/pont-spec-diff/tests/out/index.js",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "protocol": "inspector"
     }
   ]
 }
