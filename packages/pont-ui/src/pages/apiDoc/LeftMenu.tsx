@@ -59,12 +59,17 @@ export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
             {mod.interfaces.map((api) => {
               return (
                 <Menu.Item
-                  className={
-                    (selectedMeta as PontSpec.Interface)?.path && api.name === selectedMeta?.name ? "selected" : ""
-                  }
+                  className={selectedMeta?.type === "api" && api.name === selectedMeta?.name ? "selected" : ""}
                   key={api.name}
                   id={api.name}
-                  onClick={() => changeSelectedMeta(api)}
+                  onClick={() =>
+                    changeSelectedMeta({
+                      type: "api",
+                      modName: mod.name,
+                      name: api.name,
+                      spec: api,
+                    })
+                  }
                 >
                   <div className="api-name">
                     <div className="name" title={api.name}>
@@ -89,7 +94,13 @@ export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
                 className={clazz.name === selectedMeta?.name ? "selected" : ""}
                 key={clazz.name}
                 id={clazz.name}
-                onClick={() => changeSelectedMeta(clazz)}
+                onClick={() =>
+                  changeSelectedMeta({
+                    type: "baseClass",
+                    name: clazz.name,
+                    spec: clazz,
+                  })
+                }
               >
                 <div className="api-name">
                   <div className="name" title={clazz.name}>
