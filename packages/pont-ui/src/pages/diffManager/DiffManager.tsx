@@ -89,11 +89,11 @@ export const DiffManager: React.FC<DiffManagerProps> = (props) => {
     const { childrenKey = "", mappifyPath } = props;
     const diffType = (
       <>
-        {diffResult?.type === "update" && Object.keys(diffResult?.diffs || {})?.length ? (
+        {/* {diffResult?.type === "update" && Object.keys(diffResult?.diffs || {})?.length ? (
           <Balloon trigger={<i className="codicon codicon-diff"></i>} triggerType="hover" closable={false}>
             {getDiffs(diffResult)}
           </Balloon>
-        ) : null}
+        ) : null} */}
         <Balloon
           trigger={<span className={"diff-type " + diffResult.type}>{textMap[diffResult.type]}</span>}
           triggerType="hover"
@@ -357,7 +357,7 @@ export const DiffManager: React.FC<DiffManagerProps> = (props) => {
         <div className="api-name">
           {renderDiffItem(clazz, {
             mappifyPath: ["baseClasses", clazz.name],
-            description: `${clazz.schema?.description || clazz?.schema?.title}`,
+            description: `${clazz.schema?.description || clazz?.schema?.title || ""}`,
           })}
         </div>
       );

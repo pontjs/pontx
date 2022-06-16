@@ -136,7 +136,11 @@ export const SchemaExp: React.FC<SchemaExpProps> = (props) => {
     props.schema,
     currSpec?.baseClasses || [],
     (base) => {
-      changeSelectedMeta(base);
+      changeSelectedMeta({
+        type: "baseClass",
+        name: base.name,
+        spec: base,
+      });
       changePage(PageType.Doc);
     },
     props.isExp,
