@@ -16,26 +16,15 @@ import { SchemaTable } from "../../components/SchemaTable/comps/SchemaTable";
 
 export class APIProps {
   selectedApi: PontSpec.Interface;
-  diffs?: DiffResult<PontSpec.Interface>;
 }
 
 export const API: React.FC<APIProps> = (props) => {
-  const { selectedApi, diffs } = props;
-
-  const responseSchema = selectedApi?.responses?.["200"]?.schema;
-  const responses = responseSchema?.type;
-  const diffTextMap = {
-    update: "接口变更详情",
-    delete: "远程接口已删除",
-    create: "远程新增接口",
-  };
-  const diffText = diffTextMap[(diffs as any)?.type];
+  const { selectedApi } = props;
 
   return (
-    <div className={classNames("pont-ui-api", (diffs as any)?.type)}>
+    <div className={classNames("pont-ui-api")}>
       {selectedApi ? (
         <>
-          {diffText ? <div className="diff-text">{diffText}</div> : null}
           <div className={"header " + (selectedApi?.deprecated ? "deprecated" : "")}>
             <div className="method">{selectedApi.method?.toUpperCase()}</div>
             <div className="path">{selectedApi.path}</div>
@@ -50,7 +39,7 @@ export const API: React.FC<APIProps> = (props) => {
           <div className="content">
             <div className="mod">
               <div className="mod-title">入参</div>
-              <ParametersTable parameters={selectedApi?.parameters} diffParameters={props.diffs?.parameters as any} />
+              <ParametersTable parameters={selectedApi?.parameters} />
             </div>
             <div className="mod">
               <div className="mod-title">出参</div>
@@ -101,12 +90,6 @@ export const API: React.FC<APIProps> = (props) => {
                 ]}
               ></Table> */}
             </div>
-            {Object.keys(diffs?.diffs || {}).length && diffs?.type === "update" ? (
-              <div className="mod">
-                <div className="mod-title">变更内容</div>
-                {getDiffs(diffs)}
-              </div>
-            ) : null}
           </div>
         </>
       ) : null}

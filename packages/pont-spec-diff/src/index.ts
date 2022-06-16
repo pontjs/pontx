@@ -1,4 +1,5 @@
-import { PontSpec } from "pont-spec";
 import { diffPontSpec, DiffResult } from "./diff";
+import { diffApi, diffBaseClass } from "./pureDiff";
+import { BaseClazzDiffOp } from "./diffDoc";
 
-export { diffPontSpec, DiffResult };
+export { diffPontSpec, DiffResult, diffApi, diffBaseClass, BaseClazzDiffOp };

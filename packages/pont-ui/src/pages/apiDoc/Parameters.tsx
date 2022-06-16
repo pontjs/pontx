@@ -15,7 +15,6 @@ import { SchemaDynamicTable } from "../../components/SchemaTable/comps/SchemaDyn
 
 export class ParametersTableProps {
   parameters: PontSpec.Parameter[];
-  diffParameters?: DiffResult<PontSpec.Parameter>[];
 }
 
 export const ParametersTable: React.FC<ParametersTableProps> = (props) => {
