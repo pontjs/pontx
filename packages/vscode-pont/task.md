@@ -1,3 +1,7 @@
 - 1、config 文件更新后，自动 restart
 - 2、pont-config.json provider
 - 3、项目中跑通
+- 4、diff 问题
+- 5、logger 开始生成多源类型代码
+- 6、copy 问题
+- 7、修改配置后重启
