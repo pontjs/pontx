@@ -1,6 +1,6 @@
 {
   "name": "pont-cli",
-  "version": "0.0.2",
+  "version": "0.3.1",
   "description": "Pont CLI",
   "bin": {
     "pont2": "bin/init.js"
@@ -19,10 +19,10 @@
   "dependencies": {
     "chalk": "^4.1.2",
     "commander": "^9.2.0",
-    "pont-manager": "*",
-    "pont-meta-fetch-plugin": "^0.0.1",
-    "pont-oas2-parser-plugin": "^0.0.1",
-    "pont-react-hooks-generate-plugin": "^0.0.1"
+    "pont-manager": "^0.3.1",
+    "pont-meta-fetch-plugin": "^0.3.1",
+    "pont-oas2-parser-plugin": "^0.3.1",
+    "pont-react-hooks-generate-plugin": "^0.3.1"
   },
   "files": [
     "bin",
