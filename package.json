@@ -32,7 +32,11 @@
     "pre-commit": "lint-staged"
   },
   "lint-staged": {
-    "packages/{src}/**/*.ts": [
+    "packages/**/src/*.ts": [
+      "prettier --write",
+      "git add"
+    ],
+    "plugins/**/src/*.ts": [
       "prettier --write",
       "git add"
     ]
