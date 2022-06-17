@@ -11,5 +11,6 @@
     "@types/lodash": "*",
     "less": "^4.1.3",
     "lodash": "*"
-  }
+  },
+  "version": "0.3.1"
 }
