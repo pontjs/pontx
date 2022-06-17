@@ -9,10 +9,8 @@
     "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {},
-    "rootDir": "./src",
-    "composite": true
+    "rootDir": "./src"
   },
   "include": ["./src/**/*"],
-  "exclude": ["node_modules", "es6", "lib"],
-  "references": [{ "path": "../oas-spec-ts" }]
+  "exclude": ["node_modules", "es6", "lib"]
 }
