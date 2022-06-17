@@ -1,6 +1,6 @@
 {
   "name": "pont-react-hooks-generate-plugin",
-  "version": "0.0.1",
+  "version": "0.3.1",
   "description": "OpenAPI pont spec",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -11,8 +11,8 @@
     "build": "npm run clean && tsc --build"
   },
   "dependencies": {
-    "pont-generate-core": "*",
-    "pont-spec": "*"
+    "pont-generate-core": "^0.3.1",
+    "pont-spec": "^0.3.1"
   },
   "peerDependencies": {
     "pont-manager": "*"
