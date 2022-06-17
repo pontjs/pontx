@@ -1,6 +1,6 @@
 {
   "name": "pont-mocks-plugin",
-  "version": "0.0.1",
+  "version": "0.3.1",
   "description": "OpenAPI pont spec",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -14,7 +14,7 @@
     "lodash": "*"
   },
   "dependencies": {
-    "pont-spec": "*"
+    "pont-spec": "^0.3.1"
   },
   "files": [
     "lib"

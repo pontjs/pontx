@@ -1,6 +1,6 @@
 {
   "name": "pont-generate-core",
-  "version": "0.0.1",
+  "version": "0.3.1",
   "description": "OpenAPI pont spec",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -11,9 +11,9 @@
     "build": "npm run clean && tsc --build"
   },
   "dependencies": {
-    "pont-spec": "*",
     "fs-extra": "*",
     "lodash": "*",
+    "pont-spec": "^0.3.1",
     "prettier": "^2.6.2"
   },
   "files": [
@@ -23,8 +23,8 @@
   "author": "jasonHzq",
   "license": "MIT",
   "devDependencies": {
-    "@types/lodash": "*",
     "@types/fs-extra": "*",
+    "@types/lodash": "*",
     "typescript": "^4.6.4"
   }
 }
