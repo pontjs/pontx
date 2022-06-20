@@ -41,9 +41,7 @@ export class VSCodeLogger extends PontLogger {
     if (logType === "error") {
       vscode.window.showErrorMessage(message);
     } else {
-      if (pontUI.pontBar) {
-        pontUI.pontBar.text = "Pont[" + message + "]";
-      }
+      vscode.window.showInformationMessage(message);
       // vscode.window.showInformationMessage(message);
     }
   }
@@ -60,7 +58,7 @@ export const htmlTemplate = (context: { cspSource: string; getUri: (uri: string)
       http-equiv="Content-Security-Policy"
       content="default-src 'none'; img-src ${context.cspSource} https:;font-src ${context.cspSource}; script-src ${
     context.cspSource
-  }; style-src ${context.cspSource};"
+  }; style-src ${context.cspSource} 'self' 'unsafe-inline';"
     />
     <link href="${context.getUri("media/src/icon.css")}" rel="stylesheet" />
     <script type="module" crossorigin src="${context.getUri("media/dist/assets/index.js")}"></script>

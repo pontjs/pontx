@@ -13,7 +13,7 @@ export const PontUIService = {
     currentOriginName?: string;
   }> => {
     return {
-      localSpecs: [localSpec] as any[] as PontSpec[],
+      localSpecs: [localSpec, { name: "OSS2", mods: [], baseClasses: [] }] as any[] as PontSpec[],
       remoteSpecs: [remoteSpec] as any[] as PontSpec[],
       //   localSpecs: [] as any[] as PontSpec[],
       //   remoteSpecs: [] as any[] as PontSpec[],

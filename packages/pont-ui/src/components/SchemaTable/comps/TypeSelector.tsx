@@ -146,9 +146,7 @@ export const TypeSelector: React.FC<TypeSelectorProps> = (props) => {
               <div className="font-semibold mb-2 w-full">引用的数据结构</div>
               <div className="flex flex-no-wrap">
                 <Select
-                  dataSource={props.baseClasses.map((comp) => {
-                    return { value: `#/components/schemas/${comp.name}`, label: comp.name };
-                  })}
+                  dataSource={props.baseClasses.map((comp) => {})}
                   popupContainer={(dom) => {
                     return dom;
                   }}

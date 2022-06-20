@@ -14,7 +14,7 @@ export class FileStructure {
       if (typeof value === "string") {
         return fs.writeFile(currPath, value, "utf8");
       } else {
-        await fs.mkdir(currPath);
+        await fs.mkdirp(currPath);
 
         return this.generateFiles(value, currPath);
       }
@@ -92,7 +92,7 @@ export class FileGenerator {
 
   static async generateFiles(fileGenerator: FileGenerator) {
     FileGenerator.clearBasePath(fileGenerator);
-    await fs.mkdir(fileGenerator.basePath);
+    await fs.mkdirp(fileGenerator.basePath);
     await FileStructure.generateFiles(fileGenerator.fileStructure, fileGenerator.basePath);
   }
 
