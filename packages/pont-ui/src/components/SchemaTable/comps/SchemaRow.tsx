@@ -131,26 +131,6 @@ export const SchemaRow: React.FC<SchemaRowProps> = (props) => {
                 });
               }}
             />
-            {schema.$ref ? (
-              <a
-                href="javascript:;"
-                onClick={() => {
-                  const comp = baseClasses?.find(
-                    (comp) => comp.name === schema.$ref?.slice("#/components/schemas/"?.length),
-                  );
-                  if (comp) {
-                    // note
-                    // openMetaDialog({
-                    //   type: "BaseClass",
-                    //   name: comp.name,
-                    // });
-                  }
-                }}
-                style={{ lineHeight: "20px" }}
-              >
-                查看
-              </a>
-            ) : null}
 
             {schema.type === "object" && schema.properties ? (
               <span className="ml-3" style={{ color: "#8A8B8C", lineHeight: "20px" }}>{`{${

@@ -1,7 +1,16 @@
-- 1、config 文件更新后，自动 restart
-- 2、pont-config.json provider
-- 3、项目中跑通
-- 4、diff 问题
-- 5、logger 开始生成多源类型代码
-- 6、copy 问题
-- 7、修改配置后重启
+## bugfix
+
+- pont-config.json provider
+- 实际项目中跑通
+- 对比组件的样式问题
+- diff 问题
+
+## feature
+
+- spec 进阶
+- test case
+- OAS3 parser plugin
+- OneAPI parser plugin
+- more generator
+- usage report plugin
+- pont-service 冲突时，自动唤起 Diff 管理。
