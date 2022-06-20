@@ -26,23 +26,25 @@ export const Nav: React.FC<NavProps> = (props) => {
           <div className="menu-header">
             <div className="title">Pont UI</div>
 
-            {specs?.length > 1 ? (
-              <Select
-                value={currSpec.name}
-                onChange={(value) => {
-                  changeCurrSpec(specs.find((spec) => spec.name === value) as PontSpec);
-                }}
-                dataSource={specs.map((spec) => spec.name)}
-              ></Select>
-            ) : null}
-
             <div className="ops" style={{ marginLeft: 30 }}>
+              {specs?.length > 1 ? (
+                <Select
+                  value={currSpec.name}
+                  onChange={(value) => {
+                    changeCurrSpec(specs.find((spec) => spec.name === value) as PontSpec);
+                  }}
+                  size="small"
+                  style={{ marginRight: 5 }}
+                  dataSource={specs.map((spec) => spec.name)}
+                ></Select>
+              ) : null}
               <Balloon
                 closable={false}
                 trigger={
                   <Icon
                     type="refresh"
                     className="op"
+                    style={{ cursor: "pointer" }}
                     onClick={() => {
                       fetchPontSpecs().then(() => {
                         Message.success("远程数据已同步");

@@ -49,7 +49,14 @@ export const SpecMenus = (props: SpecMenusProps) => {
   });
 
   const clazzes = pontSpec.baseClasses?.length ? (
-    <Menu.SubMenu key={props.key + "/" + "pont-classes"} label="数据结构">
+    <Menu.SubMenu
+      key={props.key + "/" + "pont-classes"}
+      label={
+        <span className="diff-item">
+          <span className="update">数据结构({pontSpec.baseClasses.length})</span>
+        </span>
+      }
+    >
       {pontSpec.baseClasses.map((clazz) => {
         return (
           <Menu.Item

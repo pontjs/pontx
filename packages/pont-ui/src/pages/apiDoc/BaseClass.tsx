@@ -8,6 +8,7 @@ import "./BaseClass.less";
 import { SchemaTable } from "../../components/SchemaTable/comps/SchemaTable";
 import { PontJsonSchemaOp } from "../../components/SchemaTable/model/BaseClassSchema";
 import classNames from "classnames";
+import { SchemaDynamicTable } from "../../components/SchemaTable/comps/SchemaDynamicTable";
 
 export class BaseClassProps {
   selectedClass: PontSpec.BaseClass;
@@ -26,7 +27,8 @@ export const BaseClass: React.FC<BaseClassProps> = (props) => {
             : ""}
         </div>
       </div>
-      <SchemaTable
+
+      <SchemaDynamicTable
         changeBaseClasss={() => {}}
         changeResponseBody={() => {}}
         changeRootApiSchema={() => {}}
@@ -34,7 +36,7 @@ export const BaseClass: React.FC<BaseClassProps> = (props) => {
         readOnly
         rows={PontJsonSchemaOp.genrateRows(props.selectedClass?.schema)}
         tableType="struct"
-      />
+      ></SchemaDynamicTable>
     </div>
   );
 };
