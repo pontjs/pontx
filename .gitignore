@@ -40,4 +40,5 @@ packages/vscode-pont/media/out
 packages/pont-spec-diff/tests/out
 packages/pont-spec-diff/es6/
 packages/pont-spec-diff/tests
-packages/pont-ui/src/mocks/*.jsonpont/packages/pont-ui/src/mocks/remoteSpec.json
+packages/pont-ui/src/mocks/*.json
+packages/pont-ui/src/mocks/remoteSpec.json
