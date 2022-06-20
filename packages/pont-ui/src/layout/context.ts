@@ -2,6 +2,7 @@ import { createContainer } from "unstated-next";
 import * as React from "react";
 // import * as spec from "../mocks/spec.json";
 import { PontSpec, Interface, BaseClass } from "pont-spec";
+// import { PontUIService } from "../service";
 import { PontUIService } from "../service.local";
 
 export enum PageType {
@@ -40,9 +41,9 @@ const useContext = () => {
 
   const fetchPontSpecs = React.useCallback(() => {
     return PontUIService.requestPontSpecs().then((result) => {
-      changeSpecs(result.localSpecs);
       changeCurrSpec(getLocalSpec(result.localSpecs, result?.currentOriginName || ""));
       changeRemoteSpecs(result.remoteSpecs);
+      changeSpecs(result.localSpecs);
     });
   }, []);
 

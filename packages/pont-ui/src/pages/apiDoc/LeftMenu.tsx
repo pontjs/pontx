@@ -48,7 +48,7 @@ export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
             label={
               <div className="mod-name">
                 <div className="name" title={mod.name}>
-                  {mod.name}
+                  {mod.name}({mod.interfaces?.length || 0})
                 </div>
                 <div className="desc" title={mod.description}>
                   {mod.description}
@@ -87,7 +87,7 @@ export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
       })}
 
       {filteredCurrSpec?.baseClasses?.length ? (
-        <Menu.SubMenu key="pont-classes" label="数据结构">
+        <Menu.SubMenu key="pont-classes" label={<span>数据结构({filteredCurrSpec.baseClasses?.length || 0})</span>}>
           {(filteredCurrSpec?.baseClasses || []).map((clazz) => {
             return (
               <Menu.Item

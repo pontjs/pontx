@@ -72,7 +72,7 @@ export const SchemaDynamicTable: React.FC<SchemaDynamicTableProps> = React.memo(
       <table>
         <thead>
           <th>名称</th>
-          <th>位置</th>
+          {props.tableType === "parameters" ? <th>位置</th> : null}
           <th>描述</th>
         </thead>
         <tbody>

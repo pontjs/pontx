@@ -30,7 +30,7 @@ tsconfig.tsbuildinfo
 packages/vscode-pont-ui/out/
 packages/pont-ui/out/
 packages/pont-ui/src/mocks/*
-packages/pont-ui/src/services.local.ts
+packages/pont-ui/src/service.local.ts
 packages/pont-spec/es6/*
 package-lock.json
 packages/vscode-pont/media/dist
@@ -40,3 +40,4 @@ packages/vscode-pont/media/out
 packages/pont-spec-diff/tests/out
 packages/pont-spec-diff/es6/
 packages/pont-spec-diff/tests
+packages/pont-ui/src/mocks/*.json

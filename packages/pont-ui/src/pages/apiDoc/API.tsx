@@ -13,6 +13,7 @@ import { ParametersTable } from "./Parameters";
 import { SchemaExp } from "./SchemaExp";
 import { PontJsonSchemaOp } from "../../components/SchemaTable/model/BaseClassSchema";
 import { SchemaTable } from "../../components/SchemaTable/comps/SchemaTable";
+import { SchemaDynamicTable } from "../../components/SchemaTable/comps/SchemaDynamicTable";
 
 export class APIProps {
   selectedApi: PontSpec.Interface;
@@ -44,7 +45,7 @@ export const API: React.FC<APIProps> = (props) => {
             <div className="mod">
               <div className="mod-title">出参</div>
 
-              <SchemaTable
+              <SchemaDynamicTable
                 changeBaseClasss={() => {}}
                 changeResponseBody={() => {}}
                 changeRootApiSchema={() => {}}
@@ -52,7 +53,7 @@ export const API: React.FC<APIProps> = (props) => {
                 readOnly
                 rows={PontJsonSchemaOp.genrateRows(selectedApi?.responses["200"]?.schema)}
                 tableType="response"
-              />
+              ></SchemaDynamicTable>
               {/* <Table
                 dataSource={[selectedApi?.responses["200"]?.schema]}
                 emptyContent="当前接口无出参"
