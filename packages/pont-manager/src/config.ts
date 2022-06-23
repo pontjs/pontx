@@ -183,8 +183,7 @@ export class PontInnerManagerConfig {
             options: plugin.options,
           };
         } catch (e) {
-          console.log(e.stack);
-          logger.error(e.message);
+          logger.error(e.message, e.stack);
         }
       })
       .reduce((result, plugin, pluginIndex) => {

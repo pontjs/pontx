@@ -1,7 +1,7 @@
 import { createContainer } from "unstated-next";
 import * as React from "react";
 // import * as spec from "../mocks/spec.json";
-import { PontSpec, Interface, BaseClass } from "pont-spec";
+import { PontSpec, Interface } from "pont-spec";
 // import { PontUIService } from "../service";
 import { PontUIService } from "../service.local";
 

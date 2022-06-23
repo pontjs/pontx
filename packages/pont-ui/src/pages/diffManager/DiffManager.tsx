@@ -16,8 +16,6 @@ import { SpecMenus } from "./SpecMenus";
 import { mapifyImmutableOperate, mapifyGet } from "pont-spec";
 import { changeAllMetaProcessType, getDiffs, getNewSpec, getPontSpecByProcessType, ProcessedDiffs } from "./utils";
 import { PontUIService } from "../../service";
-import { API } from "../apiDoc/API";
-import { BaseClass } from "../apiDoc/BaseClass";
 
 export class DiffManagerProps {}
 
@@ -95,11 +93,11 @@ export const DiffManager: React.FC<DiffManagerProps> = (props) => {
           </Balloon>
         ) : null} */}
         <Balloon
-          trigger={<span className={"diff-type " + diffResult.type}>{textMap[diffResult.type]}</span>}
+          trigger={<span className={"diff-type " + diffResult.diffType}>{textMap[diffResult.diffType]}</span>}
           triggerType="hover"
           closable={false}
         >
-          {labelMap[diffResult.type]}
+          {labelMap[diffResult.diffType]}
         </Balloon>
       </>
     );
@@ -211,7 +209,7 @@ export const DiffManager: React.FC<DiffManagerProps> = (props) => {
       case "untracked": {
         diffLabel = (
           <div className="diff-label">
-            {((diffResult.type as any) || "equal") !== "equal" ? (
+            {((diffResult.diffType as any) || "equal") !== "equal" ? (
               <>
                 {/* <Balloon
                     trigger={
@@ -303,11 +301,11 @@ export const DiffManager: React.FC<DiffManagerProps> = (props) => {
 
     return (
       <div className={"diff-item"}>
-        <div className={"item-label " + diffResult.type}>
+        <div className={"item-label " + diffResult.diffType}>
           <div
             className="name"
             title={diffResult.name}
-            style={{ textDecoration: diffResult.type === "delete" ? "line-through" : "none" }}
+            style={{ textDecoration: diffResult.diffType === "delete" ? "line-through" : "none" }}
           >
             {props.name || diffResult.name}
           </div>
@@ -352,12 +350,13 @@ export const DiffManager: React.FC<DiffManagerProps> = (props) => {
   );
 
   const renderClazzLabel = React.useCallback(
-    (clazz) => {
+    (schema, name) => {
       return (
         <div className="api-name">
-          {renderDiffItem(clazz, {
-            mappifyPath: ["baseClasses", clazz.name],
-            description: `${clazz.schema?.description || clazz?.schema?.title || ""}`,
+          {renderDiffItem(schema, {
+            mappifyPath: ["definitions", name],
+            description: `${schema?.description || schema?.title || ""}`,
+            name,
           })}
         </div>
       );
@@ -410,7 +409,7 @@ export const DiffManager: React.FC<DiffManagerProps> = (props) => {
           renderClazzLabel: renderClazzLabel,
         })} */}
         <Menu.Divider key={"staged-devider"}>
-          已暂存变更({stagedSpec?.mods?.length + (stagedSpec?.baseClasses?.length ? 1 : 0)})
+          已暂存变更({stagedSpec?.mods?.length + (Object.keys(stagedSpec?.definitions || {}).length ? 1 : 0)})
           <div className="right-icons">
             <Balloon
               trigger={
@@ -467,7 +466,7 @@ export const DiffManager: React.FC<DiffManagerProps> = (props) => {
           renderClazzLabel: renderClazzLabel,
         })}
         <Menu.Divider key={"untracked-devider"}>
-          未处理变更({unTrackedSpec?.mods?.length + (unTrackedSpec?.baseClasses?.length ? 1 : 0)})
+          未处理变更({unTrackedSpec?.mods?.length + PontSpec.PontSpec.getClazzCnt(unTrackedSpec) ? 1 : 0})
           <div className="right-icons">
             {/* <Balloon
               trigger={
@@ -518,7 +517,7 @@ export const DiffManager: React.FC<DiffManagerProps> = (props) => {
           <div className="top-area">
             <span>
               模块变更共计({(diffs.mods || []).length})
-              <span style={{ marginLeft: 20 }}>数据结构变更共计({(diffs.baseClasses || []).length})</span>
+              <span style={{ marginLeft: 20 }}>数据结构变更共计({`${PontSpec.PontSpec.getClazzCnt(diffs)}`})</span>
             </span>
           </div>
           {menus}

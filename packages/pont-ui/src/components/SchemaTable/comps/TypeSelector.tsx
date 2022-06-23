@@ -53,7 +53,7 @@ export class TypeSelectorProps {
   schema: PontSpec.PontJsonSchema;
   onSchemaChange(schema: PontSpec.PontJsonSchema) {}
   disabled = false;
-  baseClasses = [] as PontSpec.BaseClass[];
+  definitions = {} as PontSpec.ObjectMap<PontSpec.PontJsonSchema>;
 }
 const getSchemaType = (schema: PontSpec.PontJsonSchema) => {
   if (schema.$ref) {
@@ -146,7 +146,7 @@ export const TypeSelector: React.FC<TypeSelectorProps> = (props) => {
               <div className="font-semibold mb-2 w-full">引用的数据结构</div>
               <div className="flex flex-no-wrap">
                 <Select
-                  dataSource={props.baseClasses.map((comp) => {})}
+                  dataSource={Object.keys(props.definitions || {})}
                   popupContainer={(dom) => {
                     return dom;
                   }}

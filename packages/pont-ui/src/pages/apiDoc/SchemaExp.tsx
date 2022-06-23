@@ -3,12 +3,17 @@
  * @description
  */
 import * as React from "react";
-import { BaseClass, PontJsonSchema } from "pont-spec";
+import { ObjectMap, PontJsonSchema } from "pont-spec";
 import { Dropdown, Overlay } from "@alicloud/console-components";
 import { BaseClass as BaseClassComp } from "./BaseClass";
 import { LayoutContext, PageType } from "../../layout/context";
 
-export function getSchemaDom(schema: PontJsonSchema, baseClasses: BaseClass[], changeBaseClass, isExp = true) {
+export function getSchemaDom(
+  schema: PontJsonSchema,
+  definitions: ObjectMap<PontJsonSchema>,
+  changeBaseClass,
+  isExp = true,
+) {
   if (!schema) {
     return "any";
   }
@@ -20,7 +25,8 @@ export function getSchemaDom(schema: PontJsonSchema, baseClasses: BaseClass[], c
   let refDom = null as any;
 
   if (schema.typeName) {
-    const base = baseClasses?.find((clazz) => clazz.name === schema.typeName);
+    const base = definitions?.[schema.typeName];
+
     if (base) {
       refDom = (
         <Overlay.Popup
@@ -33,7 +39,7 @@ export function getSchemaDom(schema: PontJsonSchema, baseClasses: BaseClass[], c
           }
         >
           <div>
-            <BaseClassComp selectedClass={base} />
+            <BaseClassComp schema={base} name={schema.typeName} />
           </div>
         </Overlay.Popup>
       );
@@ -51,7 +57,7 @@ export function getSchemaDom(schema: PontJsonSchema, baseClasses: BaseClass[], c
           if (!isExp) {
             return "T" + argIndex;
           }
-          const dom = getSchemaDom(arg, baseClasses, changeBaseClass);
+          const dom = getSchemaDom(arg, definitions, changeBaseClass);
 
           return (
             <>
@@ -85,7 +91,7 @@ export function getSchemaDom(schema: PontJsonSchema, baseClasses: BaseClass[], c
         return "array";
       }
       if (schema.items) {
-        const dom = getSchemaDom(schema.items as PontJsonSchema, baseClasses, changeBaseClass);
+        const dom = getSchemaDom(schema.items as PontJsonSchema, definitions, changeBaseClass);
         return (
           <>
             Array{"<"}
@@ -109,7 +115,7 @@ export function getSchemaDom(schema: PontJsonSchema, baseClasses: BaseClass[], c
           .join("; ")} }`;
       }
       if (schema?.additionalProperties) {
-        const dom = getSchemaDom(schema?.additionalProperties as PontJsonSchema, baseClasses, changeBaseClass);
+        const dom = getSchemaDom(schema?.additionalProperties as PontJsonSchema, definitions, changeBaseClass);
         return (
           <>
             map{"<"}string{", "}
@@ -134,7 +140,7 @@ export const SchemaExp: React.FC<SchemaExpProps> = (props) => {
 
   const dom = getSchemaDom(
     props.schema,
-    currSpec?.baseClasses || [],
+    currSpec?.definitions || [],
     (base) => {
       changeSelectedMeta({
         type: "baseClass",

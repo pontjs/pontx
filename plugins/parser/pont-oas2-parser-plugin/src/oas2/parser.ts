@@ -19,7 +19,7 @@ export function parseOAS2Interface(
   inter: OAS2.OperationObject & { path: string; method: string },
   context = new JsonSchemaContext(),
 ) {
-  const { samePath, defNames = [], compileTemplateKeyword } = context;
+  const { samePath } = context;
   const { path, method } = inter;
   let name = "";
 
@@ -35,14 +35,14 @@ export function parseOAS2Interface(
   });
 
   const parameters = (inter.parameters || []).map((param) => {
-    const { name, required, schema, ...rest } = param;
+    const { required, name, schema, ...rest } = param;
     const paramSchema = { ...rest, ...(schema || {}) };
 
     return {
       in: param.in as any,
       name: name.includes("/") ? name.split("/").join("") : name,
-      schema: parseJsonSchema(paramSchema as any as OAS2.SchemaObject, context),
       required,
+      schema: parseJsonSchema(paramSchema as any as OAS2.SchemaObject, { ...context, required }),
     } as PontSpec.Parameter;
   });
 
@@ -71,7 +71,7 @@ export function parseOAS2Interface(
   return standardInterface;
 }
 
-export function parseSwagger2Mods(swagger: OAS2.SwaggerObject, defNames: string[], compileTemplateKeyword?: string) {
+export function parseSwagger2Mods(swagger: OAS2.SwaggerObject, defNames: string[]) {
   const tags = [
     ...(swagger.tags || []),
     {
@@ -122,7 +122,6 @@ export function parseSwagger2Mods(swagger: OAS2.SwaggerObject, defNames: string[
           defNames,
           samePath,
           classTemplateArgs: [],
-          compileTemplateKeyword,
         });
       });
       processDuplicateInterfaceName(standardInterfaces, samePath);
@@ -143,7 +142,6 @@ export function parseSwagger2Mods(swagger: OAS2.SwaggerObject, defNames: string[
 }
 
 export function parseOAS2(swagger: OAS2.SwaggerObject, name = ""): PontSpec.PontSpec {
-  const compileTemplateKeyword = "#/definitions/";
   const draftClasses = _.map(swagger.definitions, (schema, defName) => {
     const defNameAst = compileTemplate(defName);
 
@@ -163,31 +161,51 @@ export function parseOAS2(swagger: OAS2.SwaggerObject, name = ""): PontSpec.Pont
     const dataType = parseAst2PontJsonSchema(clazz.defNameAst, {
       classTemplateArgs: [],
       defNames,
-      compileTemplateKeyword: "#/definitions/",
     });
+    const { definitions, required, properties, additionalProperties, items, ...rest } = clazz.schema;
     const clazzSchema = {
-      ...clazz.schema,
+      ...rest,
+      requiredProps: required,
       typeName: dataType.typeName,
       templateArgs: dataType.templateArgs,
-      properties: _.mapValues(clazz.schema?.properties || {}, (value, key) => {
+    } as PontSpec.PontJsonSchema;
+    if (properties) {
+      clazzSchema.properties = _.mapValues(clazz.schema?.properties || {}, (value, key) => {
         return parseJsonSchema(value, {
           classTemplateArgs: dataType.templateArgs,
-          compileTemplateKeyword,
+          required: required?.includes(key),
           defNames,
         });
-      }),
-    };
+      });
+    }
+    if (additionalProperties) {
+      clazzSchema.additionalProperties = parseJsonSchema(additionalProperties, {
+        classTemplateArgs: dataType.templateArgs,
+        defNames,
+      });
+    }
+    if (items) {
+      clazzSchema.items = parseJsonSchema(items, {
+        classTemplateArgs: dataType.templateArgs,
+        defNames,
+      });
+    }
 
     return {
       schema: clazzSchema,
       name: clazz.name,
-    } as PontSpec.BaseClass;
+    };
   });
   baseClasses = deleteDuplicateBaseClass(baseClasses);
 
   const pontDs = {
-    baseClasses,
-    mods: parseSwagger2Mods(swagger, defNames, compileTemplateKeyword),
+    definitions: baseClasses.reduce((result, base) => {
+      return {
+        ...result,
+        [base.name]: base.schema,
+      };
+    }, {}),
+    mods: parseSwagger2Mods(swagger, defNames),
     name,
   } as PontSpec.PontSpec;
 

@@ -11,19 +11,21 @@ import classNames from "classnames";
 import { SchemaDynamicTable } from "../../components/SchemaTable/comps/SchemaDynamicTable";
 
 export class BaseClassProps {
-  selectedClass: PontSpec.BaseClass;
+  name: string;
+
+  schema: PontSpec.PontJsonSchema;
 }
 
 export const BaseClass: React.FC<BaseClassProps> = (props) => {
-  const { selectedClass } = props;
+  const { name, schema } = props;
 
   return (
-    <div className={classNames("pont-ui-baseclass", (selectedClass as any)?.type)}>
+    <div className={classNames("pont-ui-baseclass", (schema as any)?.type)}>
       <div className="header">
         <div className="title">
-          数据结构 - {selectedClass?.name}
-          {selectedClass?.schema?.templateArgs?.length
-            ? `<${selectedClass.schema?.templateArgs.map((arg, argIndex) => "T" + argIndex).join(", ")}>`
+          数据结构 - {name}
+          {schema?.templateArgs?.length
+            ? `<${schema?.templateArgs.map((arg, argIndex) => "T" + argIndex).join(", ")}>`
             : ""}
         </div>
       </div>
@@ -34,7 +36,7 @@ export const BaseClass: React.FC<BaseClassProps> = (props) => {
         changeRootApiSchema={() => {}}
         keyword=""
         readOnly
-        rows={PontJsonSchemaOp.genrateRows(props.selectedClass?.schema)}
+        rows={PontJsonSchemaOp.genrateRows(schema)}
         tableType="struct"
       ></SchemaDynamicTable>
     </div>

@@ -1,10 +1,10 @@
 import { OAS2 } from "oas-spec-ts";
 import { PontJsonSchema } from "./dataType";
 import { Parameter } from "./parameter";
-import { getDuplicateById, mapifyImmutableOperate, mapifyOperateList, mapifyGet } from "./utils";
+import { getDuplicateById, mapifyImmutableOperate, mapifyOperateList, mapifyGet, orderMap, ObjectMap } from "./utils";
 import * as _ from "lodash";
 
-export { PontJsonSchema, Parameter, mapifyImmutableOperate, mapifyOperateList, mapifyGet };
+export { PontJsonSchema, Parameter, mapifyImmutableOperate, mapifyOperateList, mapifyGet, ObjectMap };
 
 type ResponseObject = {
   schema: PontJsonSchema;
@@ -34,14 +34,9 @@ export class Mod {
   }
 }
 
-export class BaseClass {
-  name: string;
-  schema: PontJsonSchema;
-}
-
 export class PontSpec {
   public name: string;
-  public baseClasses: BaseClass[] = [];
+  public definitions: ObjectMap<PontJsonSchema>;
   public mods: Mod[] = [];
   /** 扩展字段 */
   public ext?: any;
@@ -49,7 +44,7 @@ export class PontSpec {
   static reOrder(ds: PontSpec): PontSpec {
     return {
       ...ds,
-      baseClasses: _.orderBy(ds.baseClasses, "name"),
+      definitions: orderMap(ds.definitions),
       mods: _.orderBy(ds.mods, "name"),
     };
   }
@@ -64,22 +59,11 @@ export class PontSpec {
       }
     });
 
-    ds.baseClasses.forEach((base) => {
-      if (!base.name) {
-        errors.push(`lock 文件不合法，发现没有 name 属性的基类;`);
-      }
-    });
-
     const dupMod = getDuplicateById(ds.mods, "name");
-    const dupBase = getDuplicateById(ds.baseClasses, "name");
 
     if (dupMod) {
       errors.push(`模块 ${dupMod.name} 重复了。`);
     }
-    if (dupBase) {
-      errors.push(`基类 ${dupBase.name} 重复了。`);
-    }
-
     if (errors && errors.length) {
       throw new Error(errors.join("\n"));
     }
@@ -91,7 +75,7 @@ export class PontSpec {
     return JSON.stringify(ds, null, 2);
   }
 
-  constructor(ds?: { mods: Mod[]; name: string; baseClasses: BaseClass[] }) {
+  constructor(ds?: { mods: Mod[]; name: string; definitions: ObjectMap<PontJsonSchema> }) {
     if (ds) {
       PontSpec.reOrder(ds);
     }
@@ -100,29 +84,24 @@ export class PontSpec {
   static constructorByName(name: string) {
     return {
       name,
-      baseClasses: [] as BaseClass[],
+      definitions: {} as ObjectMap<PontJsonSchema>,
       mods: [] as Mod[],
     } as PontSpec;
   }
 
   static isEmptySpec(spec: PontSpec) {
-    if (spec?.mods?.length || spec?.baseClasses?.length) {
+    if (spec?.mods?.length || !_.isEmpty(spec?.definitions)) {
       return false;
     }
 
     return true;
   }
 
-  static findBaseClazz(spec: PontSpec, clazzName: string) {
-    for (let index = 0; index < spec.baseClasses?.length; index++) {
-      const clazz = spec.baseClasses?.[index];
-      if (clazz.name === clazzName) {
-        return clazz;
-      }
-    }
-  }
-
   static findApi(spec: PontSpec, modName: string, apiName: string) {
     return mapifyGet(spec, ["mods", modName, "interfaces", apiName]);
+  }
+
+  static getClazzCnt(spec: PontSpec) {
+    return Object.keys(spec?.definitions || {}).length;
   }
 }

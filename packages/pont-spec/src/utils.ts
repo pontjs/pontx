@@ -1,4 +1,9 @@
 import immutableSet from "lodash/fp/set";
+import * as _ from "lodash";
+
+export type ObjectMap<T> = {
+  [key: string]: T;
+};
 
 export function getDuplicateById<T>(arr: T[], idKey = "name"): null | T {
   if (!arr || !arr.length) {
@@ -101,4 +106,14 @@ export function mapifyGet(result: any, pathes: Array<string | number>) {
     currentPath = result.findIndex((item) => item?.name === currentPath);
   }
   return mapifyGet(result[currentPath], restPathes);
+}
+
+export function orderMap<T>(map: ObjectMap<T>) {
+  const result = {} as ObjectMap<T>;
+
+  _.orderBy(Object.keys(map || {})).forEach((key) => {
+    result[key] = map[key];
+  });
+
+  return result;
 }

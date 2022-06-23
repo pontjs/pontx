@@ -144,12 +144,11 @@ export const diffApi = (localApi: PontSpec.Interface, remoteApi: PontSpec.Interf
   return diffObject(localApi, remoteApi, [], customer);
 };
 
-export const diffBaseClass = (localClazz: PontSpec.BaseClass, Clazz: PontSpec.BaseClass): DiffResult[] => {
+export const diffBaseClass = (local: PontSpec.PontJsonSchema, remote: PontSpec.PontJsonSchema): DiffResult[] => {
   const customer = {
     items: diffObject as any,
     properties: diffObject as any,
     additionalProperties: diffObject as any,
-    schema: diffObject as any,
   } as CustomDiff;
-  return diffObject(localClazz, Clazz, [], customer);
+  return diffObject(local, remote, [], customer);
 };

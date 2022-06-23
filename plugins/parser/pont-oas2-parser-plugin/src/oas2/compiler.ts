@@ -2,10 +2,7 @@ import { PontJsonSchema } from "pont-spec";
 import { JsonSchemaContext, PrimitiveTypeMap } from "./utils";
 
 class Token {
-  constructor(
-    public type: "Identifier" | "PreTemplate" | "EndTemplate" | "Comma",
-    public value = ""
-  ) {}
+  constructor(public type: "Identifier" | "PreTemplate" | "EndTemplate" | "Comma", public value = "") {}
 }
 
 interface AstNode {
@@ -24,11 +21,7 @@ class Parser {
       return node;
     } else {
       console.error("current nodes", this.nodes);
-      throw Error(
-        "the first node type is not " +
-          type +
-          " in template parser's eat method"
-      );
+      throw Error("the first node type is not " + type + " in template parser's eat method");
     }
   }
 
@@ -74,8 +67,8 @@ class Parser {
 /** ast 转换为标准类型 */
 export function parseAst2PontJsonSchema(
   ast: AstNode,
-  context: JsonSchemaContext
-): PontJsonSchema {
+  context: JsonSchemaContext,
+): { typeName: string; templateArgs: any[] } {
   const { name, templateArgs } = ast;
   // 怪异类型兼容
   let typeName = PrimitiveTypeMap[name] || name;
@@ -87,7 +80,7 @@ export function parseAst2PontJsonSchema(
   const schema = {
     typeName,
     templateArgs: typeArgs,
-  } as PontJsonSchema;
+  };
 
   return schema;
 }

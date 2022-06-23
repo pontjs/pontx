@@ -69,7 +69,7 @@ export const DiffContent: React.FC<DiffContentProps> = (props) => {
           {props.remoteMeta?.responses || props?.remoteMeta?.parameters ? (
             <API selectedApi={props.remoteMeta} />
           ) : (
-            <BaseClass selectedClass={props?.remoteMeta} />
+            <BaseClass schema={props?.remoteMeta} name={props?.remoteMeta?.typeName} />
           )}
         </Tab.Item>
       </Tab>

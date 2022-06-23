@@ -57,17 +57,25 @@ class PontReactHooksGeneratorPlugin extends PontGeneratorPlugin {
   async apply(manager: PontManager, options?: any) {
     let baseDir = manager.innerManagerConfig.outDir;
 
-    if (baseDir.startsWith("./") || baseDir.startsWith("../")) {
-      baseDir = path.join(manager.innerManagerConfig.configDir, manager.innerManagerConfig.outDir);
-    }
+    try {
+      if (baseDir.startsWith("./") || baseDir.startsWith("../")) {
+        baseDir = path.join(manager.innerManagerConfig.configDir, manager.innerManagerConfig.outDir);
+      }
 
-    if (manager.localPontSpecs?.length > 1 && manager.localPontSpecs.every((spec) => spec.name)) {
-      manager.logger.info("开始生成多源类型代码");
-      await PontReactHooksGeneratorPlugin.generateSpecs(manager.localPontSpecs, baseDir);
-      return;
-    }
+      if (manager.localPontSpecs?.length > 1 && manager.localPontSpecs.every((spec) => spec.name)) {
+        manager.logger.info("开始生成多源类型代码");
+        await PontReactHooksGeneratorPlugin.generateSpecs(manager.localPontSpecs, baseDir);
+        return;
+      }
 
-    return PontReactHooksGeneratorPlugin.generateSingleSpec(manager.localPontSpecs[0], baseDir);
+      return PontReactHooksGeneratorPlugin.generateSingleSpec(manager.localPontSpecs[0], baseDir);
+    } catch (e) {
+      manager.logger.error({
+        message: e.message,
+        processType: "generate",
+        stack: e.stack,
+      });
+    }
   }
 
   providerSnippets(api: Interface, modName: string, originName = ""): Snippet[] {

@@ -1,19 +1,19 @@
 import * as _ from "lodash";
 import * as PontSpec from "pont-spec";
 
-export type DiffResult<T> = T & { diffs: { [key in keyof T]: any }; type: "update" | "create" | "delete" };
+export type DiffResult<T> = T & { diffs: { [key in keyof T]: any }; diffType: "update" | "create" | "delete" };
 
 export function diffList<T>(localList: T[], remoteList: T[], diffId = "name", customDiff) {
   const creates = _.differenceBy(remoteList, localList, diffId).map((schema) => {
     return {
       ...schema,
-      type: "create",
+      diffType: "create",
     };
   });
   const deletes = _.differenceBy(localList, remoteList, diffId).map((schema) => {
     return {
       ...schema,
-      type: "delete",
+      diffType: "delete",
     };
   });
   const updates: T[] = _.intersectionBy(localList, remoteList, diffId)
@@ -27,13 +27,13 @@ export function diffList<T>(localList: T[], remoteList: T[], diffId = "name", cu
         customDiff,
       );
     })
-    .filter((item) => item && (item?.type as any) !== "equal");
+    .filter((item) => item && (item?.diffType as any) !== "equal");
 
   return [...deletes, ...updates, ...creates];
 }
 
 type CustomDiff = {
-  [key: string]: <T>(pre: T, next: T, custom) => { diffs: any; type: string };
+  [key: string]: <T>(pre: T, next: T, custom) => { diffs: any; diffType: string };
 };
 
 const diffObject = <T>(localSpec: T, remoteSpec: T, customDiff = {} as CustomDiff): DiffResult<T> => {
@@ -41,7 +41,7 @@ const diffObject = <T>(localSpec: T, remoteSpec: T, customDiff = {} as CustomDif
   const localSpecKeys = Object.keys(localSpec || {});
   const diffs = {} as DiffResult<T>["diffs"];
   const diffReuslt = {
-    type: "update",
+    diffType: "update",
     ...localSpec,
     ...remoteSpec,
   } as any;
@@ -50,21 +50,21 @@ const diffObject = <T>(localSpec: T, remoteSpec: T, customDiff = {} as CustomDif
   remoteSpecKeys.forEach((key) => {
     if (remoteSpec[key] && !localSpec[key]) {
       diffs[key] = {
-        type: "create",
+        diffType: "create",
       };
     }
 
     if (remoteSpec[key] && localSpec[key] && !_.isEqual(remoteSpec[key], localSpec[key])) {
       if (customDiff[key]) {
-        const { diffs, type } = customDiff[key](localSpec[key], remoteSpec[key], customDiff);
-        if (type !== "equal") {
+        const { diffs, diffType } = customDiff[key](localSpec[key], remoteSpec[key], customDiff);
+        if (diffType !== "equal") {
           hasDiffResult = true;
           diffReuslt[key] = diffs;
         }
       } else {
         diffs[key] = {
           remoteValue: remoteSpec[key],
-          type: "update",
+          diffType: "update",
         };
       }
     }
@@ -72,12 +72,12 @@ const diffObject = <T>(localSpec: T, remoteSpec: T, customDiff = {} as CustomDif
 
   localSpecKeys.forEach((key) => {
     if (localSpec[key] && !remoteSpec[key]) {
-      diffs[key] = { type: "delete" };
+      diffs[key] = { diffType: "delete" };
     }
   });
 
   if (!hasDiffResult && !Object.keys(diffs)?.length) {
-    return { type: "equal" } as any;
+    return { diffType: "equal" } as any;
   }
 
   return {
@@ -111,12 +111,29 @@ const diffObject = <T>(localSpec: T, remoteSpec: T, customDiff = {} as CustomDif
 export const diffPontSpec = (localSpec: PontSpec.PontSpec, remoteSpec: PontSpec.PontSpec) => {
   const listDiff = (pre, next, customDiff) => {
     const diffs = diffList(pre, next, "name", customDiff);
-    return { diffs, type: diffs?.length ? "update" : "equal" };
+    return { diffs, diffType: diffs?.length ? "update" : "equal" };
   };
+  const defDiff = (pre, next, customDiff) => {
+    const diffResult = diffObject(pre, next, customDiff);
+
+    const result = _.mapValues(diffResult.diffs || {}, (value, key) => {
+      if (pre[key] && !next[key]) {
+        return { ...pre[key], diffType: "delete" };
+      } else if (next[key] && !pre[key]) {
+        return { ...next[key], diffType: "create" };
+      }
+      return diffObject(pre[key], next[key], customDiff);
+    });
+    return {
+      diffType: "update",
+      diffs: result,
+    };
+  };
+
   const customer = {
     mods: listDiff,
     interfaces: listDiff,
-    baseClasses: listDiff,
+    definitions: defDiff as any,
   } as CustomDiff;
 
   return diffObject(localSpec, remoteSpec, customer);

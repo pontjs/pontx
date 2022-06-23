@@ -2,6 +2,7 @@ export class PontLoggerSpec {
   originName?: string;
   processType: "read" | "fetch" | "parser" | "diff" | "generate";
   message: string;
+  stack?: any;
 }
 
 const processTypeNameMap = {
@@ -13,7 +14,7 @@ const processTypeNameMap = {
 };
 
 export class PontLogger {
-  log(message: string, logType = "info" as 'info' | 'error') {
+  log(message: string, logType = "info" as "info" | "error", stack?: any) {
     console.log(message);
   }
 
@@ -21,18 +22,14 @@ export class PontLogger {
     this.log(message, "info");
   }
 
-  error(errorSpec: PontLoggerSpec | string) {
+  error(errorSpec: PontLoggerSpec | string, stack?: any) {
     if (typeof errorSpec === "string") {
-      this.log(errorSpec, "error");
+      this.log(errorSpec, "error", stack);
     } else if (errorSpec) {
-      const originName = errorSpec.originName
-        ? `[originName: ${errorSpec.originName}] `
-        : "";
-      const processType = errorSpec.processType
-        ? `[${processTypeNameMap[errorSpec.processType]}]`
-        : "";
+      const originName = errorSpec.originName ? `[originName: ${errorSpec.originName}] ` : "";
+      const processType = errorSpec.processType ? `[${processTypeNameMap[errorSpec.processType]}]` : "";
 
-      this.log(`${originName}${processType}${errorSpec.message}`, "error");
+      this.log(`${originName}${processType}${errorSpec.message}`, "error", errorSpec.stack);
     }
   }
 }

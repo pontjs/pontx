@@ -17,7 +17,7 @@ export const ApiDoc: React.FC<ApiDocProps> = (props) => {
   const apiDoc = (
     <>
       {selectedMeta?.type === "api" ? <API selectedApi={selectedMeta?.spec} /> : null}
-      {selectedMeta?.type === "baseClass" ? <BaseClass selectedClass={selectedMeta?.spec} /> : null}
+      {selectedMeta?.type === "baseClass" ? <BaseClass name={selectedMeta?.name} schema={selectedMeta?.spec} /> : null}
     </>
   );
 
