@@ -10,7 +10,10 @@
     "watch": "tsc -w",
     "build": "rm -rf lib && tsc"
   },
-  "files": [],
+  "files": [
+    "package.json",
+    "lib"
+  ],
   "keywords": [],
   "devDependencies": {
     "@types/node": "*"

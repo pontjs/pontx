@@ -18,7 +18,9 @@
     "pont-spec": "^0.3.2"
   },
   "files": [
-    "lib"
+    "lib",
+    "package.json",
+    "*.md"
   ],
   "keywords": [],
   "author": "jasonHzq",

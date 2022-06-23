@@ -10,7 +10,11 @@
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "build": "npm run clean && tsc --build"
   },
-  "files": [],
+  "files": [
+    "package.json",
+    "lib",
+    "*.md"
+  ],
   "dependencies": {
     "fs-extra": "*",
     "node-fetch": "^2.6.7",
