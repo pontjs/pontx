@@ -17,6 +17,7 @@
     "prettier": "^2.6.2"
   },
   "files": [
+    "package.json",
     "lib"
   ],
   "keywords": [],

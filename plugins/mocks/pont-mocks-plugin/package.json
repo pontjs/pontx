@@ -17,6 +17,7 @@
     "pont-spec": "^0.3.2"
   },
   "files": [
+    "package.json",
     "lib"
   ],
   "keywords": [],

@@ -19,6 +19,7 @@
     "pont-manager": "*"
   },
   "files": [
+    "package.json",
     "lib"
   ],
   "keywords": [],

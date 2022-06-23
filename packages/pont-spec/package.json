@@ -21,6 +21,7 @@
   "files": [
     "lib/",
     "es6/",
+    "package.json",
     "*.md"
   ],
   "keywords": [],
