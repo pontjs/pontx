@@ -115,6 +115,39 @@ export class PontManager {
     }
   }
 
+  static async constructorFromPontConfig(
+    publicConfig: PontPublicManagerConfig,
+    configPathname: string,
+    logger = new PontLogger(),
+  ) {
+    try {
+      let manager = new PontManager();
+      manager.logger = logger;
+      manager.innerManagerConfig = PontInnerManagerConfig.constructorFromPublicConfig(
+        publicConfig,
+        logger,
+        path.resolve(configPathname, "../"),
+      );
+
+      manager = await PontManager.readLocalPontMeta(manager);
+      manager = await PontManager.fetchRemotePontMeta(manager);
+
+      // 自动用远程 spec，替换本地为空的 spec
+      manager.localPontSpecs = manager.localPontSpecs.map((localSpec, specIndex) => {
+        if (PontSpec.isEmptySpec(localSpec)) {
+          const remoteSpec = manager.remotePontSpecs?.find((spec) => spec.name === localSpec.name);
+
+          return remoteSpec || manager?.remotePontSpecs?.[specIndex] || localSpec;
+        }
+
+        return localSpec;
+      });
+      return manager;
+    } catch (e) {
+      logger.error("Pont 创建失败:" + e.message);
+    }
+  }
+
   /** 读取本地 api-lock.json 文件 */
   static async privateReadLockFile(manager: PontManager) {
     const origins = manager.innerManagerConfig.origins;
