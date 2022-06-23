@@ -27,18 +27,15 @@ export const DiffPage: React.FC<DiffPageProps> = (props) => {
       doc = <DiffContent localMeta={localApi} remoteMeta={remoteApi} type="api" />;
     }
   } else if (selectedMeta?.type === "baseClass") {
-    const selectedClazz =
-      PontSpec.PontSpec.findBaseClazz(currSpec, selectedMeta?.name) ||
-      PontSpec.PontSpec.findBaseClazz(remoteSpec, selectedMeta?.name);
-    doc = <BaseClass selectedClass={selectedClazz as any} />;
-
-    const localClazz = PontSpec.PontSpec.findBaseClazz(currSpec, selectedMeta?.name);
-    const remoteClazz = PontSpec.PontSpec.findBaseClazz(remoteSpec, selectedMeta?.name);
+    const localClazz = currSpec?.definitions?.[selectedMeta?.name];
+    const remoteClazz = remoteSpec?.definitions?.[selectedMeta?.name];
+    const selectedClazz = localClazz || remoteClazz;
+    doc = <BaseClass name={selectedMeta?.name} schema={selectedClazz} />;
 
     if (!localClazz) {
-      doc = <BaseClass selectedClass={remoteClazz!} />;
+      doc = <BaseClass name={selectedMeta?.name} schema={remoteClazz!} />;
     } else if (!remoteClazz) {
-      doc = <BaseClass selectedClass={localClazz} />;
+      doc = <BaseClass name={selectedMeta?.name} schema={localClazz} />;
     } else {
       doc = <DiffContent localMeta={localClazz} remoteMeta={remoteClazz} type="baseclass" />;
     }

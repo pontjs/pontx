@@ -9,6 +9,7 @@
     "watch": "tsc --build --watch",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "build:commonjs": "tsc -p ./tsconfig.lib.json",
+    "build:commonjs:watch": "tsc -p ./tsconfig.lib.json -w",
     "build": "npm run clean && tsc --build && tsc -m CommonJS --outDir lib"
   },
   "peerDependencies": {

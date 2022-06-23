@@ -40,28 +40,30 @@ export function getPontSpecByProcessType(
     } else if (mod.processType === processType) {
       return { ...mod, interfaces };
     } else if (interfaces.length) {
-      return { ...mod, interfaces, processType, type: "equal" };
+      return { ...mod, interfaces, processType, diffType: "equal" };
     }
 
     return null;
   };
-  const mapClazz = (clazz: ProcessedDiffs<PontSpec.BaseClass>) => {
+  const newDefs = Object.keys(diffs?.definitions || {}).reduce((result, key) => {
+    let clazz = diffs.definitions[key] as ProcessedDiffs<PontSpec.PontJsonSchema>;
     if (!clazz.processType && processType === "untracked") {
-      return {
+      clazz = {
         ...clazz,
         processType: "untracked",
       };
-    } else if (clazz.processType === processType) {
-      return clazz;
+    } else if (clazz.processType !== processType) {
+      clazz = null as any;
     }
-
-    return null;
-  };
+    if (clazz) {
+      return { ...result, [key]: clazz };
+    }
+  }, {} as any);
 
   return {
     ...diffs,
     mods: (diffs?.mods || []).map(mapMod as any).filter((id) => id),
-    baseClasses: (diffs?.baseClasses || []).map(mapClazz as any).filter((id) => id),
+    definitions: newDefs,
   } as ProcessedDiffs<PontSpec.PontSpec>;
 }
 
@@ -80,7 +82,7 @@ export function changeAllMetaProcessType(
     const newProcessType = (mod.processType || "untracked") === fromProcessType ? processType : mod.processType;
     return { ...mod, processType: newProcessType, interfaces: (mod.interfaces || []).map((api) => mapApi(api as any)) };
   };
-  const mapClazz = (clazz: ProcessedDiffs<PontSpec.BaseClass>) => {
+  const mapClazz = (clazz: ProcessedDiffs<PontSpec.PontJsonSchema>) => {
     const newProcessType = (clazz.processType || "untracked") === fromProcessType ? processType : clazz.processType;
     return { ...clazz, processType: newProcessType };
   };
@@ -88,7 +90,7 @@ export function changeAllMetaProcessType(
   return {
     ...diffs,
     mods: (diffs.mods || []).map(mapMod as any),
-    baseClasses: (diffs.baseClasses || []).map(mapClazz as any),
+    definitions: _.mapValues(diffs.definitions || {}, mapClazz),
   };
 }
 
@@ -101,14 +103,14 @@ export function getNewSpec(
   let newMods = [...localSpec.mods];
   stagedDiffs.mods.forEach((mod) => {
     const diffsMod: ProcessedDiffs<PontSpec.Mod> = mod as any;
-    if (diffsMod.type === "create") {
+    if (diffsMod.diffType === "create") {
       const remoteMod = (remoteSpec.mods || []).find((mod) => mod.name === diffsMod.name);
       if (remoteMod) {
         newMods.push(remoteMod);
       }
-    } else if (diffsMod.type === "delete") {
+    } else if (diffsMod.diffType === "delete") {
       newMods = newMods.filter((mod) => mod.name !== diffsMod.name);
-    } else if (diffsMod.type === "update") {
+    } else if (diffsMod.diffType === "update") {
       const localMod = (localSpec.mods || []).find((mod) => mod.name === diffsMod.name);
       const remoteMod = (remoteSpec.mods || []).find((mod) => mod.name === diffsMod.name);
       let newApis = [...(localMod?.interfaces || [])];
@@ -117,13 +119,13 @@ export function getNewSpec(
         const apiDiff: ProcessedDiffs<PontSpec.Interface> = api as any;
         const remoteApi = (remoteMod?.interfaces || []).find((api) => api.name === apiDiff.name);
 
-        if (apiDiff.type === "create") {
+        if (apiDiff.diffType === "create") {
           if (remoteApi) {
             newApis.push(remoteApi);
           }
-        } else if (apiDiff.type === "delete") {
+        } else if (apiDiff.diffType === "delete") {
           newApis = newApis.filter((api) => api.name !== apiDiff.name);
-        } else if (apiDiff.type === "update") {
+        } else if (apiDiff.diffType === "update") {
           newApis = newApis.map((api) => {
             if (api.name === apiDiff.name) {
               return remoteApi as PontSpec.Interface;
@@ -145,31 +147,25 @@ export function getNewSpec(
     }
   });
 
-  let newBaseClasses = [...localSpec.baseClasses];
-  stagedDiffs.baseClasses.forEach((clazz) => {
-    const clazzDiff: ProcessedDiffs<PontSpec.BaseClass> = clazz as any;
-    const remoteClazz = (remoteSpec.baseClasses || []).find((clazz) => clazz.name === clazzDiff.name);
+  const defs = { ...localSpec.definitions };
 
-    if (clazzDiff.type === "create") {
+  _.forEach(stagedDiffs.definitions, (schema, name) => {
+    const remoteClazz = remoteSpec.definitions[name];
+
+    if ((schema?.diffType as any) === "create") {
       if (remoteClazz) {
-        newBaseClasses.push(remoteClazz);
+        defs[name] = remoteClazz;
       }
-    } else if (clazzDiff.type === "delete") {
-      newBaseClasses = newBaseClasses.filter((clazz) => clazz.name !== clazzDiff.name);
-    } else if (clazzDiff.type === "update") {
-      newBaseClasses = newBaseClasses.map((clazz) => {
-        if (clazz.name === remoteClazz?.name) {
-          return remoteClazz;
-        }
-        return clazz;
-      });
+    } else if ((schema?.diffType as any) === "delete") {
+      delete defs[name];
+    } else if ((schema?.diffType as any) === "update") {
+      defs[name] = remoteClazz;
     }
   });
-
   return {
     ...localSpec,
     mods: newMods,
-    baseClasses: newBaseClasses,
+    definitions: defs,
   };
 }
 
@@ -177,7 +173,7 @@ export const getDiffs = (diffResult: DiffResult<any>) => {
   const diffItems = Object.keys(diffResult.diffs || {}).map((key) => {
     return {
       fieldName: key,
-      diffType: diffResult.diffs[key]?.type,
+      diffType: diffResult.diffs[key]?.diffType,
       localValue: diffResult[key],
       remoteValue: diffResult.diffs[key]?.remoteValue,
     };

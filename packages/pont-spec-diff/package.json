@@ -7,8 +7,9 @@
   "typings": "lib/index.d.ts",
   "scripts": {
     "watch": "tsc --build --watch",
-    "clean": "rm -rf lib && rm tsconfig.tsbuildinfo",
+    "clean": "rm -rf lib",
     "build:commonjs": "npm run clean && tsc -p ./tsconfig.commonjs.json",
+    "build:commonjs:watch": "npm run clean && tsc -p ./tsconfig.commonjs.json -w",
     "build": "npm run clean && tsc --build && tsc -m CommonJS --outDir lib",
     "test": "tsc -p tests/tsconfig.json"
   },

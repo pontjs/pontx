@@ -1,19 +1,43 @@
-import { JsonSchema, SimpleTypes } from "oas-spec-ts";
+import { CoreSchemaMetaSchema } from "oas-spec-ts";
 
-export interface PontJsonSchema extends JsonSchema {}
+export type PontJsonSchemaArray = PontJsonSchema[];
+export interface PontJsonSchemaMap {
+  [key: string]: PontJsonSchema;
+}
+
+export interface PontJsonSchema extends CoreSchemaMetaSchema {}
 /**
  * pont 中的数据类型，集成 JSONSchema。
  * 支持泛型类、泛型表达式、判断是否为业务数据结构。
  */
+
 export class PontJsonSchema {
-  isDefsType?: boolean;
-  /** -1 表示非泛型类型，泛型类型生成代码时为 T1, T2, T3... */
+  // isDefsType?: boolean;
+  /**
+   * 仅在数据结构子结构中定义。
+   * -1 表示非泛型类型，泛型类型生成代码时为 T0, T1, T2, T3...
+   */
   templateIndex? = -1;
-  /** 泛型表达式参数列表，支持嵌套，例如 Pagination<List<Array<Biz>>, number | string> */
+
+  /** 从 $ref 中解析出的数据结构引用名 */
+  typeName?: string;
+
+  /**
+   * 泛型表达式参数列表, 从 $ref 中解析出的泛型表达式
+   * 支持嵌套，例如 Pagination<List<Array<Biz>>, number | string>
+   */
   templateArgs?: PontJsonSchema[] = [];
+
   /** 被拆解出来的类名、处理后的怪异类型等 */
-  typeName: string;
   example?: string;
+
+  required?: boolean;
+
+  requiredProps?: string[];
+
+  items?: PontJsonSchema | PontJsonSchemaArray;
+  additionalProperties?: PontJsonSchema;
+  properties?: PontJsonSchemaMap;
 
   /** 生成表达式，用于预览读取类型信息 */
   static toString(schema: PontJsonSchema) {

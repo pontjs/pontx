@@ -14,9 +14,9 @@ type DiffResult = {
 const schemaDiffDom = (diffResult) => {
   const fieldStr = BaseClazzDiffOp.getFields(diffResult?.fields || []);
 
-  if (diffResult.type === "delete") {
+  if (diffResult?.diffType === "delete") {
     return <span>删除字段 {fieldStr} </span>;
-  } else if (diffResult.type === "create") {
+  } else if (diffResult?.diffType === "create") {
     return <span>新增字段 {fieldStr} </span>;
   }
 
@@ -41,7 +41,7 @@ const schemaDiffDom = (diffResult) => {
         oldValue={JSON.stringify(diffResult.localValue, null, 2)}
         newValue={JSON.stringify(diffResult.remoteValue, null, 2)}
         disableWordDiff
-        leftTitle={fieldStr ? "字段 Schema Diff" : "Schema Diff"}
+        leftTitle={fieldStr ? "字段元数据 Diff" : "元数据 Diff"}
         splitView={false}
         hideLineNumbers
       ></ReactDiffViewer>
@@ -166,7 +166,7 @@ export const getBaseClassDiffDom = (diff: DiffResult) => {
   const diffResult = BaseClazzDiffOp.getSchemaDiffItems(
     {
       ...diff,
-      paths: diff?.paths?.slice(1) || [],
+      paths: diff?.paths || [],
     },
     [],
   );

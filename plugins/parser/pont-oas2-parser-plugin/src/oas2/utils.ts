@@ -1,5 +1,5 @@
 import { OAS2 } from "oas-spec-ts";
-import { BaseClass, Interface, Mod, PontJsonSchema } from "pont-spec";
+import { Interface, Mod, PontJsonSchema } from "pont-spec";
 import * as _ from "lodash";
 
 /**
@@ -11,21 +11,20 @@ export const PrimitiveTypeMap = {
   void: "void",
 
   /* Array */
-  List: "Array",
+  // List: "Array",
   Collection: "Array",
 };
 
 export class JsonSchemaContext {
+  static defaultCompileTemplateKeyword = "#/definitions/";
+
   classTemplateArgs: PontJsonSchema[] = [];
-  compileTemplateKeyword = "#/definitions/";
+  compileTemplateKeyword? = "#/definitions/";
   defNames: string[] = [];
+  required?: boolean;
   samePath? = "";
 
   static handleContext(context: JsonSchemaContext, schema: PontJsonSchema) {
-    if (context?.defNames?.includes(schema.typeName)) {
-      schema.isDefsType = true;
-    }
-
     if (context?.classTemplateArgs?.length) {
       const codes = (context?.classTemplateArgs || []).map((arg) => PontJsonSchema.toString(arg));
       const index = codes.indexOf(PontJsonSchema.toString(schema));
@@ -204,7 +203,9 @@ export function processMod(interfaces: Interface[], tag: OAS2.TagObject) {
   }
 }
 
-export function deleteDuplicateBaseClass(baseClasses: BaseClass[]) {
+export function deleteDuplicateBaseClass(
+  baseClasses: Array<{ schema: PontJsonSchema; name: string; templateArgs?: any[] }>,
+) {
   baseClasses.sort((pre, next) => {
     if (pre.name === next.name && pre.schema.templateArgs?.length === next.schema.templateArgs?.length) {
       return pre.schema?.templateArgs.filter(({ isDefsType }) => isDefsType).length >

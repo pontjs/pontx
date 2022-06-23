@@ -52,24 +52,24 @@ export class MocksGenerator {
       }
       return "[]";
     }
-    if (schema.isDefsType) {
-      const baseClass = this.spec.baseClasses.find((bs) => bs.name === schema.typeName);
+    // if (schema.isDefsType) {
+    //   const baseClass = this.spec.baseClasses.find((bs) => bs.name === schema.typeName);
 
-      if (!baseClass) {
-        return "{}";
-      }
+    //   if (!baseClass) {
+    //     return "{}";
+    //   }
 
-      if (options?.useJSON) {
-        return this.generateJsonSchemaMocks(baseClass.schema, {
-          useJSON: true,
-          tempalteArgs: baseClass.schema.templateArgs,
-        });
-      }
+    //   if (options?.useJSON) {
+    //     return this.generateJsonSchemaMocks(baseClass.schema, {
+    //       useJSON: true,
+    //       tempalteArgs: baseClass.schema.templateArgs,
+    //     });
+    //   }
 
-      return `new Models.${baseClass.name}(${schema.templateArgs
-        .map((arg) => this.generateJsonSchemaMocks(arg))
-        .join(", ")})`;
-    }
+    //   return `new Models.${baseClass.name}(${schema.templateArgs
+    //     .map((arg) => this.generateJsonSchemaMocks(arg))
+    //     .join(", ")})`;
+    // }
     if (schema.enum?.length) {
       if (schema.type === "string") {
         return useString(schema.enum[0]);

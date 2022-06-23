@@ -249,23 +249,27 @@ ${indentation(2)(normalParams.map((param) => this.generateParameterTsCode(param)
       return `
 declare namespace defs {
   export namespace ${spec.name} {
-${indentation(4)(spec.baseClasses.map((baseClass) => this.generateBaseClassTsCode(baseClass)).join("\n\n"))}
+${indentation(4)(
+  _.map(spec.definitions || {}, (schema, name) => this.generateBaseClassTsCode(schema, name)).join("\n\n"),
+)}
   }
 }`;
     }
     return `
 export namespace defs {
-${indentation(2)(spec.baseClasses.map((baseClass) => this.generateBaseClassTsCode(baseClass)).join("\n\n"))}
+${indentation(2)(
+  _.map(spec.definitions || {}, (schema, name) => this.generateBaseClassTsCode(schema, name)).join("\n\n"),
+)}
 }`;
   }
 
   generateBaseClassesJsCode(spec: PontSpec.PontSpec): string {
-    const clsCodes = spec.baseClasses.map((base) => this.generateBaseClassJsCode(base));
+    const clsCodes = _.map(spec.definitions || {}, (schema, name) => this.generateBaseClassJsCode(schema, name));
 
     if (this.specName) {
       return `${clsCodes.join("\n\n")}
 export const ${this.specName} = {
-  ${spec.baseClasses.map((bs) => bs.name).join(",\n  ")}
+  ${Object.keys(spec.definitions || {}).join(",\n  ")}
 }
       `;
     }
@@ -323,33 +327,36 @@ ${indentation(2)(modsIndexTsTemplate(spec, this))}
     return modsIndexTsTemplate(spec, this);
   }
 
-  generateBaseClassJsCode(baseClass: PontSpec.BaseClass) {
-    const propsCode = _.map(baseClass.schema?.properties, (prop, propName) => {
+  generateBaseClassJsCode(schema: PontSpec.PontJsonSchema, name: string) {
+    const propsCode = _.map(schema?.properties, (prop, propName) => {
       return `${needQuotationMark(propName) ? `'${propName}'` : propName} = ${this.generateJsonSchemaInitValue(
         prop as PontSpec.PontJsonSchema,
       )};`;
     }).join("\n");
     const formattedProps = indentation(2)(propsCode);
 
-    return `class ${baseClass.name} {\n${formattedProps}\n}`;
+    return `class ${name} {\n${formattedProps}\n}`;
   }
 
-  generateBaseClassTsCode(baseClass: PontSpec.BaseClass) {
-    const propsCode = _.map(baseClass.schema?.properties, (prop, propName) => {
+  generateBaseClassTsCode(schema: PontSpec.PontJsonSchema, name: string) {
+    const propsCode = _.map(schema?.properties, (prop, propName) => {
       const propDesc = prop.description || prop.title;
       const descCode = propDesc ? `/** ${propDesc} */\n` : "";
+      const schemaCode = this.generateJsonSchemaCode(prop as any);
       return `${descCode}${needQuotationMark(propName) ? `'${propName}'` : propName}${
-        baseClass.schema.required?.includes(propName) ? "" : "?"
-      }: ${this.generateJsonSchemaCode(prop as any)};`;
+        prop.required ? "" : "?"
+      }: ${schemaCode};`;
     }).join("\n");
     const formattedProps = indentation(2)(propsCode);
+    const docs = ["title", "description"].filter((key) => schema[key]).map((key) => ` * @${key} ${schema[key]}`);
+    const clazzDoc = docs?.length ? `/**\n${docs.join("\n")}\n */\n` : "";
 
-    if (baseClass.schema?.templateArgs?.length) {
-      return `class ${baseClass.name}<${baseClass.schema?.templateArgs
+    if (schema?.templateArgs?.length) {
+      return `${clazzDoc}class ${name}<${schema?.templateArgs
         .map((_, index) => `T${index} = any`)
         .join(", ")}> {\n${formattedProps}\n}`;
     }
-    return `class ${baseClass.name} {\n${formattedProps}\n}`;
+    return `${clazzDoc}class ${name} {\n${formattedProps}\n}`;
   }
 
   generateLockCode(spec: PontSpec.PontSpec) {

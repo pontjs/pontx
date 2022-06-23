@@ -1,6 +1,7 @@
 import { PontManager } from "pont-manager";
 import { diffPontSpec } from "pont-spec-diff";
 import * as vscode from "vscode";
+import * as _ from "lodash";
 
 export class PontVSCodeUI {
   pontBar: vscode.StatusBarItem;
@@ -34,7 +35,7 @@ export class PontVSCodeUI {
 
     if (remoteSpec && localSpec) {
       const diffs = diffPontSpec(localSpec, remoteSpec);
-      const diffsCnt = diffs?.mods?.length + (diffs?.baseClasses?.length ? 1 : 0);
+      const diffsCnt = diffs?.mods?.length + (_.isEmpty(diffs?.definitions) ? 0 : 1);
       if (this.pontBar) {
         if (diffsCnt) {
           this.pontBar.color = "yellow";

@@ -78,7 +78,7 @@ export class PontManager {
         logger.error("未找到 Pont 配置文件");
       }
     } catch (e) {
-      logger.error("Pont 创建失败:" + e.message);
+      logger.error("Pont 创建失败:" + e.message, e.stack);
     }
   }
 
@@ -111,7 +111,7 @@ export class PontManager {
       });
       return manager;
     } catch (e) {
-      logger.error("Pont 创建失败:" + e.message);
+      logger.error("Pont 创建失败:" + e.message, e.stack);
     }
   }
 
@@ -266,17 +266,17 @@ export class PontManager {
   }
   static syncBaseClass(manager: PontManager, baseClassName: string, specName = "") {
     const remoteSpec = getSpecByName(manager.remotePontSpecs, specName);
-    const remoteClass = mapifyGet(remoteSpec, ["baseClasses", baseClassName]);
+    const remoteClass = mapifyGet(remoteSpec, ["definitions", baseClassName]);
 
     if (remoteClass) {
       return mapifyImmutableOperate(
         manager,
         "assign",
-        ["localPontSpecs", specName, "baseClasses", baseClassName],
+        ["localPontSpecs", specName, "definitions", baseClassName],
         remoteClass,
       );
     } else {
-      return mapifyImmutableOperate(manager, "delete", ["localPontSpecs", specName, "baseClasses", baseClassName]);
+      return mapifyImmutableOperate(manager, "delete", ["localPontSpecs", specName, "definitions", baseClassName]);
     }
   }
 

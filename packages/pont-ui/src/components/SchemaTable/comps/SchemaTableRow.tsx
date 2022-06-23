@@ -18,7 +18,7 @@ export class SchemaTableRowProps {
   isScrolling?: boolean;
   data: SchemaTableContext;
   useTableStyle? = false;
-  baseClasses? = [] as PontSpec.BaseClass[];
+  definitions = {} as PontSpec.ObjectMap<PontSpec.PontJsonSchema>;
 }
 
 export const SchemaTableRow: React.FC<SchemaTableRowProps> = React.memo(
@@ -62,7 +62,7 @@ export const SchemaTableRow: React.FC<SchemaTableRowProps> = React.memo(
             tableType,
             readOnly,
           }}
-          baseClasses={props.baseClasses || []}
+          definitions={props.definitions || []}
           node={row}
           onSchemaRowAction={data.onSchemaRowAction}
           {...row}
@@ -80,7 +80,7 @@ export const SchemaTableRow: React.FC<SchemaTableRowProps> = React.memo(
           tableType,
           readOnly,
         }}
-        baseClasses={props.baseClasses || []}
+        definitions={props.definitions || []}
         node={row}
         onSchemaRowAction={data.onSchemaRowAction}
         {...row}

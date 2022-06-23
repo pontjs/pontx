@@ -1,14 +1,7 @@
 export type NonNegativeInteger = number;
 export type NonNegativeIntegerDefault0 = NonNegativeInteger;
 export type JsonSchemaArray = JsonSchema[];
-export type SimpleTypes =
-  | "array"
-  | "boolean"
-  | "integer"
-  | "null"
-  | "number"
-  | "object"
-  | "string";
+export type SimpleTypes = "array" | "boolean" | "integer" | "null" | "number" | "object" | "string";
 export type StringArray = string[];
 
 export interface JsonSchemaMap {
@@ -33,18 +26,13 @@ export interface CoreSchemaMetaSchema {
   maxLength?: NonNegativeInteger;
   minLength?: NonNegativeIntegerDefault0;
   pattern?: string;
-  additionalItems?: JsonSchema;
-  items?: JsonSchema | JsonSchemaArray;
   maxItems?: NonNegativeInteger;
   minItems?: NonNegativeIntegerDefault0;
   uniqueItems?: boolean;
   contains?: JsonSchema;
   maxProperties?: NonNegativeInteger;
+  additionalItems?: JsonSchema;
   minProperties?: NonNegativeIntegerDefault0;
-  required?: StringArray;
-  additionalProperties?: JsonSchema;
-  definitions?: JsonSchemaMap;
-  properties?: JsonSchemaMap;
   patternProperties?: JsonSchemaMap;
   dependencies?: {
     [k: string]: JsonSchema | StringArray;
@@ -66,5 +54,11 @@ export interface CoreSchemaMetaSchema {
   [k: string]: any;
 }
 
-export interface JsonSchema extends CoreSchemaMetaSchema {}
+export interface JsonSchema extends CoreSchemaMetaSchema {
+  required?: StringArray;
+  items?: JsonSchema | JsonSchemaArray;
+  additionalProperties?: JsonSchema;
+  definitions?: JsonSchemaMap;
+  properties?: JsonSchemaMap;
+}
 export class JsonSchema {}

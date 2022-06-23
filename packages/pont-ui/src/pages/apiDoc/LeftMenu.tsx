@@ -86,25 +86,28 @@ export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
         );
       })}
 
-      {filteredCurrSpec?.baseClasses?.length ? (
-        <Menu.SubMenu key="pont-classes" label={<span>数据结构({filteredCurrSpec.baseClasses?.length || 0})</span>}>
-          {(filteredCurrSpec?.baseClasses || []).map((clazz) => {
+      {PontSpec.PontSpec.getClazzCnt(filteredCurrSpec) ? (
+        <Menu.SubMenu
+          key="pont-classes"
+          label={<span>数据结构({PontSpec.PontSpec.getClazzCnt(filteredCurrSpec)})</span>}
+        >
+          {_.map(filteredCurrSpec?.definitions || {}, (clazz, name) => {
             return (
               <Menu.Item
-                className={clazz.name === selectedMeta?.name ? "selected" : ""}
-                key={clazz.name}
-                id={clazz.name}
+                className={name === selectedMeta?.name ? "selected" : ""}
+                key={name}
+                id={name}
                 onClick={() =>
                   changeSelectedMeta({
                     type: "baseClass",
-                    name: clazz.name,
+                    name,
                     spec: clazz,
                   })
                 }
               >
                 <div className="api-name">
-                  <div className="name" title={clazz.name}>
-                    {clazz.name}
+                  <div className="name" title={name}>
+                    {name}
                   </div>
 
                   <div className="desc" title={clazz.schema?.description || clazz?.schema?.title}>
@@ -121,7 +124,7 @@ export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
   return (
     <div className="pont-ui-left-menu">
       {searchArea}
-      {!filteredCurrSpec?.mods?.length && !filteredCurrSpec?.baseClasses?.length ? (
+      {!filteredCurrSpec?.mods?.length && !PontSpec.PontSpec.getClazzCnt(filteredCurrSpec) ? (
         <Message type="notice"></Message>
       ) : (
         menus

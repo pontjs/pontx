@@ -4,6 +4,8 @@ import * as path from "path";
 import * as fs from "fs";
 import { pontUI } from "./UI";
 
+const pontConsole = vscode.window.createOutputChannel("Pont");
+
 export function showProgress(
   title: string,
   manager: PontManager,
@@ -37,8 +39,10 @@ export function wait(ttl = 500) {
 }
 
 export class VSCodeLogger extends PontLogger {
-  log(message: string, logType?: string): void {
+  log(message: string, logType?: string, stack?: any): void {
     if (logType === "error") {
+      pontConsole.appendLine(message);
+      pontConsole.appendLine(stack);
       vscode.window.showErrorMessage(message);
     } else {
       vscode.window.showInformationMessage(message);

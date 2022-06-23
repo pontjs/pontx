@@ -88,7 +88,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   fileWatcher.onDidCreate(async (uri) => {
     if (pontService.pontManager) {
-      pontService.pontManager.logger.log("检测到 Pont 配置文件已创建，Pont 自动启动中...");
+      vscode.window.showInformationMessage("检测到 Pont 配置文件已创建，Pont 自动启动中...");
       const manager = await PontManager.constructorFromRootDir(
         path.join(uri.path, ".."),
         pontService.pontManager.logger,
@@ -101,7 +101,7 @@ export async function activate(context: vscode.ExtensionContext) {
       }
     } else {
       const logger = new VSCodeLogger();
-      logger.info("检测到 Pont 配置文件已创建，Pont 自动启动中...");
+      vscode.window.showInformationMessage("检测到 Pont 配置文件已创建，Pont 自动启动中...");
       const manager = await PontManager.constructorFromRootDir(path.join(uri.path, ".."), logger);
       if (manager) {
         vscodePontManager.start(pontManager, context);
@@ -112,7 +112,7 @@ export async function activate(context: vscode.ExtensionContext) {
   });
   fileWatcher.onDidChange(async (uri) => {
     if (pontService.pontManager) {
-      pontService.pontManager.logger.log("检测到配置文件变化，Pont 自动重启中...");
+      vscode.window.showInformationMessage("检测到配置文件变化，Pont 自动重启中...");
       const manager = await PontManager.constructorFromRootDir(
         path.join(uri.path, ".."),
         pontService.pontManager.logger,
@@ -125,7 +125,7 @@ export async function activate(context: vscode.ExtensionContext) {
       }
     } else {
       const logger = new VSCodeLogger();
-      logger.info("检测到 Pont 配置文件变化，Pont 尝试启动中...");
+      vscode.window.showInformationMessage("检测到 Pont 配置文件变化，Pont 尝试启动中...");
       const manager = await PontManager.constructorFromRootDir(path.join(uri.path, ".."), logger);
       if (manager) {
         pontUI.create();

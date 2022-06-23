@@ -77,7 +77,7 @@ export const SchemaDynamicTable: React.FC<SchemaDynamicTableProps> = React.memo(
         </thead>
         <tbody>
           {visibleRows?.map((row, index) => (
-            <SchemaTableRow useTableStyle data={itemData} {...row} index={index} />
+            <SchemaTableRow definitions={{} as any} useTableStyle data={itemData} {...row} index={index} />
           ))}
         </tbody>
       </table>

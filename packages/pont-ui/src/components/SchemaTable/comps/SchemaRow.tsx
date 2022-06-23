@@ -12,6 +12,7 @@ import { Balloon, Button, Icon, Input, Select } from "@alicloud/console-componen
 import { SchemaName } from "./SchemaName";
 import { TypeSelector } from "./TypeSelector";
 import * as PontSpec from "pont-spec";
+import { ObjectMap } from "pont-spec";
 
 export class SchemaRowProps {
   node: SchemaTableNode;
@@ -23,7 +24,7 @@ export class SchemaRowProps {
     readOnly: boolean;
     tableType: "parameters" | "response" | "struct";
   };
-  baseClasses = [] as PontSpec.BaseClass[];
+  definitions = {} as ObjectMap<PontSpec.PontJsonSchema>;
 
   onSchemaRowAction: SchemaTableContext["onSchemaRowAction"];
 }
@@ -34,7 +35,7 @@ export const SchemaRow: React.FC<SchemaRowProps> = (props) => {
   const { isEvenRow, isExpanded, paddingLeft, tableType, readOnly } = props.style;
   const { fieldName, prefixes, parentType, keys } = props.node;
   const [moreStructVisible, changeMoreStructVisible] = React.useState(false);
-  const { baseClasses } = props;
+  const { definitions } = props;
 
   React.useEffect(() => {
     if (props.node?.schema !== schema) {
@@ -121,7 +122,7 @@ export const SchemaRow: React.FC<SchemaRowProps> = (props) => {
             {!!fieldName && parentType !== "array" && <span style={{ marginRight: 3 }}>:&nbsp;</span>}
             <TypeSelector
               schema={schema}
-              baseClasses={baseClasses}
+              definitions={definitions}
               disabled={readOnly}
               onSchemaChange={(newSchema) => {
                 changeSchema(newSchema);
@@ -299,7 +300,7 @@ export const SchemaRow: React.FC<SchemaRowProps> = (props) => {
     keys,
     moreStructVisible,
     readOnly,
-    baseClasses,
+    definitions,
   ]);
 };
 

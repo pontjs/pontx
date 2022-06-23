@@ -24,7 +24,7 @@ export class SchemaDocRowProps {
     readOnly: boolean;
     tableType: "parameters" | "response" | "struct";
   };
-  baseClasses = [] as PontSpec.BaseClass[];
+  definitions = {} as PontSpec.ObjectMap<PontSpec.PontJsonSchema>;
 
   onSchemaRowAction: SchemaTableContext["onSchemaRowAction"];
 }
@@ -34,7 +34,7 @@ export const SchemaDocRow: React.FC<SchemaDocRowProps> = (props) => {
   const [rootParam, changeRootParam] = React.useState(props.node.rootParameter);
   const { isEvenRow, isExpanded, paddingLeft, tableType, readOnly } = props.style;
   const { fieldName, prefixes, parentType, keys } = props.node;
-  const { baseClasses } = props;
+  const { definitions } = props;
 
   React.useEffect(() => {
     if (props.node?.schema !== schema) {
@@ -80,7 +80,7 @@ export const SchemaDocRow: React.FC<SchemaDocRowProps> = (props) => {
               ? fieldName
               : null}
             {!!fieldName && parentType !== "array" && <span style={{ marginRight: 3 }}>:&nbsp;</span>}
-            <TypeSelector schema={schema} baseClasses={baseClasses} disabled onSchemaChange={(newSchema) => {}} />
+            <TypeSelector schema={schema} definitions={definitions} disabled onSchemaChange={(newSchema) => {}} />
 
             {schema.type === "object" && schema.properties ? (
               <span style={{ color: "#8A8B8C", lineHeight: "20px", marginLeft: 3 }}>{`{${
@@ -113,7 +113,7 @@ export const SchemaDocRow: React.FC<SchemaDocRowProps> = (props) => {
     parentType,
     keys,
     readOnly,
-    baseClasses,
+    definitions,
   ]);
 };
 

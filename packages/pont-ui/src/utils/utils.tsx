@@ -81,13 +81,21 @@ export function filterSpec(spec: PontSpec, searchKeyword: string): PontSpec {
       return null;
     })
     .filter((mod) => mod) as any;
-  const baseClasses = (spec?.baseClasses || []).filter((base) => {
-    return fuzzyMatch([base?.name, base?.schema?.description, base?.schema?.title], searchKeyword);
-  });
+
+  const definitions = _.reduce(
+    spec.definitions || {},
+    (result, base, name) => {
+      if (fuzzyMatch([name, base?.description, base?.title], searchKeyword)) {
+        return { ...result, [name]: base };
+      }
+      return result;
+    },
+    {},
+  );
 
   return {
     ...spec,
     mods,
-    baseClasses,
+    definitions,
   };
 }
