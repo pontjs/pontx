@@ -2,7 +2,7 @@
   "name": "vscode-pont2",
   "displayName": "pont2",
   "description": "",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "private": true,
   "publisher": "jasonHzq",
   "license": "MIT",
@@ -73,7 +73,7 @@
   "dependencies": {
     "fs-extra": "^7.0.1",
     "mockjs": "^1.0.1-beta3",
-    "pont-manager": "^0.3.4",
+    "pont-manager": "^0.3.5",
     "pont-spec": "^0.3.4",
     "pont-spec-diff": "^0.3.4"
   },

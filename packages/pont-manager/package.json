@@ -1,6 +1,6 @@
 {
   "name": "pont-manager",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "pont manager",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,7 +13,7 @@
     "fs-extra": "^10.1.0",
     "lodash": "*",
     "pont-meta-fetch-plugin": "^0.3.3",
-    "pont-oas2-parser-plugin": "^0.3.4",
+    "pont-oas2-parser-plugin": "^0.3.5",
     "pont-react-hooks-generate-plugin": "^0.3.4",
     "pont-spec": "^0.3.4"
   },
