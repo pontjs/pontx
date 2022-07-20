@@ -35,7 +35,7 @@ export class PontFetchPlugin extends PontPlugin {
 }
 
 export class PontParserPlugin extends PontPlugin {
-  async apply(metaStr: string, options?: any): Promise<PontSpec> {
+  async apply(metaStr: string, specName: string, options?: any): Promise<PontSpec> {
     return null;
   }
 }

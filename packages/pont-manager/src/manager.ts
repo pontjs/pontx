@@ -213,7 +213,7 @@ export class PontManager {
       }
 
       const parserPlugin = await Promise.resolve(origin.plugins.parser.instance);
-      const spec = await parserPlugin.apply(metaStr, origin.plugins.parser.options);
+      const spec = await parserPlugin.apply(metaStr, origin.name, origin.plugins.parser.options);
       const transformedSpec = (await transformPlugin?.apply(spec, origin.plugins.transform?.options)) || spec;
       if (!transformedSpec) {
         manager.logger.error("远程数据未解析成功！");
