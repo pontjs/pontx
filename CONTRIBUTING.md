@@ -3,7 +3,7 @@
 ## GET START
 
 ```sh
-git clone git@github.com:alibaba/pont.git
+git clone git@github.com:pont2/pont.git
 
 cd pont
 

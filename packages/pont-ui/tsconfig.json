@@ -8,7 +8,7 @@
     "esModuleInterop": false,
     "allowSyntheticDefaultImports": true,
     "strictPropertyInitialization": false,
-    "strict": true,
+    "strict": false,
     "noImplicitAny": false,
     "forceConsistentCasingInFileNames": true,
     "module": "ESNext",

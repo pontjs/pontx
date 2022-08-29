@@ -1,11 +1,14 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 import "./registerService";
-import { App } from "pont-ui";
-import "./App.css";
+import "./main.css";
+import { App } from "./App";
+import { LayoutContext } from "pont-ui";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   // <React.StrictMode>
-  <App />,
+  <LayoutContext.Provider>
+    <App />
+  </LayoutContext.Provider>,
   // </React.StrictMode>,
 );

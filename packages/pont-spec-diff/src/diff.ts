@@ -136,5 +136,40 @@ export const diffPontSpec = (localSpec: PontSpec.PontSpec, remoteSpec: PontSpec.
     definitions: defDiff as any,
   } as CustomDiff;
 
-  return diffObject(localSpec, remoteSpec, customer);
+  return diffObject(
+    {
+      name: localSpec.name,
+      mods: PontSpec.PontSpec.getMods(localSpec),
+      definitions: localSpec.definitions,
+      ext: localSpec.ext,
+    },
+    {
+      name: remoteSpec.name,
+      mods: PontSpec.PontSpec.getMods(remoteSpec),
+      definitions: remoteSpec.definitions,
+      ext: remoteSpec.ext,
+    },
+    customer,
+  ) as DiffResult<{
+    mods: PontSpec.Mod[];
+    name?: string;
+    definitions?: PontSpec.PontSpec["definitions"];
+  }>;
+};
+
+export const diffPontSpecs = (localSpecs: PontSpec.PontSpec[], remoteSpecs: PontSpec.PontSpec[]) => {
+  return _.unionBy(localSpecs, remoteSpecs, "name")
+    .map((spec) => {
+      const localSpec = localSpecs?.find((_spec) => _spec.name === spec.name);
+      const remoteSpec = remoteSpecs?.find((_spec) => _spec.name === spec.name);
+
+      if (remoteSpec && !localSpec) {
+        return { ...remoteSpec, diffType: "create" };
+      }
+      if (!remoteSpec && localSpec) {
+        return { ...localSpec, diffType: "delete" };
+      }
+      return diffPontSpec(localSpec, remoteSpec);
+    })
+    .filter((spec) => spec.diffType !== "equal");
 };

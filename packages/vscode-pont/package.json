@@ -2,7 +2,7 @@
   "name": "vscode-pont2",
   "displayName": "pont2",
   "description": "",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "private": true,
   "publisher": "jasonHzq",
   "license": "MIT",
@@ -13,7 +13,8 @@
     "Other"
   ],
   "activationEvents": [
-    "*"
+    "*",
+    "onWebviewPanel:pont-ui"
   ],
   "main": "./out/extension",
   "contributes": {
@@ -29,20 +30,78 @@
         "title": "switchOrigin pont current origin"
       },
       {
-        "command": "pont.findInterface",
-        "title": "find pont interface"
-      },
-      {
         "command": "pont.openPontUI",
         "title": "open pont tab"
       },
       {
-        "command": "pont.pont.regenerate",
-        "title": "regenerate local spec sdk code"
+        "command": "pont.findInterface",
+        "title": "find pont interface",
+        "icon": "$(search)"
+      },
+      {
+        "command": "pont.regenerate",
+        "title": "生成本地代码",
+        "icon": "$(debug-start)"
       },
       {
         "command": "pont.restart",
-        "title": "restart vscode-pont"
+        "title": "重启 Pont",
+        "icon": "$(debug-restart)"
+      },
+      {
+        "command": "pont.fetchRemote",
+        "title": "拉取远程数据",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "pontChanges.commit",
+        "icon": "$(check)",
+        "title": "提交暂存变更，并更新本地代码"
+      },
+      {
+        "command": "pontChanges.unStageAll",
+        "icon": "$(remove)",
+        "title": "取消所有已暂存的变更"
+      },
+      {
+        "command": "pontChanges.stageAll",
+        "icon": "$(add)",
+        "title": "暂存所有变更"
+      },
+      {
+        "command": "pontChanges.batchStage",
+        "icon": "$(add)",
+        "title": "批量暂存变更"
+      },
+      {
+        "command": "pontChanges.batchUnStage",
+        "icon": "$(remove)",
+        "title": "批量取消暂存变更"
+      },
+      {
+        "command": "pontChanges.stage",
+        "icon": "$(add)",
+        "title": "暂存变更"
+      },
+      {
+        "command": "pontChanges.unStage",
+        "icon": "$(remove)",
+        "title": "取消暂存变更"
+      },
+      {
+        "command": "pontAPIs.openMeta",
+        "icon": "$(go-to-file)",
+        "title": "查看元数据定义"
+      },
+      {
+        "command": "pont.openDocument",
+        "icon": "$(book)",
+        "title": "查看 API 文档"
+      },
+      {
+        "command": "pont.openMeta",
+        "icon": "$(go-to-file)",
+        "title": "查看元数据定义"
       }
     ],
     "keybindings": [
@@ -57,8 +116,171 @@
         "mac": "cmd+ctrl+m"
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "icon": "node_modules/@vscode/codicons/src/icons/symbol-structure.svg",
+          "id": "pontActivity",
+          "title": "高效 API 管理工具"
+        }
+      ]
+    },
+    "colors": [
+      {
+        "id": "pontx.decorations.addedForegroundColor",
+        "description": "Specifies the decoration foreground color of added files",
+        "defaults": {
+          "light": "gitDecoration.addedResourceForeground",
+          "dark": "gitDecoration.addedResourceForeground",
+          "highContrast": "gitDecoration.addedResourceForeground"
+        }
+      },
+      {
+        "id": "pontx.decorations.deletedForegroundColor",
+        "description": "Specifies the decoration foreground color of deleted files",
+        "defaults": {
+          "light": "gitDecoration.stageDeletedResourceForeground",
+          "dark": "gitDecoration.stageDeletedResourceForeground",
+          "highContrast": "gitDecoration.stageDeletedResourceForeground"
+        }
+      },
+      {
+        "id": "pontx.decorations.modifiedForegroundColor",
+        "description": "Specifies the decoration foreground color of modified files",
+        "defaults": {
+          "light": "gitDecoration.stageModifiedResourceForeground",
+          "dark": "gitDecoration.stageModifiedResourceForeground",
+          "highContrast": "gitDecoration.stageModifiedResourceForeground"
+        }
+      },
+      {
+        "id": "pontx.decorations.untrackedForegroundColor",
+        "description": "Specifies the decoration untracked color of modified files",
+        "defaults": {
+          "light": "gitDecoration.untrackedResourceForeground",
+          "dark": "gitDecoration.untrackedResourceForeground",
+          "highContrast": "gitDecoration.untrackedResourceForeground"
+        }
+      }
+    ],
+    "views": {
+      "pontActivity": [
+        {
+          "id": "pontExplorer",
+          "name": "pont"
+        }
+      ]
+    },
     "menus": {
-      "editor/context": []
+      "editor/context": [
+        {
+          "command": "pont.openDocument",
+          "group": "navigation"
+        },
+        {
+          "command": "pont.openMeta",
+          "group": "navigation"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "pont.findInterface",
+          "when": "view == pontExplorer",
+          "group": "navigation"
+        },
+        {
+          "command": "pont.fetchRemote",
+          "when": "view == pontExplorer",
+          "group": "navigation"
+        },
+        {
+          "command": "pont.regenerate",
+          "when": "view == pontExplorer",
+          "group": "navigation"
+        },
+        {
+          "command": "pont.restart",
+          "when": "view == pontExplorer",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "pontChanges.commit",
+          "when": "view == pontExplorer && viewItem == pontChangesManager",
+          "group": "inline"
+        },
+        {
+          "command": "pontAPIs.openMeta",
+          "when": "view == pontExplorer && viewItem == Spec",
+          "group": "inline"
+        },
+        {
+          "command": "pontAPIs.openMeta",
+          "when": "view == pontExplorer && viewItem == Mod",
+          "group": "inline"
+        },
+        {
+          "command": "pontAPIs.openMeta",
+          "when": "view == pontExplorer && viewItem == API",
+          "group": "inline"
+        },
+        {
+          "command": "pontAPIs.openMeta",
+          "when": "view == pontExplorer && viewItem == Struct",
+          "group": "inline"
+        },
+        {
+          "command": "pontChanges.unStageAll",
+          "when": "view == pontExplorer && viewItem == StagedChanges",
+          "group": "inline"
+        },
+        {
+          "command": "pontChanges.stageAll",
+          "when": "view == pontExplorer && viewItem == Changes",
+          "group": "inline"
+        },
+        {
+          "command": "pontChanges.batchStage",
+          "when": "view == pontExplorer && viewItem == ChangesSpec",
+          "group": "inline"
+        },
+        {
+          "command": "pontChanges.batchStage",
+          "when": "view == pontExplorer && viewItem == ChangesMod",
+          "group": "inline"
+        },
+        {
+          "command": "pontChanges.batchStage",
+          "when": "view == pontExplorer && viewItem == ChangesDefinitions",
+          "group": "inline"
+        },
+        {
+          "command": "pontChanges.stage",
+          "when": "view == pontExplorer && viewItem == ChangesStruct || viewItem == ChangesAPI",
+          "group": "inline"
+        },
+        {
+          "command": "pontChanges.unStage",
+          "when": "view == pontExplorer && viewItem == StagedChangesStruct || viewItem == StagedChangesAPI",
+          "group": "inline"
+        },
+        {
+          "command": "pontChanges.batchUnStage",
+          "when": "view == pontExplorer && viewItem == StagedChangesSpec",
+          "group": "inline"
+        },
+        {
+          "command": "pontChanges.batchUnStage",
+          "when": "view == pontExplorer && viewItem == StagedChangesMod",
+          "group": "inline"
+        },
+        {
+          "command": "pontChanges.batchUnStage",
+          "when": "view == pontExplorer && viewItem == StagedChangesDefinitions",
+          "group": "inline"
+        }
+      ]
     }
   },
   "scripts": {
@@ -71,9 +293,10 @@
     "preview": "cd media && vite build --watch"
   },
   "dependencies": {
+    "@vscode/codicons": "^0.0.32",
     "fs-extra": "^7.0.1",
     "mockjs": "^1.0.1-beta3",
-    "pont-manager": "^0.3.4",
+    "pont-manager": "^0.3.5",
     "pont-spec": "^0.3.4",
     "pont-spec-diff": "^0.3.4"
   },

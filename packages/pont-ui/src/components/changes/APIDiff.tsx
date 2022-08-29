@@ -1,4 +1,4 @@
-import { Interface, Parameter, PontJsonSchema } from "pont-spec";
+import { PontAPI, Parameter, PontJsonSchema } from "pont-spec";
 import { BaseClazzDiffOp } from "pont-spec-diff";
 import * as React from "react";
 import ReactDiffViewer from "react-diff-viewer";
@@ -96,7 +96,7 @@ export class ApiDiffOp {
 
     const [fieldName, ...rest] = paths;
 
-    switch (fieldName as keyof Interface) {
+    switch (fieldName as keyof PontAPI) {
       case "deprecated": {
         return <li>deprecated 变更为 {remoteValue}</li>;
       }

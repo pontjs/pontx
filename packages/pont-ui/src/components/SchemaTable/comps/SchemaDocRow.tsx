@@ -80,7 +80,13 @@ export const SchemaDocRow: React.FC<SchemaDocRowProps> = (props) => {
               ? fieldName
               : null}
             {!!fieldName && parentType !== "array" && <span style={{ marginRight: 3 }}>:&nbsp;</span>}
-            <TypeSelector schema={schema} definitions={definitions} disabled onSchemaChange={(newSchema) => {}} />
+            <TypeSelector
+              schema={schema}
+              definitions={definitions}
+              disabled
+              onSchemaChange={(newSchema) => {}}
+              onStructClick={(struct) => props.onSchemaRowAction(props.node, { type: "ClickStruct", payload: struct })}
+            />
 
             {schema.type === "object" && schema.properties ? (
               <span style={{ color: "#8A8B8C", lineHeight: "20px", marginLeft: 3 }}>{`{${

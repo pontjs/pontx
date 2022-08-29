@@ -3,7 +3,7 @@ import { PontParserPlugin } from "pont-manager";
 import { PontSpec } from "pont-spec";
 
 export class PontOAS2ParserPlugin extends PontParserPlugin {
-  apply(metaStr: string, options?: any): Promise<PontSpec> {
+  apply(metaStr: string, specName: string, options?: any): Promise<PontSpec> {
     try {
       let swaggerObj = null;
 

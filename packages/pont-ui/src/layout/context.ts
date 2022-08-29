@@ -1,9 +1,11 @@
 import { createContainer } from "unstated-next";
 import * as React from "react";
 // import * as spec from "../mocks/spec.json";
-import { PontSpec, Interface } from "pont-spec";
+import { PontSpec, PontAPI } from "pont-spec";
 // import { PontUIService } from "../service";
 import { PontUIService } from "../service.local";
+import { diffPontSpec } from "pont-spec-diff";
+import * as _ from "lodash";
 
 export enum PageType {
   Doc = "doc",
@@ -41,9 +43,20 @@ const useContext = () => {
 
   const fetchPontSpecs = React.useCallback(() => {
     return PontUIService.requestPontSpecs().then((result) => {
-      changeCurrSpec(getLocalSpec(result.localSpecs, result?.currentOriginName || ""));
+      const localSpec = getLocalSpec(result.localSpecs, result?.currentOriginName || "");
+      changeCurrSpec(localSpec);
       changeRemoteSpecs(result.remoteSpecs);
       changeSpecs(result.localSpecs);
+
+      const remoteSpec = result.remoteSpecs?.find((spec) => spec.name === localSpec?.name) || remoteSpecs?.[0];
+      const diffs = diffPontSpec(localSpec, remoteSpec);
+      const diffsCnt = ((diffs as any)?.mods?.length || 0) + (_.isEmpty(diffs?.definitions) ? 0 : 1);
+
+      if (diffsCnt) {
+        changePage(PageType.Diff);
+      } else {
+        changePage(PageType.Doc);
+      }
     });
   }, []);
 

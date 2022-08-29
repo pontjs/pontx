@@ -124,6 +124,12 @@ export const SchemaRow: React.FC<SchemaRowProps> = (props) => {
               schema={schema}
               definitions={definitions}
               disabled={readOnly}
+              onStructClick={(struct) =>
+                props.onSchemaRowAction(props.node, {
+                  type: "ClickStruct",
+                  payload: struct,
+                })
+              }
               onSchemaChange={(newSchema) => {
                 changeSchema(newSchema);
                 props.onSchemaRowAction(props.node, {

@@ -1,9 +1,10 @@
 import { PontManager } from "pont-manager";
 import * as _ from "lodash";
 import * as vscode from "vscode";
-import { showProgress, VSCodeLogger, wait } from "./utils";
+import { findInterface, showProgress, viewMetaFile, VSCodeLogger, wait } from "./utils";
 import { PontWebView } from "./webview";
 import { pontService } from "./Service";
+import { PontSpec } from "pont-spec";
 // import { PontService } from "./Service";
 const fs = require("fs");
 const path = require("path");
@@ -30,8 +31,26 @@ export class PontCommands {
     regenerate: "pont.regenerate",
   };
 
+  static getPickItems(pontSpec: PontSpec) {
+    const hasSingleMod = PontSpec.getMods(pontSpec).length <= 1;
+    const items = PontSpec.getMods(pontSpec)
+      .map((mod) => {
+        return mod.interfaces.map((inter) => {
+          return {
+            label: `${inter.method ? `[${inter.method}] ` : ""}${inter.path ? inter.path : ""}`,
+            detail: `${pontSpec.name ? pontSpec.name + "." : ""}${hasSingleMod ? "" : mod.name + "."}${inter.name}`,
+            description: `${inter.description}`,
+          };
+        });
+      })
+      .reduce((pre, next) => pre.concat(next), []);
+
+    return items;
+  }
+
   static registerCommands(context) {
     const service = pontService;
+
     vscode.commands.registerCommand("pont.switchOrigin", () => {
       const origins = service.pontManager.innerManagerConfig.origins.map((conf) => {
         return {
@@ -44,7 +63,7 @@ export class PontCommands {
         async (item) => {
           vscode.window.withProgress(
             {
-              location: vscode.ProgressLocation.Notification,
+              location: vscode.ProgressLocation.Window,
               title: "",
             },
             async (p) => {
@@ -68,16 +87,10 @@ export class PontCommands {
     });
 
     vscode.commands.registerCommand("pont.findInterface", () => {
-      const pontSpec = PontManager.getCurrentSpec(service.pontManager);
-      const items = pontSpec.mods
-        .map((mod) => {
-          return mod.interfaces.map((inter) => {
-            return {
-              label: `[${inter.method}] ${inter.path}`,
-              detail: `${mod.name}.${inter.name}`,
-              description: `${inter.description}`,
-            };
-          });
+      const hasSpecName = service.pontManager.localPontSpecs.some((spec) => spec.name);
+      const items = service.pontManager.localPontSpecs
+        .map((pontSpec) => {
+          return PontCommands.getPickItems(pontSpec);
         })
         .reduce((pre, next) => pre.concat(next), []);
 
@@ -90,12 +103,38 @@ export class PontCommands {
           if (!item) {
             return;
           }
-          const [modName, apiName] = item.detail.split(".");
-          const modMeta = PontManager.getCurrentSpec(service.pontManager).mods.find((mod) => mod.name === modName);
+          let specName: string, modName: string, apiName: string;
+          const detailItems = item.detail.split(".");
+
+          if (hasSpecName) {
+            specName = detailItems[0];
+            const spec = service.pontManager.localPontSpecs.find((spec) => spec.name === specName);
+            if (PontSpec.getMods(spec)?.length > 1) {
+              modName = detailItems[1];
+              apiName = detailItems[2];
+            } else {
+              apiName = detailItems[1];
+            }
+          } else {
+            const spec = service.pontManager.localPontSpecs[0];
+            if (PontSpec.getMods(spec)?.length > 1) {
+              modName = detailItems[0];
+              apiName = detailItems[1];
+            } else {
+              apiName = detailItems[0];
+            }
+          }
+          const pontSpec =
+            service.pontManager.localPontSpecs.find((spec) => spec.name === specName) ||
+            service.pontManager.localPontSpecs[0];
+          const modMeta =
+            PontSpec.getMods(pontSpec)?.find((mod) => mod.name === modName) || PontSpec.getMods(pontSpec)?.[0];
           const apiMeta = modMeta?.interfaces?.find((api) => api.name === apiName);
 
           Promise.resolve(service.pontManager.innerManagerConfig.plugins.generate?.instance).then((generatePlugin) => {
-            const snippets = generatePlugin?.providerSnippets?.(apiMeta, modName, pontSpec.name);
+            const snippets = generatePlugin?.providerSnippets?.(apiMeta, modName, pontSpec.name, {
+              spec: pontSpec,
+            });
 
             if (snippets?.length) {
               if (snippets.length === 1) {
@@ -116,17 +155,14 @@ export class PontCommands {
                   },
                 )
                 .then((snippet) => {
-                  const foundSnippet = snippets.find((inst) => inst.name === snippet.label);
+                  const foundSnippet = snippets.find((inst) => inst.name === snippet?.label);
                   if (foundSnippet) {
                     insertCode(foundSnippet.code);
                   }
                 });
             }
 
-            let code = `API.${item.detail}.`;
-            if (pontSpec.name) {
-              code = `API.${pontSpec.name}.${item.detail}`;
-            }
+            const code = `API.${item.detail}.`;
             insertCode(code);
           });
         });
@@ -144,24 +180,101 @@ export class PontCommands {
         vscode.window.showInformationMessage("文件生成成功！");
       });
     });
+    vscode.commands.registerCommand("pont.fetchRemote", (config) => {
+      const pontManager = service.pontManager;
 
-    vscode.commands.registerCommand("pont.openPontUI", () => {
-      new PontWebView().openTab(context.extensionUri);
+      showProgress("拉取远程元数据", pontManager, async (log) => {
+        try {
+          log("元数据拉取中...");
+          await wait(100);
+
+          const manager = await PontManager.fetchRemotePontMeta(pontManager);
+          service.updatePontManger(manager);
+
+          log("元数据拉取成功！");
+          vscode.window.showInformationMessage("元数据拉取成功！");
+        } catch (e) {
+          vscode.window.showErrorMessage("元数据拉取失败：" + e.message);
+        }
+      });
+    });
+
+    vscode.commands.registerCommand("pont.openPontUI", (config) => {
+      new PontWebView().openTab(context.extensionUri, config);
     });
 
     vscode.commands.registerCommand("pont.restart", async () => {
-      const logger = new VSCodeLogger();
-      vscode.window.showInformationMessage("pont 重启中...");
-      try {
-        const pontManager = await PontManager.constructorFromRootDir(vscode.workspace.rootPath, logger);
+      await vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Window,
+          cancellable: false,
+          title: "pont",
+        },
+        async (progress, token) => {
+          progress.report({ message: "pont 重启中...", increment: 0 });
+          try {
+            const pontManager = await PontManager.constructorFromRootDir(
+              vscode.workspace.rootPath,
+              VSCodeLogger.createFromProgress(progress),
+            );
 
-        pontService.updatePontManger(pontManager);
-        vscode.window.showInformationMessage("pont 启动成功");
-        logger.log("");
-      } catch (e) {
-        logger.log("");
-      }
+            pontService.updatePontManger(pontManager);
+            progress.report({ message: "pont 启动成功", increment: 100 });
+          } catch (e) {
+            vscode.window.showErrorMessage("pont 启动失败: " + e.message);
+          }
+        },
+      );
     });
+    vscode.commands.registerCommand("pont.openPontPanel", async () => {
+      await vscode.commands.executeCommand("pontExplorer.focus");
+    });
+    vscode.commands.registerTextEditorCommand("pont.openDocument", async (editor, edit) => {
+      const isSingleSpec = PontManager.checkIsSingleSpec(service.pontManager);
+      const { specName, apiName, modName } = findInterface(editor, !isSingleSpec) || ({} as any);
+      const spec = PontManager.getSpec(service.pontManager, specName);
+
+      vscode.commands.executeCommand("pont.openPontUI", {
+        specName,
+        modName,
+        name: apiName,
+        pageType: "document",
+        schemaType: "api",
+        spec: spec?.apis?.[`${modName}/${apiName}`],
+      });
+    });
+
+    vscode.commands.registerTextEditorCommand("pont.openDocument", async (editor, edit) => {
+      const isSingleSpec = PontManager.checkIsSingleSpec(service.pontManager);
+      const { specName, apiName, modName } = findInterface(editor, !isSingleSpec) || ({} as any);
+      const spec = PontManager.getSpec(service.pontManager, specName);
+
+      vscode.commands.executeCommand("pont.openPontUI", {
+        specName,
+        modName,
+        name: apiName,
+        pageType: "document",
+        schemaType: "api",
+        spec: spec?.apis?.[`${modName}/${apiName}`],
+      });
+    });
+
+    vscode.commands.registerCommand("pont.openMeta", async (editor, edit) => {
+      const isSingleSpec = PontManager.checkIsSingleSpec(service.pontManager);
+      const { specName, apiName, modName } = findInterface(editor, !isSingleSpec) || ({} as any);
+
+      viewMetaFile({
+        specName,
+        modName,
+        apiName,
+        specType: "API",
+        pontManager: service.pontManager,
+      });
+    });
+
+    // vscode.commands.registerCommand('pont.refreshPontExplorer', () => {
+    //   service.treeDataProvider.refresh();
+    // });
   }
 }
 
