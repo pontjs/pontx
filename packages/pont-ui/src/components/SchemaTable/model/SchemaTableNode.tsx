@@ -33,6 +33,14 @@ export type TableRowAction =
         value: string;
         name?: string;
       };
+    }
+  | {
+      type: "ClickStruct";
+      payload: {
+        type: string;
+        name: string;
+        spec: any;
+      };
     };
 
 export class SchemaTableContext {

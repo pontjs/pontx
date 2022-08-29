@@ -19,6 +19,7 @@
   },
   "files": [
     "package.json",
+    "builtin",
     "lib"
   ],
   "keywords": [],
@@ -26,6 +27,9 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "*",
+    "@types/react": "^16.14.30",
+    "react": "^16.14.0",
+    "swr": "^0.3.0",
     "typescript": "^4.6.4"
   }
 }

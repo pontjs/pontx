@@ -5,18 +5,19 @@
 import * as React from "react";
 import { Tab } from "@alicloud/console-components";
 import ReactDiffViewer from "react-diff-viewer";
-import { BaseClass } from "../apiDoc/BaseClass";
-import { API } from "../apiDoc/API";
+import { BaseClass } from "../docs/BaseClass";
+import { API } from "../docs/API";
+import * as PontSpec from "pont-spec";
 import { BaseClazzDiffOp, diffApi, diffBaseClass } from "pont-spec-diff";
 import { ApiDiffOp, getBaseClassDiffDom } from "./APIDiff";
 import "./DiffContent.less";
-import "../apiDoc/BaseClass.less";
-import "../apiDoc/API.less";
 
 export class DiffContentProps {
   localMeta: any;
   remoteMeta: any;
   type: "api" | "baseclass";
+  definitions = {} as PontSpec.ObjectMap<PontSpec.PontJsonSchema>;
+  onStructClick(struct: { type: string; name: string; spec: any }) {}
 }
 
 export const DiffContent: React.FC<DiffContentProps> = (props) => {
@@ -67,9 +68,14 @@ export const DiffContent: React.FC<DiffContentProps> = (props) => {
         </Tab.Item>
         <Tab.Item key="detail" title="查看文档(新元数据)">
           {props.remoteMeta?.responses || props?.remoteMeta?.parameters ? (
-            <API selectedApi={props.remoteMeta} />
+            <API selectedApi={props.remoteMeta} definitions={props.definitions} onStructClick={props.onStructClick} />
           ) : (
-            <BaseClass schema={props?.remoteMeta} name={props?.remoteMeta?.typeName} />
+            <BaseClass
+              schema={props?.remoteMeta}
+              name={props?.remoteMeta?.typeName}
+              definitions={props.definitions}
+              onStructClick={props.onStructClick}
+            />
           )}
         </Tab.Item>
       </Tab>
