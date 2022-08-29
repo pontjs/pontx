@@ -3,12 +3,11 @@
  * @description diff 管理
  */
 import * as _ from "lodash";
-import * as PontSpec from "pont-spec";
+import { PontSpec, Mod, PontAPI, PontJsonSchema } from "pont-spec";
 import { diffPontSpec, DiffResult } from "pont-spec-diff";
-import { BaseClass } from "../apiDoc/BaseClass";
 import * as React from "react";
 import { Table } from "@alicloud/console-components";
-import { SchemaRow } from "../../components/SchemaTable/comps/SchemaRow";
+// import { SchemaRow } from "../../components/SchemaTable/comps/SchemaRow";
 
 export type ProcessedDiffs<T> = {
   name?: string;
@@ -16,11 +15,8 @@ export type ProcessedDiffs<T> = {
   processType: "untracked" | "discard" | "staged";
 } & DiffResult<T>;
 
-export function getPontSpecByProcessType(
-  diffs: ProcessedDiffs<PontSpec.PontSpec>,
-  processType: "untracked" | "discard" | "staged",
-): ProcessedDiffs<PontSpec.PontSpec> {
-  const mapApi = (api: ProcessedDiffs<PontSpec.Interface>) => {
+export function getPontSpecByProcessType(diffs, processType: "untracked" | "discard" | "staged") {
+  const mapApi = (api: ProcessedDiffs<PontAPI>) => {
     if (api.processType === processType) {
       return api;
     } else if (processType === "untracked" && !api.processType) {
@@ -28,7 +24,7 @@ export function getPontSpecByProcessType(
     }
     return null;
   };
-  const mapMod = (mod: ProcessedDiffs<PontSpec.Mod>) => {
+  const mapMod = (mod: ProcessedDiffs<Mod>) => {
     const interfaces = (mod?.interfaces || []).map(mapApi as any).filter((id) => id);
 
     if (!mod.processType && processType === "untracked") {
@@ -46,7 +42,7 @@ export function getPontSpecByProcessType(
     return null;
   };
   const newDefs = Object.keys(diffs?.definitions || {}).reduce((result, key) => {
-    let clazz = diffs.definitions[key] as ProcessedDiffs<PontSpec.PontJsonSchema>;
+    let clazz = diffs.definitions[key] as ProcessedDiffs<PontJsonSchema>;
     if (!clazz.processType && processType === "untracked") {
       clazz = {
         ...clazz,
@@ -64,25 +60,25 @@ export function getPontSpecByProcessType(
     ...diffs,
     mods: (diffs?.mods || []).map(mapMod as any).filter((id) => id),
     definitions: newDefs,
-  } as ProcessedDiffs<PontSpec.PontSpec>;
+  } as ProcessedDiffs<PontSpec>;
 }
 
 export function changeAllMetaProcessType(
-  diffs: ProcessedDiffs<PontSpec.PontSpec>,
+  diffs,
   fromProcessType: "untracked" | "discard" | "staged",
   processType: "untracked" | "discard" | "staged",
-) {
-  const mapApi = (api: ProcessedDiffs<PontSpec.Interface>) => {
+): any {
+  const mapApi = (api: ProcessedDiffs<PontAPI>) => {
     if ((api.processType || "untracked") === fromProcessType) {
       return { ...api, processType };
     }
     return api;
   };
-  const mapMod = (mod: ProcessedDiffs<PontSpec.Mod>) => {
+  const mapMod = (mod: ProcessedDiffs<Mod>) => {
     const newProcessType = (mod.processType || "untracked") === fromProcessType ? processType : mod.processType;
     return { ...mod, processType: newProcessType, interfaces: (mod.interfaces || []).map((api) => mapApi(api as any)) };
   };
-  const mapClazz = (clazz: ProcessedDiffs<PontSpec.PontJsonSchema>) => {
+  const mapClazz = (clazz: ProcessedDiffs<PontJsonSchema>) => {
     const newProcessType = (clazz.processType || "untracked") === fromProcessType ? processType : clazz.processType;
     return { ...clazz, processType: newProcessType };
   };
@@ -94,15 +90,11 @@ export function changeAllMetaProcessType(
   };
 }
 
-export function getNewSpec(
-  diffs: ProcessedDiffs<PontSpec.PontSpec>,
-  localSpec: PontSpec.PontSpec,
-  remoteSpec: PontSpec.PontSpec,
-): PontSpec.PontSpec {
-  const stagedDiffs = getPontSpecByProcessType(diffs, "staged");
+export function getNewSpec(diffs: ProcessedDiffs<PontSpec>, localSpec, remoteSpec): PontSpec {
+  const stagedDiffs: any = getPontSpecByProcessType(diffs, "staged");
   let newMods = [...localSpec.mods];
   stagedDiffs.mods.forEach((mod) => {
-    const diffsMod: ProcessedDiffs<PontSpec.Mod> = mod as any;
+    const diffsMod: ProcessedDiffs<Mod> = mod as any;
     if (diffsMod.diffType === "create") {
       const remoteMod = (remoteSpec.mods || []).find((mod) => mod.name === diffsMod.name);
       if (remoteMod) {
@@ -116,7 +108,7 @@ export function getNewSpec(
       let newApis = [...(localMod?.interfaces || [])];
 
       (diffsMod.interfaces || []).forEach((api) => {
-        const apiDiff: ProcessedDiffs<PontSpec.Interface> = api as any;
+        const apiDiff: ProcessedDiffs<PontAPI> = api as any;
         const remoteApi = (remoteMod?.interfaces || []).find((api) => api.name === apiDiff.name);
 
         if (apiDiff.diffType === "create") {
@@ -128,7 +120,7 @@ export function getNewSpec(
         } else if (apiDiff.diffType === "update") {
           newApis = newApis.map((api) => {
             if (api.name === apiDiff.name) {
-              return remoteApi as PontSpec.Interface;
+              return remoteApi as PontAPI;
             }
             return api;
           });
@@ -137,7 +129,7 @@ export function getNewSpec(
       const newMod = {
         ...remoteMod,
         interfaces: newApis,
-      } as PontSpec.Mod;
+      } as Mod;
       newMods = (newMods || []).map((mod) => {
         if (mod.name === newMod.name) {
           return newMod;

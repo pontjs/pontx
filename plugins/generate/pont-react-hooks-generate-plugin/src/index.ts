@@ -1,13 +1,33 @@
 import { InnerOriginConfig, PontGeneratorPlugin, PontManager } from "pont-manager";
-import { Interface, PontSpec } from "pont-spec";
+import { PontAPI, PontSpec } from "pont-spec";
 import * as path from "path";
+import * as fs from "fs-extra";
 import { CodeGenerator, FileGenerator, FileStructure, indentation, Snippet } from "pont-generate-core";
 
+async function getBuiltinStructure() {
+  const builtinStructure = {};
+  const dir = await fs.readdir(path.join(__dirname, "../builtin"));
+  const promises = dir.map(async (filename) => {
+    const content = await fs.readFile(path.join(__dirname, "../builtin", filename));
+
+    return {
+      content,
+      name: filename,
+    };
+  });
+  const files = await Promise.all(promises);
+  files.forEach((file) => {
+    builtinStructure[file.name] = file.content;
+  });
+
+  return builtinStructure;
+}
+
 class MyCodeGenerator extends CodeGenerator {
-  generateAPITsCode(api: Interface): string {
+  generateAPITsCode(api: PontAPI): string {
     return `/**
  * ${api.description}
- * ${api.path}
+ * ${api.path}${api.deprecated ? "\n * @deprecated" : ""}
  */
 export namespace ${api.name} {
 	type HooksParams = (() => Params) | Params;
@@ -31,11 +51,23 @@ declare type ConfigInterface = import("swr").ConfigInterface;
 
 ${super.generateSpecIndexTsCode(spec)}`;
   }
+
+  generateSpecsIndexJsCode(specs: PontSpec[]): string {
+    const originCode = super.generateSpecsIndexJsCode(specs);
+    return `import { processSpecs } from "./builtin/process";\n${originCode}\nprocessSpecs();\n`;
+  }
+
+  generateSpecIndexJsCode(spec: PontSpec): string {
+    const originCode = super.generateSpecIndexJsCode(spec);
+    return `import { processSingleSpec } from "./builtin/process";\n${originCode}\nprocessSingleSpec();\n`;
+  }
 }
 
 class PontReactHooksGeneratorPlugin extends PontGeneratorPlugin {
-  static generateSingleSpec(pontSpec: PontSpec, basePath: string) {
+  static async generateSingleSpec(pontSpec: PontSpec, basePath: string) {
     const fileStructure = FileStructure.constructorFromCodeGenerator(pontSpec, new MyCodeGenerator());
+    fileStructure["builtin"] = await getBuiltinStructure();
+
     const fileGenerator = {
       basePath,
       fileStructure,
@@ -44,8 +76,9 @@ class PontReactHooksGeneratorPlugin extends PontGeneratorPlugin {
     return FileGenerator.generateFiles(fileGenerator);
   }
 
-  static generateSpecs(pontSpecs: PontSpec[], basePath: string) {
+  static async generateSpecs(pontSpecs: PontSpec[], basePath: string) {
     const fileStructure = FileStructure.constructorSpecsFromCodeGenerator(pontSpecs, new MyCodeGenerator());
+    fileStructure["builtin"] = await getBuiltinStructure();
     const fileGenerator = {
       basePath,
       fileStructure,
@@ -64,8 +97,7 @@ class PontReactHooksGeneratorPlugin extends PontGeneratorPlugin {
 
       if (manager.localPontSpecs?.length > 1 && manager.localPontSpecs.every((spec) => spec.name)) {
         manager.logger.info("开始生成多源类型代码");
-        await PontReactHooksGeneratorPlugin.generateSpecs(manager.localPontSpecs, baseDir);
-        return;
+        return PontReactHooksGeneratorPlugin.generateSpecs(manager.localPontSpecs, baseDir);
       }
 
       return PontReactHooksGeneratorPlugin.generateSingleSpec(manager.localPontSpecs[0], baseDir);
@@ -78,7 +110,7 @@ class PontReactHooksGeneratorPlugin extends PontGeneratorPlugin {
     }
   }
 
-  providerSnippets(api: Interface, modName: string, originName = ""): Snippet[] {
+  providerSnippets(api: PontAPI, modName: string, originName = ""): Snippet[] {
     const apiName = originName ? `API.${originName}.${modName}.${api.name}` : `API.${modName}.${api.name}`;
 
     const isGet = api?.method?.toUpperCase() === "GET";

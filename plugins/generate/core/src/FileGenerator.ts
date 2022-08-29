@@ -28,7 +28,7 @@ export class FileStructure {
     generator: T = new CodeGenerator() as any,
   ): FileStructure {
     generator.specName = spec.name;
-    const mods = spec.mods.reduce((result, mod) => {
+    const mods = PontSpec.PontSpec.getMods(spec).reduce((result, mod) => {
       return { ...result, [mod.name + ".js"]: generator.generateModJsCode(mod) };
     }, {} as FileStructure);
     mods["index.js"] = generator.generateModsIndexJsCode(spec);

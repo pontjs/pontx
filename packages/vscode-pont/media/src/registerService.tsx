@@ -1,12 +1,9 @@
 import { PontSpec } from "pont-spec";
 import { PontUIService } from "pont-ui";
 import * as _ from "lodash";
-import { WebviewApi } from "vscode-webview";
+import { vscode } from "./utils/utils";
 
-declare let acquireVsCodeApi: any;
 if (import.meta.env.PROD) {
-  const vscode: WebviewApi<VscodeState> = acquireVsCodeApi?.();
-
   const requestPostMessage = <T,>(message: { type: string; value?: any }): Promise<T> => {
     const requestId = _.uniqueId();
     vscode.postMessage({ ...message, requestId });
@@ -19,10 +16,6 @@ if (import.meta.env.PROD) {
         }
       });
     });
-  };
-
-  type VscodeState = {
-    specs: PontSpec[];
   };
 
   PontUIService.requestPontSpecs = () => {
@@ -65,5 +58,4 @@ if (import.meta.env.PROD) {
     });
   };
 }
-
 // todo

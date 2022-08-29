@@ -1,0 +1,17 @@
+{
+  "extends": "../../../tsconfig.build.json",
+  "compilerOptions": {
+    "target": "es6",
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "outDir": "builtin",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {},
+    "rootDir": "./builtinSrc",
+    "composite": true
+  },
+  "include": ["./builtinSrc/**/*"],
+  "exclude": ["node_modules", "builtin"],
+  "references": []
+}

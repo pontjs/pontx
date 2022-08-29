@@ -19,7 +19,7 @@ export const needQuotationMark = (name: string) => {
   return !name.match(/^[a-zA-Z_$][a-zA-Z0-9_$]*$/);
 };
 
-export const apiJsTemplate = (inter: PontSpec.Interface) => `${
+export const apiJsTemplate = (inter: PontSpec.PontAPI) => `${
   inter.description
     ? `/**
  * ${inter.description.split("\n").join("\n * ")}
@@ -33,13 +33,13 @@ export const ${inter.name} = {
 };
 `;
 
-export const apiTsTemplate = (api: PontSpec.Interface, generator: CodeGenerator) => `/**
+export const apiTsTemplate = (api: PontSpec.PontAPI, generator: CodeGenerator) => `/**
  * @path: ${api.path}${
   api.description
     ? `
 * ${api.description.split("\n").join("\n * ")}`
     : ""
-}
+}${api.deprecated ? `\n * @deprecated` : ""}
  */
 export namespace ${api.name} {
 ${indentation(2)(`export ${generator.generateAPIParametersTsCode(api)}`)}
@@ -81,14 +81,16 @@ const modsIndexJsTemplate = (spec: PontSpec.PontSpec) => `${
   */
 `
     : ""
-}${spec.mods
+}${PontSpec.PontSpec.getMods(spec)
   .map((mod) => {
     return `import * as ${mod.name} from './${mod.name}';`;
   })
   .join("\n")}
 
 ${spec.name ? `export const ${spec.name} =` : "window.API ="} {
-  ${spec.mods.map((mod) => mod.name).join(",\n  ")}
+  ${PontSpec.PontSpec.getMods(spec)
+    .map((mod) => mod.name)
+    .join(",\n  ")}
 };
 `;
 
@@ -96,7 +98,7 @@ const modsIndexTsTemplate = (spec: PontSpec.PontSpec, generator: CodeGenerator) 
   spec.name || "API"
 } {
 ${indentation(2)(
-  spec.mods
+  PontSpec.PontSpec.getMods(spec)
     .map((mod) => {
       return generator.generateModTsCode(mod);
     })
@@ -155,16 +157,16 @@ export class CodeGenerator {
     }
 
     if (schema.templateArgs?.length) {
-      const defName = schema.isDefsType
+      const defName = schema.typeName
         ? `defs.${this.specName ? `${this.specName}.${schema.typeName}` : schema.typeName}`
-        : schema.typeName;
+        : schema.type;
       if (schema.templateArgs?.length) {
         return `${defName}<${schema.templateArgs.map((arg) => this.generateJsonSchemaCode(arg)).join(", ")}>`;
       }
       return defName;
     }
 
-    switch (schema?.typeName) {
+    switch (schema?.type || schema?.typeName) {
       case "long":
       case "integer": {
         return "number";
@@ -192,7 +194,12 @@ export class CodeGenerator {
       }
     }
 
-    return schema?.typeName || "any";
+    if (schema.typeName) {
+      const defName = `defs.${this.specName ? `${this.specName}.${schema.typeName}` : schema.typeName}`;
+      return defName;
+    }
+
+    return schema?.type || "any";
   }
 
   generateParameterTsCode(parameter: PontSpec.Parameter) {
@@ -209,13 +216,13 @@ export class CodeGenerator {
     return `${desc}${name}${fieldTypeDeclaration};`;
   }
 
-  genereateAPIRequestParamsTsCode(api: PontSpec.Interface): string {
+  genereateAPIRequestParamsTsCode(api: PontSpec.PontAPI): string {
     const bodyParamSchema = api.parameters?.find((param) => param.in === "body")?.schema;
     const bodyParamCode = bodyParamSchema ? this.generateJsonSchemaCode(bodyParamSchema) : "";
     return bodyParamCode ? `params: Params, bodyParams: ${bodyParamCode}` : `params: Params`;
   }
 
-  generateAPIParametersTsCode(api: PontSpec.Interface): string {
+  generateAPIParametersTsCode(api: PontSpec.PontAPI): string {
     const normalParams = api.parameters.filter((param) => param.in === "path" || param.in === "query");
 
     if (!api.parameters?.length) {
@@ -228,11 +235,11 @@ ${indentation(2)(normalParams.map((param) => this.generateParameterTsCode(param)
     `;
   }
 
-  generateAPITsCode(api: PontSpec.Interface): string {
+  generateAPITsCode(api: PontSpec.PontAPI): string {
     return apiTsTemplate(api, this);
   }
 
-  generateAPIJsCode(api: PontSpec.Interface): string {
+  generateAPIJsCode(api: PontSpec.PontAPI): string {
     return apiJsTemplate(api);
   }
 
@@ -348,7 +355,9 @@ ${indentation(2)(modsIndexTsTemplate(spec, this))}
       }: ${schemaCode};`;
     }).join("\n");
     const formattedProps = indentation(2)(propsCode);
-    const docs = ["title", "description"].filter((key) => schema[key]).map((key) => ` * @${key} ${schema[key]}`);
+    const docs = ["title", "description"]
+      .filter((key) => schema[key] && schema[key] !== name)
+      .map((key) => ` * @${key} ${schema[key]}`);
     const clazzDoc = docs?.length ? `/**\n${docs.join("\n")}\n */\n` : "";
 
     if (schema?.templateArgs?.length) {

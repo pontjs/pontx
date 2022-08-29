@@ -9,7 +9,7 @@ import * as React from "react";
 import { PontJsonSchemaOp } from "../model/BaseClassSchema";
 import classNames from "classnames";
 import "./TypeSelector.less";
-import { SchemaExp } from "../../../pages/apiDoc/SchemaExp";
+import { SchemaExp } from "./SchemaExp";
 
 const typeStyleMap = {
   text: {
@@ -52,6 +52,7 @@ const constTypes = ["object", "array", "map", "string", "number", "integer", "bo
 export class TypeSelectorProps {
   schema: PontSpec.PontJsonSchema;
   onSchemaChange(schema: PontSpec.PontJsonSchema) {}
+  onStructClick(struct: { name: string; type: string; spec: any }) {}
   disabled = false;
   definitions = {} as PontSpec.ObjectMap<PontSpec.PontJsonSchema>;
 }
@@ -187,7 +188,14 @@ export const TypeSelector: React.FC<TypeSelectorProps> = (props) => {
     </div>
   );
 
-  const typeValue = <SchemaExp schema={props.schema} isExp={false} />;
+  const typeValue = (
+    <SchemaExp
+      definitions={props.definitions}
+      onStructClick={props.onStructClick}
+      schema={props.schema}
+      isExp={false}
+    />
+  );
 
   // let typeValue = PontSpec.PontJsonSchema.toString(props.schema);
 

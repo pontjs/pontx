@@ -54,4 +54,12 @@ export const PontUIService = {
 
   /** 更新类 */
   updateBaseClass: async (className: string, specName = ""): Promise<void> => {},
+
+  openMeta: async (meta: {
+    name: string;
+    specName: string;
+    modName?: string;
+    type: string;
+    spec: any;
+  }): Promise<void> => {},
 };

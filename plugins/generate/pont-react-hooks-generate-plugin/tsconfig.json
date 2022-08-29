@@ -20,6 +20,9 @@
     },
     {
       "path": "../core"
+    },
+    {
+      "path": "./tsconfig.builtin.json"
     }
   ]
 }

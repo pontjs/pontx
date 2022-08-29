@@ -42,3 +42,4 @@ packages/pont-spec-diff/es6/
 packages/pont-spec-diff/tests
 packages/pont-ui/src/mocks/*.json
 packages/pont-ui/src/mocks/remoteSpec.json
+plugins/generate/pont-react-hooks-generate-plugin/builtin

@@ -1,6 +1,6 @@
 import { OAS2 } from "oas-spec-ts";
 import { compileTemplate, parseAst2PontJsonSchema } from "./compiler";
-import { JsonSchemaContext, PrimitiveTypeMap } from "./utils";
+import { JsonSchemaContext, PrimitiveTypeMap, PRIMITIVE_TYPES } from "./utils";
 import * as PontSpec from "pont-spec";
 import * as _ from "lodash";
 
@@ -8,14 +8,14 @@ export function parseJsonSchema(schema: OAS2.SchemaObject, context = new JsonSch
   const { items, $ref, type, additionalProperties, properties, required, ...rest } = schema;
   const { required: contextRequied, ...commonContext } = context;
 
-  let reTypeName = PrimitiveTypeMap[type as any] || type;
+  let reTypeName = PrimitiveTypeMap[type as any]?.type;
   let resultSchema = {
     ...rest,
     required: contextRequied,
   } as PontSpec.PontJsonSchema;
 
   if (reTypeName) {
-    resultSchema.typeName = reTypeName;
+    resultSchema.type = reTypeName;
   }
 
   if ($ref) {
@@ -29,7 +29,7 @@ export function parseJsonSchema(schema: OAS2.SchemaObject, context = new JsonSch
     }
 
     const { typeName, templateArgs } = parseAst2PontJsonSchema(ast, context);
-    console.assert(context.defNames.includes(typeName), "$ref not valid");
+    console.assert(context.defNames.includes(typeName) || PRIMITIVE_TYPES.includes(typeName), "$ref not valid");
     resultSchema.typeName = typeName;
     resultSchema.templateArgs = templateArgs;
   } else if (type === "array" && items) {

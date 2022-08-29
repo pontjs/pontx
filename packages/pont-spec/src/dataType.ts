@@ -23,12 +23,12 @@ export class PontJsonSchema {
   typeName?: string;
 
   /**
-   * 泛型表达式参数列表, 从 $ref 中解析出的泛型表达式
-   * 支持嵌套，例如 Pagination<List<Array<Biz>>, number | string>
+   * 两种含义：
+   * 1、泛型表达式参数列表, 从 $ref 中解析出的泛型表达式
+   * 2、支持嵌套，例如 Pagination<List<Array<Biz>>, number | string>
    */
   templateArgs?: PontJsonSchema[] = [];
 
-  /** 被拆解出来的类名、处理后的怪异类型等 */
   example?: string;
 
   required?: boolean;
@@ -38,6 +38,7 @@ export class PontJsonSchema {
   items?: PontJsonSchema | PontJsonSchemaArray;
   additionalProperties?: PontJsonSchema;
   properties?: PontJsonSchemaMap;
+  ext?: any;
 
   /** 生成表达式，用于预览读取类型信息 */
   static toString(schema: PontJsonSchema) {
