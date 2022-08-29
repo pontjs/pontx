@@ -62,12 +62,12 @@ function fuzzyMatch(texts: Array<string | undefined>, keyword: string) {
   });
 }
 
-export function filterSpec(spec: PontSpec, searchKeyword: string): PontSpec {
+export function filterSpec(spec, searchKeyword: string) {
   if (!searchKeyword || !spec) {
     return spec;
   }
 
-  const mods = (spec?.mods || [])
+  const mods = (PontSpec.getMods(spec) || [])
     .map((mod) => {
       const apis = (mod.interfaces || []).filter((api) => {
         return fuzzyMatch([api?.name, api?.description, api?.title, api?.path], searchKeyword);

@@ -62,7 +62,7 @@ export const SchemaTableRow: React.FC<SchemaTableRowProps> = React.memo(
             tableType,
             readOnly,
           }}
-          definitions={props.definitions || []}
+          definitions={props.definitions || {}}
           node={row}
           onSchemaRowAction={data.onSchemaRowAction}
           {...row}
@@ -80,7 +80,7 @@ export const SchemaTableRow: React.FC<SchemaTableRowProps> = React.memo(
           tableType,
           readOnly,
         }}
-        definitions={props.definitions || []}
+        definitions={props.definitions || {}}
         node={row}
         onSchemaRowAction={data.onSchemaRowAction}
         {...row}

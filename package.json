@@ -15,18 +15,18 @@
     "clean": "lerna clean && rimraf ./node_modules",
     "lint": "prettier --write --parser typescript \"packages/**/*.ts\"",
     "release:all": "npm run release && npm run release:vscode",
-    "release": "lerna version patch --message 'chore: publish' && npm run build && lerna exec --ignore vscode-pont2 --ignore vscode-pont-media --ignore pont-report-plugin --ignore jsonschema-form  --stream -- npm publish",
+    "release": "lerna version patch --message 'chore: publish' && lerna exec --ignore vscode-pont2 --ignore vscode-pont-media --ignore pont-report-plugin --ignore jsonschema-form  --stream -- npm publish",
     "release:dry": "node scripts/release.js --dry",
     "release:vscode": "sh scripts/releaseVscode.sh"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alibaba/pont.git"
+    "url": "git+https://github.com/pont2/pont.git"
   },
   "bugs": {
-    "url": "https://github.com/alibaba/pont/issues"
+    "url": "https://github.com/pont2/pont/issues"
   },
-  "homepage": "https://github.com/alibaba/pont#readme",
+  "homepage": "https://github.com/pont2/pont#readme",
   "gitHooks": {
     "commit-msg": "node ./scripts/verifyCommit.js",
     "post-merge": "lerna bootstrap",

@@ -1,12 +1,12 @@
 import fetch from "node-fetch";
 import * as _ from "lodash";
-import { InnerOriginConfig, PontFetchPlugin } from "pont-manager";
+import { InnerOriginConfig, PontFetchPlugin, PontLogger } from "pont-manager";
 import { Translate } from "./translator";
 
 let Translator: Translate;
 export default class PontMetaFetchPlugin extends PontFetchPlugin {
   /** 翻译中文类名等 */
-  static async translateChinese(jsonString: string) {
+  static async translateChinese(jsonString: string, errCallback: (err) => any) {
     let retString = jsonString;
     try {
       const matchItems = jsonString
@@ -37,6 +37,7 @@ export default class PontMetaFetchPlugin extends PontFetchPlugin {
       });
       return retString;
     } catch (err) {
+      errCallback(err);
       return retString;
     }
   }
@@ -46,7 +47,14 @@ export default class PontMetaFetchPlugin extends PontFetchPlugin {
 
     try {
       const remoteStr = await fetch(originConf.url, {}).then((res) => res.text());
-      const metaStr = await PontMetaFetchPlugin.translateChinese(remoteStr);
+      const metaStr = await PontMetaFetchPlugin.translateChinese(remoteStr, (err) => {
+        this.logger.error({
+          originName: originConf.name,
+          message: `元数据中的中文翻译失败，请查看您的网络环境: ${err.message}`,
+          stack: err.stack,
+          processType: "fetch",
+        });
+      });
       // const metaStr = remoteStr;
       this.logger.info("远程数据中非法中文已翻译成功");
       this.logger.info("远程数据获取成功");
@@ -57,7 +65,7 @@ export default class PontMetaFetchPlugin extends PontFetchPlugin {
         originName: originConf.name,
         message: `远程数据获取失败，请确认您配置的 pont origin url(${
           originConf.url || ""
-        })，在您当前的网络环境中允许访问`,
+        })，在您当前的网络环境中允许访问。${e.message}`,
         processType: "fetch",
       });
     }

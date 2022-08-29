@@ -3,19 +3,7 @@ import react from "@vitejs/plugin-react";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    react(),
-
-    // htmlTemplate({
-    //   pagesDir: "./",
-    //   pages: {
-    //     index: {
-    //       template: "./index.html",
-    //     },
-    //   },
-    //   data: { cspSource: "" },
-    // }),
-  ],
+  plugins: [react()],
   root: "",
   build: {
     // minify: false,

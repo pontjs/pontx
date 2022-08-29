@@ -131,7 +131,7 @@ const diffObject = <T>(localSpec: T, remoteSpec: T, paths: string[], customDiff 
   return diffs;
 };
 
-export const diffApi = (localApi: PontSpec.Interface, remoteApi: PontSpec.Interface): DiffResult[] => {
+export const diffApi = (localApi: PontSpec.PontAPI, remoteApi: PontSpec.PontAPI): DiffResult[] => {
   const responsesDiff = (pre, next, customDiff) => {
     return diffObject(pre?.["200"], next?.["200"], ["responses", "200"], customDiff);
   };

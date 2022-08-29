@@ -1,19 +1,25 @@
 import { OAS2 } from "oas-spec-ts";
-import { Interface, Mod, PontJsonSchema } from "pont-spec";
+import { PontAPI, PontJsonSchema, PontDirectory } from "pont-spec";
 import * as _ from "lodash";
+import { PontSpec } from "pont-manager";
 
 /**
  * Swagger 类型兼容
  */
 export const PrimitiveTypeMap = {
   /* void */
-  Void: "void",
-  void: "void",
-
-  /* Array */
-  // List: "Array",
-  Collection: "Array",
+  Void: { type: "void" },
+  void: { type: "void" },
+  List: { type: "array" },
+  Set: { type: "array" },
+  Collection: { type: "array" },
+  Integer: {
+    type: "number",
+    format: "int32",
+  },
 };
+
+export const PRIMITIVE_TYPES = ["array", "number", "string", "boolean", "object"];
 
 export class JsonSchemaContext {
   static defaultCompileTemplateKeyword = "#/definitions/";
@@ -28,6 +34,11 @@ export class JsonSchemaContext {
     if (context?.classTemplateArgs?.length) {
       const codes = (context?.classTemplateArgs || []).map((arg) => PontJsonSchema.toString(arg));
       const index = codes.indexOf(PontJsonSchema.toString(schema));
+
+      if (!context.defNames?.includes(schema.typeName)) {
+        schema.type = schema.typeName as any;
+        schema.typeName = "";
+      }
 
       (schema.templateArgs || []).forEach((arg) => JsonSchemaContext.handleContext(context, arg));
       schema.templateIndex = index;
@@ -161,19 +172,21 @@ export function transformCamelCase(name: string) {
 }
 
 /** 如果两个模块忽略大小写名称一致，则加以区分 */
-export function processDuplicateModName(mods: Mod[]) {
-  mods.forEach((mod, modIndex) => {
-    const currName = mod.name;
-    const sameMods = mods.slice(modIndex).filter((mod) => mod.name.toLowerCase() === currName.toLowerCase());
+export function processDuplicateNameSpaceName(directories: PontSpec.PontDirectory[]) {
+  directories.forEach((dir, dirIndex) => {
+    const currName = dir.namespace;
+    const sameMods = directories
+      .slice(dirIndex)
+      .filter((_dir) => _dir.namespace.toLowerCase() === currName.toLowerCase());
 
     if (sameMods.length > 1) {
-      sameMods.forEach((dupMod, dupIndex) => (dupMod.name = dupMod.name + ("" + dupIndex + 1)));
+      sameMods.forEach((dupMod, dupIndex) => (dupMod.namespace = dupMod.namespace + ("" + dupIndex + 1)));
     }
   });
 }
 
 /** 处理接口名重复 */
-export function processDuplicateInterfaceName(interfaces: Interface[], samePath: string) {
+export function processDuplicateInterfaceName(interfaces: PontAPI[], samePath: string) {
   const names = [] as string[];
 
   interfaces.forEach((inter) => {
@@ -185,21 +198,19 @@ export function processDuplicateInterfaceName(interfaces: Interface[], samePath:
   });
 }
 
-/** 兼容某些项目把swagger tag的name和description弄反的情况 */
-export function processMod(interfaces: Interface[], tag: OAS2.TagObject) {
+/** 兼容某些项目把 swagger tag 的 name 和 description 弄反的情况 */
+export function processTag(tag: OAS2.TagObject) {
   if (hasChinese(tag.name)) {
     // 当检测到name包含中文的时候，采用description
     return {
-      description: tag.name,
-      interfaces: _.uniqBy(interfaces, "name"),
-      name: transformCamelCase(tag.description),
-    } as Mod;
+      title: tag.name,
+      namespace: transformCamelCase(tag.description),
+    } as PontDirectory;
   } else {
     return {
-      description: tag.description,
-      interfaces: _.uniqBy(interfaces, "name"),
-      name: transformCamelCase(tag.name),
-    } as Mod;
+      title: tag.description,
+      namespace: transformCamelCase(tag.name),
+    } as PontDirectory;
   }
 }
 

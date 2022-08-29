@@ -1,7 +1,21 @@
 import * as path from "path";
-import { PontSpec, Interface } from "pont-spec";
+import * as fs from "fs-extra";
+import { PontSpec, PontAPI } from "pont-spec";
 import { PontManager } from "./manager";
 import { PontLogger } from "./logger";
+
+const findRealPath = (configDir: string, pluginPath: string) => {
+  if (configDir === "/") {
+    return pluginPath;
+  }
+  let retPath = path.join(configDir, "node_modules", pluginPath);
+
+  if (fs.existsSync(retPath)) {
+    return retPath;
+  }
+
+  return findRealPath(path.join(configDir, ".."), pluginPath);
+};
 
 class PublicOriginConfig {
   url: string;
@@ -55,7 +69,7 @@ export class Snippet {
 export class PontGeneratorPlugin extends PontPlugin {
   apply(manager: PontManager, options?: any): void {}
 
-  providerSnippets(api: Interface, modName: string, originName: string, options?: any): Snippet[] {
+  providerSnippets(api: PontAPI, modName: string, originName: string, options?: any): Snippet[] {
     return [];
   }
 }
@@ -91,7 +105,7 @@ export function requireModule(pluginPath: string, configDir: string) {
   let requirePath =
     pluginPath.startsWith("./") || pluginPath.startsWith("../")
       ? path.join(configDir, pluginPath)
-      : path.join(configDir, "node_modules", pluginPath);
+      : findRealPath(configDir, pluginPath);
 
   if (["pont-meta-fetch-plugin", "pont-react-hooks-generate-plugin", "pont-oas2-parser-plugin"].includes(pluginPath)) {
     requirePath = pluginPath;
@@ -235,14 +249,15 @@ export class PontInnerManagerConfig {
       origins: origins
         .map((origin) => {
           if (origin.envs && origin.env) {
+            const { envs, env, ...rest } = origin;
             const envConfig = origin.envs[origin.env];
             if (typeof envConfig === "string") {
               return {
-                ...origin,
+                ...rest,
                 url: envConfig,
               };
             }
-            return envConfig;
+            return { ...rest, ...envConfig };
           }
 
           if (typeof origin === "string") {

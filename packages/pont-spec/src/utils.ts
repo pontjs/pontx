@@ -5,108 +5,104 @@ export type ObjectMap<T> = {
   [key: string]: T;
 };
 
-export function getDuplicateById<T>(arr: T[], idKey = "name"): null | T {
-  if (!arr || !arr.length) {
-    return null;
-  }
+// /**
+//  * 像 map 一样操作数组
+//  */
+// export function mapifyOperateList<T extends { name: string }>(
+//   operate: "assign" | "delete" | "update",
+//   name: string,
+//   newValueOrUpdator: ((data: T) => T) | T,
+//   list: T[],
+// ): T[] {
+//   if (operate === "delete") {
+//     return (list || []).filter((item) => item.name !== name);
+//   }
 
-  let result;
+//   const newValue = newValueOrUpdator as T;
+//   const updator = newValueOrUpdator as (data: T) => T;
 
-  arr.forEach((item, itemIndex) => {
-    if (arr.slice(0, itemIndex).find((o) => o[idKey] === item[idKey])) {
-      result = item;
-      return;
-    }
-  });
+//   const index = (list || []).findIndex((item) => item.name === name);
+//   if (index === -1) {
+//     if (operate === "assign") {
+//       return [...(list || []), newValue];
+//     }
+//     return list;
+//   }
 
-  return result;
-}
+//   return (list || []).map((item) => {
+//     if (item.name === name) {
+//       if (operate === "update") {
+//         return updator(item);
+//       }
+//       return newValue;
+//     }
+//     return item;
+//   });
+// }
 
-/**
- * 像 map 一样操作数组
- */
-export function mapifyOperateList<T extends { name: string }>(
-  operate: "assign" | "delete",
-  name: string,
-  newValue: T,
-  list: T[],
-): T[] {
-  if (operate === "delete") {
-    return (list || []).filter((item) => item.name !== name);
-  }
+// /**
+//  * @param pathes ['mods', 'modA', 'name']
+//  * @param newValue newModAName
+//  * @param obj spec
+//  * @returns
+//  */
+// export function mapifyImmutableOperate(
+//   result: any,
+//   operate: "delete" | "assign" | "update",
+//   pathes: Array<string | number>,
+//   newValueOrUpdator?: any,
+// ) {
+//   const newValue = newValueOrUpdator;
+//   if (!pathes?.length) {
+//     return newValue;
+//   }
 
-  const index = (list || []).findIndex((item) => item.name === name);
-  if (index === -1) {
-    return [...(list || []), newValue];
-  }
+//   let [currentPath, ...restPathes] = pathes;
 
-  return (list || []).map((item) => {
-    if (item.name === name) {
-      return newValue;
-    }
-    return item;
-  });
-}
+//   if (!restPathes?.length) {
+//     let returnValue = null;
+//     if (Array.isArray(result) && typeof currentPath === "string") {
+//       returnValue = mapifyOperateList(operate, currentPath, newValue, result);
+//     } else if (operate === "delete") {
+//       const { [currentPath]: __, ...rest } = result || {};
+//       returnValue = rest;
+//     } else if (operate === "update") {
+//       const updated = newValueOrUpdator(_.get(result, currentPath));
+//       returnValue = immutableSet(currentPath, updated, result);
+//     } else {
+//       returnValue = immutableSet(currentPath, newValue, result);
+//     }
 
-/**
- * @param pathes ['mods', 'modA', 'name']
- * @param newValue newModAName
- * @param obj spec
- * @returns
- */
-export function mapifyImmutableOperate(
-  result: any,
-  operate: "delete" | "assign",
-  pathes: Array<string | number>,
-  newValue?: any,
-) {
-  if (!pathes?.length) {
-    return newValue;
-  }
+//     return returnValue;
+//   }
 
-  let [currentPath, ...restPathes] = pathes;
+//   if (Array.isArray(result) && typeof currentPath === "string") {
+//     currentPath = result.findIndex((item) => item?.name === currentPath);
+//   }
+//   const pathNewValue = mapifyImmutableOperate(result[currentPath], operate, restPathes, newValue);
 
-  if (!restPathes?.length) {
-    let returnValue = null;
-    if (Array.isArray(result) && typeof currentPath === "string") {
-      returnValue = mapifyOperateList(operate, currentPath, newValue, result);
-    } else if (operate === "delete") {
-      const { [currentPath]: __, ...rest } = result || {};
-      returnValue = rest;
-    } else {
-      returnValue = immutableSet(currentPath, newValue, result);
-    }
+//   return immutableSet(currentPath, pathNewValue, result);
+// }
 
-    return returnValue;
-  }
+// /**
+//  * 像 map 一样操作数组
+//  * @param pathes ['mods', 'modA', 'name']
+//  * @param newValue newModAName
+//  * @param obj spec
+//  * @returns
+//  */
+// export function mapifyGet(result: any, pathes: Array<string | number>) {
+//   if (!pathes?.length) {
+//     return result;
+//   }
 
-  if (Array.isArray(result) && typeof currentPath === "string") {
-    currentPath = result.findIndex((item) => item?.name === currentPath);
-  }
-  const pathNewValue = mapifyImmutableOperate(result[currentPath], operate, restPathes, newValue);
+//   let [currentPath, ...restPathes] = pathes;
 
-  return immutableSet(currentPath, pathNewValue, result);
-}
-
-/**
- * 像 map 一样操作数组
- * @param pathes ['mods', 'modA', 'name']
- * @param newValue newModAName
- * @param obj spec
- * @returns
- */
-export function mapifyGet(result: any, pathes: Array<string | number>) {
-  if (!pathes?.length) {
-    return result;
-  }
-
-  let [currentPath, ...restPathes] = pathes;
-
-  if (Array.isArray(result) && typeof currentPath === "string") {
-    currentPath = result.findIndex((item) => item?.name === currentPath);
-  }
-  return mapifyGet(result[currentPath], restPathes);
-}
+//   if (Array.isArray(result) && typeof currentPath === "string") {
+//     currentPath = result.findIndex((item) => item?.name === currentPath);
+//   }
+//   return mapifyGet(result[currentPath], restPathes);
+// }
 
 export function orderMap<T>(map: ObjectMap<T>) {
   const result = {} as ObjectMap<T>;
@@ -116,4 +112,19 @@ export function orderMap<T>(map: ObjectMap<T>) {
   });
 
   return result;
+}
+
+export function removeMapKeys<T extends ObjectMap<any>>(obj: T, checkRemoveKey: (key: string) => boolean): T {
+  if (!obj) {
+    return obj;
+  }
+
+  return Object.keys(obj || {})
+    .filter((key) => !checkRemoveKey(key))
+    .reduce((result, key) => {
+      return {
+        ...result,
+        [key]: obj[key],
+      };
+    }, {} as T);
 }

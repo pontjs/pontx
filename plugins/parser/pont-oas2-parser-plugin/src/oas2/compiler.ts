@@ -71,14 +71,15 @@ export function parseAst2PontJsonSchema(
 ): { typeName: string; templateArgs: any[] } {
   const { name, templateArgs } = ast;
   // 怪异类型兼容
-  let typeName = PrimitiveTypeMap[name] || name;
+  let typeSchema = PrimitiveTypeMap[name] || {};
 
   const typeArgs = templateArgs.map((arg) => {
     return parseAst2PontJsonSchema(arg, context);
   });
 
   const schema = {
-    typeName,
+    ...typeSchema,
+    typeName: typeSchema?.type || name,
     templateArgs: typeArgs,
   };
 

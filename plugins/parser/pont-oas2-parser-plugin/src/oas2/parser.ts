@@ -5,11 +5,11 @@ import {
   getIdentifierFromUrl,
   getMaxSamePath,
   processDuplicateInterfaceName,
-  processMod,
-  processDuplicateModName,
   toDashCase,
   JsonSchemaContext,
   deleteDuplicateBaseClass,
+  processTag,
+  processDuplicateNameSpaceName,
 } from "./utils";
 import * as _ from "lodash";
 import { compileTemplate, parseAst2PontJsonSchema } from "./compiler";
@@ -56,7 +56,7 @@ export function parseOAS2Interface(
     }
   }
 
-  const standardInterface = {
+  const pontAPI = {
     consumes: inter.consumes,
     description: interDesc,
     name,
@@ -66,12 +66,12 @@ export function parseOAS2Interface(
     deprecated: inter.deprecated,
     /** 后端返回的参数可能重复 */
     parameters: _.unionBy(parameters, "name"),
-  } as PontSpec.Interface;
+  } as PontSpec.PontAPI;
 
-  return standardInterface;
+  return pontAPI;
 }
 
-export function parseSwagger2Mods(swagger: OAS2.SwaggerObject, defNames: string[]) {
+export function parseSwagger2APIs(swagger: OAS2.SwaggerObject, defNames: string[]) {
   const tags = [
     ...(swagger.tags || []),
     {
@@ -102,9 +102,9 @@ export function parseSwagger2Mods(swagger: OAS2.SwaggerObject, defNames: string[
     });
   });
 
-  const mods = tags
+  const directories = tags
     .map((tag) => {
-      const modInterfaces = allSwaggerInterfaces.filter((inter) => {
+      const tagInterfaces = allSwaggerInterfaces.filter((inter) => {
         tag.description = tag.description || "";
 
         return (
@@ -114,10 +114,9 @@ export function parseSwagger2Mods(swagger: OAS2.SwaggerObject, defNames: string[
           inter.tags.includes(toDashCase(tag.description))
         );
       });
+      const samePath = getMaxSamePath(tagInterfaces.map((inter) => inter.path.slice(1)));
 
-      const samePath = getMaxSamePath(modInterfaces.map((inter) => inter.path.slice(1)));
-
-      const standardInterfaces = modInterfaces.map((inter) => {
+      const standardInterfaces = tagInterfaces.map((inter) => {
         return parseOAS2Interface(inter, {
           defNames,
           samePath,
@@ -125,20 +124,38 @@ export function parseSwagger2Mods(swagger: OAS2.SwaggerObject, defNames: string[
         });
       });
       processDuplicateInterfaceName(standardInterfaces, samePath);
+      const processedTag = processTag(tag);
 
-      const processedMod = processMod(standardInterfaces, tag);
       return {
-        ...processedMod,
-        interfaces: _.sortBy(processedMod.interfaces, (api) => api.name),
+        ...processedTag,
+        interfaces: standardInterfaces,
       };
     })
-    .filter((mod) => {
-      return mod.interfaces.length;
+    .filter((tag) => {
+      return tag.interfaces.length;
     });
+  const apis = directories.reduce((result: PontSpec.ObjectMap<PontSpec.PontAPI>, dir) => {
+    return dir.interfaces.reduce((currResult, api) => {
+      return {
+        ...currResult,
+        [`${dir.namespace}/${api.name}`]: api,
+      };
+    }, result as PontSpec.ObjectMap<PontSpec.PontAPI>);
+  }, {} as any);
 
-  processDuplicateModName(mods);
+  processDuplicateNameSpaceName(directories);
 
-  return _.sortBy(mods, (mod) => mod.name);
+  const retDirs = _.sortBy(directories, (dir) => dir.namespace).map((dir) => {
+    const { interfaces, ...rest } = dir;
+    return {
+      ...rest,
+      children: interfaces.map((api) => `${dir.namespace}/${api.name}`),
+    };
+  });
+  return {
+    directories: retDirs,
+    apis,
+  };
 }
 
 export function parseOAS2(swagger: OAS2.SwaggerObject, name = ""): PontSpec.PontSpec {
@@ -197,6 +214,7 @@ export function parseOAS2(swagger: OAS2.SwaggerObject, name = ""): PontSpec.Pont
     };
   });
   baseClasses = deleteDuplicateBaseClass(baseClasses);
+  const { apis, directories } = parseSwagger2APIs(swagger, defNames);
 
   const pontDs = {
     definitions: baseClasses.reduce((result, base) => {
@@ -205,7 +223,8 @@ export function parseOAS2(swagger: OAS2.SwaggerObject, name = ""): PontSpec.Pont
         [base.name]: base.schema,
       };
     }, {}),
-    mods: parseSwagger2Mods(swagger, defNames),
+    apis,
+    directories,
     name,
   } as PontSpec.PontSpec;
 

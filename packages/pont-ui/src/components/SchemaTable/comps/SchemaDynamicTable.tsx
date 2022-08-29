@@ -3,22 +3,22 @@
  * @description SchemaEditor
  */
 import * as React from "react";
-import { FixedSizeList, VariableSizeList, areEqual } from "react-window";
 import "./SchemaTable.less";
 import * as _ from "lodash";
 import { SchemaTableRow } from "./SchemaTableRow";
-import { SchemaTableContext, SchemaTableNode } from "../model/SchemaTableNode";
+import { ActionContext, SchemaTableContext, SchemaTableNode, TableRowAction } from "../model/SchemaTableNode";
 import * as PontSpec from "pont-spec";
-import { Table } from "@alicloud/console-components";
 
 export class SchemaDynamicTableProps {
   tableType: "parameters" | "response" | "struct";
   readOnly = false;
   keyword = "";
+  definitions = {} as PontSpec.ObjectMap<PontSpec.PontJsonSchema>;
   rows = [] as SchemaTableNode[];
   changeRootApiSchema: (schemaChanger: Function) => any;
   changeResponseBody: (bodyChanger: (newBody: PontSpec.PontJsonSchema) => PontSpec.PontJsonSchema) => any;
   changeBaseClasss: Function;
+  onStructClick(struct: { name: string; type: string; spec: any }) {}
 }
 
 const MAX_HEIGHT = 400;
@@ -46,7 +46,12 @@ export const SchemaDynamicTable: React.FC<SchemaDynamicTableProps> = React.memo(
   visibleRowsRef.current = visibleRows;
   const editorRef = React.useRef<HTMLDivElement>();
   const scrollToRowKeys = (rowKeys: string[]) => {};
-  const handleSchemaRowAction = (row, action) => {
+  const handleSchemaRowAction = (row, action: TableRowAction) => {
+    if (action.type === "ClickStruct") {
+      props.onStructClick(action.payload);
+      return;
+    }
+
     SchemaTableNode.handleSchemaRowAction(action, row, {
       tableType: props.tableType,
       changeFoldedRows,
@@ -77,7 +82,13 @@ export const SchemaDynamicTable: React.FC<SchemaDynamicTableProps> = React.memo(
         </thead>
         <tbody>
           {visibleRows?.map((row, index) => (
-            <SchemaTableRow definitions={{} as any} useTableStyle data={itemData} {...row} index={index} />
+            <SchemaTableRow
+              definitions={props.definitions || ({} as any)}
+              useTableStyle
+              data={itemData}
+              {...row}
+              index={index}
+            />
           ))}
         </tbody>
       </table>

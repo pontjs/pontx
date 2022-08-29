@@ -5,15 +5,15 @@
 import * as React from "react";
 import * as PontSpec from "pont-spec";
 import "./BaseClass.less";
-import { SchemaTable } from "../../components/SchemaTable/comps/SchemaTable";
-import { PontJsonSchemaOp } from "../../components/SchemaTable/model/BaseClassSchema";
+import { PontJsonSchemaOp } from "../SchemaTable/model/BaseClassSchema";
 import classNames from "classnames";
-import { SchemaDynamicTable } from "../../components/SchemaTable/comps/SchemaDynamicTable";
+import { SchemaDynamicTable } from "../SchemaTable/comps/SchemaDynamicTable";
 
 export class BaseClassProps {
   name: string;
-
   schema: PontSpec.PontJsonSchema;
+  definitions = {} as PontSpec.ObjectMap<PontSpec.PontJsonSchema>;
+  onStructClick(struct: { type: string; name: string; spec: any }) {}
 }
 
 export const BaseClass: React.FC<BaseClassProps> = (props) => {
@@ -33,6 +33,8 @@ export const BaseClass: React.FC<BaseClassProps> = (props) => {
       <SchemaDynamicTable
         changeBaseClasss={() => {}}
         changeResponseBody={() => {}}
+        definitions={props.definitions}
+        onStructClick={props.onStructClick}
         changeRootApiSchema={() => {}}
         keyword=""
         readOnly

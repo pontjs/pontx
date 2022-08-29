@@ -1,4 +1,4 @@
-import { PontSpec, mapifyGet, mapifyImmutableOperate } from "pont-spec";
+import { PontSpec, PontJsonPointer } from "pont-spec";
 import { InnerOriginConfig, PontInnerManagerConfig, PontPublicManagerConfig } from "./config";
 import * as path from "path";
 import * as fs from "fs-extra";
@@ -38,6 +38,10 @@ export class PontManager {
   static readonly lockFilename = "api-lock.json";
   static readonly configFilename = "pont-config.json";
 
+  static checkIsSingleSpec(manager: PontManager) {
+    return manager.innerManagerConfig.origins.length <= 1 && !manager.innerManagerConfig.origins?.[0]?.name;
+  }
+
   static async constructorFromRootDir(rootDir: string, logger = new PontLogger()) {
     try {
       const configPathname = await lookForFiles(rootDir, PontManager.configFilename);
@@ -63,9 +67,11 @@ export class PontManager {
         manager = await PontManager.readLocalPontMeta(manager);
         manager = await PontManager.fetchRemotePontMeta(manager);
 
+        const emptySpecs = [] as string[];
         // 自动用远程 spec，替换本地为空的 spec
         manager.localPontSpecs = manager.localPontSpecs.map((localSpec, specIndex) => {
           if (PontSpec.isEmptySpec(localSpec)) {
+            emptySpecs.push(localSpec.name);
             const remoteSpec = manager.remotePontSpecs?.find((spec) => spec.name === localSpec.name);
 
             return remoteSpec || manager?.remotePontSpecs?.[specIndex] || localSpec;
@@ -73,6 +79,11 @@ export class PontManager {
 
           return localSpec;
         });
+        if (emptySpecs.length) {
+          logger.info(`本地 ${emptySpecs.join(", ")} SDK为空，已为您自动生成...`);
+          await PontManager.generateCode(manager);
+        }
+
         return manager;
       } else {
         logger.error("未找到 Pont 配置文件");
@@ -254,52 +265,55 @@ export class PontManager {
   // 展示方法
   static showDiffs(manager: PontManager) {}
 
-  static syncMod(manager: PontManager, modName: string, specName = "") {
+  static syncMod(manager: PontManager, namespace: string, specName = "") {
     const remoteSpec = getSpecByName(manager.remotePontSpecs, specName);
-    const remoteMod = mapifyGet(remoteSpec, ["mods", modName]);
+    const remoteMod = PontSpec.getMods(remoteSpec)?.find((mod) => mod.name === namespace);
 
     if (remoteMod) {
-      return mapifyImmutableOperate(manager, "assign", ["localPontSpecs", specName, "mods", modName], remoteMod);
-    } else {
-      return mapifyImmutableOperate(manager, "delete", ["localPontSpecs", specName, "mods", modName]);
+      return PontJsonPointer.update(manager, `localPontSpecs[name=${specName}]`, (spec) =>
+        PontSpec.updateMod(spec, remoteMod),
+      );
     }
+
+    return PontJsonPointer.update(manager, `localPontSpecs[name=${specName}]`, (spec) =>
+      PontSpec.removeMod(spec, namespace),
+    );
   }
   static syncBaseClass(manager: PontManager, baseClassName: string, specName = "") {
     const remoteSpec = getSpecByName(manager.remotePontSpecs, specName);
-    const remoteClass = mapifyGet(remoteSpec, ["definitions", baseClassName]);
+    const remoteClass = _.get(remoteSpec, `definitions.${baseClassName}`);
 
     if (remoteClass) {
-      return mapifyImmutableOperate(
-        manager,
-        "assign",
-        ["localPontSpecs", specName, "definitions", baseClassName],
-        remoteClass,
-      );
+      return PontJsonPointer.set(manager, `localPontSpecs[name=${specName}].definitions.${baseClassName}`, remoteClass);
     } else {
-      return mapifyImmutableOperate(manager, "delete", ["localPontSpecs", specName, "definitions", baseClassName]);
+      return PontJsonPointer.remove(manager, `localPontSpecs[name=${specName}].definitions.${baseClassName}`);
     }
   }
 
   static syncInterface(manager: PontManager, apiName: string, modName: string, specName = "") {
     const remoteSpec = getSpecByName(manager.remotePontSpecs, specName);
-    const remoteApi = mapifyGet(remoteSpec, ["mods", modName, "interfaces", apiName]);
+    const remoteApi = remoteSpec?.apis?.[`${modName}/${apiName}`];
 
     if (remoteApi) {
-      return mapifyImmutableOperate(
-        manager,
-        "assign",
-        ["localPontSpecs", specName, "mods", modName, "interfaces", apiName],
-        remoteApi,
-      );
+      return PontJsonPointer.update(manager, `localPontSpecs[name=${specName}]`, (spec) => {
+        const newSpec = PontJsonPointer.update(spec, `directories[namespace=${modName}].children`, (children) => {
+          if ((children || []).find((child) => child === `${modName}/${remoteApi.name}`)) {
+            return children;
+          }
+          return [...(children || []), `${modName}/${remoteApi.name}`];
+        });
+        return PontJsonPointer.set(newSpec, `apis[${modName}/${apiName}]`, remoteApi);
+      });
     } else {
-      return mapifyImmutableOperate(manager, "delete", [
-        "localPontSpecs",
-        specName,
-        "mods",
-        modName,
-        "interfaces",
-        apiName,
-      ]);
+      return PontJsonPointer.update(manager, `localPontSpecs[name=${specName}]`, (spec) => {
+        const newSpec = PontJsonPointer.update(spec, `directories[namespace=${modName}].children`, (children) => {
+          if ((children || []).find((child) => child === `${modName}/${remoteApi.name}`)) {
+            return children.filter((child) => child !== `${modName}/${remoteApi.name}`);
+          }
+          return children;
+        });
+        return PontJsonPointer.remove(newSpec, `apis[${modName}/${apiName}]`);
+      });
     }
   }
 
@@ -333,18 +347,12 @@ export class PontManager {
     }
   }
 
+  static getSpec(manager: PontManager, specName?: string): PontSpec {
+    return getSpecByName(manager.localPontSpecs, specName);
+  }
+
   // 辅助方法
   static getCurrentSpec(manager: PontManager): PontSpec {
-    if (manager.localPontSpecs?.length) {
-      if (manager?.currentOriginName) {
-        const foundSpec = getSpecByName(manager.localPontSpecs, manager.currentOriginName);
-
-        if (foundSpec) {
-          return foundSpec;
-        }
-      }
-      return manager.localPontSpecs[0];
-    }
-    return null;
+    return PontManager.getSpec(manager, manager.currentOriginName);
   }
 }
