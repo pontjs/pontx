@@ -3,7 +3,7 @@ import * as React from "react";
 // import * as spec from "../mocks/spec.json";
 import { PontSpec, PontAPI } from "pont-spec";
 // import { PontUIService } from "../service";
-import { PontUIService } from "../service.local";
+import { PontUIService } from "../service";
 import { diffPontSpec } from "pont-spec-diff";
 import * as _ from "lodash";
 
@@ -36,7 +36,7 @@ const useContext = () => {
   const [localSpecs, changeSpecs] = React.useState([] as PontSpec[]);
   const [remoteSpecs, changeRemoteSpecs] = React.useState([] as PontSpec[]);
   // const specs = [spec as any] as PontSpec[];
-  const [selectedMeta, changeSelectedMeta] = React.useState(null as any as Meta);
+  const [selectedMeta, changeSelectedMeta] = React.useState(null as Meta);
   const [currSpec, changeCurrSpec] = React.useState(localSpecs?.[0]);
   const [page, changePage] = React.useState(PageType.Diff);
   const remoteSpec = remoteSpecs?.find((spec) => spec.name === currSpec?.name) || remoteSpecs[0];

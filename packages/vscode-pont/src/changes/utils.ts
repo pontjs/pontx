@@ -1,5 +1,16 @@
 import { diffPontSpec, DiffResult } from "pont-spec-diff";
-import { PontSpec, Mod, PontAPI, PontJsonSchema, ObjectMap, PontJsonPointer, removeMapKeys } from "pont-spec";
+import {
+  PontSpec,
+  Mod,
+  PontAPI,
+  PontJsonSchema,
+  ObjectMap,
+  PontJsonPointer,
+  removeMapKeys,
+  PontSpecs,
+  PontDirectory,
+} from "pont-spec";
+import { PontManager } from "pont-manager";
 
 export class StagedChange {
   metaType: MetaType;
@@ -155,19 +166,29 @@ export class PontSpecDiffs extends PontSpec {
     } else if (meta.metaType === MetaType.Mod) {
       const mod: Mod = PontJsonPointer.get(specDiffs, `[${specIndex}].mods[name=${meta.modName}]`);
 
-      return (mod.interfaces || []).reduce((result, api) => {
-        return PontSpecDiffs.updateSpecsProcessType(
-          specDiffs,
+      return (mod.interfaces || []).reduce(
+        (result, api) => {
+          return PontSpecDiffs.updateSpecsProcessType(
+            specDiffs,
+            {
+              metaType: MetaType.API,
+              apiName: api.name,
+              modName: meta.modName,
+              specName: meta.specName,
+            },
+            processType,
+            result,
+          );
+        },
+        [
+          ...stagedChanges,
           {
-            metaType: MetaType.API,
-            apiName: api.name,
             modName: meta.modName,
             specName: meta.specName,
+            metaType: MetaType.Mod,
           },
-          processType,
-          result,
-        );
-      }, stagedChanges);
+        ] as StagedChange[],
+      );
     } else if (meta.metaType === MetaType.Definitions) {
       const defs: PontSpec["definitions"] = PontJsonPointer.get(specDiffs, `[${specIndex}].definitions`);
 
@@ -186,18 +207,27 @@ export class PontSpecDiffs extends PontSpec {
     } else if (meta.metaType === MetaType.Spec) {
       const spec: PontSpecWithMods = PontJsonPointer.get(specDiffs, `[${specIndex}]`);
 
-      const firstResult = (spec.mods || []).reduce((result, mod) => {
-        return PontSpecDiffs.updateSpecsProcessType(
-          specDiffs,
+      const firstResult = (spec.mods || []).reduce(
+        (result, mod) => {
+          return PontSpecDiffs.updateSpecsProcessType(
+            specDiffs,
+            {
+              metaType: MetaType.Mod,
+              modName: mod.name as any,
+              specName: meta.specName,
+            },
+            processType,
+            result,
+          );
+        },
+        [
+          ...stagedChanges,
           {
-            metaType: MetaType.Mod,
-            modName: mod.name as any,
+            MetaType: MetaType.Spec,
             specName: meta.specName,
           },
-          processType,
-          result,
-        );
-      }, stagedChanges);
+        ] as StagedChange[],
+      );
       return PontSpecDiffs.updateSpecsProcessType(
         specDiffs,
         {
@@ -219,6 +249,80 @@ export class PontSpecDiffs extends PontSpec {
           result,
         );
       }, stagedChanges);
+    }
+  }
+
+  static updateSpecsByProcessType(
+    stagedSpecs: PontSpec[],
+    pontManager: PontManager,
+    meta: { metaType: MetaType; specName?: string; modName?: string; apiName?: string; structName?: string },
+    processType: "staged" | "untracked",
+  ) {
+    const [fromSpecs, toSpecs] =
+      processType === "staged"
+        ? [pontManager.localPontSpecs, pontManager.remotePontSpecs]
+        : [stagedSpecs, pontManager.localPontSpecs];
+
+    switch (meta.metaType) {
+      case MetaType.All: {
+        return toSpecs;
+      }
+      case MetaType.Spec: {
+        return PontSpecs.updateSpec(stagedSpecs, meta.specName, PontSpecs.getSpecByName(toSpecs, meta.specName));
+      }
+      case MetaType.Mod: {
+        const fromSpecIndex = PontSpecs.getUpdateSpecIndex(fromSpecs, meta.specName);
+        const toSpecIndex = PontSpecs.getSpecIndex(toSpecs, meta.specName);
+        const toApis = toSpecs[toSpecIndex]?.apis;
+        const toDir = PontJsonPointer.get(
+          toSpecs,
+          `${toSpecIndex}.directories[namespace=${meta.modName}]`,
+        ) as PontDirectory;
+        if (!toDir) {
+          const result = PontJsonPointer.remove(fromSpecs, `${fromSpecIndex}.directories[namespace=${meta.modName}]`);
+          return PontJsonPointer.removeMapKeyBy(result, `${fromSpecIndex}.apis`, (key) => {
+            if ((key + "" || "").split("/")?.[0] === meta.modName) {
+              return true;
+            }
+            return false;
+          });
+        }
+
+        const result = PontJsonPointer.set(fromSpecs, `${fromSpecIndex}.directories[namespace=${meta.modName}]`, toDir);
+        const newApis = (toDir?.children || []).reduce((result, name: string) => {
+          return {
+            ...result,
+            name: toApis[name],
+          };
+        }, {});
+        return PontJsonPointer.update(result, `${fromSpecIndex}.apis`, (apis) => {
+          return {
+            ...apis,
+            ...newApis,
+          };
+        });
+      }
+      case MetaType.Definitions: {
+        const fromSpecIndex = PontSpecs.getUpdateSpecIndex(fromSpecs, meta.specName);
+        const toSpecIndex = PontSpecs.getSpecIndex(toSpecs, meta.specName);
+        const toDefs = PontJsonPointer.get(toSpecs, `${toSpecIndex}.definitions`);
+
+        return PontJsonPointer.set(fromSpecs, `${fromSpecIndex}.definitions`, toDefs);
+      }
+      case MetaType.API: {
+        const fromSpecIndex = PontSpecs.getUpdateSpecIndex(fromSpecs, meta.specName);
+        const toSpecIndex = PontSpecs.getSpecIndex(toSpecs, meta.specName);
+        const toApi = PontJsonPointer.get(toSpecs, `${toSpecIndex}.apis.[${meta.modName}/${meta.apiName}]`);
+
+        return PontJsonPointer.set(fromSpecs, `${fromSpecIndex}.apis[${meta.modName}/${meta.apiName}]`, toApi);
+      }
+      case MetaType.Struct: {
+        const fromSpecIndex = PontSpecs.getUpdateSpecIndex(fromSpecs, meta.specName);
+        const toSpecIndex = PontSpecs.getSpecIndex(toSpecs, meta.specName);
+        const toStruct = PontJsonPointer.get(toSpecs, `${toSpecIndex}.definitions.${meta.structName}`);
+
+        return PontJsonPointer.set(fromSpecs, `${fromSpecIndex}.definitions.${meta.structName}`, toStruct);
+      }
     }
   }
 }

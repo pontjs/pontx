@@ -43,7 +43,10 @@ export class PontService {
     if (this.treeDataProvider) {
       this.treeDataProvider.refresh(this.pontManager);
     } else {
-      this.treeDataProvider = new PontExplorer(this.pontManager, this.context);
+      this.treeDataProvider = new PontExplorer(this.pontManager, this.context, (newManager: PontManager) => {
+        this.updatePontManger(newManager);
+        vscode.commands.executeCommand("pont.regenerate");
+      });
     }
 
     if (!this.hasTreeProviderRegistered) {

@@ -11,6 +11,7 @@ export function parseJsonSchema(schema: OAS2.SchemaObject, context = new JsonSch
   let reTypeName = PrimitiveTypeMap[type as any]?.type;
   let resultSchema = {
     ...rest,
+    type,
     required: contextRequied,
   } as PontSpec.PontJsonSchema;
 

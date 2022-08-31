@@ -16,12 +16,14 @@ export async function activate(context: vscode.ExtensionContext) {
   if (!vscode.workspace.rootPath) {
     return;
   }
-
-  context.subscriptions.push(vscode.window.registerWebviewPanelSerializer(PontWebView.viewType, new PontSerializer()));
-  context.subscriptions.push(new PontFileDecoration());
+  pontService.context = context;
   const pontManager = await PontManager.constructorFromRootDir(vscode.workspace.rootPath, new VSCodeLogger());
   if (pontManager) {
     pontService.startup(pontManager, context);
+    context.subscriptions.push(
+      vscode.window.registerWebviewPanelSerializer(PontWebView.viewType, new PontSerializer()),
+    );
+    context.subscriptions.push(new PontFileDecoration());
   }
 }
 

@@ -1,5 +1,4 @@
 import immutableSet from "lodash/fp/set";
-import immutableRemove from "lodash/fp/remove";
 import { removeMapKeys } from "./utils";
 
 interface JsonPointerNode {
@@ -89,9 +88,10 @@ function _set(json: any, nodes: JsonPointerNode[], newValue: any) {
     path = current?.name;
   }
   if (restNodes.length) {
-    return _set(pathValue, restNodes, newValue);
+    const newPathValue = _set(pathValue, restNodes, newValue);
+    return immutableSet(path, newPathValue, json);
   } else {
-    return immutableSet(json, path, newValue);
+    return immutableSet(path, newValue, json);
   }
 }
 function _remove(json: any, nodes: JsonPointerNode[]) {

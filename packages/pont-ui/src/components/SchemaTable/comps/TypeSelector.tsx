@@ -189,12 +189,7 @@ export const TypeSelector: React.FC<TypeSelectorProps> = (props) => {
   );
 
   const typeValue = (
-    <SchemaExp
-      definitions={props.definitions}
-      onStructClick={props.onStructClick}
-      schema={props.schema}
-      isExp={false}
-    />
+    <SchemaExp definitions={props.definitions} onStructClick={props.onStructClick} schema={props.schema} isExp={true} />
   );
 
   // let typeValue = PontSpec.PontJsonSchema.toString(props.schema);

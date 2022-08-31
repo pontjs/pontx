@@ -76,9 +76,7 @@ export const SchemaDocTableRow: React.FC<SchemaDocTableRowProps> = (props) => {
                   <i className={isExpanded ? "codicon codicon-chevron-down" : "codicon codicon-chevron-right"}></i>
                 </div>
               ) : null}
-              {parentType !== "array" && !(tableType !== "parameters" && !prefixes?.length) && !props.node?.isParentMap
-                ? fieldName
-                : null}
+              {parentType !== "array" && !(tableType !== "parameters" && !prefixes?.length) ? fieldName : null}
             </div>
             {!!fieldName && parentType !== "array" && <span style={{ marginRight: 3 }}>:&nbsp;</span>}
             <TypeSelector

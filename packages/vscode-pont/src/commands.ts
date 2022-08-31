@@ -25,12 +25,6 @@ const insertCode = (code: string) => {
 };
 
 export class PontCommands {
-  static commands = {
-    switchOrigin: "pont.switchOrigin",
-    findInterface: "pont.findInterface",
-    regenerate: "pont.regenerate",
-  };
-
   static getPickItems(pontSpec: PontSpec) {
     const hasSingleMod = PontSpec.getMods(pontSpec).length <= 1;
     const items = PontSpec.getMods(pontSpec)
@@ -229,21 +223,14 @@ export class PontCommands {
     vscode.commands.registerCommand("pont.openPontPanel", async () => {
       await vscode.commands.executeCommand("pontExplorer.focus");
     });
-    vscode.commands.registerTextEditorCommand("pont.openDocument", async (editor, edit) => {
-      const isSingleSpec = PontManager.checkIsSingleSpec(service.pontManager);
-      const { specName, apiName, modName } = findInterface(editor, !isSingleSpec) || ({} as any);
-      const spec = PontManager.getSpec(service.pontManager, specName);
+    vscode.commands.registerCommand("pont.config", async () => {
+      const innerConf = service.pontManager.innerManagerConfig;
 
-      vscode.commands.executeCommand("pont.openPontUI", {
-        specName,
-        modName,
-        name: apiName,
-        pageType: "document",
-        schemaType: "api",
-        spec: spec?.apis?.[`${modName}/${apiName}`],
-      });
+      const textDocument = await vscode.workspace.openTextDocument(
+        vscode.Uri.file(path.join(innerConf.configDir, "pont-config.json")),
+      );
+      await vscode.window.showTextDocument(textDocument);
     });
-
     vscode.commands.registerTextEditorCommand("pont.openDocument", async (editor, edit) => {
       const isSingleSpec = PontManager.checkIsSingleSpec(service.pontManager);
       const { specName, apiName, modName } = findInterface(editor, !isSingleSpec) || ({} as any);

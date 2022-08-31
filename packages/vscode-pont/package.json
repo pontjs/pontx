@@ -39,6 +39,11 @@
         "icon": "$(search)"
       },
       {
+        "command": "pont.config",
+        "title": "pont 配置",
+        "icon": "$(settings-gear)"
+      },
+      {
         "command": "pont.regenerate",
         "title": "生成本地代码",
         "icon": "$(debug-start)"
@@ -120,8 +125,8 @@
       "activitybar": [
         {
           "icon": "node_modules/@vscode/codicons/src/icons/symbol-structure.svg",
-          "id": "pontActivity",
-          "title": "高效 API 管理工具"
+          "title": "Pont",
+          "id": "pontActivity"
         }
       ]
     },
@@ -167,7 +172,7 @@
       "pontActivity": [
         {
           "id": "pontExplorer",
-          "name": "pont"
+          "name": ""
         }
       ]
     },
@@ -183,6 +188,11 @@
         }
       ],
       "view/title": [
+        {
+          "command": "pont.config",
+          "when": "view == pontExplorer",
+          "group": "navigation"
+        },
         {
           "command": "pont.findInterface",
           "when": "view == pontExplorer",
@@ -208,6 +218,11 @@
         {
           "command": "pontChanges.commit",
           "when": "view == pontExplorer && viewItem == pontChangesManager",
+          "group": "inline"
+        },
+        {
+          "command": "pontChanges.commit",
+          "when": "view == pontExplorer && viewItem == StagedChanges",
           "group": "inline"
         },
         {

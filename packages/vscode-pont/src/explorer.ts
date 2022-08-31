@@ -3,7 +3,6 @@ import { PontAPI, Mod, ObjectMap, PontJsonSchema, PontSpec, PontJsonPointer } fr
 import { diffPontSpecs, DiffResult } from "pont-spec-diff";
 import * as vscode from "vscode";
 import { getPontSpecByProcessType, MetaType, PontSpecDiffs, PontSpecWithMods, StagedChange } from "./changes/utils";
-import { pontService } from "./Service";
 import * as path from "path";
 import { viewMetaFile } from "./utils";
 
@@ -80,20 +79,12 @@ export class PontFileDecoration implements vscode.FileDecorationProvider, vscode
       };
       const [contextValue, diffType] = uri.path.split("/");
 
-      if (!contextValue.includes("Staged") && diffType === "create") {
+      if (textMap[diffType]) {
         return {
-          badge: textMap["untracked"],
-          color: colorMap["untracked"],
-          tooltip: labelMap["untracked"],
+          badge: textMap[diffType],
+          color: colorMap[diffType],
+          tooltip: labelMap[diffType],
         };
-      } else {
-        if (textMap[diffType]) {
-          return {
-            badge: textMap[diffType],
-            color: colorMap[diffType],
-            tooltip: labelMap[diffType],
-          };
-        }
       }
     }
 
@@ -138,7 +129,10 @@ function getMetaTypeByContextValue(contextValue: string) {
 
 export class PontExplorer implements vscode.TreeDataProvider<PontChangeTreeItem | PontAPITreeItem> {
   specsDiffs: any[] = [];
-  stagedChanges = [] as StagedChange[];
+  // stagedChanges = [] as StagedChange[];
+  stagedLocalSpecs = [] as PontSpec[];
+  stagedDiffs: any[] = [];
+  allDiffs: any[] = [];
 
   getAPIManagerChildren(element?: PontAPITreeItem): vscode.ProviderResult<PontAPITreeItem[]> {
     if (element.contextValue === "pontAPIsManager") {
@@ -235,13 +229,24 @@ export class PontExplorer implements vscode.TreeDataProvider<PontChangeTreeItem 
     throw new Error("Method not implemented.");
   }
 
-  constructor(private pontManager: PontManager, private context: vscode.ExtensionContext) {
-    this.specsDiffs = diffPontSpecs(pontManager.localPontSpecs, pontManager.remotePontSpecs) || [];
-    this.stagedChanges = [] as StagedChange[];
+  updateDiffs() {
+    this.specsDiffs = diffPontSpecs(this.stagedLocalSpecs, this.pontManager.remotePontSpecs) || [];
+    this.stagedDiffs = diffPontSpecs(this.pontManager.localPontSpecs, this.stagedLocalSpecs) || [];
+    this.allDiffs = diffPontSpecs(this.pontManager.localPontSpecs, this.pontManager.remotePontSpecs) || [];
+  }
+
+  constructor(
+    private pontManager: PontManager,
+    private context: vscode.ExtensionContext,
+    private updatePontManager: Function,
+  ) {
+    this.stagedLocalSpecs = pontManager.localPontSpecs;
+    this.updateDiffs();
 
     vscode.commands.registerCommand("pontChanges.stage", (meta) => {
-      this.stagedChanges = PontSpecDiffs.updateSpecsProcessType(
-        this.specsDiffs,
+      this.stagedLocalSpecs = PontSpecDiffs.updateSpecsByProcessType(
+        this.stagedLocalSpecs,
+        this.pontManager,
         {
           metaType: getMetaTypeByContextValue(meta.contextValue),
           apiName: meta.apiName,
@@ -250,13 +255,14 @@ export class PontExplorer implements vscode.TreeDataProvider<PontChangeTreeItem 
           structName: meta.structName,
         },
         "staged",
-        this.stagedChanges,
       );
+      this.updateDiffs();
       this._onDidChangeTreeData.fire();
     });
     vscode.commands.registerCommand("pontChanges.unStage", (meta) => {
-      this.stagedChanges = PontSpecDiffs.updateSpecsProcessType(
-        this.specsDiffs,
+      this.stagedLocalSpecs = PontSpecDiffs.updateSpecsByProcessType(
+        this.stagedLocalSpecs,
+        this.pontManager,
         {
           metaType: getMetaTypeByContextValue(meta.contextValue),
           apiName: meta.apiName,
@@ -265,13 +271,14 @@ export class PontExplorer implements vscode.TreeDataProvider<PontChangeTreeItem 
           structName: meta.structName,
         },
         "untracked",
-        this.stagedChanges,
       );
+      this.updateDiffs();
       this._onDidChangeTreeData.fire();
     });
     vscode.commands.registerCommand("pontChanges.batchStage", (meta) => {
-      this.stagedChanges = PontSpecDiffs.updateSpecsProcessType(
-        this.specsDiffs,
+      this.stagedLocalSpecs = PontSpecDiffs.updateSpecsByProcessType(
+        this.stagedLocalSpecs,
+        this.pontManager,
         {
           metaType: getMetaTypeByContextValue(meta.contextValue),
           apiName: meta.apiName,
@@ -280,13 +287,14 @@ export class PontExplorer implements vscode.TreeDataProvider<PontChangeTreeItem 
           structName: meta.structName,
         },
         "staged",
-        this.stagedChanges,
       );
+      this.updateDiffs();
       this._onDidChangeTreeData.fire();
     });
     vscode.commands.registerCommand("pontChanges.batchUnStage", (meta) => {
-      this.stagedChanges = PontSpecDiffs.updateSpecsProcessType(
-        this.specsDiffs,
+      this.stagedLocalSpecs = PontSpecDiffs.updateSpecsByProcessType(
+        this.stagedLocalSpecs,
+        this.pontManager,
         {
           metaType: getMetaTypeByContextValue(meta.contextValue),
           apiName: meta.apiName,
@@ -295,13 +303,14 @@ export class PontExplorer implements vscode.TreeDataProvider<PontChangeTreeItem 
           structName: meta.structName,
         },
         "untracked",
-        this.stagedChanges,
       );
+      this.updateDiffs();
       this._onDidChangeTreeData.fire();
     });
     vscode.commands.registerCommand("pontChanges.stageAll", (meta) => {
-      this.stagedChanges = PontSpecDiffs.updateSpecsProcessType(
-        this.specsDiffs,
+      this.stagedLocalSpecs = PontSpecDiffs.updateSpecsByProcessType(
+        this.stagedLocalSpecs,
+        this.pontManager,
         {
           metaType: getMetaTypeByContextValue(meta.contextValue),
           apiName: meta.apiName,
@@ -310,13 +319,14 @@ export class PontExplorer implements vscode.TreeDataProvider<PontChangeTreeItem 
           structName: meta.structName,
         },
         "staged",
-        this.stagedChanges,
       );
+      this.updateDiffs();
       this._onDidChangeTreeData.fire();
     });
     vscode.commands.registerCommand("pontChanges.unStageAll", (meta) => {
-      this.stagedChanges = PontSpecDiffs.updateSpecsProcessType(
-        this.specsDiffs,
+      this.stagedLocalSpecs = PontSpecDiffs.updateSpecsByProcessType(
+        this.stagedLocalSpecs,
+        this.pontManager,
         {
           metaType: getMetaTypeByContextValue(meta.contextValue),
           apiName: meta.apiName,
@@ -325,9 +335,17 @@ export class PontExplorer implements vscode.TreeDataProvider<PontChangeTreeItem 
           structName: meta.structName,
         },
         "untracked",
-        this.stagedChanges,
       );
+      this.updateDiffs();
       this._onDidChangeTreeData.fire();
+    });
+    vscode.commands.registerCommand("pontChanges.commit", (meta) => {
+      const newManager = {
+        ...this.pontManager,
+        localPontSpecs: this.stagedLocalSpecs,
+      };
+
+      this.updatePontManager(newManager);
     });
 
     vscode.commands.registerCommand("pontAPIs.openMeta", async (meta) => {
@@ -346,7 +364,8 @@ export class PontExplorer implements vscode.TreeDataProvider<PontChangeTreeItem 
 
   refresh(pontManager: PontManager) {
     this.pontManager = pontManager;
-    this.specsDiffs = diffPontSpecs(pontManager.localPontSpecs, pontManager.remotePontSpecs) || [];
+    this.stagedLocalSpecs = pontManager.localPontSpecs;
+    this.updateDiffs();
     this._onDidChangeTreeData.fire();
   }
 
@@ -453,17 +472,11 @@ export class PontExplorer implements vscode.TreeDataProvider<PontChangeTreeItem 
   }
 
   getAPIChangesChildren(element?: PontChangeTreeItem): vscode.ProviderResult<PontChangeTreeItem[]> {
-    const hasSingleSpec = this.specsDiffs?.length <= 1 && !this.specsDiffs[0]?.name;
+    const hasSingleSpec = PontManager.checkIsSingleSpec(this.pontManager);
 
     if (element.contextValue === "pontChangesManager") {
-      const stagedDiffs = this.specsDiffs
-        .map((diff) => getPontSpecByProcessType(diff, "staged", this.stagedChanges))
-        .filter((diff) => PontExplorer.getSpecCnt(diff) > 0);
-      const unStagedDiffs = this.specsDiffs
-        .map((diff) => getPontSpecByProcessType(diff, "untracked", this.stagedChanges))
-        .filter((diff) => PontExplorer.getSpecCnt(diff) > 0);
-      const stagedItemCnt = hasSingleSpec ? PontExplorer?.getSpecCnt(stagedDiffs[0]) : stagedDiffs.length;
-      const changesItemCnt = hasSingleSpec ? PontExplorer?.getSpecCnt(unStagedDiffs[0]) : unStagedDiffs.length;
+      const stagedItemCnt = hasSingleSpec ? PontExplorer?.getSpecCnt(this.stagedDiffs[0]) : this.stagedDiffs.length;
+      const changesItemCnt = hasSingleSpec ? PontExplorer?.getSpecCnt(this.specsDiffs[0]) : this.specsDiffs.length;
 
       return [
         {
@@ -486,18 +499,14 @@ export class PontExplorer implements vscode.TreeDataProvider<PontChangeTreeItem 
     }
 
     if (element.contextValue === "StagedChanges" || element.contextValue === "Changes") {
+      const specs = element.contextValue === "StagedChanges" ? this.stagedDiffs : this.specsDiffs;
       if (hasSingleSpec) {
-        return PontExplorer.getAPIChangesModItems(this.specsDiffs[0], element.contextValue);
+        return PontExplorer.getAPIChangesModItems(specs[0], element.contextValue);
       }
 
-      return this.specsDiffs
+      return specs
         .map((diffs) => {
-          const diffsResult = getPontSpecByProcessType(
-            diffs,
-            element.contextValue === "StagedChanges" ? "staged" : "untracked",
-            this.stagedChanges,
-          ) as any;
-          const itemCnt = PontExplorer.getSpecCnt(diffsResult);
+          const itemCnt = PontExplorer.getSpecCnt(diffs);
 
           return {
             label: `${diffs.name}(${itemCnt})`,
@@ -505,8 +514,8 @@ export class PontExplorer implements vscode.TreeDataProvider<PontChangeTreeItem 
             itemCnt,
             contextValue: element.contextValue === "StagedChanges" ? "StagedChangesSpec" : "ChangesSpec",
             collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
-            resourceUri: vscode.Uri.parse(`pont-changes://${element.contextValue}/${diffsResult.diffType}`),
-            schema: diffsResult,
+            resourceUri: vscode.Uri.parse(`pont-changes://${element.contextValue}/${diffs.diffType}`),
+            schema: diffs,
           };
         })
         .filter((child) => child.itemCnt > 0);
@@ -528,8 +537,8 @@ export class PontExplorer implements vscode.TreeDataProvider<PontChangeTreeItem 
     element?: PontChangeTreeItem | PontAPITreeItem,
   ): vscode.ProviderResult<(PontChangeTreeItem | PontAPITreeItem)[]> {
     if (!element) {
-      const hasSingleSpec = this.specsDiffs?.length <= 1 && !this.specsDiffs[0]?.name;
-      const diffCnt = hasSingleSpec ? PontExplorer?.getSpecCnt(this.specsDiffs?.[0]) : this.specsDiffs?.length;
+      const hasSingleSpec = this.allDiffs?.length <= 1 && !this.allDiffs[0]?.name;
+      const diffCnt = hasSingleSpec ? PontExplorer?.getSpecCnt(this.allDiffs?.[0]) : this.allDiffs?.length;
 
       return [
         {

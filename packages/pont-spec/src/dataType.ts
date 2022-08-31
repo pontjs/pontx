@@ -54,14 +54,18 @@ export class PontJsonSchema {
     }
 
     if (schema.templateArgs?.length) {
-      const defName = schema.isDefsType ? `defs.${schema.typeName}` : schema.typeName;
+      let defName = schema.isDefsType ? `defs.${schema.typeName}` : schema.typeName;
+
       if (schema.templateArgs?.length) {
+        if (defName === "array") {
+          defName = "Array";
+        }
         return `${defName}<${schema.templateArgs.map((arg) => PontJsonSchema.toString(arg)).join(", ")}>`;
       }
       return defName;
     }
 
-    switch (schema?.typeName) {
+    switch (schema?.typeName || schema.type) {
       case "long":
       case "integer": {
         return "number";

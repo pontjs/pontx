@@ -174,3 +174,52 @@ export class PontSpec {
     return Object.keys(spec?.definitions || {}).length;
   }
 }
+
+export class PontSpecs {
+  static updateSpec(specs: PontSpec[], specName: string, newSpec: PontSpec) {
+    if (specName) {
+      const specIndex = specs?.findIndex((spec) => spec.name === specName);
+
+      if (specIndex === -1) {
+        return [...specs, newSpec];
+      }
+      return specs.map((spec, index) => {
+        if (index === specIndex) {
+          return newSpec;
+        }
+        return spec;
+      });
+    }
+
+    return [newSpec];
+  }
+
+  static checkIsSingleSpec(specs: PontSpec[]) {
+    return specs.length <= 1 && !specs?.[0]?.name;
+  }
+
+  static getSpecByName = (specs: PontSpec[], specName: string) => {
+    return specs?.find((spec) => spec.name === specName) || specs?.[0];
+  };
+
+  static getSpecIndex = (specs: PontSpec[], specName: string) => {
+    const index = specs?.findIndex((spec) => spec.name === specName);
+
+    if (index === -1) {
+      return 0;
+    }
+
+    return index;
+  };
+
+  static getUpdateSpecIndex = (specs: PontSpec[], specName: string) => {
+    const index = specs?.findIndex((spec) => spec.name === specName);
+    if (specName && index === -1) {
+      return specs.length;
+    } else if (index === -1 && !specs?.[0]?.name) {
+      return 0;
+    }
+
+    return index;
+  };
+}
