@@ -40,14 +40,14 @@ export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
 
   // 简单、复杂模式切换、搜索、折叠
   const menus = (
-    <Menu selectedKeys={[selectedMeta?.name]} defaultOpenKeys={[filteredCurrSpec?.mods?.[0]?.name]} mode="inline">
+    <Menu selectedKeys={[selectedMeta?.name]} defaultOpenKeys={[filteredCurrSpec?.[0]?.name]} mode="inline">
       {(filteredCurrSpec?.mods || []).map((mod) => {
         return (
           <Menu.SubMenu
-            key={mod.name}
+            key={mod.name as any}
             label={
               <div className="mod-name">
-                <div className="name" title={mod.name}>
+                <div className="name" title={mod.name as any}>
                   {mod.name}({mod.interfaces?.length || 0})
                 </div>
                 <div className="desc" title={mod.description}>
@@ -65,7 +65,7 @@ export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
                   onClick={() =>
                     changeSelectedMeta({
                       type: "api",
-                      modName: mod.name,
+                      modName: mod.name as any,
                       name: api.name,
                       spec: api,
                     })
@@ -124,7 +124,7 @@ export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
   return (
     <div className="pont-ui-left-menu">
       {searchArea}
-      {!filteredCurrSpec?.mods?.length && !PontSpec.PontSpec.getClazzCnt(filteredCurrSpec) ? (
+      {!PontSpec.PontSpec.getMods(filteredCurrSpec)?.length && !PontSpec.PontSpec.getClazzCnt(filteredCurrSpec) ? (
         <Message type="notice"></Message>
       ) : (
         menus

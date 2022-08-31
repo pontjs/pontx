@@ -35,7 +35,7 @@ export function getSchemaDom(
           triggerType={["hover"]}
           trigger={
             <a href="javascript:;" onClick={() => changeBaseClass(base)}>
-              {base.name}
+              {base.typeName}
             </a>
           }
         >
@@ -60,7 +60,7 @@ export function getSchemaDom(
         {refDom}
         {"<"}
         {schema.templateArgs.map((arg, argIndex) => {
-          if (!isExp) {
+          if (schema.properties || schema.items || schema.additionalProperties) {
             return "T" + argIndex;
           }
           const dom = getSchemaDom(arg, definitions, changeBaseClass, onStructClick);
@@ -157,7 +157,7 @@ export const SchemaExp: React.FC<SchemaExpProps> = (props) => {
     (base) => {
       props.onStructClick({
         type: "baseClass",
-        name: base.name,
+        name: base.typeName,
         spec: base,
       });
     },

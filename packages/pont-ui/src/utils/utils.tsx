@@ -64,6 +64,10 @@ function fuzzyMatch(texts: Array<string | undefined>, keyword: string) {
 
 export function filterSpec(spec, searchKeyword: string) {
   if (!searchKeyword || !spec) {
+    if (spec) {
+      const mods = PontSpec.getMods(spec);
+      return { ...spec, mods };
+    }
     return spec;
   }
 

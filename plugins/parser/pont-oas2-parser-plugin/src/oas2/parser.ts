@@ -228,5 +228,11 @@ export function parseOAS2(swagger: OAS2.SwaggerObject, name = ""): PontSpec.Pont
     name,
   } as PontSpec.PontSpec;
 
-  return pontDs;
+  try {
+    const metaStr = JSON.stringify(pontDs);
+
+    return JSON.parse(metaStr);
+  } catch (e) {
+    return pontDs;
+  }
 }

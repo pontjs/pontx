@@ -15,7 +15,9 @@ export const PrimitiveTypeMap = {
   Collection: { type: "array" },
   Integer: {
     type: "number",
-    format: "int32",
+  },
+  integer: {
+    type: "number",
   },
 };
 
@@ -36,7 +38,7 @@ export class JsonSchemaContext {
       const index = codes.indexOf(PontJsonSchema.toString(schema));
 
       if (!context.defNames?.includes(schema.typeName)) {
-        schema.type = schema.typeName as any;
+        schema.type = (schema.typeName as any) || schema.type;
         schema.typeName = "";
       }
 

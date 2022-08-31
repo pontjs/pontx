@@ -124,7 +124,7 @@ export class PontJsonSchemaOp extends PontJsonSchema {
           return [
             currentRow,
             ...PontJsonSchemaOp.genrateRows(schema.additionalProperties as PontSpec.PontJsonSchema, {
-              fieldName: "",
+              fieldName: "[key]",
               prefixes: [...context.prefixes, "additionalProperties"],
               parentType: "object",
               keys: [...context.keys, 0],
@@ -155,6 +155,8 @@ export class PontJsonSchemaOp extends PontJsonSchema {
           }
 
           return rows;
+        } else if (schema.typeName) {
+          return [currentRow];
         }
 
         return rows;
