@@ -1,7 +1,7 @@
 {
   "name": "pontx",
   "private": true,
-  "version": "1.0.12",
+  "version": "0.0.1",
   "license": "MIT",
   "scripts": {
     "test": "jest pont",
