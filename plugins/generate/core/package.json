@@ -1,6 +1,6 @@
 {
   "name": "pontx-generate-core",
-  "version": "0.3.4",
+  "version": "0.0.1",
   "description": "OpenAPI pont spec",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
