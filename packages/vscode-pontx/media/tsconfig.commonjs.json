@@ -1,0 +1,20 @@
+{
+  "extends": "../../../tsconfig.build.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES2015",
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "outDir": "lib",
+    "moduleResolution": "node",
+    "jsx": "react",
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
+    "baseUrl": "./src",
+    "paths": {},
+    "rootDir": "./src"
+  },
+  "include": ["./src/entry", "./src/utils", "./src/components", "src/server.ts"],
+  "exclude": ["node_modules", "es6", "tests", "lib", "src/registerService.tsx"],
+  "references": []
+}

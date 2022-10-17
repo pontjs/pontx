@@ -1,34 +1,34 @@
 {
-  "name": "pont2",
+  "name": "pontx",
   "private": true,
   "version": "1.0.12",
   "license": "MIT",
   "scripts": {
     "test": "jest pont",
     "changelog": "node -r esm scripts/changelog.js",
-    "build:commonjs": "lerna exec --scope pont-spec* --stream -- npm run build:commonjs",
-    "build:commonjs:watch": "concurrently 'tsc -p ./packages/pont-spec/tsconfig.lib.json -w' 'tsc -p packages/pont-spec-diff/tsconfig.commonjs.json -w'",
+    "build:commonjs": "lerna exec --scope pontx-spec* --stream -- npm run build:commonjs",
+    "build:commonjs:watch": "concurrently 'tsc -p ./packages/pontx-spec/tsconfig.lib.json -w' 'tsc -p packages/pontx-spec-diff/tsconfig.commonjs.json -w'",
     "build": "tsc --build && npm run build:commonjs",
     "start": "tsc --build -w",
-    "ui": "cd packages/pont-ui && npm run start",
-    "vs-ui": "cd packages/pont-ui && npm run build && cd ../vscode-pont/media && npm run build",
+    "ui": "cd packages/pontx-ui && npm run start",
+    "vs-ui": "cd packages/pontx-ui && npm run build && cd ../vscode-pontx/media && npm run build",
     "clean": "lerna clean && rimraf ./node_modules",
     "lint": "prettier --write --parser typescript \"packages/**/*.ts\"",
     "release:all": "npm run release && npm run release:vscode",
-    "release": "lerna version patch --message 'chore: publish' && lerna exec --ignore vscode-pont2 --ignore vscode-pont-media --ignore pont-report-plugin --ignore jsonschema-form  --stream -- npm publish",
+    "release": "lerna version patch --message 'chore: publish' && lerna exec --ignore vscode-pontx --ignore vscode-pontx-media --ignore pontx-report-plugin --ignore jsonschema-form  --stream -- npm publish",
     "release:dry": "node scripts/release.js --dry",
     "release:vscode": "sh scripts/releaseVscode.sh"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pont2/pont.git"
+    "url": "git+https://github.com/pontjs/pontx.git"
   },
   "bugs": {
-    "url": "https://github.com/pont2/pont/issues"
+    "url": "https://github.com/pontjs/pontx/issues"
   },
-  "homepage": "https://github.com/pont2/pont#readme",
+  "homepage": "https://github.com/pontjs/pontx#readme",
   "gitHooks": {
-    "commit-msg": "node ./scripts/verifyCommit.js",
+    "commit-msg": "node ./scripts/verifyCommit.js && node ./scripts/verifySafeCode.js",
     "post-merge": "lerna bootstrap",
     "pre-commit": "lint-staged"
   },
@@ -54,6 +54,8 @@
     "lint-staged": "^12.4.1",
     "lodash": "*",
     "prettier": "^2.7.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "rimraf": "3.0.2",
     "typescript": "^4.6.4",
     "yorkie": "^2.0.0"

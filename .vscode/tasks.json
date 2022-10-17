@@ -6,13 +6,13 @@
     {
       "type": "npm",
       "script": "test",
-      "path": "packages/pont-spec-diff",
+      "path": "packages/pontx-spec-diff",
       "group": {
         "kind": "test",
         "isDefault": true
       },
       "problemMatcher": [],
-      "label": "test:pont-spec-diff",
+      "label": "test:pontx-spec-diff",
       "detail": "tsc -p tests/tsconfig.json"
     }
   ]

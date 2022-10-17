@@ -1,0 +1,23 @@
+{
+  "extends": "../../tsconfig.build.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "outDir": "lib",
+    "moduleResolution": "node",
+    "esModuleInterop": false,
+    "baseUrl": ".",
+    "paths": {},
+    "rootDir": "./src",
+    "composite": true
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules", "build"],
+  "references": [
+    {
+      "path": "../pontx-manager"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "name": "pontx-mocks-plugin",
+  "version": "0.3.4",
+  "description": "OpenAPI pont spec",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "pretest": "npm run build",
+    "watch": "tsc --build --watch",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "build": "npm run clean && tsc --build"
+  },
+  "peerDependencies": {
+    "lodash": "*"
+  },
+  "dependencies": {
+    "pontx-spec": "^0.3.4"
+  },
+  "files": [
+    "package.json",
+    "lib"
+  ],
+  "keywords": [],
+  "author": "jasonHzq",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.6.4"
+  }
+}

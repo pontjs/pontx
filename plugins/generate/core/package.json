@@ -1,5 +1,5 @@
 {
-  "name": "pont-generate-core",
+  "name": "pontx-generate-core",
   "version": "0.3.4",
   "description": "OpenAPI pont spec",
   "main": "lib/index.js",
@@ -13,7 +13,7 @@
   "dependencies": {
     "fs-extra": "*",
     "lodash": "*",
-    "pont-spec": "^0.3.4",
+    "pontx-spec": "^0.3.4",
     "prettier": "^2.6.2"
   },
   "files": [

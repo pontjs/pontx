@@ -3,10 +3,18 @@
   "request": "launch",
   "configurations": [
     {
-      "type": "node",
-      "name": "Debug Pont CLI",
+      "name": "test",
       "request": "launch",
-      "program": "${workspaceRoot}/packages/pont-cli/lib/index.js",
+      "program": "${workspaceRoot}/packages/vscode-pontx/media/lib/main.js",
+      "console": "integratedTerminal",
+      "protocol": "inspector",
+      "type": "node"
+    },
+    {
+      "type": "node",
+      "name": "Debug Pontx CLI",
+      "request": "launch",
+      "program": "${workspaceRoot}/packages/pontx-cli/lib/index.js",
       "args": ["generate"],
       "cwd": "${workspaceFolder}/examples/hooks-app",
       "console": "integratedTerminal",
@@ -18,10 +26,10 @@
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
-      "args": ["--extensionDevelopmentPath=${workspaceRoot}/packages/vscode-pont"],
+      "args": ["--extensionDevelopmentPath=${workspaceRoot}/packages/vscode-pontx"],
       "stopOnEntry": false,
       "sourceMaps": true,
-      "outFiles": ["${workspaceRoot}/packages/vscode-pont/out/**/*.js"]
+      "outFiles": ["${workspaceRoot}/packages/vscode-pontx/out/**/*.js"]
     },
     {
       "name": "Debug Extension Tests",
@@ -34,10 +42,10 @@
     },
     {
       "type": "node",
-      "name": "Debug Pont Spec Diff Tests",
+      "name": "Debug Pontx Spec Diff Tests",
       "request": "launch",
-      "preLaunchTask": "test:pont-spec-diff",
-      "program": "${workspaceRoot}/packages/pont-spec-diff/tests/out/index.js",
+      "preLaunchTask": "test:pontx-spec-diff",
+      "program": "${workspaceRoot}/packages/pontx-spec-diff/tests/out/index.js",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "protocol": "inspector"

@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.build.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES2015",
+    "removeComments": true,
+    "composite": true,
+    "outDir": "lib",
+    "moduleResolution": "Node",
+    "baseUrl": ".",
+    "paths": {},
+    "esModuleInterop": true,
+    "rootDir": "./src"
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules", "build"],
+  "references": [{ "path": "../pontx-spec" }]
+}

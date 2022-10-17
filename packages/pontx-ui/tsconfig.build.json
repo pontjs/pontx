@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.build.json",
+  "compilerOptions": {
+    "module": "ES6",
+    "target": "es6",
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "outDir": "dist/es6",
+    "jsx": "react",
+    "moduleResolution": "node",
+    "baseUrl": "./src",
+    "paths": {},
+    "rootDir": "./src"
+  },
+  "include": ["./src/components/*"],
+  "exclude": ["node_modules", "es6", "tests", "lib", "./src/service.local.ts"],
+  "references": []
+}

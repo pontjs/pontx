@@ -1,0 +1,37 @@
+{
+  "name": "pontx-react-hooks-generate-plugin",
+  "version": "0.3.4",
+  "description": "OpenAPI pont spec",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "pretest": "npm run build",
+    "watch": "tsc --build --watch",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "build": "npm run clean && tsc --build"
+  },
+  "dependencies": {
+    "pontx-generate-core": "^0.3.4",
+    "pontx-spec": "^0.3.4"
+  },
+  "peerDependencies": {
+    "pontx-manager": "*",
+    "fs-extra": "^10.1.0"
+  },
+  "files": [
+    "package.json",
+    "builtin",
+    "lib"
+  ],
+  "keywords": [],
+  "author": "jasonHzq",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/fs-extra": "^9.0.13",
+    "@types/node": "*",
+    "@types/react": "^16.14.30",
+    "react": "^16.14.0",
+    "swr": "^0.3.0",
+    "typescript": "^4.6.4"
+  }
+}

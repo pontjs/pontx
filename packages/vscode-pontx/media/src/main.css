@@ -1,0 +1,12 @@
+.pontx-page .next-icon {
+  font-family: NextIcon !important;
+}
+html body {
+  padding: 0;
+  border-left: 1px solid #d7d7d7;
+}
+.vscode-page {
+  padding: 20px;
+  width: 100%;
+  max-width: 100%;
+}

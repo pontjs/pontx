@@ -1,4 +1,4 @@
-import * as PontSpec from "pont-spec";
+import * as PontSpec from "pontx-spec";
 import * as _ from "lodash";
 
 const makeArray = (cnt: number) => Array.from(new Array(cnt));
