@@ -2,6 +2,13 @@
 .vscode-test/**
 out/test/**
 out/**/*.map
+out/**/*.d.ts
+media/src/**
+media/config/**
+media/out/**
+media/tsconfig.json
+media/tsconfig.node.json
+media/tsconfig.commonjs.json
 src/**
 .gitignore
 tsconfig.json
