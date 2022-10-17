@@ -1,0 +1,23 @@
+{
+  "name": "pontx-report-plugin",
+  "version": "0.3.3",
+  "description": "OpenAPI pont spec",
+  "private": true,
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "pretest": "npm run build",
+    "watch": "tsc -w",
+    "build": "rm -rf lib && tsc"
+  },
+  "files": [
+    "package.json",
+    "lib"
+  ],
+  "keywords": [],
+  "devDependencies": {
+    "@types/node": "*"
+  },
+  "author": "jasonHzq",
+  "license": "MIT"
+}

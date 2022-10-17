@@ -1,8 +1,10 @@
 import * as fs from "fs-extra";
 import * as _ from "lodash";
-import * as PontSpec from "pont-spec";
+import * as PontSpec from "pontx-spec";
 import { CodeGenerator } from "./CodeGenerator";
 import prettier from "prettier";
+import { clearPath } from "./utils";
+import * as path from "path";
 
 export class FileStructure {
   [fileName: string]: string | FileStructure;
@@ -83,17 +85,82 @@ export class FileGenerator {
   basePath = "";
   fileStructure: FileStructure;
 
-  static clearBasePath(fileGenerator: FileGenerator) {
-    const isExists = fs.existsSync(fileGenerator.basePath);
-    if (isExists) {
-      return fs.removeSync(fileGenerator.basePath);
+  static async generateWrapper(fileGenerator: FileGenerator) {
+    if (fs.existsSync(fileGenerator.basePath)) {
+      if (fs.existsSync(fileGenerator.basePath + "/.gitignore")) {
+        return;
+      }
+      fs.writeFileSync(fileGenerator.basePath + "/.gitignore", ".mocks\n.remote\n.local", "utf8");
+      return;
     }
+
+    await fs.mkdirp(fileGenerator.basePath);
+    fs.writeFileSync(fileGenerator.basePath + "/.gitignore", ".mocks\n.remote\n.local", "utf8");
   }
 
   static async generateFiles(fileGenerator: FileGenerator) {
-    FileGenerator.clearBasePath(fileGenerator);
+    clearPath(fileGenerator.basePath);
     await fs.mkdirp(fileGenerator.basePath);
     await FileStructure.generateFiles(fileGenerator.fileStructure, fileGenerator.basePath);
+  }
+
+  static async generateSdk(fileGenerator: FileGenerator) {
+    await FileGenerator.generateWrapper(fileGenerator);
+    const sdkPath = fileGenerator.basePath + "/sdk";
+
+    clearPath(sdkPath);
+    await fs.mkdirp(sdkPath);
+    await FileStructure.generateFiles(fileGenerator.fileStructure, sdkPath);
+  }
+
+  static async generateRemoteCache(outDir: string, specs: PontSpec.PontSpec[]) {
+    if (specs?.length && specs.some((spec) => spec.name)) {
+      const struct = {};
+      specs.forEach((spec) => {
+        struct[spec.name + ".json"] = JSON.stringify(spec, null, 2);
+      });
+
+      return FileGenerator.generateFiles({
+        basePath: path.join(outDir, ".remote"),
+        fileStructure: struct,
+      });
+    } else if (specs.length) {
+      return fs.writeFile(path.join(outDir, ".remote"), JSON.stringify(specs, null, 2), "utf8");
+    }
+  }
+
+  static regenerateSingleLocaleSpec(spec: PontSpec.PontSpec, pontPath: string) {
+    FileStructure.generateFiles(FileGenerator.generateLocalSpec(spec), path.join(pontPath, ".locale"));
+  }
+
+  static regenerateLocaleSpecs(specs: PontSpec.PontSpec[], pontPath: string) {
+    const structure = {};
+    specs.forEach((spec) => {
+      structure[spec.name] = FileGenerator.generateLocalSpec(spec);
+    });
+    FileStructure.generateFiles(structure, path.join(pontPath, ".locale"));
+  }
+  static generateLocalSpec(spec: PontSpec.PontSpec) {
+    const mods = PontSpec.PontSpec.getMods(spec);
+    const specFiles = { definitions: spec.definitions };
+    const hasMods = PontSpec.PontSpec.checkHasMods(spec);
+
+    if (hasMods) {
+      mods.forEach((mod) => {
+        if (typeof mod.name === "string") {
+          const modFiles = {};
+          mod.interfaces.forEach((api) => {
+            modFiles[api.name] = api;
+          });
+
+          specFiles[mod.name] = modFiles;
+        }
+      });
+    } else {
+      specFiles["apis"] = spec.apis;
+    }
+
+    return specFiles;
   }
 
   // todo 按需增量重新生成文件，类似 React DOM diff

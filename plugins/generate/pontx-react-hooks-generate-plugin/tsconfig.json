@@ -1,0 +1,28 @@
+{
+  "extends": "../../../tsconfig.build.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "outDir": "lib",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {},
+    "rootDir": "./src",
+    "composite": true
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules", "build"],
+  "references": [
+    {
+      "path": "../../../packages/pontx-spec"
+    },
+    {
+      "path": "../core"
+    },
+    {
+      "path": "./tsconfig.builtin.json"
+    }
+  ]
+}
