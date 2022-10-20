@@ -310,11 +310,12 @@ export class PontSpecDiffs extends PontSpec {
         return PontJsonPointer.set(fromSpecs, `${fromSpecIndex}.definitions`, toDefs);
       }
       case MetaType.API: {
+        const apiKey = meta.modName ? `${meta.modName}/${meta.apiName}` : meta.apiName;
         const fromSpecIndex = PontSpecs.getUpdateSpecIndex(fromSpecs, meta.specName);
         const toSpecIndex = PontSpecs.getSpecIndex(toSpecs, meta.specName);
-        const toApi = PontJsonPointer.get(toSpecs, `${toSpecIndex}.apis.[${meta.modName}/${meta.apiName}]`);
+        const toApi = PontJsonPointer.get(toSpecs, `${toSpecIndex}.apis.[${apiKey}]`);
 
-        return PontJsonPointer.set(fromSpecs, `${fromSpecIndex}.apis[${meta.modName}/${meta.apiName}]`, toApi);
+        return PontJsonPointer.set(fromSpecs, `${fromSpecIndex}.apis[${apiKey}]`, toApi);
       }
       case MetaType.Struct: {
         const fromSpecIndex = PontSpecs.getUpdateSpecIndex(fromSpecs, meta.specName);

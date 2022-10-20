@@ -1,4 +1,4 @@
-import { PontManager } from "pontx-manager";
+import { getSpecByName, PontManager } from "pontx-manager";
 import * as vscode from "vscode";
 import * as path from "path";
 import { pontUI } from "./UI";
@@ -121,6 +121,19 @@ export class PontService {
     const result = await Promise.resolve(this[message.type](message.value));
 
     return { requestId: message.requestId, type: message.type, data: result };
+  }
+
+  async openMeta(meta: { name: string; spec: any; specName: string; type: "baseClass" | "api" }) {
+    vscode.commands.executeCommand("pontAPIs.openMeta", meta);
+  }
+
+  async requestDefinitions(specName: string) {
+    const specs = this.pontManager.localPontSpecs;
+    const spec = getSpecByName(specs, specName);
+    if (spec) {
+      return spec.definitions || {};
+    }
+    return {};
   }
 
   async requestPontSpecs(): Promise<{ localSpecs: PontSpec[]; remoteSpecs: PontSpec[]; currentOriginName: string }> {

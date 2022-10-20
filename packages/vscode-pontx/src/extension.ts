@@ -16,6 +16,8 @@ export async function activate(context: vscode.ExtensionContext) {
   if (!vscode.workspace.rootPath) {
     return;
   }
+  vscode.commands.executeCommand("setContext", "pontx.hasPontxConfig", true);
+
   pontService.context = context;
   const pontManager = await PontManager.constructorFromRootDir(vscode.workspace.rootPath, new VSCodeLogger());
   if (pontManager) {

@@ -94,6 +94,9 @@ export const SchemaTableRow: React.FC<SchemaTableRowProps> = React.memo(
     if (prev.data?.readOnly !== next.data?.readOnly) {
       return false;
     }
+    if (!_.isEqual(prev.definitions, next.definitions)) {
+      return false;
+    }
     const prevRow = prev.data?.visibleRows[prev.index] as SchemaTableNode;
     const nextRow = next.data?.visibleRows[next.index] as SchemaTableNode;
 

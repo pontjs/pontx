@@ -33,6 +33,7 @@ packages/pontx-ui/src/mocks/*
 packages/pontx-ui/src/service.local.ts
 packages/pontx-spec/es6/*
 package-lock.json
+packages/vscode-pontx/dist
 packages/vscode-pontx/media/dist
 packages/vscode-pontx/media/node_modules
 packages/vscode-pontx/media/assets/

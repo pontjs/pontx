@@ -17,8 +17,9 @@ export const DiffPage: React.FC<DiffPageProps> = (props) => {
 
   let doc = null as any;
   if (selectedMeta?.type === "api") {
-    const localApi = currSpec?.apis?.[`${selectedMeta.modName}/${selectedMeta.name}`];
-    const remoteApi = remoteSpec?.apis?.[`${selectedMeta.modName}/${selectedMeta.name}`];
+    const apiKey = selectedMeta.modName ? `${selectedMeta.modName}/${selectedMeta.name}` : selectedMeta.name;
+    const localApi = currSpec?.apis?.[apiKey];
+    const remoteApi = remoteSpec?.apis?.[apiKey];
 
     if (!localApi) {
       doc = (

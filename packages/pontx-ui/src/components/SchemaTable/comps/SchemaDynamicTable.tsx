@@ -22,7 +22,7 @@ export class SchemaDynamicTableProps {
 
 const MAX_HEIGHT = 400;
 
-export const SchemaDynamicTable: React.FC<SchemaDynamicTableProps> = React.memo((props) => {
+export const SchemaDynamicTable: React.FC<SchemaDynamicTableProps> = (props) => {
   const [foldedRows, changeFoldedRows] = React.useState([] as string[][]);
 
   const visibleRows = props.rows
@@ -71,28 +71,31 @@ export const SchemaDynamicTable: React.FC<SchemaDynamicTableProps> = React.memo(
     } as SchemaTableContext;
   }, [foldedRows, props.rows, props.readOnly, props.keyword]);
 
-  return (
-    <div className="pontx-ui-schema-editor" ref={editorRef as any}>
-      <table>
-        <thead>
-          <th>名称</th>
-          {props.tableType === "parameters" ? <th>位置</th> : null}
-          <th>描述</th>
-        </thead>
-        <tbody>
-          {visibleRows?.map((row, index) => (
-            <SchemaTableRow
-              definitions={props.definitions || ({} as any)}
-              useTableStyle
-              data={itemData}
-              {...row}
-              index={index}
-            />
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-});
+  return React.useMemo(() => {
+    return (
+      <div className="pontx-ui-schema-editor" ref={editorRef as any}>
+        <table>
+          <thead>
+            <th>名称</th>
+            {props.tableType === "parameters" ? <th>位置</th> : null}
+            <th>描述</th>
+          </thead>
+          <tbody>
+            {visibleRows?.map((row, index) => (
+              <SchemaTableRow
+                key={index}
+                definitions={props.definitions || ({} as any)}
+                useTableStyle
+                data={itemData}
+                {...row}
+                index={index}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }, [props.tableType, visibleRows, itemData, props.definitions]);
+};
 
 SchemaDynamicTable.defaultProps = new SchemaDynamicTableProps();

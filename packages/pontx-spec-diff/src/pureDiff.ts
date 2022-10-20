@@ -34,7 +34,7 @@ export function diffList<T>(
       return diffObject(
         schema,
         remoteList?.find((item) => item[diffId] === schema[diffId]),
-        [...paths, diffId],
+        [...paths, schema[diffId]],
         customDiff,
       );
     })
