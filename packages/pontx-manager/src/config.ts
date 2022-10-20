@@ -144,6 +144,7 @@ export class PontPublicManagerConfig {
   origin?: PublicOriginConfig = new PublicOriginConfig();
   url: string;
   outDir: string;
+  preset: string;
   plugins: {
     fetch: PluginConfig;
     transform: PluginConfig;
@@ -284,6 +285,21 @@ export class PontInnerManagerConfig {
 
     if (!origins?.length) {
       logger.error("pont 配置文件错误！未配置数据源信息");
+    }
+
+    if (config.preset) {
+      const presetPath = findRealPath(configDir, config.preset);
+      const presetResult = require(presetPath);
+      const plugins = presetResult?.default || presetResult;
+      if (config.plugins) {
+        Object.keys(plugins).forEach((pluginType) => {
+          if (!config.plugins[pluginType]) {
+            config.plugins[pluginType] = plugins[pluginType];
+          }
+        });
+      } else {
+        config.plugins = plugins;
+      }
     }
 
     const innerConfig = {

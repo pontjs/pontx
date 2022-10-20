@@ -4,6 +4,10 @@ import { getVSCode } from "../utils/utils";
 
 // (window as any).routerMeta = {};
 const getRouterMeta = (): any => {
+  if (typeof window === "undefined") {
+    return {};
+  }
+
   const routerMetaStr = (document.getElementById("router-meta-data") as any).value;
   let value = {};
   try {
@@ -15,7 +19,7 @@ const getRouterMeta = (): any => {
 };
 
 export class AppProps {
-  routerMeta?: any;
+  routerMeta? = getRouterMeta();
 }
 
 export const App: React.FC<AppProps> = (props) => {
@@ -27,7 +31,11 @@ export const App: React.FC<AppProps> = (props) => {
 
   React.useEffect(() => {
     if (!appMeta) {
-      setAppMeta(getRouterMeta());
+      const newAppMeta = getRouterMeta();
+      if (newAppMeta) {
+        setAppMeta(newAppMeta);
+        setItemMeta(newAppMeta.spec);
+      }
     }
 
     window.addEventListener("message", (event) => {

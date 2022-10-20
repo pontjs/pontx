@@ -95,7 +95,7 @@ export class PontManager {
 
         return manager;
       } else {
-        logger.error("未找到 Pont 配置文件");
+        // logger.error("未找到 Pont 配置文件");
       }
     } catch (e) {
       logger.error("Pont 创建失败:" + e.message, e.stack);

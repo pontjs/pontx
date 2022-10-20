@@ -33,7 +33,7 @@ export class PontCommands {
       .map((mod) => {
         return mod.interfaces.map((inter) => {
           return {
-            label: `${inter.method ? `[${inter.method}] ` : ""}${inter.path ? inter.path : ""}`,
+            label: `${inter.method ? `[${inter.method}] ` : ""}${inter.path ? inter.path : inter.name}`,
             detail: `${pontSpec.name ? pontSpec.name + "." : ""}${hasSingleMod ? "" : mod.name + "."}${inter.name}`,
             description: `${inter.description}`,
           };
@@ -136,24 +136,39 @@ export class PontCommands {
               if (snippets.length === 1) {
                 insertCode[snippets[0].code];
               }
+              const VIEW_API_DOC_ID = "VSCODE_PONTX_SHOW_PICK_ITEM_VIEW_API_DOC";
+              const pickItems = [
+                {
+                  label: "查看文档",
+                  id: VIEW_API_DOC_ID,
+                },
+                ...snippets.map((snippet) => {
+                  return {
+                    label: "插入代码段: " + snippet.name,
+                    id: snippet.name,
+                    description: snippet.description,
+                  };
+                }),
+              ];
 
               return vscode.window
-                .showQuickPick(
-                  snippets.map((snippet) => {
-                    return {
-                      label: snippet.name,
-                      description: snippet.description,
-                    };
-                  }),
-                  {
-                    matchOnDescription: true,
-                    matchOnDetail: true,
-                  },
-                )
+                .showQuickPick(pickItems, {
+                  matchOnDescription: true,
+                  matchOnDetail: true,
+                })
                 .then((snippet) => {
-                  const foundSnippet = snippets.find((inst) => inst.name === snippet?.label);
+                  const foundSnippet = snippets.find((inst) => inst.name === snippet?.id);
                   if (foundSnippet) {
                     insertCode(foundSnippet.code);
+                  } else if (snippet.id === VIEW_API_DOC_ID) {
+                    vscode.commands.executeCommand("pontx.openPontUI", {
+                      specName,
+                      modName,
+                      name: apiName,
+                      spec: apiMeta,
+                      pageType: "document",
+                      schemaType: "api",
+                    });
                   }
                 });
             }
@@ -248,6 +263,7 @@ export class PontCommands {
       const isSingleSpec = PontManager.checkIsSingleSpec(service.pontManager);
       const { specName, apiName, modName } = findInterface(editor, !isSingleSpec) || ({} as any);
       const spec = PontManager.getSpec(service.pontManager, specName);
+      const apiKey = modName ? `${modName}/${apiName}` : apiName;
 
       vscode.commands.executeCommand("pontx.openPontUI", {
         specName,
@@ -255,7 +271,7 @@ export class PontCommands {
         name: apiName,
         pageType: "document",
         schemaType: "api",
-        spec: spec?.apis?.[`${modName}/${apiName}`],
+        spec: spec?.apis?.[`${apiKey}`],
       });
     });
 

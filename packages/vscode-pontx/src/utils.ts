@@ -1,8 +1,8 @@
 import { PontLogger, PontManager } from "pontx-manager";
 import * as vscode from "vscode";
 import * as path from "path";
-import * as fs from "fs";
-import { pontUI } from "./UI";
+
+const { createServerContent } = require("../media/lib/server");
 
 const pontConsole = vscode.window.createOutputChannel("Pontx");
 
@@ -68,7 +68,6 @@ export class VSCodeLogger extends PontLogger {
 }
 
 export const htmlTemplate = (context: { cspSource: string; getUri: (uri: string) => any }, pageConfig: any) => {
-  const { createServerContent } = require("../media/lib/server");
   const initContent = createServerContent(pageConfig);
 
   return `<!DOCTYPE html>
@@ -187,12 +186,13 @@ export async function viewMetaFile(meta: {
 
     activeEditor.revealRange(new vscode.Range(startPos, endPos));
     activeEditor.selection = new vscode.Selection(startPos, endPos);
-  } else if (meta.specType === "API" && meta.modName && meta.apiName) {
-    const beginOffset = textCode.indexOf(`"${meta.modName}/${meta.apiName}": {`);
+  } else if (meta.specType === "API" && meta.apiName) {
+    const apiKey = meta.modName ? `${meta.modName}/${meta.apiName}` : meta.apiName;
+    const beginOffset = textCode.indexOf(`"${apiKey}": {`);
     const beginLine = textCode.slice(0, beginOffset).split("\n").length - 1;
     const beginCol = beginOffset - textCode.slice(0, beginOffset).lastIndexOf("\n");
     const startPos = new vscode.Position(beginLine, beginCol);
-    const endPos = new vscode.Position(beginLine, beginCol + `"${meta.modName}/${meta.apiName}": {`.length);
+    const endPos = new vscode.Position(beginLine, beginCol + `"${apiKey}": {`.length);
     activeEditor.revealRange(new vscode.Range(startPos, endPos));
     activeEditor.selection = new vscode.Selection(startPos, endPos);
   } else if (meta.specType === "Struct" && meta.structName) {

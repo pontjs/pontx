@@ -62,33 +62,19 @@ const schemaDiffDom = (diffResult) => {
 export class ApiDiffOp {
   static getParameterDiffItems(diffResult: DiffResult, paramName: string) {
     const { paths, type, localValue, remoteValue } = diffResult;
-    const [fieldName, ...rest] = paths;
 
-    switch (fieldName as keyof Parameter) {
-      case "in": {
-        return `参数位置由 ${localValue} 变更为 ${remoteValue}`;
-      }
-      case "required": {
-        if (remoteValue) {
-          return `参数变更为必填`;
-        } else {
-          return `参数变更为非必填`;
-        }
-      }
-      case "schema": {
-        const diffResult = BaseClazzDiffOp.getSchemaDiffItems(
-          {
-            paths: rest,
-            remoteValue,
-            localValue,
-            type,
-          },
-          [],
-        );
-
-        return schemaDiffDom(diffResult);
-      }
-    }
+    return (
+      <span className="diff-viewer">
+        <ReactDiffViewer
+          oldValue={JSON.stringify(localValue, null, 2)}
+          newValue={JSON.stringify(remoteValue, null, 2)}
+          disableWordDiff
+          leftTitle="元数据 Diff"
+          splitView={false}
+          hideLineNumbers
+        ></ReactDiffViewer>
+      </span>
+    );
   }
 
   static getAPIDiffItems(diffResult: DiffResult) {
@@ -118,25 +104,24 @@ export class ApiDiffOp {
             return <li>新增请求参数 {paramName}</li>;
           } else if (type === "delete") {
             return <li>删除请求参数 {paramName}</li>;
-          } else if (type === "update") {
-            return (
-              <li>
-                变更请求参数 {paramName}
-                <div className="content">
-                  {ApiDiffOp.getParameterDiffItems(
-                    {
-                      localValue,
-                      remoteValue,
-                      paths: rest,
-                      type,
-                    },
-                    paramName,
-                  )}
-                </div>
-              </li>
-            );
           }
         }
+        return (
+          <li>
+            变更请求参数 {paramName}
+            <div className="content">
+              {ApiDiffOp.getParameterDiffItems(
+                {
+                  localValue,
+                  remoteValue,
+                  paths: rest,
+                  type,
+                },
+                paramName,
+              )}
+            </div>
+          </li>
+        );
       }
       case "responses": {
         const [statusCode, field, ...others] = rest;

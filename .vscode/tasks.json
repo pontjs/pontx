@@ -14,6 +14,17 @@
       "problemMatcher": [],
       "label": "test:pontx-spec-diff",
       "detail": "tsc -p tests/tsconfig.json"
+    },
+    {
+      "type": "npm",
+      "script": "esbuild-watch",
+      "path": "packages/vscode-pontx",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "label": "vscode-pontx:esbuild-watch"
     }
   ]
 }

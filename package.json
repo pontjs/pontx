@@ -15,6 +15,7 @@
     "vs-ui": "cd packages/pontx-ui && npm run build && cd ../vscode-pontx/media && npm run build",
     "clean": "lerna clean && rimraf ./node_modules",
     "lint": "prettier --write --parser typescript \"packages/**/*.ts\"",
+    "sync:package": "node scripts/syncRegistry.js",
     "release:all": "npm run release && npm run release:vscode",
     "release": "lerna version patch --message 'chore: publish' && lerna exec --ignore vscode-pontx --ignore vscode-pontx-media --ignore pontx-report-plugin --ignore jsonschema-form  --stream -- npm publish",
     "release:dry": "node scripts/release.js --dry",

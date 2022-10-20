@@ -132,6 +132,7 @@ export const diffPontSpec = (localSpec: PontSpec.PontSpec, remoteSpec: PontSpec.
 
   const customer = {
     mods: listDiff,
+    parameters: listDiff,
     interfaces: listDiff,
     definitions: defDiff as any,
   } as CustomDiff;

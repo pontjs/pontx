@@ -453,7 +453,7 @@ export class PontExplorer implements vscode.TreeDataProvider<PontChangeTreeItem 
 
     return (mod?.interfaces || []).map((api: DiffResult<PontAPI>) => {
       const localApi = localSpec?.apis?.[api.name];
-      const remoteApi = localSpec?.apis?.[api.name];
+      const remoteApi = remoteSpec?.apis?.[api.name];
 
       return {
         label: api.name,
@@ -475,7 +475,7 @@ export class PontExplorer implements vscode.TreeDataProvider<PontChangeTreeItem 
               specName,
               modName,
               spec: localApi,
-              remtoeSpec: remoteApi,
+              remoteSpec: remoteApi,
               name: api.name,
               pageType: "changes",
               schemaType: "api",
