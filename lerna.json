@@ -1,15 +1,10 @@
 {
-  "packages": [
-    "packages/**",
-    "plugins/**"
-  ],
+  "packages": ["packages/**", "plugins/**"],
   "npmClient": "npm",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "command": {
     "bootstrap": {
-      "npmClientArgs": [
-        "--no-package-lock"
-      ]
+      "npmClientArgs": ["--no-package-lock"]
     }
   },
   "publishConfig": {

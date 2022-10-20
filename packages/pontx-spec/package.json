@@ -1,6 +1,6 @@
 {
   "name": "pontx-spec",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "pont spec",
   "module": "es6/index.js",
   "main": "lib/index.js",
