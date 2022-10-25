@@ -390,6 +390,7 @@
     "type": "git"
   },
   "devDependencies": {
+    "prettier": "*",
     "@types/fs-extra": "^5.1.0",
     "@types/lodash": "^4.14.182",
     "@types/react": "^18.0.8",

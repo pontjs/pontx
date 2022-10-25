@@ -12,7 +12,7 @@
       "oas-spec-ts": ["packages/oas-spec-ts"],
       "pontx-cli": ["packages/pontx-cli"],
       "pontx-ui": ["packages/pontx-ui"],
-      "vscode-pontx2": ["packages/vscode-pontx"],
+      "vscode-pontx": ["packages/vscode-pontx"],
       "pontx-meta-fetch-plugin": ["plugins/fetch/pontx-meta-fetch-plugin"],
       "pontx-mocks-plugin": ["plugins/mocks/pontx-mocks-plugin"],
       "pontx-generate-core": ["plugins/generate/core"],
@@ -26,7 +26,7 @@
     "packages/pontx-ui/node_modules/",
     "packages/oas-spec-ts/scripts/",
     "packages/pontx-ui",
-    "packages/vscode-pontx/media/",
+    "packages/vscode-pontx",
     "packages/pontx-spec-diff/tests/",
     "packages/jsonschema-form"
   ],
@@ -45,12 +45,6 @@
     },
     {
       "path": "packages/pontx-spec-diff"
-    },
-    {
-      "path": "packages/pontx-ui"
-    },
-    {
-      "path": "packages/vscode-pontx"
     },
     {
       "path": "plugins/fetch/pontx-meta-fetch-plugin"

@@ -5,20 +5,30 @@
 ```sh
 git clone git@github.com:pontjs/pontx.git
 
-cd pont
+cd pontx
 
 lerna bootstrap
 
+# 初始化环境
+npm i && npm run build
+
+# 启动项目
 npm start
 
-# 基于 pontx-ui，构建 vscode-pont 的 webview ui
-npm run vs-ui
+# 启动 pontx-ui
+npm run ui
+```
+
+## release
+
+```sh
+npm run release
 ```
 
 ## Debug with VSCode
 
-Debug pontx-cli by select "Debug Pont CLI" in VSCode Debug Panel.
-Debug vscode-pont by select "Debug Extension" in VSCode Debug Panel.
+Debug pontx-cli by select "Debug Pontx CLI" in VSCode Debug Panel.
+Debug vscode-pontx by select "Debug Extension" in VSCode Debug Panel.
 
 ## Code Style
 
@@ -44,7 +54,7 @@ Debug vscode-pont by select "Debug Extension" in VSCode Debug Panel.
   描述 Pont 标准数据源的类型，提供 Pont 标准数据源的常用数据处理方法。
   新版 Pont 标准数据源做了升级，全面拥抱 JSON Schema 标准。
 
-- pontx-core
+- pontx-manager
   pont 核心包，包括配置文件解析、不同生命周期的插件加载和执行
 
 - pontx-ui
