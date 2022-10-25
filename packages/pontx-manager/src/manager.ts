@@ -58,42 +58,9 @@ export class PontManager {
           logger.error("您的 pont 配置文件不符合 JSON 格式: " + e.message);
           return;
         }
+        const configDir = path.resolve(configPathname, "../");
 
-        let manager = new PontManager();
-        manager.logger = logger;
-        manager.innerManagerConfig = PontInnerManagerConfig.constructorFromPublicConfig(
-          publicConfig,
-          logger,
-          path.resolve(configPathname, "../"),
-        );
-
-        manager = await PontManager.readLocalPontMeta(manager);
-        manager = await PontManager.fetchRemotePontMeta(manager);
-        if (manager.remotePontSpecs?.length) {
-          await FileGenerator.generateRemoteCache(
-            path.join(manager.innerManagerConfig.configDir, manager.innerManagerConfig.outDir),
-            manager.remotePontSpecs,
-          );
-        }
-
-        const emptySpecs = [] as string[];
-        // 自动用远程 spec，替换本地为空的 spec
-        manager.localPontSpecs = manager.localPontSpecs.map((localSpec, specIndex) => {
-          if (PontSpec.isEmptySpec(localSpec)) {
-            emptySpecs.push(localSpec.name);
-            const remoteSpec = manager.remotePontSpecs?.find((spec) => spec.name === localSpec.name);
-
-            return remoteSpec || manager?.remotePontSpecs?.[specIndex] || localSpec;
-          }
-
-          return localSpec;
-        });
-        if (emptySpecs.length) {
-          logger.info(`本地 ${emptySpecs.join(", ")} SDK为空，已为您自动生成...`);
-          await PontManager.generateCode(manager);
-        }
-
-        return manager;
+        return PontManager.constructorFromPontConfig(publicConfig, configDir, logger);
       } else {
         // logger.error("未找到 Pont 配置文件");
       }
@@ -104,24 +71,28 @@ export class PontManager {
 
   static async constructorFromPontConfig(
     publicConfig: PontPublicManagerConfig,
-    configPathname: string,
+    configDir: string,
     logger = new PontLogger(),
   ) {
     try {
       let manager = new PontManager();
       manager.logger = logger;
-      manager.innerManagerConfig = PontInnerManagerConfig.constructorFromPublicConfig(
-        publicConfig,
-        logger,
-        path.resolve(configPathname, "../"),
-      );
+      manager.innerManagerConfig = PontInnerManagerConfig.constructorFromPublicConfig(publicConfig, logger, configDir);
 
       manager = await PontManager.readLocalPontMeta(manager);
       manager = await PontManager.fetchRemotePontMeta(manager);
+      if (manager.remotePontSpecs?.length) {
+        await FileGenerator.generateRemoteCache(
+          path.join(manager.innerManagerConfig.configDir, manager.innerManagerConfig.outDir),
+          manager.remotePontSpecs,
+        );
+      }
 
+      const emptySpecs = [] as string[];
       // 自动用远程 spec，替换本地为空的 spec
       manager.localPontSpecs = manager.localPontSpecs.map((localSpec, specIndex) => {
         if (PontSpec.isEmptySpec(localSpec)) {
+          emptySpecs.push(localSpec.name);
           const remoteSpec = manager.remotePontSpecs?.find((spec) => spec.name === localSpec.name);
 
           return remoteSpec || manager?.remotePontSpecs?.[specIndex] || localSpec;
@@ -129,6 +100,11 @@ export class PontManager {
 
         return localSpec;
       });
+      if (emptySpecs.length) {
+        logger.info(`本地 ${emptySpecs.join(", ")} SDK为空，已为您自动生成...`);
+        await PontManager.generateCode(manager);
+      }
+
       return manager;
     } catch (e) {
       logger.error("Pont 创建失败:" + e.message, e.stack);

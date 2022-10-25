@@ -3,7 +3,6 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
 import { PontManager } from "pontx-manager";
-import * as path from "path";
 import { pontService } from "./Service";
 import { VSCodeLogger } from "./utils";
 import { PontCommands } from "./commands";
@@ -12,7 +11,6 @@ import { PontSerializer, PontWebView } from "./webview";
 import { PontAPIExplorer, PontFileDecoration } from "./explorer";
 
 export async function activate(context: vscode.ExtensionContext) {
-  console.log('Congratulations, your extension "pont" is now active!');
   if (!vscode.workspace.rootPath) {
     return;
   }
@@ -20,7 +18,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
   pontService.context = context;
   const pontManager = await PontManager.constructorFromRootDir(vscode.workspace.rootPath, new VSCodeLogger());
+
   if (pontManager) {
+    console.log('Congratulations, your extension "pontx" is now active!');
     pontService.startup(pontManager, context);
     context.subscriptions.push(
       vscode.window.registerWebviewPanelSerializer(PontWebView.viewType, new PontSerializer()),
