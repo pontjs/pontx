@@ -4,7 +4,7 @@
 import * as vscode from "vscode";
 import { PontManager } from "pontx-manager";
 import { pontService } from "./Service";
-import { VSCodeLogger } from "./utils";
+import { findPontxConfig, registerConfigSchema, VSCodeLogger } from "./utils";
 import { PontCommands } from "./commands";
 import { pontUI } from "./UI";
 import { PontSerializer, PontWebView } from "./webview";
@@ -14,10 +14,16 @@ export async function activate(context: vscode.ExtensionContext) {
   if (!vscode.workspace.rootPath) {
     return;
   }
-  vscode.commands.executeCommand("setContext", "pontx.hasPontxConfig", true);
+  const [configDir, pontxConfig] = await findPontxConfig();
 
+  if (!pontxConfig) {
+    return;
+  }
+  registerConfigSchema(configDir, pontxConfig, context);
+
+  vscode.commands.executeCommand("setContext", "pontx.hasPontxConfig", true);
   pontService.context = context;
-  const pontManager = await PontManager.constructorFromRootDir(vscode.workspace.rootPath, new VSCodeLogger());
+  const pontManager = await PontManager.constructorFromPontConfig(pontxConfig, configDir, new VSCodeLogger());
 
   if (pontManager) {
     console.log('Congratulations, your extension "pontx" is now active!');

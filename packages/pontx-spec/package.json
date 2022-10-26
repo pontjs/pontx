@@ -21,6 +21,7 @@
   "files": [
     "lib/",
     "es6/",
+    "*.json",
     "package.json",
     "*.md"
   ],

@@ -37,26 +37,26 @@ type PurePluginConfig =
     };
 export type PluginConfig = PurePluginConfig | { [key: string]: PurePluginConfig };
 
-export class PontPlugin {
+export class PontxPlugin {
   logger: PontLogger;
   innerConfig: PontInnerManagerConfig;
 
   apply(...args: any[]): any {}
 }
 
-export class PontFetchPlugin extends PontPlugin {
+export class PontxFetchPlugin extends PontxPlugin {
   async apply(originConf: InnerOriginConfig, options?: any): Promise<string> {
     return "";
   }
 }
 
-export class PontParserPlugin extends PontPlugin {
+export class PontxParserPlugin extends PontxPlugin {
   async apply(metaStr: string, specName: string, options?: any): Promise<PontSpec> {
     return null;
   }
 }
 
-export class PontTransformPlugin extends PontPlugin {
+export class PontxTransformPlugin extends PontxPlugin {
   async apply(spec: PontSpec, options?: any): Promise<PontSpec> {
     return null;
   }
@@ -68,7 +68,7 @@ export class Snippet {
   description? = "";
 }
 
-export class PontGeneratorPlugin extends PontPlugin {
+export class PontxGeneratorPlugin extends PontxPlugin {
   apply(manager: PontManager, options?: any): void {}
 
   providerSnippets(api: PontAPI, modName: string, originName: string, options?: any): Snippet[] {
@@ -76,23 +76,34 @@ export class PontGeneratorPlugin extends PontPlugin {
   }
 }
 
-export class PontMocksPlugin extends PontPlugin {
+export class PontxMocksPlugin extends PontxPlugin {
   apply(manager: PontManager, options?: any): void {}
 }
 
-export class PontReportPlugin extends PontPlugin {
+export class PontxReportPlugin extends PontxPlugin {
   apply(manager: PontManager, options?: any): void {}
 }
 
-type PluginItem<T extends PontPlugin> = { instance: Promise<T>; options: any };
+export class PontxConfigPlugin extends PontxPlugin {
+  apply(...args: any[]) {}
+  async getSchema(): Promise<string> {
+    return "";
+  }
+  async getOrigins(keyword?: string): Promise<Array<{ label: string; config: any; value: string }>> {
+    return [];
+  }
+}
 
-export class PontPlugins {
-  fetch: PluginItem<PontFetchPlugin>;
-  transform: PluginItem<PontTransformPlugin>;
-  parser: PluginItem<PontParserPlugin>;
-  mocks: PluginItem<PontMocksPlugin>;
-  generate: PluginItem<PontGeneratorPlugin>;
-  report: PluginItem<PontReportPlugin>;
+type PluginItem<T extends PontxPlugin> = { instance: Promise<T>; options: any };
+
+export class PontxPlugins {
+  fetch: PluginItem<PontxFetchPlugin>;
+  transform: PluginItem<PontxTransformPlugin>;
+  parser: PluginItem<PontxParserPlugin>;
+  config: PluginItem<PontxConfigPlugin>;
+  mocks: PluginItem<PontxMocksPlugin>;
+  generate: PluginItem<PontxGeneratorPlugin>;
+  report: PluginItem<PontxReportPlugin>;
 
   static getDefaultPlugins() {
     return {
@@ -152,13 +163,14 @@ export class PontPublicManagerConfig {
     mocks: PluginConfig;
     generate: PluginConfig;
     report: PluginConfig;
+    config: PluginConfig;
   };
 }
 
 export class InnerOriginConfig {
   url: string;
   name: string;
-  plugins: PontPlugins;
+  plugins: PontxPlugins;
 }
 
 export class PontInnerManagerConfig {
@@ -166,7 +178,7 @@ export class PontInnerManagerConfig {
   origins = [] as InnerOriginConfig[];
   outDir: string;
   configDir: string;
-  plugins: PontPlugins;
+  plugins: PontxPlugins;
 
   static parsePurePlugin(plugin: PurePluginConfig, originName?: string): SimplePluginConfig {
     if (typeof plugin === "string") {
@@ -183,7 +195,7 @@ export class PontInnerManagerConfig {
 
     try {
       const LoadedPlugin = requiredModule.default;
-      const instance = new LoadedPlugin() as PontPlugin;
+      const instance = new LoadedPlugin() as PontxPlugin;
 
       return {
         instance,
@@ -200,7 +212,7 @@ export class PontInnerManagerConfig {
     innerConfig: PontInnerManagerConfig,
   ) {
     const configPlugins = {
-      ...PontPlugins.getDefaultPlugins(),
+      ...PontxPlugins.getDefaultPlugins(),
       ...(config.plugins || {}),
     };
 
@@ -211,14 +223,14 @@ export class PontInnerManagerConfig {
         const plugin = configPlugins[pluginType];
 
         return (
-          PontInnerManagerConfig.parsePurePlugin(plugin, originName) || PontPlugins.getDefaultPlugins()[pluginType]
+          PontInnerManagerConfig.parsePurePlugin(plugin, originName) || PontxPlugins.getDefaultPlugins()[pluginType]
         );
       })
       .map((plugin, pluginIndex) => {
         try {
           const requiredModule = requireModule(plugin.use, configDir, config.rootDir);
           const LoadedPlugin = requiredModule.default;
-          const instance = new LoadedPlugin() as PontPlugin;
+          const instance = new LoadedPlugin() as PontxPlugin;
           if (instance) {
             instance.logger = logger;
             instance.innerConfig = innerConfig;
@@ -244,15 +256,15 @@ export class PontInnerManagerConfig {
     configDir: string,
     logger: PontLogger,
     innerConfig: PontInnerManagerConfig,
-  ): PontPlugins {
+  ): PontxPlugins {
     const configPlugins = {
-      ...PontPlugins.getDefaultPlugins(),
+      ...PontxPlugins.getDefaultPlugins(),
       ...(config.plugins || {}),
     };
     return Object.keys(configPlugins || {}).reduce((result, pluginType) => {
       const plugin = configPlugins[pluginType];
       const loadedPlugin = PontInnerManagerConfig.loadPlugin(
-        PontInnerManagerConfig.parsePurePlugin(plugin) || PontPlugins.getDefaultPlugins()[pluginType],
+        PontInnerManagerConfig.parsePurePlugin(plugin) || PontxPlugins.getDefaultPlugins()[pluginType],
         configDir,
         config.rootDir,
       );
@@ -265,7 +277,7 @@ export class PontInnerManagerConfig {
         ...result,
         [pluginType]: loadedPlugin,
       };
-    }, {} as PontPlugins);
+    }, {} as PontxPlugins);
   }
 
   // todo, 解析 envs、plugins

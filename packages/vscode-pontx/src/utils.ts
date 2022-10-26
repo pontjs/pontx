@@ -1,10 +1,54 @@
-import { PontLogger, PontManager } from "pontx-manager";
+import { lookForFiles, PontInnerManagerConfig, PontLogger, PontManager } from "pontx-manager";
 import * as vscode from "vscode";
 import * as path from "path";
+import * as fs from "fs-extra";
+const configSchema = require("pontx-spec/configSchema.json");
 
 const { createServerContent } = require("../media/lib/server");
 
 const pontConsole = vscode.window.createOutputChannel("Pontx");
+
+export const findPontxConfig = async () => {
+  try {
+    const pontxConfigPath = await lookForFiles(vscode.workspace.rootPath, "pontx-config.json");
+    await vscode.workspace.findFiles("pontx-config.json", "node_modules", 1);
+    const pontxConfigStr = await fs.readFile(pontxConfigPath, "utf8");
+    const publicConfig = JSON.parse(pontxConfigStr);
+    publicConfig.rootDir = vscode.workspace.rootPath;
+
+    return [path.join(pontxConfigPath, ".."), publicConfig];
+  } catch (e) {}
+};
+
+export const registerConfigSchema = async (
+  configDir: string,
+  pontPublicConfig: any,
+  context: vscode.ExtensionContext,
+) => {
+  try {
+    const pontxConfig = PontInnerManagerConfig.constructorFromPublicConfig(
+      pontPublicConfig,
+      new PontLogger(),
+      configDir,
+    );
+    const configPlugin = pontxConfig.plugins.config?.instance;
+    let schema = configSchema;
+
+    if (configPlugin) {
+      schema = (await configPlugin).getSchema();
+    }
+    const myProvider = new (class implements vscode.TextDocumentContentProvider {
+      onDidChangeEmitter = new vscode.EventEmitter<vscode.Uri>();
+      onDidChange = this.onDidChangeEmitter.event;
+      provideTextDocumentContent(uri: vscode.Uri): string {
+        return JSON.stringify(schema);
+      }
+    })();
+    context.subscriptions.push(
+      vscode.Disposable.from(vscode.workspace.registerTextDocumentContentProvider("pontx", myProvider)),
+    );
+  } catch (e) {}
+};
 
 export function showProgress(
   title: string,

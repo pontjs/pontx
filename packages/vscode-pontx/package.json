@@ -13,6 +13,7 @@
     "Other"
   ],
   "activationEvents": [
+    "onFileSystem:pontx://schemas/config-plugin-schema",
     "workspaceContains:**/pontx-config.json",
     "onWebviewPanel:pontx-ui"
   ],
@@ -21,7 +22,7 @@
     "jsonValidation": [
       {
         "fileMatch": "pontx-config.json",
-        "url": "./configSchema.json"
+        "url": "pontx://schemas/config-plugin-schema"
       },
       {
         "fileMatch": [
