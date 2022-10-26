@@ -5,6 +5,7 @@ export {
   PontxFetchPlugin,
   PontxGeneratorPlugin,
   PontInnerManagerConfig,
+  PontxConfigPlugin,
   PontxMocksPlugin,
   PontxParserPlugin,
   PontxTransformPlugin,
