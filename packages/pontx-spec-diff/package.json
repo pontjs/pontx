@@ -1,6 +1,6 @@
 {
   "name": "pontx-spec-diff",
-  "version": "0.3.13",
+  "version": "0.3.14",
   "description": "pont spec",
   "module": "es6/index.js",
   "main": "lib/index.js",
@@ -17,7 +17,7 @@
     "lodash": "*"
   },
   "dependencies": {
-    "pontx-spec": "^0.3.13"
+    "pontx-spec": "^0.3.14"
   },
   "files": [
     "lib/",
