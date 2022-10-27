@@ -1,6 +1,6 @@
 {
   "name": "pontx-spec",
-  "version": "0.3.15",
+  "version": "0.3.16",
   "description": "pont spec",
   "module": "es6/index.js",
   "main": "lib/index.js",
@@ -16,7 +16,7 @@
     "lodash": "*"
   },
   "dependencies": {
-    "oas-spec-ts": "^0.3.15"
+    "oas-spec-ts": "^0.3.16"
   },
   "files": [
     "lib/",
