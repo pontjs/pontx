@@ -259,6 +259,47 @@ export class PontCommands {
       );
       await vscode.window.showTextDocument(textDocument);
     });
+    vscode.commands.registerCommand("pontx.addOrigin", async () => {
+      try {
+        const innerConf = service.pontManager.innerManagerConfig;
+        const configPlugin = await innerConf.plugins.config?.instance;
+        const configPath = path.join(innerConf.configDir, "pontx-config.json");
+
+        if (configPlugin && configPlugin.getOrigins) {
+          const origins = await configPlugin.getOrigins();
+
+          if (origins.length) {
+            await vscode.window
+              .showQuickPick(
+                origins.map((item) => {
+                  return { label: item.label, value: item.value };
+                }),
+              )
+              .then(async (item) => {
+                const foundOrigin = origins.find((i) => i.value === item.value);
+                if (foundOrigin) {
+                  try {
+                    const fileContent = fs.readFileSync(configPath, "utf8");
+                    const json = JSON.parse(fileContent);
+
+                    if (json.origins) {
+                      json.origins.push(foundOrigin.config);
+                    } else {
+                      json.origins = [foundOrigin];
+                    }
+                    fs.writeFileSync(configPath, JSON.stringify(json, null, 2), "utf8");
+
+                    const textDocument = await vscode.workspace.openTextDocument(vscode.Uri.file(configPath));
+                    await vscode.window.showTextDocument(textDocument);
+                  } catch (e) {}
+                }
+              });
+          }
+        }
+      } catch (e) {
+        service.pontManager.logger.error(e.message, e.stack);
+      }
+    });
     vscode.commands.registerTextEditorCommand("pontx.openDocument", async (editor, edit) => {
       const isSingleSpec = PontManager.checkIsSingleSpec(service.pontManager);
       const { specName, apiName, modName } = findInterface(editor, !isSingleSpec) || ({} as any);

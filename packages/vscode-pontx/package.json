@@ -17,7 +17,7 @@
     "workspaceContains:**/pontx-config.json",
     "onWebviewPanel:pontx-ui"
   ],
-  "main": "./dist/main",
+  "main": "./dist/extension",
   "contributes": {
     "jsonValidation": [
       {
@@ -134,9 +134,19 @@
         "command": "pontx.openMeta",
         "icon": "$(go-to-file)",
         "title": "查看元数据定义"
+      },
+      {
+        "command": "pontx.addOrigin",
+        "icon": "$(diff-added)",
+        "title": "添加数据源"
       }
     ],
     "keybindings": [
+      {
+        "command": "pontx.addOrigin",
+        "key": "cmd+ctrl+o",
+        "mac": "cmd+ctrl+o"
+      },
       {
         "command": "pontx.findInterface",
         "key": "cmd+ctrl+p",
@@ -251,29 +261,34 @@
       ],
       "view/title": [
         {
-          "command": "pontx.config",
+          "command": "pontx.restart",
           "when": "view == pontExplorer",
-          "group": "navigation"
-        },
-        {
-          "command": "pontx.findInterface",
-          "when": "view == pontExplorer",
-          "group": "navigation"
+          "group": "navigation@1"
         },
         {
           "command": "pontx.fetchRemote",
           "when": "view == pontExplorer",
-          "group": "navigation"
+          "group": "navigation@2"
         },
         {
           "command": "pontx.regenerate",
           "when": "view == pontExplorer",
-          "group": "navigation"
+          "group": "navigation@3"
         },
         {
-          "command": "pontx.restart",
+          "command": "pontx.findInterface",
           "when": "view == pontExplorer",
-          "group": "navigation"
+          "group": "navigation@4"
+        },
+        {
+          "command": "pontx.config",
+          "when": "view == pontExplorer",
+          "group": "navigation@5"
+        },
+        {
+          "command": "pontx.addOrigin",
+          "when": "view == pontExplorer && pontx.hasPontxOrigins == true",
+          "group": "navigation@6"
         }
       ],
       "view/item/context": [
@@ -361,14 +376,14 @@
     }
   },
   "scripts": {
-    "watch": "npm run esbuild-watch && tsc --build --watch",
-    "clean": "rimraf oub && rimraf tsconfig.tsbuildinfo",
-    "build": "npm run clean && tsc --build",
+    "watch": "rm -rf dist && tsc --build --watch",
+    "clean": "rimraf out && rimraf tsconfig.tsbuildinfo",
+    "build": "npm run esbuild",
     "test": "npm run build && node ../../node_modules/vscode/bin/test",
     "media": "cd media && vite --mode browser",
     "build:media": "cd media && vite build",
     "vscode:prepublish": "rm -rf node_modules && npm i && npm run esbuild-base -- --minify && cd ../../ && lerna bootstrap",
-    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/main.js --external:vscode --format=cjs --platform=node",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
     "esbuild": "npm run esbuild-base -- --sourcemap",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
     "preview": "cd media && vite build --watch"

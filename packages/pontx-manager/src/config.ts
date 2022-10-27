@@ -313,9 +313,13 @@ export class PontInnerManagerConfig {
         config.plugins = plugins;
       }
     }
+    let outDir = config.outDir;
+    if (outDir.startsWith("./") || outDir.startsWith("../")) {
+      outDir = path.join(configDir, config.outDir);
+    }
 
     const innerConfig = {
-      outDir: config.outDir,
+      outDir,
       rootDir: config.rootDir,
       configDir,
     } as PontInnerManagerConfig;

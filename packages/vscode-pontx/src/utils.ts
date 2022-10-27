@@ -1,4 +1,4 @@
-import { lookForFiles, PontInnerManagerConfig, PontLogger, PontManager } from "pontx-manager";
+import { lookForFiles, PontInnerManagerConfig, PontLogger, PontManager, PontxConfigPlugin } from "pontx-manager";
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs-extra";
@@ -20,28 +20,52 @@ export const findPontxConfig = async () => {
   } catch (e) {}
 };
 
-export const registerConfigSchema = async (
-  configDir: string,
-  pontPublicConfig: any,
-  context: vscode.ExtensionContext,
-) => {
+export const registerConfigSchema = async (context: vscode.ExtensionContext) => {
   try {
-    const pontxConfig = PontInnerManagerConfig.constructorFromPublicConfig(
-      pontPublicConfig,
-      new PontLogger(),
-      configDir,
-    );
-    const configPlugin = pontxConfig.plugins.config?.instance;
-    let schema = configSchema;
-
-    if (configPlugin) {
-      schema = (await configPlugin).getSchema();
-    }
     const myProvider = new (class implements vscode.TextDocumentContentProvider {
       onDidChangeEmitter = new vscode.EventEmitter<vscode.Uri>();
       onDidChange = this.onDidChangeEmitter.event;
       provideTextDocumentContent(uri: vscode.Uri): string {
-        return JSON.stringify(schema);
+        return this.schema;
+      }
+
+      async getPluginSchema() {
+        try {
+          const [configDir, pontPublicConfig] = await findPontxConfig();
+          const pontxConfig = PontInnerManagerConfig.constructorFromPublicConfig(
+            pontPublicConfig,
+            new PontLogger(),
+            configDir,
+          );
+          const configPlugin = await pontxConfig.plugins.config?.instance;
+
+          if (configPlugin) {
+            this.registerCommand(configPlugin);
+            return await configPlugin.getSchema();
+          }
+        } catch (e) {}
+      }
+
+      async registerCommand(configPlugin: PontxConfigPlugin) {
+        try {
+          const origins = await configPlugin.getOrigins();
+
+          if (origins.length) {
+            vscode.commands.executeCommand("setContext", "pontx.hasPontxOrigins", true);
+          }
+        } catch (e) {}
+      }
+
+      schema = JSON.stringify(configSchema, null, 2);
+
+      constructor() {
+        this.getPluginSchema().then((value) => {
+          if (value) {
+            this.schema = value;
+            // this.onDidChangeEmitter.fire();
+            this.onDidChangeEmitter.fire(vscode.Uri.parse("pontx://schemas/config-plugin-schema"));
+          }
+        });
       }
     })();
     context.subscriptions.push(
@@ -209,7 +233,7 @@ export async function viewMetaFile(meta: {
 }) {
   const innerConf = meta.pontManager.innerManagerConfig;
   const isSingleSpec = PontManager.checkIsSingleSpec(meta.pontManager);
-  let outDir = path.join(innerConf.configDir, innerConf.outDir, "sdk");
+  let outDir = path.join(innerConf.outDir, "sdk");
   let outFile;
 
   if (isSingleSpec) {

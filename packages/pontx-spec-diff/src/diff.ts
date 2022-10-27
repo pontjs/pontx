@@ -18,7 +18,7 @@ export function diffList<T>(localList: T[], remoteList: T[], diffId = "name", cu
   });
   const updates: T[] = _.intersectionBy(localList, remoteList, diffId)
     .map((schema: T) => {
-      if (_.isEqual(localList, remoteList)) {
+      if (JSON.stringify(localList) === JSON.stringify(remoteList)) {
         return null;
       }
       return diffObject(
@@ -54,7 +54,7 @@ const diffObject = <T>(localSpec: T, remoteSpec: T, customDiff = {} as CustomDif
       };
     }
 
-    if (remoteSpec[key] && localSpec[key] && !_.isEqual(remoteSpec[key], localSpec[key])) {
+    if (remoteSpec[key] && localSpec[key] && JSON.stringify(remoteSpec[key]) !== JSON.stringify(localSpec[key])) {
       if (customDiff[key]) {
         const { diffs, diffType } = customDiff[key](localSpec[key], remoteSpec[key], customDiff);
         if (diffType !== "equal") {

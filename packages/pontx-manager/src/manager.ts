@@ -82,10 +82,7 @@ export class PontManager {
       manager = await PontManager.readLocalPontMeta(manager);
       manager = await PontManager.fetchRemotePontMeta(manager);
       if (manager.remotePontSpecs?.length) {
-        await FileGenerator.generateRemoteCache(
-          path.join(manager.innerManagerConfig.configDir, manager.innerManagerConfig.outDir),
-          manager.remotePontSpecs,
-        );
+        await FileGenerator.generateRemoteCache(manager.innerManagerConfig.outDir, manager.remotePontSpecs);
       }
 
       const emptySpecs = [] as string[];
@@ -116,11 +113,7 @@ export class PontManager {
     const origins = manager.innerManagerConfig.origins;
 
     if (origins?.length === 1) {
-      let lockFile = path.join(
-        manager.innerManagerConfig.configDir,
-        manager.innerManagerConfig.outDir,
-        PontManager.lockFilename,
-      );
+      let lockFile = path.join(manager.innerManagerConfig.outDir, "sdk", PontManager.lockFilename);
       const isExists = fs.existsSync(lockFile);
       if (isExists) {
         const localDataStr = await fs.readFile(lockFile, {
@@ -140,13 +133,7 @@ export class PontManager {
       return [new PontSpec()];
     } else {
       const allFilePromises = manager.innerManagerConfig.origins.map(async (config) => {
-        const filePath = path.join(
-          manager.innerManagerConfig.configDir,
-          manager.innerManagerConfig.outDir,
-          "sdk",
-          config.name,
-          PontManager.lockFilename,
-        );
+        const filePath = path.join(manager.innerManagerConfig.outDir, "sdk", config.name, PontManager.lockFilename);
         const isExists = fs.existsSync(filePath);
         if (isExists) {
           const localDataStr = await fs.readFile(filePath, {
@@ -206,11 +193,7 @@ export class PontManager {
 
       if (!metaStr) {
         // manager.logger.error("未获取到远程数据");
-        const cacheSpec = await fetchRemoteCacheSpec(
-          manager.logger,
-          path.join(manager.innerManagerConfig.configDir, manager.innerManagerConfig.outDir),
-          origin.name,
-        );
+        const cacheSpec = await fetchRemoteCacheSpec(manager.logger, manager.innerManagerConfig.outDir, origin.name);
         return cacheSpec;
       }
 

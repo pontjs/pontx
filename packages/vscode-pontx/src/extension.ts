@@ -14,12 +14,12 @@ export async function activate(context: vscode.ExtensionContext) {
   if (!vscode.workspace.rootPath) {
     return;
   }
+  registerConfigSchema(context);
   const [configDir, pontxConfig] = await findPontxConfig();
 
   if (!pontxConfig) {
     return;
   }
-  registerConfigSchema(configDir, pontxConfig, context);
 
   vscode.commands.executeCommand("setContext", "pontx.hasPontxConfig", true);
   pontService.context = context;
