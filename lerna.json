@@ -4,7 +4,7 @@
     "plugins/**"
   ],
   "npmClient": "npm",
-  "version": "0.3.16",
+  "version": "0.3.19",
   "command": {
     "bootstrap": {
       "npmClientArgs": [
