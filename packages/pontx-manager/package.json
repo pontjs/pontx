@@ -1,6 +1,6 @@
 {
   "name": "pontx-manager",
-  "version": "0.3.19",
+  "version": "0.3.20",
   "description": "pont manager",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -12,11 +12,11 @@
   "dependencies": {
     "fs-extra": "^10.1.0",
     "lodash": "*",
-    "pontx-generate-core": "^0.3.19",
-    "pontx-meta-fetch-plugin": "^0.3.19",
-    "pontx-oas2-parser-plugin": "^0.3.19",
-    "pontx-react-hooks-generate-plugin": "^0.3.19",
-    "pontx-spec": "^0.3.19",
+    "pontx-generate-core": "^0.3.20",
+    "pontx-meta-fetch-plugin": "^0.3.20",
+    "pontx-oas2-parser-plugin": "^0.3.20",
+    "pontx-react-hooks-generate-plugin": "^0.3.20",
+    "pontx-spec": "^0.3.20",
     "typescript": "^4.6.4"
   },
   "files": [
