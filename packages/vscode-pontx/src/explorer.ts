@@ -300,11 +300,14 @@ export class PontExplorer implements vscode.TreeDataProvider<PontChangeTreeItem 
       this._onDidChangeTreeData.fire();
     });
     vscode.commands.registerCommand("pontChanges.batchStage", (meta) => {
+      if (!meta) {
+        return;
+      }
       this.stagedLocalSpecs = PontSpecDiffs.updateSpecsByProcessType(
         this.stagedLocalSpecs,
         this.pontManager,
         {
-          metaType: getMetaTypeByContextValue(meta.contextValue),
+          metaType: getMetaTypeByContextValue(meta?.contextValue),
           apiName: meta.apiName,
           modName: meta.modName,
           specName: meta.specName,

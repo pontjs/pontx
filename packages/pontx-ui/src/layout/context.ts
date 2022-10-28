@@ -2,8 +2,8 @@ import { createContainer } from "unstated-next";
 import * as React from "react";
 // import * as spec from "../mocks/spec.json";
 import { PontSpec, PontAPI } from "pontx-spec";
-// import { PontUIService } from "../components/utils/service";
-import { PontUIService } from "../components/utils/service.local";
+import { PontUIService } from "../components/utils/service";
+// import { PontUIService } from "../components/utils/service.local";
 import * as _ from "lodash";
 
 export enum PageType {

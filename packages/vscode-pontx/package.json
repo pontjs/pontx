@@ -2,7 +2,7 @@
   "name": "vscode-pontx",
   "displayName": "pontx",
   "description": "",
-  "version": "0.3.13",
+  "version": "0.3.16",
   "private": true,
   "publisher": "jasonHzq",
   "license": "MIT",
@@ -13,15 +13,16 @@
     "Other"
   ],
   "activationEvents": [
+    "onFileSystem:pontx://schemas/config-plugin-schema",
     "workspaceContains:**/pontx-config.json",
     "onWebviewPanel:pontx-ui"
   ],
-  "main": "./dist/main",
+  "main": "./dist/extension",
   "contributes": {
     "jsonValidation": [
       {
         "fileMatch": "pontx-config.json",
-        "url": "./configSchema.json"
+        "url": "pontx://schemas/config-plugin-schema"
       },
       {
         "fileMatch": [
@@ -133,9 +134,19 @@
         "command": "pontx.openMeta",
         "icon": "$(go-to-file)",
         "title": "查看元数据定义"
+      },
+      {
+        "command": "pontx.addOrigin",
+        "icon": "$(diff-added)",
+        "title": "添加数据源"
       }
     ],
     "keybindings": [
+      {
+        "command": "pontx.addOrigin",
+        "key": "cmd+ctrl+o",
+        "mac": "cmd+ctrl+o"
+      },
       {
         "command": "pontx.findInterface",
         "key": "cmd+ctrl+p",
@@ -250,29 +261,34 @@
       ],
       "view/title": [
         {
-          "command": "pontx.config",
+          "command": "pontx.restart",
           "when": "view == pontExplorer",
-          "group": "navigation"
-        },
-        {
-          "command": "pontx.findInterface",
-          "when": "view == pontExplorer",
-          "group": "navigation"
+          "group": "navigation@1"
         },
         {
           "command": "pontx.fetchRemote",
           "when": "view == pontExplorer",
-          "group": "navigation"
+          "group": "navigation@2"
         },
         {
           "command": "pontx.regenerate",
           "when": "view == pontExplorer",
-          "group": "navigation"
+          "group": "navigation@3"
         },
         {
-          "command": "pontx.restart",
+          "command": "pontx.findInterface",
           "when": "view == pontExplorer",
-          "group": "navigation"
+          "group": "navigation@4"
+        },
+        {
+          "command": "pontx.config",
+          "when": "view == pontExplorer",
+          "group": "navigation@5"
+        },
+        {
+          "command": "pontx.addOrigin",
+          "when": "view == pontExplorer && pontx.hasPontxOrigins == true",
+          "group": "navigation@6"
         }
       ],
       "view/item/context": [
@@ -360,14 +376,15 @@
     }
   },
   "scripts": {
-    "watch": "npm run esbuild-watch && tsc --build --watch",
-    "clean": "rimraf oub && rimraf tsconfig.tsbuildinfo",
-    "build": "npm run clean && tsc --build",
-    "test": "npm run build && node ../../node_modules/vscode/bin/test",
+    "watch": "rm -rf dist && tsc --build --watch",
+    "clean": "rimraf out && rimraf tsconfig.tsbuildinfo",
+    "build": "npm run esbuild",
     "media": "cd media && vite --mode browser",
     "build:media": "cd media && vite build",
+    "reinstall": "rm -rf node_modules && npm i",
+    "afterinstall": "cd ../../ && lerna bootstrap",
     "vscode:prepublish": "npm run esbuild-base -- --minify",
-    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/main.js --external:vscode --format=cjs --platform=node",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
     "esbuild": "npm run esbuild-base -- --sourcemap",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
     "preview": "cd media && vite build --watch"
@@ -376,13 +393,13 @@
     "@vscode/codicons": "^0.0.32",
     "fs-extra": "^10.1.0",
     "mockjs": "^1.0.1-beta3",
-    "pontx-generate-core": "^0.3.4",
-    "pontx-manager": "^0.3.8",
-    "pontx-meta-fetch-plugin": "^0.3.8",
-    "pontx-oas2-parser-plugin": "^0.3.5",
-    "pontx-react-hooks-generate-plugin": "^0.3.4",
-    "pontx-spec": "^0.3.6",
-    "pontx-spec-diff": "^0.3.7"
+    "pontx-generate-core": "^0.3.16",
+    "pontx-manager": "^0.3.16",
+    "pontx-meta-fetch-plugin": "^0.3.16",
+    "pontx-oas2-parser-plugin": "^0.3.16",
+    "pontx-react-hooks-generate-plugin": "^0.3.16",
+    "pontx-spec": "^0.3.16",
+    "pontx-spec-diff": "^0.3.16"
   },
   "icon": "logo.png",
   "repository": {
@@ -398,6 +415,7 @@
     "@types/vscode-webview": "^1.57.0",
     "@vitejs/plugin-react": "^1.3.2",
     "@vscode/codicons": "^0.0.30",
+    "prettier": "*",
     "typescript": "^4.6.4",
     "vite": "^2.9.7",
     "vsce": "^2.7.0"

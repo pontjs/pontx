@@ -2,18 +2,20 @@ import * as PontSpec from "pontx-spec";
 export {
   InnerOriginConfig,
   PluginConfig,
-  PontFetchPlugin,
-  PontGeneratorPlugin,
+  PontxFetchPlugin,
+  PontxGeneratorPlugin,
   PontInnerManagerConfig,
-  PontMocksPlugin,
-  PontParserPlugin,
-  PontTransformPlugin,
+  PontxConfigPlugin,
+  PontxMocksPlugin,
+  PontxParserPlugin,
+  PontxTransformPlugin,
   Snippet,
-  PontPlugin,
-  PontPlugins,
+  PontxPlugin,
+  PontxPlugins,
   PontPublicManagerConfig,
-  PontReportPlugin,
+  PontxReportPlugin,
 } from "./config";
 export { PontManager, getSpecByName } from "./manager";
 export * from "./logger";
 export { PontSpec };
+export { lookForFiles } from "./scan";

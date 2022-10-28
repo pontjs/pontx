@@ -1,16 +1,16 @@
-# Pont 插件开发指南
+# Pontx 插件开发指南
 
-## Pont 插件类别介绍
+## Pontx 插件类别介绍
 
-## Pont 插件开发
+## Pontx 插件开发
 
 ### 使用 Javascript 开发
 
 ```js
 class MyTransformPlugin {
-  async apply(pontSpec) {
+  async apply(pontxSpec) {
     this.logger.info("开发转换中...");
-    return pontSpec;
+    return pontxSpec;
   }
 }
 exports.default = MyTransformPlugin;
@@ -20,10 +20,10 @@ exports.default = MyTransformPlugin;
 
 ```js
 import { parseOAS2 } from "./parser";
-import { PontParserPlugin } from "pontx-manager";
+import { PontxParserPlugin } from "pontx-manager";
 import { PontSpec } from "pontx-spec";
 
-export class PontOAS2ParserPlugin extends PontParserPlugin {
+export class PontOAS2ParserPlugin extends PontxParserPlugin {
   apply(metaStr: string, specName: string, options?: any): Promise<PontSpec> {
     try {
       let swaggerObj = null;
