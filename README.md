@@ -17,6 +17,8 @@ pontx can be highly customed and extended with full lifecle plugin. [Plugin deve
 
 ## Pontx Spec
 
+[Pontx Spec 元数据结构](./packages/pontx-spec/docs/classes/PontSpec.md)
+
 ## API fetching
 
 ## parser
