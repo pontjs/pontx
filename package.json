@@ -17,7 +17,7 @@
     "lint": "prettier --write --parser typescript \"packages/**/*.ts\"",
     "sync:package": "node scripts/syncRegistry.js",
     "release:all": "npm run release && npm run release:vscode",
-    "release": "lerna version patch --message 'chore: publish' && lerna exec --ignore vscode-pontx --ignore vscode-pontx-media --ignore pontx-report-plugin --ignore jsonschema-form  --stream -- npm publish",
+    "release": "lerna version patch --force-publish --message 'chore: publish' && lerna exec --ignore vscode-pontx --ignore vscode-pontx-media --ignore pontx-report-plugin --ignore jsonschema-form  --stream -- npm publish --registry https://registry.npmjs.org",
     "release:dry": "node scripts/release.js --dry",
     "release:vscode": "sh scripts/releaseVscode.sh"
   },

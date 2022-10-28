@@ -94,10 +94,6 @@ class PontReactHooksGeneratorPlugin extends PontGeneratorPlugin {
     let baseDir = manager.innerManagerConfig.outDir;
 
     try {
-      if (baseDir.startsWith("./") || baseDir.startsWith("../")) {
-        baseDir = path.join(manager.innerManagerConfig.configDir, manager.innerManagerConfig.outDir);
-      }
-
       if (manager.localPontSpecs?.length > 1 && manager.localPontSpecs.every((spec) => spec.name)) {
         manager.logger.info("开始生成代码");
         return PontReactHooksGeneratorPlugin.generateSpecs(manager.localPontSpecs, baseDir);

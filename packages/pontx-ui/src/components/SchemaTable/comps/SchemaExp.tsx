@@ -35,7 +35,7 @@ export function getSchemaDom(
           triggerType={["hover"]}
           trigger={
             <a href="javascript:;" onClick={() => changeBaseClass(base)}>
-              {base.typeName}
+              {schema.typeName}
             </a>
           }
         >

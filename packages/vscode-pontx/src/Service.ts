@@ -67,7 +67,7 @@ export class PontService {
     batchDispose(this.lockFileWatcherDisposes);
 
     const lockWatcher = vscode.workspace.createFileSystemWatcher(
-      path.join(config.configDir, config.outDir) + "/**/" + PontManager.lockFilename,
+      config.outDir + "/**/" + PontManager.lockFilename,
       true,
       false,
       true,

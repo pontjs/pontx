@@ -1,6 +1,6 @@
 {
   "name": "pontx-spec",
-  "version": "0.3.7",
+  "version": "0.3.16",
   "description": "pont spec",
   "module": "es6/index.js",
   "main": "lib/index.js",
@@ -10,17 +10,20 @@
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "build:commonjs": "tsc -p ./tsconfig.lib.json",
     "build:commonjs:watch": "tsc -p ./tsconfig.lib.json -w",
+    "build:doc": "typedoc --plugin typedoc-plugin-markdown --out docs src/index.ts",
     "build": "npm run clean && tsc --build && tsc -m CommonJS --outDir lib"
   },
   "peerDependencies": {
     "lodash": "*"
   },
   "dependencies": {
-    "oas-spec-ts": "^0.3.6"
+    "oas-spec-ts": "^0.3.16"
   },
   "files": [
     "lib/",
     "es6/",
+    "*.json",
+    "docs",
     "package.json",
     "*.md"
   ],
@@ -29,6 +32,8 @@
   "license": "MIT",
   "devDependencies": {
     "@types/lodash": "*",
-    "typescript": "^4.6.4"
+    "typedoc": "^0.23.8",
+    "typedoc-plugin-markdown": "^3.13.3",
+    "typescript": "4.6"
   }
 }

@@ -14,4 +14,6 @@ const packages = [
   "pontx-oas2-parser-plugin",
 ];
 
-child_process.execSync(packages.map((name) => `open https://npmmirror.com/sync/${name}`).join(" && "));
+const hostname = process.argv[2] || "https://npmmirror.com";
+
+child_process.execSync(packages.map((name) => `open ${hostname}/sync/${name}`).join(" && "));
