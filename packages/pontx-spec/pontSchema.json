@@ -32,6 +32,22 @@
     "api": {
       "type": "object",
       "required": ["parameters", "responses", "name"],
+      "default": {
+        "name": "createPontx",
+        "description": "This is a pontx api",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "schema": { "type": "string", "title": "名称", "required": true }
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {}
+          }
+        }
+      },
       "properties": {
         "name": {
           "title": "API 标识名称",
@@ -42,17 +58,36 @@
           "type": "string"
         },
         "description": {
-          "type": "string"
+          "type": "string",
+          "title": "描述"
         },
         "deprecated": {
-          "type": "boolean"
+          "type": "boolean",
+          "title": "是否弃用"
         },
         "path": {
           "title": "路径",
           "type": "string"
         },
         "method": {
-          "type": "string"
+          "title": "API 方法",
+          "type": "string",
+          "enum": [
+            "GET",
+            "POST",
+            "DELETE",
+            "PATCH",
+            "PUT",
+            "OPTIONS",
+            "HEAD",
+            "get",
+            "post",
+            "delete",
+            "patch",
+            "put",
+            "options",
+            "head"
+          ]
         },
         "consumes": {
           "description": "A list of MIME types the API can consume.",
@@ -63,13 +98,14 @@
           ]
         },
         "parameters": {
-          "title": "The parameters Schema",
+          "title": "入参",
           "type": "array",
           "items": {
             "$ref": "#/definitions/parameter"
           }
         },
         "responses": {
+          "title": "返回参数",
           "type": "object",
           "additionalProperties": {
             "$ref": "#/definitions/response"

@@ -4,7 +4,7 @@
 import * as vscode from "vscode";
 import { PontManager } from "pontx-manager";
 import { pontService } from "./Service";
-import { findPontxConfig, registerConfigSchema, VSCodeLogger } from "./utils";
+import { findPontxConfig, pontConsole, registerConfigSchema, VSCodeLogger } from "./utils";
 import { PontCommands } from "./commands";
 import { pontUI } from "./UI";
 import { PontSerializer, PontWebView } from "./webview";
@@ -23,15 +23,22 @@ export async function activate(context: vscode.ExtensionContext) {
 
   vscode.commands.executeCommand("setContext", "pontx.hasPontxConfig", true);
   pontService.context = context;
-  const pontManager = await PontManager.constructorFromPontConfig(pontxConfig, configDir, new VSCodeLogger());
 
-  if (pontManager) {
-    console.log('Congratulations, your extension "pontx" is now active!');
-    pontService.startup(pontManager, context);
-    context.subscriptions.push(
-      vscode.window.registerWebviewPanelSerializer(PontWebView.viewType, new PontSerializer()),
-    );
-    context.subscriptions.push(new PontFileDecoration());
+  try {
+    const pontManager = await PontManager.constructorFromPontConfig(pontxConfig, configDir, new VSCodeLogger());
+
+    if (pontManager) {
+      console.log('Congratulations, your extension "pontx" is now active!');
+      pontService.startup(pontManager, context);
+      context.subscriptions.push(
+        vscode.window.registerWebviewPanelSerializer(PontWebView.viewType, new PontSerializer()),
+      );
+      context.subscriptions.push(new PontFileDecoration());
+    }
+  } catch (e) {
+    vscode.window.showErrorMessage(e.message);
+    pontConsole.appendLine(e.message);
+    pontConsole.appendLine(e.stack);
   }
 }
 
