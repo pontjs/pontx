@@ -1,7 +1,10 @@
-cp -r packages/vscode-pont .
-cd vscode-pont
-yarn
-npm run build
+npm run sync:package
+cd packages/vscode-pontx
+echo 'deleting node_modules...'
+rm -rf node_modules
+echo 'installing node_modules...'
+npm i --registry https://registry.npm.taobao.org
+echo 'relese vscode'
 vsce publish
 cd ..
-rm -rf vscode-pont
+lerna bootstrap
