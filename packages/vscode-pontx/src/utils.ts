@@ -6,7 +6,7 @@ const configSchema = require("pontx-spec/configSchema.json");
 
 const { createServerContent } = require("../media/lib/server");
 
-const pontConsole = vscode.window.createOutputChannel("Pontx");
+export const pontConsole = vscode.window.createOutputChannel("Pontx");
 
 export const findPontxConfig = async () => {
   try {

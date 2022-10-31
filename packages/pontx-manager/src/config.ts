@@ -291,8 +291,10 @@ export class PontInnerManagerConfig {
     if (!origins?.length) {
       if (typeof config.url === "string" && config.url) {
         origins = [{ url: config.url } as PublicOriginConfig];
-      } else {
+      } else if (config.origin) {
         origins = [config.origin];
+      } else {
+        origins = [];
       }
     }
 

@@ -285,7 +285,7 @@ export class PontCommands {
                     if (json.origins) {
                       json.origins.push(foundOrigin.config);
                     } else {
-                      json.origins = [foundOrigin];
+                      json.origins = [foundOrigin.config];
                     }
                     fs.writeFileSync(configPath, JSON.stringify(json, null, 2), "utf8");
 
