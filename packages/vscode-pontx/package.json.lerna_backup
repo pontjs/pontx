@@ -1,0 +1,423 @@
+{
+  "name": "vscode-pontx",
+  "displayName": "pontx",
+  "description": "",
+  "version": "0.3.21",
+  "private": true,
+  "publisher": "jasonHzq",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.47.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onFileSystem:pontx://schemas/config-plugin-schema",
+    "workspaceContains:**/pontx-config.json",
+    "onWebviewPanel:pontx-ui"
+  ],
+  "main": "./dist/extension",
+  "contributes": {
+    "jsonValidation": [
+      {
+        "fileMatch": "pontx-config.json",
+        "url": "pontx://schemas/config-plugin-schema"
+      },
+      {
+        "fileMatch": [
+          "api-lock.json",
+          "removeSpec.json",
+          "spec.json"
+        ],
+        "url": "./node_modules/pontx-spec/pontSchema.json"
+      },
+      {
+        "fileMatch": [
+          "*.api.json"
+        ],
+        "url": "./node_modules/pontx-spec/apiSchema.json"
+      },
+      {
+        "fileMatch": [
+          "*.struct.json"
+        ],
+        "url": "./node_modules/pontx-spec/structSchema.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "pontx.openPreviewToTheSide",
+        "title": "可视化预览",
+        "category": "pont",
+        "icon": "$(open-preview)"
+      },
+      {
+        "command": "pontx.switchOrigin",
+        "title": "switchOrigin pont current origin"
+      },
+      {
+        "command": "pontx.openPontUI",
+        "title": "open pont tab"
+      },
+      {
+        "command": "pontx.findInterface",
+        "title": "find pont interface",
+        "icon": "$(search)"
+      },
+      {
+        "command": "pontx.config",
+        "title": "pont 配置",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "pontx.regenerate",
+        "title": "生成本地代码",
+        "icon": "$(debug-start)"
+      },
+      {
+        "command": "pontx.restart",
+        "title": "重启 Pont",
+        "icon": "$(debug-restart)"
+      },
+      {
+        "command": "pontx.fetchRemote",
+        "title": "拉取远程数据",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "pontChanges.commit",
+        "icon": "$(check)",
+        "title": "提交暂存变更，并更新本地代码"
+      },
+      {
+        "command": "pontChanges.unStageAll",
+        "icon": "$(remove)",
+        "title": "取消所有已暂存的变更"
+      },
+      {
+        "command": "pontChanges.stageAll",
+        "icon": "$(add)",
+        "title": "暂存所有变更"
+      },
+      {
+        "command": "pontChanges.batchStage",
+        "icon": "$(add)",
+        "title": "批量暂存变更"
+      },
+      {
+        "command": "pontChanges.batchUnStage",
+        "icon": "$(remove)",
+        "title": "批量取消暂存变更"
+      },
+      {
+        "command": "pontChanges.stage",
+        "icon": "$(add)",
+        "title": "暂存变更"
+      },
+      {
+        "command": "pontChanges.unStage",
+        "icon": "$(remove)",
+        "title": "取消暂存变更"
+      },
+      {
+        "command": "pontAPIs.openMeta",
+        "icon": "$(go-to-file)",
+        "title": "查看元数据定义"
+      },
+      {
+        "command": "pontx.openDocument",
+        "icon": "$(book)",
+        "title": "查看 API 文档"
+      },
+      {
+        "command": "pontx.openMeta",
+        "icon": "$(go-to-file)",
+        "title": "查看元数据定义"
+      },
+      {
+        "command": "pontx.addOrigin",
+        "icon": "$(diff-added)",
+        "title": "添加数据源"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "pontx.addOrigin",
+        "key": "cmd+ctrl+o",
+        "mac": "cmd+ctrl+o"
+      },
+      {
+        "command": "pontx.findInterface",
+        "key": "cmd+ctrl+p",
+        "mac": "cmd+ctrl+p"
+      },
+      {
+        "command": "pontx.refreshMocks",
+        "key": "cmd+ctrl+m",
+        "mac": "cmd+ctrl+m"
+      },
+      {
+        "command": "pontx.openPreviewToTheSide",
+        "key": "ctrl+p",
+        "mac": "cmd+p",
+        "when": "editorLangId == json && resourceFilename =~ /.api.json$/"
+      },
+      {
+        "command": "pontx.openPreviewToTheSide",
+        "key": "ctrl+p",
+        "mac": "cmd+p",
+        "when": "editorLangId == json && resourceFilename =~ /.struct.json$/"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "icon": "$(symbol-structure)",
+          "title": "Pont",
+          "id": "pontActivity"
+        }
+      ]
+    },
+    "colors": [
+      {
+        "id": "pontx.decorations.addedForegroundColor",
+        "description": "Specifies the decoration foreground color of added files",
+        "defaults": {
+          "light": "gitDecoration.addedResourceForeground",
+          "dark": "gitDecoration.addedResourceForeground",
+          "highContrast": "gitDecoration.addedResourceForeground"
+        }
+      },
+      {
+        "id": "pontx.decorations.deletedForegroundColor",
+        "description": "Specifies the decoration foreground color of deleted files",
+        "defaults": {
+          "light": "gitDecoration.stageDeletedResourceForeground",
+          "dark": "gitDecoration.stageDeletedResourceForeground",
+          "highContrast": "gitDecoration.stageDeletedResourceForeground"
+        }
+      },
+      {
+        "id": "pontx.decorations.modifiedForegroundColor",
+        "description": "Specifies the decoration foreground color of modified files",
+        "defaults": {
+          "light": "gitDecoration.stageModifiedResourceForeground",
+          "dark": "gitDecoration.stageModifiedResourceForeground",
+          "highContrast": "gitDecoration.stageModifiedResourceForeground"
+        }
+      },
+      {
+        "id": "pontx.decorations.untrackedForegroundColor",
+        "description": "Specifies the decoration untracked color of modified files",
+        "defaults": {
+          "light": "gitDecoration.untrackedResourceForeground",
+          "dark": "gitDecoration.untrackedResourceForeground",
+          "highContrast": "gitDecoration.untrackedResourceForeground"
+        }
+      }
+    ],
+    "views": {
+      "pontActivity": [
+        {
+          "id": "pontExplorer",
+          "name": "",
+          "when": "pontx.hasPontxConfig == true"
+        }
+      ]
+    },
+    "menus": {
+      "editor/context": [
+        {
+          "command": "pontx.openDocument",
+          "group": "navigation"
+        },
+        {
+          "command": "pontx.openMeta",
+          "group": "navigation"
+        },
+        {
+          "command": "pontx.openPreviewToTheSide",
+          "when": "editorLangId == json && resourceFilename =~ /.api.json$/",
+          "group": "pont"
+        },
+        {
+          "command": "pontx.openPreviewToTheSide",
+          "when": "editorLangId == json && resourceFilename =~ /.struct.json$/",
+          "group": "pont"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "pontx.openPreviewToTheSide",
+          "when": "editorLangId == json && resourceFilename =~ /.api.json$/",
+          "group": "navigation"
+        },
+        {
+          "command": "pontx.openPreviewToTheSide",
+          "when": "editorLangId == json && resourceFilename =~ /.struct.json$/",
+          "group": "navigation"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "pontx.restart",
+          "when": "view == pontExplorer",
+          "group": "navigation@1"
+        },
+        {
+          "command": "pontx.fetchRemote",
+          "when": "view == pontExplorer",
+          "group": "navigation@2"
+        },
+        {
+          "command": "pontx.regenerate",
+          "when": "view == pontExplorer",
+          "group": "navigation@3"
+        },
+        {
+          "command": "pontx.findInterface",
+          "when": "view == pontExplorer",
+          "group": "navigation@4"
+        },
+        {
+          "command": "pontx.config",
+          "when": "view == pontExplorer",
+          "group": "navigation@5"
+        },
+        {
+          "command": "pontx.addOrigin",
+          "when": "view == pontExplorer && pontx.hasPontxOrigins == true",
+          "group": "navigation@6"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "pontChanges.commit",
+          "when": "view == pontExplorer && viewItem == pontChangesManager",
+          "group": "inline"
+        },
+        {
+          "command": "pontChanges.commit",
+          "when": "view == pontExplorer && viewItem == StagedChanges",
+          "group": "inline"
+        },
+        {
+          "command": "pontAPIs.openMeta",
+          "when": "view == pontExplorer && viewItem == Spec",
+          "group": "inline"
+        },
+        {
+          "command": "pontAPIs.openMeta",
+          "when": "view == pontExplorer && viewItem == Mod",
+          "group": "inline"
+        },
+        {
+          "command": "pontAPIs.openMeta",
+          "when": "view == pontExplorer && viewItem == API",
+          "group": "inline"
+        },
+        {
+          "command": "pontAPIs.openMeta",
+          "when": "view == pontExplorer && viewItem == Struct",
+          "group": "inline"
+        },
+        {
+          "command": "pontChanges.unStageAll",
+          "when": "view == pontExplorer && viewItem == StagedChanges",
+          "group": "inline"
+        },
+        {
+          "command": "pontChanges.stageAll",
+          "when": "view == pontExplorer && viewItem == Changes",
+          "group": "inline"
+        },
+        {
+          "command": "pontChanges.batchStage",
+          "when": "view == pontExplorer && viewItem == ChangesSpec",
+          "group": "inline"
+        },
+        {
+          "command": "pontChanges.batchStage",
+          "when": "view == pontExplorer && viewItem == ChangesMod",
+          "group": "inline"
+        },
+        {
+          "command": "pontChanges.batchStage",
+          "when": "view == pontExplorer && viewItem == ChangesDefinitions",
+          "group": "inline"
+        },
+        {
+          "command": "pontChanges.stage",
+          "when": "view == pontExplorer && viewItem == ChangesStruct || viewItem == ChangesAPI",
+          "group": "inline"
+        },
+        {
+          "command": "pontChanges.unStage",
+          "when": "view == pontExplorer && viewItem == StagedChangesStruct || viewItem == StagedChangesAPI",
+          "group": "inline"
+        },
+        {
+          "command": "pontChanges.batchUnStage",
+          "when": "view == pontExplorer && viewItem == StagedChangesSpec",
+          "group": "inline"
+        },
+        {
+          "command": "pontChanges.batchUnStage",
+          "when": "view == pontExplorer && viewItem == StagedChangesMod",
+          "group": "inline"
+        },
+        {
+          "command": "pontChanges.batchUnStage",
+          "when": "view == pontExplorer && viewItem == StagedChangesDefinitions",
+          "group": "inline"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "watch": "rm -rf dist && tsc --build --watch",
+    "clean": "rimraf out && rimraf tsconfig.tsbuildinfo",
+    "build": "npm run esbuild",
+    "media": "cd media && vite --mode browser",
+    "build:media": "cd media && vite build",
+    "reinstall": "rm -rf node_modules && npm i",
+    "afterinstall": "cd ../../ && lerna bootstrap",
+    "vscode:prepublish": "rm -rf dist && npm run esbuild-base -- --minify",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+    "preview": "cd media && vite build --watch"
+  },
+  "dependencies": {
+    "@vscode/codicons": "^0.0.32",
+    "fs-extra": "^10.1.0",
+    "mockjs": "^1.0.1-beta3",
+    "pontx-generate-core": "^0.3.21",
+    "pontx-manager": "^0.3.21",
+    "pontx-meta-fetch-plugin": "^0.3.21",
+    "pontx-oas2-parser-plugin": "^0.3.21",
+    "pontx-react-hooks-generate-plugin": "^0.3.21",
+    "pontx-spec": "^0.3.21",
+    "pontx-spec-diff": "^0.3.21"
+  },
+  "icon": "logo.png",
+  "repository": {
+    "url": "git@github.com:pontjs/pontx.git",
+    "type": "git"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^5.1.0",
+    "@types/lodash": "^4.14.182",
+    "@types/react": "^18.0.8",
+    "@types/react-dom": "^18.0.3",
+    "@types/vscode": "^1.47.0",
+    "@types/vscode-webview": "^1.57.0",
+    "@vitejs/plugin-react": "^1.3.2",
+    "@vscode/codicons": "^0.0.30",
+    "prettier": "*",
+    "typescript": "^4.6.4",
+    "vite": "^2.9.7",
+    "vsce": "^2.7.0"
+  }
+}
