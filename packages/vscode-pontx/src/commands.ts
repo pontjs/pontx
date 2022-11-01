@@ -302,23 +302,33 @@ export class PontCommands {
     });
     vscode.commands.registerTextEditorCommand("pontx.openDocument", async (editor, edit) => {
       const isSingleSpec = PontManager.checkIsSingleSpec(service.pontManager);
-      const { specName, apiName, modName } = findInterface(editor, !isSingleSpec) || ({} as any);
-      const spec = PontManager.getSpec(service.pontManager, specName);
-      const apiKey = modName ? `${modName}/${apiName}` : apiName;
+      const result = (await findInterface(editor, !isSingleSpec, service.pontManager)) || ({} as any);
+      const spec = PontManager.getSpec(service.pontManager, result.specName);
+
+      if (!result.apiName) {
+        vscode.window.showErrorMessage("未找到该 OpenAPI");
+        return;
+      }
 
       vscode.commands.executeCommand("pontx.openPontUI", {
-        specName,
-        modName,
-        name: apiName,
+        specName: result.specName,
+        modName: result.modName,
+        name: result.apiName,
         pageType: "document",
         schemaType: "api",
-        spec: spec?.apis?.[`${apiKey}`],
+        spec: spec?.apis?.[`${result.apiName}`],
       });
     });
 
-    vscode.commands.registerCommand("pontx.openMeta", async (editor, edit) => {
+    vscode.commands.registerTextEditorCommand("pontx.openMeta", async (editor, edit) => {
       const isSingleSpec = PontManager.checkIsSingleSpec(service.pontManager);
-      const { specName, apiName, modName } = findInterface(editor, !isSingleSpec) || ({} as any);
+      const { specName, apiName, modName } =
+        (await findInterface(editor, !isSingleSpec, service.pontManager)) || ({} as any);
+
+      if (!apiName) {
+        vscode.window.showErrorMessage("未找到该 OpenAPI");
+        return;
+      }
 
       viewMetaFile({
         specName,
