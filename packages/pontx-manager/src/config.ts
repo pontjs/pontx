@@ -18,6 +18,12 @@ const findRealPath = (configDir: string, pluginPath: string) => {
   return findRealPath(path.join(configDir, ".."), pluginPath);
 };
 
+const loadPresetPluginPath = (presetPath: string, pluginPath: string) => {
+  return pluginPath.startsWith("./") || pluginPath.startsWith("../")
+    ? path.join(presetPath, pluginPath)
+    : findRealPath(presetPath, pluginPath);
+};
+
 class PublicOriginConfig {
   url: string;
   name: string;
@@ -306,10 +312,11 @@ export class PontInnerManagerConfig {
       const presetPath = findRealPath(configDir, config.preset);
       const presetResult = require(presetPath);
       const plugins = presetResult?.default || presetResult;
+
       if (config.plugins) {
         Object.keys(plugins).forEach((pluginType) => {
           if (!config.plugins[pluginType]) {
-            config.plugins[pluginType] = plugins[pluginType];
+            config.plugins[pluginType] = loadPresetPluginPath(presetPath, plugins[pluginType]);
           }
         });
       } else {

@@ -2,6 +2,7 @@ import { lookForFiles, PontInnerManagerConfig, PontLogger, PontManager, PontxCon
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs-extra";
+import { PontJsonPointer, PontSpec, PontSpecs } from "pontx-spec";
 const configSchema = require("pontx-spec/configSchema.json");
 
 const { createServerContent } = require("../media/lib/server");
@@ -173,7 +174,7 @@ export function batchDispose(disposables: vscode.Disposable[]) {
   }
 }
 
-export async function findInterface(editor: vscode.TextEditor, hasMultiOrigins: boolean) {
+export async function findInterface(editor: vscode.TextEditor, hasMultiOrigins: boolean, pontManager: PontManager) {
   const pos = editor.selection.start;
   const codeAtLine = editor.document.getText().split("\n")[pos.line];
 
@@ -209,18 +210,28 @@ export async function findInterface(editor: vscode.TextEditor, hasMultiOrigins: 
   }
 
   const wordsWithOrigin = [words[wordIndex - 2], words[wordIndex - 1], words[wordIndex]];
+  const localSpecs = pontManager.localPontSpecs;
 
+  let offsetIndex = 1;
+  let specIndex = 0;
   if (hasMultiOrigins) {
+    offsetIndex = 0;
+    specIndex = localSpecs?.findIndex((spec) => spec.name === wordsWithOrigin[offsetIndex]);
+
+    if (specIndex < 0) {
+      offsetIndex = 1;
+      specIndex = localSpecs?.findIndex((spec) => spec.name === wordsWithOrigin[offsetIndex]);
+    }
+  }
+
+  const apiKey = wordsWithOrigin.slice(offsetIndex + 1).join(".");
+  const api = PontJsonPointer.get(localSpecs, `${specIndex}.apis.[${apiKey}]`);
+  if (api) {
     return {
-      specName: wordsWithOrigin[0],
-      modName: wordsWithOrigin[1],
-      apiName: wordsWithOrigin[2],
+      specName: localSpecs[specIndex]?.name || "",
+      apiName: api?.name,
     };
   }
-  return {
-    modName: wordsWithOrigin[1],
-    apiName: wordsWithOrigin[2],
-  };
 }
 
 export async function viewMetaFile(meta: {
