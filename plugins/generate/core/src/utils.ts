@@ -7,3 +7,9 @@ export function clearPath(basePath: string) {
     return fs.removeSync(basePath);
   }
 }
+export function getModName(mod) {
+  if (typeof mod.name === "string") {
+    return mod.name;
+  }
+  return "main";
+}

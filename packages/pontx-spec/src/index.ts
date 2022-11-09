@@ -22,6 +22,7 @@ export class PontAPI {
   method: string;
   name: string;
   title?: string;
+  summary?: string;
   path: string;
   deprecated: boolean;
   ext?: any;

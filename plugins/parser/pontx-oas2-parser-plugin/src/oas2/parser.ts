@@ -46,19 +46,10 @@ export function parseOAS2Interface(
     } as PontSpec.Parameter;
   });
 
-  let interDesc = inter.summary;
-
-  if (inter.description) {
-    if (interDesc) {
-      interDesc += "\n" + inter.description;
-    } else {
-      interDesc = inter.description;
-    }
-  }
-
   const pontAPI = {
+    summary: inter.summary,
     consumes: inter.consumes,
-    description: interDesc,
+    description: inter.description,
     name,
     method,
     path,

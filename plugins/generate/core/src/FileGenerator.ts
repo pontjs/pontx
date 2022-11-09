@@ -30,8 +30,10 @@ export class FileStructure {
     generator: T = new CodeGenerator() as any,
   ): FileStructure {
     generator.specName = spec.name;
+
     const mods = PontSpec.PontSpec.getMods(spec).reduce((result, mod) => {
-      return { ...result, [mod.name + ".js"]: generator.generateModJsCode(mod) };
+      const modName = typeof mod.name === "string" ? mod.name : "main";
+      return { ...result, [modName + ".js"]: generator.generateModJsCode(mod) };
     }, {} as FileStructure);
     mods["index.js"] = generator.generateModsIndexJsCode(spec);
 
@@ -49,9 +51,12 @@ export class FileStructure {
     generator: T = new CodeGenerator() as any,
   ): FileStructure {
     const specsFiles = specs.reduce((result, spec) => {
+      const hasMod = PontSpec.PontSpec.checkHasMods(spec);
       return {
         ...result,
-        [spec.name]: FileStructure.constructorFromCodeGenerator(spec, generator),
+        [spec.name]: hasMod
+          ? FileStructure.constructorFromCodeGenerator(spec, generator)
+          : NoModFileStructure.constructorFromCodeGenerator(spec, generator),
       };
     }, {});
 
@@ -78,6 +83,24 @@ export class FileStructure {
         };
       }
     }, {} as FileStructure);
+  }
+}
+export class NoModFileStructure {
+  [fileName: string]: string | NoModFileStructure;
+
+  static constructorFromCodeGenerator<T extends CodeGenerator>(
+    spec: PontSpec.PontSpec,
+    generator: T = new CodeGenerator() as any,
+  ): NoModFileStructure {
+    generator.specName = spec.name;
+
+    return {
+      "index.d.ts": generator.generateSpecIndexTsCode(spec),
+      "api-lock.json": generator.generateLockCode(spec),
+      "baseClasses.js": generator.generateBaseClassesJsCode(spec),
+      [generator.specName + ".js"]: generator.generateModsIndexJsCode(spec),
+      "index.js": generator.generateSpecIndexJsCode(spec),
+    };
   }
 }
 
@@ -147,13 +170,15 @@ export class FileGenerator {
 
     if (hasMods) {
       mods.forEach((mod) => {
-        if (typeof mod.name === "string") {
-          const modFiles = {};
-          mod.interfaces.forEach((api) => {
-            modFiles[api.name] = api;
-          });
+        const modFiles = {};
+        mod.interfaces.forEach((api) => {
+          modFiles[api.name] = api;
+        });
 
+        if (typeof mod.name === "string") {
           specFiles[mod.name] = modFiles;
+        } else {
+          specFiles["main"] = modFiles;
         }
       });
     } else {
