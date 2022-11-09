@@ -96,7 +96,7 @@ class PontReactHooksGeneratorPlugin extends PontGeneratorPlugin {
 
   async apply(manager: PontManager, options?: any) {
     let baseDir = manager.innerManagerConfig.outDir;
-    this.origins = manager.innerManagerConfig.origins;
+    (this as any).origins = manager.innerManagerConfig.origins;
 
     try {
       if (manager.localPontSpecs?.length >= 1 && manager.localPontSpecs.every((spec) => spec.name)) {
