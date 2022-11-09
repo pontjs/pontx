@@ -3,6 +3,7 @@ import { PontAPI, PontSpec } from "pontx-spec";
 import * as path from "path";
 import * as fs from "fs-extra";
 import { CodeGenerator, FileGenerator, FileStructure, indentation, Snippet } from "pontx-generate-core";
+import { NoModFileStructure } from "pontx-generate-core";
 
 async function getBuiltinStructure() {
   const builtinStructure = {};
@@ -68,7 +69,10 @@ ${super.generateSpecIndexTsCode(spec)}`;
 
 class PontReactHooksGeneratorPlugin extends PontGeneratorPlugin {
   static async generateSingleSpec(pontSpec: PontSpec, basePath: string) {
-    const fileStructure = FileStructure.constructorFromCodeGenerator(pontSpec, new MyCodeGenerator());
+    const hasMod = PontSpec.checkHasMods(pontSpec);
+    const fileStructure = hasMod
+      ? FileStructure.constructorFromCodeGenerator(pontSpec, new MyCodeGenerator())
+      : NoModFileStructure.constructorFromCodeGenerator(pontSpec, new MyCodeGenerator());
     fileStructure["builtin"] = await getBuiltinStructure();
 
     const fileGenerator = {
@@ -92,9 +96,10 @@ class PontReactHooksGeneratorPlugin extends PontGeneratorPlugin {
 
   async apply(manager: PontManager, options?: any) {
     let baseDir = manager.innerManagerConfig.outDir;
+    this.origins = manager.innerManagerConfig.origins;
 
     try {
-      if (manager.localPontSpecs?.length > 1 && manager.localPontSpecs.every((spec) => spec.name)) {
+      if (manager.localPontSpecs?.length >= 1 && manager.localPontSpecs.every((spec) => spec.name)) {
         manager.logger.info("开始生成代码");
         return PontReactHooksGeneratorPlugin.generateSpecs(manager.localPontSpecs, baseDir);
       }

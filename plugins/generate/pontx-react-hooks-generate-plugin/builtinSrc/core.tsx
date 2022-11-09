@@ -2,7 +2,7 @@
  * @description pont内置请求单例
  */
 
-import useSWR, { SWRConfig, ConfigInterface } from "swr";
+import useSWR, { SWRConfig, ConfigInterface, mutate, trigger } from "swr";
 import * as React from "react";
 
 const defaultOptions = {
@@ -119,6 +119,57 @@ class PontHooksCore {
     const configValue = { ...defaultOptions, ...options } as any;
 
     return <SWRConfig value={configValue}>{props.children}</SWRConfig>;
+  };
+
+  process = (specAPI = {}) => {
+    Object.keys(specAPI).forEach((modName) => {
+      specAPI[modName] = { ...specAPI[modName] };
+      const mod = specAPI[modName];
+      if (modName === "index") {
+        return;
+      }
+      Object.keys(mod).forEach((apiName) => {
+        if (apiName === "index") {
+          return;
+        }
+        mod[apiName] = { ...mod[apiName] };
+        const api = specAPI[modName][apiName];
+
+        api.mutate = (params = {}, newValue = undefined, shouldRevalidate = true) => {
+          return mutate(PontCore.getUrlKey(api.path, params, api.method), newValue, shouldRevalidate);
+        };
+        api.trigger = (params = {}, shouldRevalidate = true) => {
+          return trigger(PontCore.getUrlKey(api.path, params, api.method), shouldRevalidate);
+        };
+
+        if (api.method === "GET") {
+          api.useRequest = (params = {}, swrOptions = {}) => {
+            return PontCore.useRequest(api.path, params, swrOptions);
+          };
+        } else {
+          api.useDeprecatedRequest = (params = {}, swrOptions = {}) => {
+            return PontCore.useRequest(api.path, params, swrOptions, { method: api.method });
+          };
+        }
+
+        if (api.hasBody) {
+          api.request = (params, body, options = {}) => {
+            return PontCore.fetch(PontCore.getUrl(api.path, params, api.method), {
+              method: api.method,
+              body,
+              ...options,
+            });
+          };
+        } else {
+          api.request = (params = {}, options = {}) => {
+            return PontCore.fetch(PontCore.getUrl(api.path, params, api.method), {
+              method: api.method,
+              ...options,
+            });
+          };
+        }
+      });
+    });
   };
 }
 

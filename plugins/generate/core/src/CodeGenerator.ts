@@ -1,5 +1,6 @@
 import * as PontSpec from "pontx-spec";
 import * as _ from "lodash";
+import { getModName } from "./utils";
 
 const makeArray = (cnt: number) => Array.from(new Array(cnt));
 const indentationLine = (cnt: number) => (line: string) =>
@@ -49,7 +50,7 @@ ${indentation(2)(`export ${generator.generateAPIParametersTsCode(api)}`)}
 `;
 
 const modJsTemplate = (mod: PontSpec.Mod, generator: CodeGenerator) => `/**
-* ${mod.name}${
+* ${getModName(mod)}${
   mod.description
     ? `
 * ${mod.description}`
@@ -67,9 +68,9 @@ ${mod.interfaces
 const modTsTemplate = (mod: PontSpec.Mod, generator: CodeGenerator) => `
 /**
  * ${mod.description}
- * ${mod.name}
+ * ${getModName(mod)}
  */
-export namespace ${mod.name} {
+export namespace ${getModName(mod)} {
 ${indentation(2)(mod.interfaces.map((inter) => generator.generateAPITsCode(inter)).join("\n\n"))}
 }
 `;
@@ -83,15 +84,26 @@ const modsIndexJsTemplate = (spec: PontSpec.PontSpec) => `${
     : ""
 }${PontSpec.PontSpec.getMods(spec)
   .map((mod) => {
-    return `import * as ${mod.name} from './${mod.name}';`;
+    return `import * as ${getModName(mod)} from './${getModName(mod)}';`;
   })
   .join("\n")}
 
 ${spec.name ? `export const ${spec.name} =` : "window.API ="} {
   ${PontSpec.PontSpec.getMods(spec)
-    .map((mod) => mod.name)
+    .map((mod) => getModName(mod))
     .join(",\n  ")}
 };
+`;
+const noModIndexJsTemplate = (spec: PontSpec.PontSpec, generator: CodeGenerator) => `${
+  spec.name
+    ? `/**
+  * @name: ${spec.name}
+  */
+`
+    : ""
+}${_.map(spec.apis, (api) => {
+  return generator.generateAPIJsCode(api);
+}).join("\n")}
 `;
 
 const modsIndexTsTemplate = (spec: PontSpec.PontSpec, generator: CodeGenerator) => `export namespace ${
@@ -106,9 +118,19 @@ ${indentation(2)(
 )}
 }
 `;
+const noModIndexTsTemplate = (spec: PontSpec.PontSpec, generator: CodeGenerator) => `export namespace ${
+  spec.name || "API"
+} {
+${indentation(2)(_.map(spec.apis, (inter) => generator.generateAPITsCode(inter)).join("\n\n"))}
+}
+`;
 
 export class CodeGenerator {
   specName = "";
+
+  hasMod(pontSpec: PontSpec.PontSpec) {
+    return PontSpec.PontSpec.checkHasMods(pontSpec);
+  }
 
   generateJsonSchemaInitValue(schema: PontSpec.PontJsonSchema) {
     if (schema.typeName === "Array") {
@@ -292,6 +314,7 @@ ${this.generateModsIndexTsCode(spec)}
   }
 
   generateSpecIndexJsCode(spec: PontSpec.PontSpec): string {
+    const hasMod = this.hasMod(spec);
     if (!spec.name) {
       return `import './mods/index';
 import * as defs from './baseClasses';
@@ -300,7 +323,11 @@ window.defs = defs;
 `;
     }
 
-    return `import { ${spec.name} } from './mods/index';
+    const modImport = hasMod
+      ? `import { ${spec.name} } from './mods/index';`
+      : `import * as ${spec.name} from './${spec.name}';`;
+
+    return `${modImport}
 import { ${spec.name} as baseClasses } from './baseClasses';
 
 if (window.API) {
@@ -322,16 +349,18 @@ if (window.defs) {
   }
 
   generateModsIndexJsCode(spec: PontSpec.PontSpec): string {
-    return modsIndexJsTemplate(spec);
+    return this.hasMod(spec) ? modsIndexJsTemplate(spec) : noModIndexJsTemplate(spec, this);
   }
 
   generateModsIndexTsCode(spec: PontSpec.PontSpec): string {
+    const modIndexCode = this.hasMod(spec) ? modsIndexTsTemplate(spec, this) : noModIndexTsTemplate(spec, this);
+
     if (spec.name) {
       return `declare namespace API {
-${indentation(2)(modsIndexTsTemplate(spec, this))}
+${indentation(2)(modIndexCode)}
 }`;
     }
-    return modsIndexTsTemplate(spec, this);
+    return modIndexCode;
   }
 
   generateBaseClassJsCode(schema: PontSpec.PontJsonSchema, name: string) {

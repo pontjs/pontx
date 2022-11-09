@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "license": "MIT",
   "scripts": {
+    "install": "lerna bootstrap",
     "test": "jest pont",
     "changelog": "node -r esm scripts/changelog.js",
     "build:commonjs": "lerna exec --scope pontx-spec* --stream -- npm run build:commonjs",
@@ -60,6 +61,15 @@
     "react-dom": "^18.2.0",
     "rimraf": "3.0.2",
     "typescript": "^4.6.4",
+    "css-loader": "^6.7.1",
+    "file-loader": "^6.2.0",
+    "less-loader": "^11.1.0",
+    "mini-css-extract-plugin": "^2.6.1",
+    "style-loader": "^3.3.1",
+    "ts-loader": "^9.4.1",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-node-externals": "^3.0.0",
     "yorkie": "^2.0.0"
   }
 }
