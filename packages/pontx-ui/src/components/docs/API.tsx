@@ -8,6 +8,7 @@ import { ParametersTable } from "./Parameters";
 import { PontJsonSchemaOp } from "../SchemaTable/model/BaseClassSchema";
 import { SchemaDynamicTable } from "../SchemaTable/comps/SchemaDynamicTable";
 import { Tab } from "@alicloud/console-components";
+import MarkdownPreview from "@uiw/react-markdown-preview";
 export class APIProps {
   selectedApi: PontSpec.PontAPI;
   definitions = {} as PontSpec.ObjectMap<PontSpec.PontJsonSchema>;
@@ -29,7 +30,7 @@ export const API: React.FC<APIProps> = (props) => {
           </div>
           {selectedApi?.description ? (
             <div className="desc-mod" style={{ margin: "12px 0", width: "100%" }}>
-              接口详情：{selectedApi?.description}
+              <MarkdownPreview linkTarget="_blank" sourcePos source={selectedApi?.description} />
             </div>
           ) : null}
           <Tab defaultActiveKey="doc">
