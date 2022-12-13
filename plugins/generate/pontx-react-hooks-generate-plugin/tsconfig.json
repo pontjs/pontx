@@ -12,17 +12,17 @@
     "rootDir": "./src",
     "composite": true
   },
-  "include": ["./src/**/*"],
+  "include": ["./src/**/*", "template"],
   "exclude": ["node_modules", "build"],
   "references": [
     {
       "path": "../../../packages/pontx-spec"
     },
     {
-      "path": "../core"
+      "path": "./tsconfig.builtin.json"
     },
     {
-      "path": "./tsconfig.builtin.json"
+      "path": "../../../packages/pontx-manager"
     }
   ]
 }

@@ -289,13 +289,21 @@ export class PontSpecDiffs extends PontSpec {
         }
 
         const result = PontJsonPointer.set(fromSpecs, `${fromSpecIndex}.directories[namespace=${meta.modName}]`, toDir);
+        // 删除原有 API
+        const deletedAPIsResult = PontJsonPointer.removeMapKeyBy(result, `${fromSpecIndex}.apis`, (key) => {
+          if ((key + "" || "").split("/")?.[0] === meta.modName) {
+            return true;
+          }
+          return false;
+        });
         const newApis = (toDir?.children || []).reduce((result, name: string) => {
           return {
             ...result,
-            name: toApis[name],
+            [name]: toApis[name],
           };
         }, {});
-        return PontJsonPointer.update(result, `${fromSpecIndex}.apis`, (apis) => {
+
+        return PontJsonPointer.update(deletedAPIsResult, `${fromSpecIndex}.apis`, (apis) => {
           return {
             ...apis,
             ...newApis,
@@ -315,7 +323,32 @@ export class PontSpecDiffs extends PontSpec {
         const toSpecIndex = PontSpecs.getSpecIndex(toSpecs, meta.specName);
         const toApi = PontJsonPointer.get(toSpecs, `${toSpecIndex}.apis.[${apiKey}]`);
 
-        return PontJsonPointer.set(fromSpecs, `${fromSpecIndex}.apis[${apiKey}]`, toApi);
+        // 更新 API
+        const updatedApiResult = PontJsonPointer.update(fromSpecs, `${fromSpecIndex}.apis`, (apis) => {
+          if (apis[apiKey] && !toApi) {
+            const { [apiKey]: __, ...rest } = apis;
+
+            return rest;
+          }
+          return {
+            ...apis,
+            [apiKey]: toApi,
+          };
+        });
+        // 更新 directories
+        const foundDirIndex = fromSpecs[fromSpecIndex]?.directories?.findIndex((dir) => dir.namespace === meta.modName);
+        if (foundDirIndex === -1) {
+          return updatedApiResult;
+        }
+        const newDirChildren = Object.keys(updatedApiResult[fromSpecIndex]?.apis || {})?.filter((key) =>
+          key?.includes(`${meta.modName}/`),
+        );
+        return PontJsonPointer.update(updatedApiResult, `${fromSpecIndex}.directories.${foundDirIndex}`, (dir) => {
+          return {
+            ...dir,
+            children: newDirChildren,
+          };
+        });
       }
       case MetaType.Struct: {
         const fromSpecIndex = PontSpecs.getUpdateSpecIndex(fromSpecs, meta.specName);

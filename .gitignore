@@ -10,6 +10,7 @@ lerna-debug.log
 .awcache
 .DS_Store
 .env
+tests/apis
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

@@ -56,7 +56,7 @@ export const App: React.FC<AppProps> = (props) => {
       return null;
     }
 
-    if (!metaSpec) {
+    if (!metaSpec && !remoteSpec) {
       return <div className="vscode-page">loading...</div>;
     }
     if (pageType === "document") {

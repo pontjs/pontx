@@ -3,26 +3,7 @@ import * as fs from "fs-extra";
 import { PontSpec, PontAPI } from "pontx-spec";
 import { PontManager } from "./manager";
 import { PontLogger } from "./logger";
-import { requireTsFile } from "./utils";
-
-const findRealPath = (configDir: string, pluginPath: string) => {
-  if (configDir === "/") {
-    return pluginPath;
-  }
-  let retPath = path.join(configDir, "node_modules", pluginPath);
-
-  if (fs.existsSync(retPath)) {
-    return retPath;
-  }
-
-  return findRealPath(path.join(configDir, ".."), pluginPath);
-};
-
-const loadPresetPluginPath = (presetPath: string, pluginPath: string) => {
-  return pluginPath.startsWith("./") || pluginPath.startsWith("../")
-    ? path.join(presetPath, pluginPath)
-    : findRealPath(presetPath, pluginPath);
-};
+import { findRealPath, loadPresetPluginPath, requireTsFile, requireUncached } from "./utils";
 
 class PublicOriginConfig {
   url: string;
@@ -134,7 +115,7 @@ export function requireModule(pluginPath: string, configDir: string, rootDir: st
 
   if (!path.extname(requirePath)) {
     if (fs.existsSync(requirePath + ".js")) {
-      return require(requirePath + ".js");
+      return requireUncached(requirePath + ".js");
     }
     if (fs.existsSync(requirePath + ".ts")) {
       const fileName = path.basename(requirePath);
@@ -143,7 +124,7 @@ export function requireModule(pluginPath: string, configDir: string, rootDir: st
         filePath: requirePath + ".ts",
       });
     }
-    return require(requirePath);
+    return requireUncached(requirePath);
   } else if (path.extname(requirePath) === ".ts") {
     const fileName = path.basename(requirePath, ".ts");
     return requireTsFile(rootDir, {
@@ -151,7 +132,7 @@ export function requireModule(pluginPath: string, configDir: string, rootDir: st
       filePath: requirePath,
     });
   } else {
-    return require(requirePath);
+    return requireUncached(requirePath);
   }
 }
 
@@ -310,7 +291,7 @@ export class PontInnerManagerConfig {
 
     if (config.preset) {
       const presetPath = findRealPath(configDir, config.preset);
-      const presetResult = require(presetPath);
+      const presetResult = requireUncached(presetPath);
       const plugins = presetResult?.default || presetResult;
 
       if (config.plugins) {

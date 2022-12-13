@@ -1,0 +1,18 @@
+{
+  "outDir": "../apis",
+  "plugins": {
+    "fetch": "../../plugins/fetch/pontx-meta-fetch-plugin",
+    "parser": "../../plugins/parser/pontx-oas2-parser-plugin",
+    "generate": "../../plugins/generate/pontx-react-hooks-generate-plugin"
+  },
+  "origins": [
+    {
+      "url": "http://127.0.0.1:9099/oas2.json",
+      "name": "api1"
+    },
+    {
+      "url": "http://127.0.0.1:9099/oas2.json",
+      "name": "api2"
+    }
+  ]
+}

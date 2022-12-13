@@ -18,9 +18,9 @@ export function diffList<T>(localList: T[], remoteList: T[], diffId = "name", cu
   });
   const updates: T[] = _.intersectionBy(localList, remoteList, diffId)
     .map((schema: T) => {
-      if (JSON.stringify(localList) === JSON.stringify(remoteList)) {
-        return null;
-      }
+      // if (JSON.stringify(localList) === JSON.stringify(remoteList)) {
+      //   return null;
+      // }
       return diffObject(
         schema,
         remoteList?.find((item) => item[diffId] === schema[diffId]),
@@ -54,7 +54,7 @@ const diffObject = <T>(localSpec: T, remoteSpec: T, customDiff = {} as CustomDif
       };
     }
 
-    if (remoteSpec[key] && localSpec[key] && JSON.stringify(remoteSpec[key]) !== JSON.stringify(localSpec[key])) {
+    if (remoteSpec[key] && localSpec[key]) {
       if (customDiff[key]) {
         const { diffs, diffType } = customDiff[key](localSpec[key], remoteSpec[key], customDiff);
         if (diffType !== "equal") {
@@ -62,10 +62,19 @@ const diffObject = <T>(localSpec: T, remoteSpec: T, customDiff = {} as CustomDif
           diffReuslt[key] = diffs;
         }
       } else {
-        diffs[key] = {
-          remoteValue: remoteSpec[key],
-          diffType: "update",
-        };
+        if (typeof remoteSpec[key] === "object" || typeof localSpec[key] === "object") {
+          const { diffs, diffType } = diffObject(localSpec[key], remoteSpec[key], customDiff);
+
+          if (diffType !== "equal") {
+            hasDiffResult = true;
+            diffReuslt[key] = diffs;
+          }
+        } else if (JSON.stringify(remoteSpec[key]) !== JSON.stringify(localSpec[key])) {
+          diffs[key] = {
+            remoteValue: remoteSpec[key],
+            diffType: "update",
+          };
+        }
       }
     }
   });
@@ -125,7 +134,7 @@ export const diffPontSpec = (localSpec: PontSpec.PontSpec, remoteSpec: PontSpec.
       return diffObject(pre[key], next[key], customDiff);
     });
     return {
-      diffType: "update",
+      diffType: diffResult.diffType,
       diffs: result,
     };
   };
@@ -135,9 +144,20 @@ export const diffPontSpec = (localSpec: PontSpec.PontSpec, remoteSpec: PontSpec.
     parameters: listDiff,
     interfaces: listDiff,
     definitions: defDiff as any,
+    ext: (localExt, remoteExt) => {
+      if (JSON.stringify(localExt) !== JSON.stringify(remoteExt)) {
+        return {
+          diffType: "update",
+          diffs: {},
+        } as any;
+      }
+      return {
+        diffType: "equal",
+      } as any;
+    },
   } as CustomDiff;
 
-  return diffObject(
+  const specDiffResult = diffObject(
     {
       name: localSpec.name,
       mods: PontSpec.PontSpec.getMods(localSpec),
@@ -156,6 +176,14 @@ export const diffPontSpec = (localSpec: PontSpec.PontSpec, remoteSpec: PontSpec.
     name?: string;
     definitions?: PontSpec.PontSpec["definitions"];
   }>;
+  specDiffResult.definitions = _.omitBy(specDiffResult.definitions, (def) => {
+    return !def.diffType || def.diffType === "equal";
+  });
+  specDiffResult.mods = _.filter(specDiffResult.mods, (mod: any) => {
+    return mod.diffType && mod.diffType !== "equal";
+  });
+
+  return specDiffResult;
 };
 
 export const diffPontSpecs = (localSpecs: PontSpec.PontSpec[], remoteSpecs: PontSpec.PontSpec[]) => {
