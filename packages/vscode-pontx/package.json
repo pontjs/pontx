@@ -2,7 +2,7 @@
   "name": "vscode-pontx",
   "displayName": "pontx",
   "description": "",
-  "version": "0.3.24",
+  "version": "0.3.25",
   "private": true,
   "publisher": "jasonHzq",
   "license": "MIT",
@@ -62,7 +62,7 @@
       },
       {
         "command": "pontx.findInterface",
-        "title": "find pont interface",
+        "title": "查找 API",
         "icon": "$(search)"
       },
       {
@@ -173,8 +173,8 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "icon": "$(symbol-structure)",
-          "title": "Pont",
+          "icon": "resources/pontx.svg",
+          "title": "Pontx",
           "id": "pontActivity"
         }
       ]
@@ -393,15 +393,15 @@
     "@vscode/codicons": "^0.0.32",
     "fs-extra": "^10.1.0",
     "mockjs": "^1.0.1-beta3",
-    "pontx-generate-core": "^0.3.24",
-    "pontx-manager": "^0.3.24",
-    "pontx-meta-fetch-plugin": "^0.3.24",
-    "pontx-oas2-parser-plugin": "^0.3.24",
-    "pontx-react-hooks-generate-plugin": "^0.3.24",
-    "pontx-spec": "^0.3.24",
-    "pontx-spec-diff": "^0.3.24"
+    "pontx-generate-core": "^0.3.25",
+    "pontx-manager": "^0.3.25",
+    "pontx-meta-fetch-plugin": "^0.3.25",
+    "pontx-oas2-parser-plugin": "^0.3.25",
+    "pontx-react-hooks-generate-plugin": "^0.3.25",
+    "pontx-spec": "^0.3.25",
+    "pontx-spec-diff": "^0.3.25"
   },
-  "icon": "logo.png",
+  "icon": "resources/pontx.png",
   "repository": {
     "url": "git@github.com:pontjs/pontx.git",
     "type": "git"

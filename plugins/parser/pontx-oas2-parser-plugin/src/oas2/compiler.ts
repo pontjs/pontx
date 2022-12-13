@@ -1,5 +1,5 @@
 import { PontJsonSchema } from "pontx-spec";
-import { JsonSchemaContext, PrimitiveTypeMap } from "./utils";
+import { JsonSchemaContext, PrimitiveTypeMap, PRIMITIVE_TYPES } from "./utils";
 
 class Token {
   constructor(public type: "Identifier" | "PreTemplate" | "EndTemplate" | "Comma", public value = "") {}
@@ -68,7 +68,7 @@ class Parser {
 export function parseAst2PontJsonSchema(
   ast: AstNode,
   context: JsonSchemaContext,
-): { typeName: string; templateArgs: any[] } {
+): { typeName: string; templateArgs: any[]; type?: string } {
   const { name, templateArgs } = ast;
   // 怪异类型兼容
   let typeSchema = PrimitiveTypeMap[name] || {};
@@ -79,9 +79,13 @@ export function parseAst2PontJsonSchema(
 
   const schema = {
     ...typeSchema,
-    typeName: typeSchema?.type || name,
     templateArgs: typeArgs,
   };
+  if (context.defNames?.includes(typeSchema?.type || name)) {
+    schema["typeName"] = typeSchema?.type || name;
+  } else if (PRIMITIVE_TYPES.includes(name)) {
+    schema["type"] = name;
+  }
 
   return schema;
 }

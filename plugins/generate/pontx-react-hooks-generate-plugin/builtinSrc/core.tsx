@@ -14,6 +14,39 @@ const defaultOptions = {
   dedupingInterval: 60000,
 };
 
+export function getAPIMethods(apiMetaData: any) {
+  const { method, path, hasBody } = apiMetaData;
+
+  const methods = {
+    mutate: (params = {}, newValue = undefined, shouldRevalidate = true) => {
+      return mutate(PontCore.getUrlKey(path, params, method), newValue, shouldRevalidate);
+    },
+    trigger: (params = {}, shouldRevalidate = true) => {
+      return trigger(PontCore.getUrlKey(path, params, method), shouldRevalidate);
+    },
+    useRequest: (params = {}, swrOptions = {}) => {
+      return PontCore.useRequest(path, params, swrOptions);
+    },
+    request: (params = {}, options = {}) => {
+      return PontCore.fetch(PontCore.getUrl(path, params, method), {
+        method,
+        ...options,
+      });
+    },
+  };
+
+  if (hasBody) {
+    methods.request = (params, body, options = {}) => {
+      return PontCore.fetch(PontCore.getUrl(path, params, method), {
+        method,
+        body,
+        ...options,
+      });
+    };
+  }
+  return methods;
+}
+
 class PontHooksCore {
   static singleInstance = null as any as PontHooksCore;
 
@@ -121,55 +154,47 @@ class PontHooksCore {
     return <SWRConfig value={configValue}>{props.children}</SWRConfig>;
   };
 
-  process = (specAPI = {}) => {
-    Object.keys(specAPI).forEach((modName) => {
-      specAPI[modName] = { ...specAPI[modName] };
-      const mod = specAPI[modName];
-      if (modName === "index") {
-        return;
-      }
-      Object.keys(mod).forEach((apiName) => {
-        if (apiName === "index") {
+  processAPI = (api: any, apiName: string) => {
+    if (apiName === "index") {
+      return;
+    }
+
+    const methods = getAPIMethods(api);
+
+    api.mutate = methods.mutate;
+    api.trigger = methods.trigger;
+    api.request = methods.request;
+
+    if (api.method === "GET") {
+      api.useRequest = methods.useRequest;
+    } else {
+      api.useDeprecatedRequest = methods.useRequest;
+    }
+  };
+
+  process = (specAPI = {} as any, API: any, definitions: any, hasModule = true) => {
+    const { apis, defs } = specAPI;
+
+    if (hasModule) {
+      Object.keys(apis).forEach((modName) => {
+        API[modName] = { ...apis[modName] };
+        const mod = API[modName];
+        if (modName === "index") {
           return;
         }
-        mod[apiName] = { ...mod[apiName] };
-        const api = specAPI[modName][apiName];
-
-        api.mutate = (params = {}, newValue = undefined, shouldRevalidate = true) => {
-          return mutate(PontCore.getUrlKey(api.path, params, api.method), newValue, shouldRevalidate);
-        };
-        api.trigger = (params = {}, shouldRevalidate = true) => {
-          return trigger(PontCore.getUrlKey(api.path, params, api.method), shouldRevalidate);
-        };
-
-        if (api.method === "GET") {
-          api.useRequest = (params = {}, swrOptions = {}) => {
-            return PontCore.useRequest(api.path, params, swrOptions);
-          };
-        } else {
-          api.useDeprecatedRequest = (params = {}, swrOptions = {}) => {
-            return PontCore.useRequest(api.path, params, swrOptions, { method: api.method });
-          };
-        }
-
-        if (api.hasBody) {
-          api.request = (params, body, options = {}) => {
-            return PontCore.fetch(PontCore.getUrl(api.path, params, api.method), {
-              method: api.method,
-              body,
-              ...options,
-            });
-          };
-        } else {
-          api.request = (params = {}, options = {}) => {
-            return PontCore.fetch(PontCore.getUrl(api.path, params, api.method), {
-              method: api.method,
-              ...options,
-            });
-          };
-        }
+        Object.keys(mod).forEach((apiName) => {
+          mod[apiName] = { ...mod[apiName] };
+          const api = mod[apiName];
+          this.processAPI(api, apiName);
+        });
       });
-    });
+    } else {
+      Object.keys(apis).forEach((apiName) => {
+        API[apiName] = { ...apis[apiName] };
+        const api = apis[apiName];
+        this.processAPI(api, apiName);
+      });
+    }
   };
 }
 

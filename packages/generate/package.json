@@ -1,0 +1,33 @@
+{
+  "name": "pontx-generate",
+  "version": "0.3.25",
+  "description": "OpenAPI pont spec",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "pretest": "npm run build",
+    "watch": "tsc --build --watch",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "build": "tsc --build"
+  },
+  "dependencies": {
+    "fs-extra": "*",
+    "lodash": "*",
+    "pontx-spec": "^0.3.25"
+  },
+  "peerDependencies": {
+    "pontx-manager": "*"
+  },
+  "files": [
+    "package.json",
+    "lib"
+  ],
+  "keywords": [],
+  "author": "jasonHzq",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/fs-extra": "*",
+    "@types/lodash": "*",
+    "typescript": "^4.6.4"
+  }
+}

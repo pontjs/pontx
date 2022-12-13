@@ -1,13 +1,15 @@
 module.exports = {
-  preset: 'ts-jest',
+  transform: {
+    ".(ts|tsx)": "ts-jest",
+  },
   globals: {},
-  coverageDirectory: 'coverage',
-  coverageReporters: ['html', 'lcov', 'text'],
-  collectCoverageFrom: ['packages/*/src/**/*.ts'],
-  watchPathIgnorePatterns: ['/node_modules/'],
-  testEnvironment: 'node',
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'json'],
+  coverageDirectory: "coverage",
+  coverageReporters: ["html", "lcov", "text"],
+  collectCoverageFrom: ["packages/*/src/**/*.ts", "plugins/*/src/**/*.ts"],
+  watchPathIgnorePatterns: ["/node_modules/"],
+  testEnvironment: "node",
+  moduleFileExtensions: ["ts", "tsx", "js", "json"],
   moduleNameMapper: {},
   rootDir: __dirname,
-  testMatch: ['<rootDir>/packages/**/__tests__/**/*spec.[jt]s?(x)']
+  testMatch: ["<rootDir>/packages/**/tests/**/*spec.[jt]s?(x)", "<rootDir>/plugins/**/tests/**/*spec.[jt]s?(x)"],
 };

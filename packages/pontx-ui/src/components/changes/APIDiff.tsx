@@ -1,7 +1,7 @@
 import { PontAPI, Parameter, PontJsonSchema } from "pontx-spec";
 import { BaseClazzDiffOp } from "pontx-spec-diff";
 import * as React from "react";
-import ReactDiffViewer from "react-diff-viewer";
+import ReactDiffViewer from "react-diff-viewer-continued";
 import * as _ from "lodash";
 
 type DiffResult = {

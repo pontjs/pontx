@@ -1,12 +1,12 @@
 import fetch from "node-fetch";
 import * as _ from "lodash";
-import { InnerOriginConfig, PontFetchPlugin, PontLogger, PontManager } from "pontx-manager";
+import { InnerOriginConfig, PontxFetchPlugin, PontLogger, PontManager } from "pontx-manager";
 import { Translate } from "./translator";
 import * as fs from "fs-extra";
 import * as path from "path";
 
 let Translator: Translate;
-export default class PontMetaFetchPlugin extends PontFetchPlugin {
+export default class PontMetaFetchPlugin extends PontxFetchPlugin {
   /** 翻译中文类名等 */
   static async translateChinese(jsonString: string, errCallback: (err) => any) {
     let retString = jsonString;

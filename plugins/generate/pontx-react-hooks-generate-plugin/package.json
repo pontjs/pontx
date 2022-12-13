@@ -1,6 +1,6 @@
 {
   "name": "pontx-react-hooks-generate-plugin",
-  "version": "0.3.24",
+  "version": "0.3.25",
   "description": "OpenAPI pont spec",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -12,8 +12,9 @@
     "build": "npm run clean && tsc --build"
   },
   "dependencies": {
-    "pontx-generate-core": "^0.3.24",
-    "pontx-spec": "^0.3.24"
+    "pontx-generate": "^0.3.25",
+    "pontx-generate-core": "^0.3.25",
+    "pontx-spec": "^0.3.25"
   },
   "peerDependencies": {
     "fs-extra": "^10.1.0",

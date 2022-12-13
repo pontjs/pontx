@@ -237,8 +237,12 @@ export class PontManager {
   }
 
   static async generateCode(manager: PontManager) {
-    const generatorPlugin = await Promise.resolve(manager.innerManagerConfig.plugins.generate.instance);
-    return Promise.resolve(generatorPlugin.apply(manager, manager.innerManagerConfig.plugins.generate.options));
+    try {
+      const generatorPlugin = await Promise.resolve(manager.innerManagerConfig.plugins.generate.instance);
+      return Promise.resolve(generatorPlugin.apply(manager, manager.innerManagerConfig.plugins.generate.options));
+    } catch (e) {
+      manager.logger.error(e.message, e.stack);
+    }
   }
 
   // 展示方法

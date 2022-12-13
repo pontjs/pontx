@@ -1,8 +1,8 @@
 import { parseOAS2 } from "./parser";
-import { PontParserPlugin } from "pontx-manager";
+import { PontxParserPlugin } from "pontx-manager";
 import { PontSpec } from "pontx-spec";
 
-export class PontOAS2ParserPlugin extends PontParserPlugin {
+export class PontOAS2ParserPlugin extends PontxParserPlugin {
   apply(metaStr: string, specName: string, options?: any): Promise<PontSpec> {
     try {
       let swaggerObj = null;

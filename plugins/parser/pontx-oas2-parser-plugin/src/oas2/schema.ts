@@ -29,9 +29,17 @@ export function parseJsonSchema(schema: OAS2.SchemaObject, context = new JsonSch
       return new PontSpec.PontJsonSchema();
     }
 
-    const { typeName, templateArgs } = parseAst2PontJsonSchema(ast, context);
-    console.assert(context.defNames.includes(typeName) || PRIMITIVE_TYPES.includes(typeName), "$ref not valid");
-    resultSchema.typeName = typeName;
+    const { typeName, templateArgs, type: refType } = parseAst2PontJsonSchema(ast, context);
+    console.assert(
+      context.defNames.includes(typeName) || PRIMITIVE_TYPES.includes(typeName || refType),
+      "$ref not valid",
+    );
+    if (refType) {
+      resultSchema.type = refType as any;
+    }
+    if (typeName) {
+      resultSchema.typeName = typeName;
+    }
     resultSchema.templateArgs = templateArgs;
   } else if (type === "array" && items) {
     resultSchema = {

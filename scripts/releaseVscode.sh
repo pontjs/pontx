@@ -1,4 +1,5 @@
 npm run sync:package
+sleep 10
 cd packages/vscode-pontx
 echo 'deleting node_modules...'
 rm -rf node_modules

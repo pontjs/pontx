@@ -12,3 +12,22 @@
     }
   }
 }
+
+@delete-color: #b01011;
+@create-color: #007100;
+
+.pontx-ui-page {
+  .diff-page-header {
+    margin-bottom: 12px;
+    padding: 10px 20px;
+
+    &.create {
+      background-color: #eafded;
+      border: 1px solid @create-color;
+    }
+    &.delete {
+      background-color: #faeeef;
+      border: 1px solid @delete-color;
+    }
+  }
+}

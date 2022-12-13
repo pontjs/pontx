@@ -1,23 +1,20 @@
 "use sloppy";
 import { PontCore } from "./core";
 
-export const processSingleSpec = () => {
-  const globalAPI = (window as any).API;
-  if (!globalAPI) {
+export const processSingleSpec = (metaData, API: any, defs: any, hasModule = true) => {
+  if (!metaData) {
     return;
   }
-  PontCore.process(globalAPI);
+  PontCore.process(metaData, API, defs, hasModule);
 };
 
-export const processSpecs = () => {
-  const globalAPI = (window as any).API;
-
-  if (!globalAPI) {
+export const processSpecs = (metaData: any, API: any, defs: any, hasModule = true) => {
+  if (!metaData) {
     return;
   }
 
-  Object.keys(globalAPI).forEach((specName) => {
-    const spec = globalAPI[specName];
-    PontCore.process(spec);
+  Object.keys(metaData).forEach((specName) => {
+    const spec = metaData[specName];
+    PontCore.process(spec, API[specName], defs[specName], hasModule);
   });
 };

@@ -22,5 +22,11 @@
   },
   "[css]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "json.schemas": [
+    {
+      "fileMatch": ["/*-pontx-config.json"],
+      "url": "/packages/pontx-spec/configSchema.json"
+    }
+  ]
 }

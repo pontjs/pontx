@@ -246,13 +246,18 @@ export async function viewMetaFile(meta: {
   const isSingleSpec = PontManager.checkIsSingleSpec(meta.pontManager);
   let outDir = path.join(innerConf.outDir, "sdk");
   let outFile;
+  const specName = meta.specName;
+  let lockPath = path.join(outDir, specName, PontManager.lockFilename);
+  const hasLockPath = fs.existsSync(lockPath);
 
-  if (isSingleSpec) {
-    outFile = path.join(outDir, PontManager.lockFilename);
-  } else {
-    const specName = meta.specName;
-    outFile = path.join(outDir, specName, PontManager.lockFilename);
+  if (!hasLockPath) {
+    const newLockPath = path.join(outDir, PontManager.lockFilename);
+    if (fs.existsSync(newLockPath)) {
+      lockPath = newLockPath;
+    }
   }
+
+  outFile = lockPath;
   const textDocument = await vscode.workspace.openTextDocument(vscode.Uri.file(outFile));
   const activeEditor = await vscode.window.showTextDocument(textDocument);
   const textCode = textDocument.getText();

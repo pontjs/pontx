@@ -12,7 +12,24 @@ export const PrimitiveTypeMap = {
   void: { type: "void" },
   List: { type: "array" },
   Set: { type: "array" },
+  ArrayList: { type: "array" },
+  JSONArray: { type: "array" },
+  Array: { type: "array" },
   Collection: { type: "array" },
+  int: {
+    type: "number",
+    format: "int32",
+  },
+  long: {
+    type: "number",
+    format: "int64",
+  },
+  double: {
+    type: "number",
+  },
+  float: {
+    type: "number",
+  },
   Integer: {
     type: "number",
   },
@@ -142,20 +159,17 @@ export function hasChinese(str: string) {
 
 export function transformCamelCase(name: string) {
   let words = [] as string[];
-  let result = "";
-
-  if (name.includes("-")) {
-    words = name.split("-");
-  } else if (name.includes(" ")) {
-    words = name.split(" ");
-  } else {
-    if (typeof name === "string") {
-      result = name;
-    } else {
-      throw new Error("mod name is not a string: " + name);
-    }
+  if (typeof name !== "string") {
+    throw new Error("mod name is not a string: " + name);
   }
 
+  if (["-", " ", "_", "/", "^", "%", "*", "?", "="].some((char) => name.includes(char))) {
+    words = name.split(/[\s-_\/\^%\*\?\=]+/);
+  } else {
+    return name;
+  }
+
+  let result = "";
   if (words && words.length) {
     result = words
       .map((word) => {
@@ -202,7 +216,7 @@ export function processDuplicateInterfaceName(interfaces: PontAPI[], samePath: s
 
 /** 兼容某些项目把 swagger tag 的 name 和 description 弄反的情况 */
 export function processTag(tag: OAS2.TagObject) {
-  if (hasChinese(tag.name)) {
+  if (hasChinese(tag.name) || ["/"]?.some((char) => tag.name?.includes(char))) {
     // 当检测到name包含中文的时候，采用description
     return {
       title: tag.name,

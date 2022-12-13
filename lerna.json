@@ -4,7 +4,11 @@
     "plugins/**"
   ],
   "npmClient": "npm",
-  "version": "0.3.24",
+  "npmClientArgs": [
+    "--no-package-lock",
+    "--registry https://registry.npm.taobao.org"
+  ],
+  "version": "0.3.25",
   "command": {
     "bootstrap": {
       "npmClientArgs": [

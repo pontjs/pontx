@@ -177,9 +177,11 @@ function getMetaTypeByContextValue(contextValue: string) {
 }
 
 export class PontExplorer implements vscode.TreeDataProvider<PontChangeTreeItem | PontAPITreeItem> {
+  /** changes: diff(staged, remote) */
   specsDiffs: any[] = [];
-  // stagedChanges = [] as StagedChange[];
   stagedLocalSpecs = [] as PontSpec[];
+
+  /** staged changes: diffs(local, staged) */
   stagedDiffs: any[] = [];
   allDiffs: any[] = [];
 
@@ -455,8 +457,9 @@ export class PontExplorer implements vscode.TreeDataProvider<PontChangeTreeItem 
     const remoteSpec = getSpecByName(pontService.pontManager.remotePontSpecs, specName);
 
     return (mod?.interfaces || []).map((api: DiffResult<PontAPI>) => {
-      const localApi = localSpec?.apis?.[api.name];
-      const remoteApi = remoteSpec?.apis?.[api.name];
+      const apiKey = `${mod.name}/${api.name}`;
+      const localApi = localSpec?.apis?.[apiKey];
+      const remoteApi = remoteSpec?.apis?.[apiKey];
 
       return {
         label: api.name,
@@ -605,6 +608,7 @@ export class PontExplorer implements vscode.TreeDataProvider<PontChangeTreeItem 
     element?: PontChangeTreeItem | PontAPITreeItem,
   ): vscode.ProviderResult<(PontChangeTreeItem | PontAPITreeItem)[]> {
     if (!element) {
+      // todo
       const hasSingleSpec = this.allDiffs?.length <= 1 && !this.allDiffs[0]?.name;
       const diffCnt = hasSingleSpec ? PontExplorer?.getSpecCnt(this.allDiffs?.[0]) : this.allDiffs?.length;
 

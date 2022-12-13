@@ -4,7 +4,7 @@
  */
 import * as React from "react";
 import { Tab } from "@alicloud/console-components";
-import ReactDiffViewer from "react-diff-viewer";
+import ReactDiffViewer from "react-diff-viewer-continued";
 import { BaseClass } from "../docs/BaseClass";
 import { API } from "../docs/API";
 import * as PontSpec from "pontx-spec";

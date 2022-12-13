@@ -15,7 +15,7 @@ const processTypeNameMap = {
 
 export class PontLogger {
   log(message: string, logType = "info" as "info" | "error", stack?: any) {
-    console.log(message);
+    console.log(message, stack);
   }
 
   info(message: string) {

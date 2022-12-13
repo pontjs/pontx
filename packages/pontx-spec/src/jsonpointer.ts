@@ -79,7 +79,7 @@ function _set(json: any, nodes: JsonPointerNode[], newValue: any) {
   if (current.exp) {
     const { left, op, right } = current.exp;
     if (Array.isArray(json)) {
-      path = json.find((item) => judgeExp(item[left], op, right));
+      path = json.findIndex((item) => judgeExp(item[left], op, right));
       pathValue = path === -1 ? undefined : json[path];
       path = path === -1 ? 0 : path;
     }
@@ -142,8 +142,8 @@ function _removeMapKeyBy(json: any, nodes: JsonPointerNode[], checkRemoveKey: (k
 
   if (Array.isArray(value)) {
     newValue = value.filter((item, index) => !checkRemoveKey(index));
-  } else if (typeof newValue === "object") {
-    newValue = removeMapKeys(newValue, checkRemoveKey);
+  } else if (typeof value === "object") {
+    newValue = removeMapKeys(value, checkRemoveKey);
   }
   return _set(json, nodes, newValue);
 }
