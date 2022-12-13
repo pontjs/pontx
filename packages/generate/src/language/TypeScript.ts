@@ -9,8 +9,7 @@ export const apiComment = (api: PontSpec.PontAPI) => {
   const summary = api.summary ? `\n * @summary: ${api.summary}` : "";
   const deprecated = api.deprecated ? `\n * @deprecated` : "";
 
-  return `/**${path}${desc}${summary || title}${deprecated}\n */
-  `;
+  return `/**${path}${desc}${summary || title}${deprecated}\n */\n`;
 };
 
 export const generateSchemaCode = (schema: PontSpec.PontJsonSchema, specName?: string) => {
@@ -150,5 +149,5 @@ export const generateApiRequestCode = (api: PontSpec.PontAPI, specName: string) 
     return `(params: Params, bodyParams: ${bodyParamType}): Promise<Response>`;
   }
 
-  return `(params: Params): Promise<Response>`;
+  return `(params: Params): Promise<APIReponse>`;
 };
