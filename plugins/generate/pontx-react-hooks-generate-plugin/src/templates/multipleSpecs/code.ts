@@ -49,7 +49,7 @@ export const apiTsCode = (api: PontSpec.PontAPI, name: string, specName: string)
     `const Methods = getAPIMethods({ path: '${api.path}', method: '${api.method}', hasBody: ${hasBody} });`,
     ``,
     `export ${paramTypes};`,
-    `export type Reponse = ${TypeScriptGenerator.generateSchemaCode(api.responses["200"]?.schema)};`,
+    `export type APIReponse = ${TypeScriptGenerator.generateSchemaCode(api.responses["200"]?.schema)};`,
     `type HooksParams = (() => Params) | Params;`,
     `export const trigger: (params?: HooksParams, shouldRevalidate?: boolean) => any = Methods.trigger;`,
     `type Mutate = (params?: HooksParams, newValue?: any, shouldRevalidate?: boolean) => any`,
@@ -60,7 +60,7 @@ export const apiTsCode = (api: PontSpec.PontAPI, name: string, specName: string)
     `export const ${isGet ? "useRequest" : "useDeprecatedRequest"}: {
   (params?: HooksParams, options?: ConfigInterface): {
     isLoading: boolean;
-    data: Response;
+    data: APIReponse;
     error: Error;
     mutate: Mutate;
   }
@@ -89,7 +89,8 @@ ${_.map(spec.definitions, (schema, name) => {
 export namespace API {
   ${_.map(spec.apis, (api, name) => {
     const apiContentTsCode = indentation(2)(apiTsCode(api, name, ""));
-    const apiNamespaceCode = indentation(2)(`export namespace ${name} {
+    const apiCommentCode = TypeScriptGenerator.apiComment(api);
+    const apiNamespaceCode = indentation(2)(`${apiCommentCode}export namespace ${name} {
 ${apiContentTsCode}
 };`);
     return apiNamespaceCode;

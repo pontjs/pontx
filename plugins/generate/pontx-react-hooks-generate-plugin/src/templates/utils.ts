@@ -24,3 +24,8 @@ export async function getBuiltinStructure() {
 
   return builtinStructure;
 }
+
+export class GeneratorConfig {
+	/** 生成全局定义 */
+	useGlobalDefine = false;
+}

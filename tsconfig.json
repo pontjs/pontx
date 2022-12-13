@@ -9,6 +9,7 @@
       "pontx-spec": ["packages/pontx-spec"],
       "pontx-spec-diff": ["packages/pontx-spec-diff"],
       "pontx-manager": ["packages/pontx-manager"],
+      "pontx-generate": ["packages/generate"],
       "oas-spec-ts": ["packages/oas-spec-ts"],
       "pontx-cli": ["packages/pontx-cli"],
       "pontx-ui": ["packages/pontx-ui"],
@@ -36,6 +37,9 @@
     },
     {
       "path": "packages/pontx-manager"
+    },
+    {
+      "path": "packages/generate"
     },
     {
       "path": "packages/oas-spec-ts"

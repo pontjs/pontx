@@ -77,9 +77,5 @@
     "webpack-cli": "^4.10.0",
     "webpack-node-externals": "^3.0.0",
     "yorkie": "^2.0.0"
-  },
-  "workspaces": [
-    "packages/**",
-    "plugins/**"
-  ]
+  }
 }
