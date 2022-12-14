@@ -224,12 +224,15 @@ export async function findInterface(editor: vscode.TextEditor, hasMultiOrigins: 
     }
   }
 
-  const apiKey = wordsWithOrigin.slice(offsetIndex + 1).join(".");
+  const apiKey = wordsWithOrigin.slice(offsetIndex + 1).join("/");
+  const nameWords = wordsWithOrigin.slice(offsetIndex + 1);
   const api = PontJsonPointer.get(localSpecs, `${specIndex}.apis.[${apiKey}]`);
   if (api) {
     return {
       specName: localSpecs[specIndex]?.name || "",
       apiName: api?.name,
+      apiKey,
+      modName: nameWords?.length > 1 ? nameWords[0] : "",
     };
   }
 }

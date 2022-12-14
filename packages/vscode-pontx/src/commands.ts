@@ -316,7 +316,7 @@ export class PontCommands {
         name: result.apiName,
         pageType: "document",
         schemaType: "api",
-        spec: spec?.apis?.[`${result.apiName}`],
+        spec: spec?.apis?.[`${result.apiKey}`],
       });
     });
 
