@@ -16,27 +16,14 @@ export const getRuntimeAPIMetaCode = (api: PontSpec.PontAPI) => {
 };
 
 export const entryIndexTs = (specs: PontSpec.PontSpec[]) =>
-  `${specs
-    .map((spec) => `import { defs as ${spec.name}Defs, API as ${spec.name}API } from "./${spec.name}/index";`)
-    .join("\n")}
+  `${specs.map((spec) => `import * as ${spec.name}SDK from "./${spec.name}/index";`).join("\n")}
 
 export namespace API {
-${specs
-  .map((spec) =>
-    [`  export const ${spec.name} = ${spec.name}API;`, `  export type ${spec.name} = typeof ${spec.name}API;`].join(
-      "\n",
-    ),
-  )
-  .join("\n\n")}
+${specs.map((spec) => `  export import ${spec.name} = ${spec.name}SDK.API;`).join("\n")}
 }
 
 export namespace defs {
-${specs
-  .map((spec) => {
-    return `  export const ${spec.name} = ${spec.name}Defs;
-  export type ${spec.name} = typeof ${spec.name}Defs;`;
-  })
-  .join("\n\n")}
+${specs.map((spec) => `  export import ${spec.name} = ${spec.name}SDK.defs;`).join("\n")}
 }
 `;
 

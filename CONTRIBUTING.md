@@ -22,7 +22,15 @@ npm run ui
 ## release
 
 ```sh
-npm run release
+lerna bootstrap
+# 构建
+npm run build
+# 发布 npm 包
+npm run release:npm
+# 可选，同步到不同公司内部仓库。
+npm run sync:npm
+# 发布 vscode 插件市场
+npm run release:vscode
 ```
 
 ## Debug with VSCode
