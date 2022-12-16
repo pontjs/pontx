@@ -8,6 +8,7 @@ import immutableSet from "lodash/fp/set";
 import * as _ from "lodash";
 import { FileGenerator } from "pontx-generate-core";
 import { fetchRemoteCacheSpec } from "./utils";
+import stringify from "fast-json-stable-stringify";
 
 const enhancedImmutableUpdate = (path: any[], updator, value) => {
   if (!path?.length) {
@@ -232,7 +233,12 @@ export class PontManager {
 
     return {
       ...manager,
-      remotePontSpecs: remoteSpecs.filter((spec) => spec),
+      remotePontSpecs: remoteSpecs
+        .filter((spec) => spec)
+        .map((spec) => {
+          const stringifiedSpec = stringify(spec);
+          return JSON.parse(stringifiedSpec);
+        }),
     };
   }
 

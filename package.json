@@ -12,6 +12,7 @@
     "build:vscode": "cd packages/pontx-ui && npm run build && cd ../vscode-pontx/media && npm run build && cd ../ && npm run build",
     "build": "lerna bootstrap && tsc --build && npm run build:commonjs && npm run build:vscode",
     "start": "tsc --build -w",
+    "watch": "concurrently 'npm start' 'npm run build:commonjs:watch'",
     "ui": "cd packages/pontx-ui && npm run start",
     "vs-ui": "cd packages/pontx-ui && npm run build && cd ../vscode-pontx/media && npm run build",
     "clean": "lerna clean && rimraf ./node_modules",

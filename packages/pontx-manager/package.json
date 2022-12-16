@@ -10,6 +10,7 @@
     "build": "npm run clean && tsc --build"
   },
   "dependencies": {
+    "fast-json-stable-stringify": "^2.1.0",
     "fs-extra": "^10.1.0",
     "lodash": "*",
     "pontx-generate-core": "^0.3.28",

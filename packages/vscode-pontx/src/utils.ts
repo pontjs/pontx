@@ -222,6 +222,10 @@ export async function findInterface(editor: vscode.TextEditor, hasMultiOrigins: 
       offsetIndex = 1;
       specIndex = localSpecs?.findIndex((spec) => spec.name === wordsWithOrigin[offsetIndex]);
     }
+    if (specIndex < 0) {
+      offsetIndex = 1;
+      specIndex = 0;
+    }
   }
 
   const apiKey = wordsWithOrigin.slice(offsetIndex + 1).join("/");

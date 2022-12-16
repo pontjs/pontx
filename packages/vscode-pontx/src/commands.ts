@@ -35,7 +35,7 @@ export class PontCommands {
           return {
             label: `${inter.method ? `[${inter.method}] ` : ""}${inter.path ? inter.path : inter.name}`,
             detail: `${pontSpec.name ? pontSpec.name + "." : ""}${hasSingleMod ? "" : mod.name + "."}${inter.name}`,
-            description: `${inter.description || inter.summary}`,
+            description: `${inter.description || inter.summary || ""}`,
           };
         });
       })
