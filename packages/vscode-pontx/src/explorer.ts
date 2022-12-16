@@ -457,7 +457,7 @@ export class PontExplorer implements vscode.TreeDataProvider<PontChangeTreeItem 
     const remoteSpec = getSpecByName(pontService.pontManager.remotePontSpecs, specName);
 
     return (mod?.interfaces || []).map((api: DiffResult<PontAPI>) => {
-      const apiKey = `${mod.name}/${api.name}`;
+      const apiKey = modName ? `${mod.name}/${api.name}` : api.name;
       const localApi = localSpec?.apis?.[apiKey];
       const remoteApi = remoteSpec?.apis?.[apiKey];
 
