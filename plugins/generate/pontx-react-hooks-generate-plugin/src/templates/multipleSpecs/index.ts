@@ -2,7 +2,7 @@ import { GetFilesBySpecs, SnippetsProvider } from "pontx-generate";
 import * as _ from "lodash";
 import { getBuiltinStructure } from "../utils";
 
-import { apiTsCode, entryIndexTs, getRuntimeAPIMetaCode, specIndexTs } from "./code";
+import { apiTsCode, entryAPITs, entryDefsTs, entryIndexTs, getRuntimeAPIMetaCode, specIndexTs } from "./code";
 import { specIndexTsWithModule } from "./useModule";
 import { PontSpec, PontManager } from "pontx-manager";
 import { WithoutModsName } from "pontx-spec";
@@ -57,5 +57,7 @@ export const getFilesBySpecs: GetFilesBySpecs = async (origins) => {
     ...specDirs,
     builtin: builtinStructure,
     "index.ts": entryIndexTs(specs),
+    "API.ts": entryAPITs(specs),
+    "defs.ts": entryDefsTs(specs),
   };
 };

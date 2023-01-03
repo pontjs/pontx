@@ -4,14 +4,14 @@
 [![Installs](https://img.shields.io/visual-studio-marketplace/i/jasonhzq.vscode-pontx)](https://marketplace.visualstudio.com/items?itemName=jasonHzq.vscode-pontx)
 [![Ratings](https://img.shields.io/visual-studio-marketplace/r/jasonhzq.vscode-pontx)](https://marketplace.visualstudio.com/items?itemName=jasonHzq.vscode-pontx)
 
-[pontx](https://github.com/pontjs/pontx) is a lightweight and universal API lifecycle management and API develop tools. Supporting API writing, documentation, API changes analysis, API searching, debugging, generating auto mocks data, multiple and custom SDK generating...
+[pontx](https://github.com/pontjs/pontx) is a lightweight API management tools. Supporting API searching, documentation, debug, design, changement analysis, mocks data auto generating and serving, SDK generating...
 
-pontx provide multiple style of service, like CLI、VSCode IDE Extension、Platform.
+pontx provide different types of services: CLI、VSCode IDE Extension、Platform e.g.
 
-pontx can be highly customed and extended with full lifecle plugin. [Plugin developer reference document](https://github.com/pontjs/pontx/blob/main/PluginContribution.md)
+pontx can be highly customed with full lifecle plugin. [Plugin development guide](https://github.com/pontjs/pontx/blob/main/PluginContribution.md)
 
 ## Quick Start
-  Once the pontx configuration file named `pontx-config.json` is detected, Pontx will start.
+  Once the pontx configuration file named `pontx-config.json` is detected, Pontx will be automatic activated.
 
   ### Settings
 

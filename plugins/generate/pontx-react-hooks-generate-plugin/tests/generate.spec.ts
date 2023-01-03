@@ -2,7 +2,7 @@ jest.setTimeout(300000);
 
 import * as assert from "assert";
 import * as path from "path";
-import httpServer = require("http-server");
+import * as httpServer from "http-server";
 import * as fs from "fs-extra";
 import { PontManager } from "pontx-manager";
 
@@ -38,7 +38,7 @@ describe("pont功能测试", () => {
 
     server.listen({ port: 9099 }, async () => {
       console.log("http server start successfull");
-      manager = await createManager("multiple-origins-pontx-config.json");
+      manager = (await createManager("multiple-origins-pontx-config.json"))!;
       await PontManager.generateCode(manager);
 
       done();
@@ -53,9 +53,9 @@ describe("pont功能测试", () => {
   });
 
   test("index.ts should exists", () => {
-    assert.ok(exists("apis/index.ts"));
-    assert.ok(exists("apis/api1/index.ts"));
-    assert.ok(exists("apis/api2/index.ts"));
+    assert.ok(exists("apis/sdk/index.ts"));
+    assert.ok(exists("apis/sdk/api1/index.ts"));
+    assert.ok(exists("apis/sdk/api2/index.ts"));
   });
 
   // const idnexTs = fs.readFileSync(path.join(projectTestPath, "apis/sdk", "index.d.ts"), "utf8");

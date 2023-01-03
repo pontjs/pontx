@@ -4,6 +4,7 @@ const packages = [
   "jsonschema-form",
   "pontx-cli",
   "pontx-manager",
+  "pontx-generate",
   "pontx-spec",
   "pontx-spec-diff",
   "pontx-ui",
