@@ -16,16 +16,20 @@ export const getRuntimeAPIMetaCode = (api: PontSpec.PontAPI) => {
 };
 
 export const entryIndexTs = (specs: PontSpec.PontSpec[]) =>
-  `${specs.map((spec) => `import * as ${spec.name}SDK from "./${spec.name}/index";`).join("\n")}
+  `import * as API from "./API";
+import * as defs from "./defs";
 
-export namespace API {
-${specs.map((spec) => `  export import ${spec.name} = ${spec.name}SDK.API;`).join("\n")}
-}
-
-export namespace defs {
-${specs.map((spec) => `  export import ${spec.name} = ${spec.name}SDK.defs;`).join("\n")}
+export {
+  API,
+  defs
 }
 `;
+
+export const entryAPITs = (specs: PontSpec.PontSpec[]) =>
+  `${specs.map((spec) => `export { API as ${spec.name} } from "./${spec.name}/index";`).join("\n") + "\n"}`;
+
+export const entryDefsTs = (specs: PontSpec.PontSpec[]) =>
+  `${specs.map((spec) => `export { defs as ${spec.name} } from "./${spec.name}/index";`).join("\n") + "\n"}`;
 
 export const apiTsCode = (api: PontSpec.PontAPI, name: string, specName: string) => {
   const paramTypes = TypeScriptGenerator.generateParametersTsCode(api, specName);
