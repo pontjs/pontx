@@ -5,8 +5,8 @@ const fs = require("fs-extra");
 const path = require("path");
 
 // 校验示例项目
-const examplePontConfig = require("../examples/hooks-app/config/pont-config.json");
-if (examplePontConfig.url !== "https://petstore.swagger.io/v2/swagger.json") {
+const examplePontConfig = require("../examples/hooks-app/config/pontx-config.json");
+if (examplePontConfig.origin && examplePontConfig.origin.url !== "https://petstore.swagger.io/v2/swagger.json") {
   console.log();
   console.error(`  ${chalk.red(`[ERROR]: examples/hooks-app pont-config url 不合法`)}\n\n`);
 

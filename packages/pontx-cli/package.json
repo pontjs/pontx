@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "chalk": "^4.1.2",
+    "signale": "1.4.0",
     "commander": "^9.2.0",
     "pontx-manager": "^0.3.32",
     "pontx-meta-fetch-plugin": "^0.3.32",

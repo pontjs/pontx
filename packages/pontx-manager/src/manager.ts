@@ -118,7 +118,7 @@ export class PontManager {
   static async privateReadLockFile(manager: PontManager) {
     const origins = manager.innerManagerConfig.origins;
 
-    if (origins?.length === 1) {
+    if (origins?.length === 1 && !origins[0]?.name) {
       let lockFile = path.join(manager.innerManagerConfig.outDir, "sdk", PontManager.lockFilename);
       const isExists = fs.existsSync(lockFile);
       if (isExists) {
