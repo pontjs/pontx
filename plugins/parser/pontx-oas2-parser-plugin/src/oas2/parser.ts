@@ -51,7 +51,7 @@ export function parseOAS2Interface(
     consumes: inter.consumes,
     description: inter.description,
     name,
-    method,
+    method: method?.toUpperCase?.() || method,
     path,
     responses,
     deprecated: inter.deprecated,
