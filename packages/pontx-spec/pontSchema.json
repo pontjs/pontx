@@ -19,8 +19,8 @@
       }
     },
     "directories": {
-      "type": "object",
-      "additionalProperties": {
+      "type": "array",
+      "items": {
         "$ref": "#/definitions/directory"
       }
     },

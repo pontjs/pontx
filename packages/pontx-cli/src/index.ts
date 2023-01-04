@@ -2,7 +2,7 @@ import { program } from "commander";
 import * as path from "path";
 import * as fs from "fs-extra";
 import { PontManager, PontLogger } from "pontx-manager";
-import { cliLog, error } from "./debugLog";
+import { cliLog, logger } from "./debugLog";
 import "pontx-meta-fetch-plugin";
 import "pontx-oas2-parser-plugin";
 import "pontx-react-hooks-generate-plugin";
@@ -19,12 +19,18 @@ program.description("powerful api code generator");
 (async function () {
   try {
     const rootDir = process.cwd();
-    const logger = new PontLogger();
-    logger.log = cliLog;
+    const pontLogger = new PontLogger();
+    pontLogger.log = cliLog;
 
-    let manager = await PontManager.constructorFromRootDir(rootDir, logger);
+    logger.pending("Pontx CLI 启动中...");
+    let manager = await PontManager.constructorFromRootDir(rootDir, pontLogger);
 
-    manager = await PontManager.readLocalPontMeta(manager).then(PontManager.fetchRemotePontMeta);
+    logger.success("Pontx CLI 启动成功！");
+
+    manager = await PontManager.readLocalPontMeta(manager);
+    logger.success("Pontx 本地数据读取成功！");
+    manager = await PontManager.fetchRemotePontMeta(manager);
+    logger.success("Pontx 远程数据拉取成功！");
 
     program
       .command("check")
@@ -34,13 +40,6 @@ program.description("powerful api code generator");
         manager = await PontManager.readLocalPontMeta(manager);
 
         process.exit(0);
-      });
-
-    program
-      .command("ls")
-      .description("查看数据源")
-      .action(() => {
-        manager.logger.info(manager.innerManagerConfig.origins.map((origin) => origin.name).join("\n"));
       });
 
     program
@@ -99,12 +98,15 @@ program.description("powerful api code generator");
       .description("拉取远程数据源并生成代码")
       .action(async () => {
         manager.localPontSpecs = manager.remotePontSpecs;
-        PontManager.generateCode(manager);
+        logger.success("Pontx 已切换使用最新远程数据");
+        await PontManager.generateCode(manager);
+        logger.success("Pontx SDK 生成完毕!");
       });
 
     program.parse(process.argv);
   } catch (e) {
-    console.error(e.stack);
-    error(e.toString());
+    cliLog(e.message, "error");
+    // console.error(e.stack);
+    // error(e.toString());
   }
 })();

@@ -1,40 +1,23 @@
 const chalk = require("chalk");
-const log = console.log;
+const { Signale } = require("signale");
 
-export function bindInfo(onLog) {
-  return (message: string) => {
-    onLog && onLog(message);
-    info(message);
-  };
-}
+const logger = new Signale();
+logger.config({
+  displayTimestamp: true,
+});
 
-export function info(info: string) {
-  log(chalk.bold.blue(info));
-}
-
-export function error(info: string) {
-  log(chalk.bold.red(info));
-}
-
-export function warn(info: string) {
-  log(chalk.bold.yellow(info));
-}
-
-export function success(info: string) {
-  log(chalk.bold.green(info));
-}
+export { logger };
 
 export function cliLog(message: string, logType: string) {
   switch (logType) {
     case "info": {
-      log(chalk.bold.blue(message));
+      logger.info(message);
       break;
     }
     case "error": {
-      log(chalk.bold.red(message));
+      logger.error(message);
       process.exit(1);
       break;
     }
   }
-  console.log(message);
 }

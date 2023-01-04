@@ -13,9 +13,9 @@ pontx can be highly customed with full lifecle plugin. [Plugin development guide
 ## Quick Start
   Once the pontx configuration file named `pontx-config.json` is detected, Pontx will be automatic activated.
 
-  ### Settings
+### Settings
 
-  #### Settings Sample
+#### Settings Sample
 
   ```json
   {
@@ -38,6 +38,20 @@ pontx can be highly customed with full lifecle plugin. [Plugin development guide
   }
   ```
 
+#### VSCode Extension Guide
+
+ * Extension UI Guide
+
+![VSCode Extension Guide](https://img.alicdn.com/imgextra/i3/O1CN01AWodzd1KMkHYgvhiW_!!6000000001150-2-tps-1854-1396.png)
+
+ * API changes management
+
+![API changement manage](https://img.alicdn.com/imgextra/i4/O1CN01CJgI7L1Q2wr6VsN3r_!!6000000001919-2-tps-882-366.png)
+
+ * API Searching
+
+![API Serching](https://img.alicdn.com/imgextra/i3/O1CN01gcgW4z1iVUcgbdpNK_!!6000000004418-2-tps-1750-532.png)
+
 ## Features Overview
 
 ### API Fetching & Parse
@@ -46,16 +60,20 @@ With Pontx, you can fetch API meta data from different and parse to [`Pontx Spec
 
 ### SDK Genenrating
 
-you can generate different sdk code by Pontx generate plugin or your custom generate plugin.
+You can generate SDK codes in different languages by using different Pontx generate plugin, or your can writing your custom SDK generate plugin.
 
 ### API Searching
 
-search API by shortcut key `cmd + ctrl + p`. or click search icon in Pontx panel.
+Searching API by shortcut key `cmd + ctrl + p`. Or click search icon in Pontx panel.
 
-### API documentation
+### Other Features
 
-### API changing management
+* API documentation
 
-### API editing
+* API changes management
 
-### API mocks
+* API design
+
+* API mocks
+
+* ...

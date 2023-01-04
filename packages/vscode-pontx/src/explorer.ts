@@ -551,7 +551,7 @@ export class PontExplorer implements vscode.TreeDataProvider<PontChangeTreeItem 
 
       return [
         {
-          label: `Staged Changes(${stagedItemCnt})`,
+          label: `Staged Changes(${stagedItemCnt || 0})`,
           description: "已暂存的变更",
           tooltip: "按需更新远程的变更",
           contextValue: "StagedChanges",
@@ -559,7 +559,7 @@ export class PontExplorer implements vscode.TreeDataProvider<PontChangeTreeItem 
           collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
         },
         {
-          label: `Changes(${changesItemCnt})`,
+          label: `Changes(${changesItemCnt || 0})`,
           description: "远程API更新",
           tooltip: "按需更新远程的变更",
           contextValue: "Changes",
