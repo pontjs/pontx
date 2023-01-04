@@ -27,6 +27,9 @@ export function getAPIMethods(apiMetaData: any) {
     useRequest: (params = {}, swrOptions = {}) => {
       return PontCore.useRequest(path, params, swrOptions);
     },
+    useDeprecatedRequest: (params = {}, swrOptions = {}) => {
+      return PontCore.useRequest(path, params, swrOptions, { method });
+    },
     request: (params = {}, options = {}) => {
       return PontCore.fetch(PontCore.getUrl(path, params, method), {
         method,

@@ -55,7 +55,7 @@ export const apiTsCode = (api: PontSpec.PontAPI, name: string, specName: string)
     error: Error;
     mutate: Mutate;
   }
-} = Methods.useRequest;`,
+} = Methods.${isGet ? "useRequest" : "useDeprecatedRequest"};`,
   ].join("\n");
 
   return code;
