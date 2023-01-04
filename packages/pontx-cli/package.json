@@ -1,6 +1,6 @@
 {
   "name": "pontx-cli",
-  "version": "0.3.32",
+  "version": "0.3.33",
   "description": "Pontx CLI",
   "bin": {
     "pontx": "bin/init.js"
@@ -18,12 +18,12 @@
   },
   "dependencies": {
     "chalk": "^4.1.2",
-    "signale": "1.4.0",
     "commander": "^9.2.0",
-    "pontx-manager": "^0.3.32",
-    "pontx-meta-fetch-plugin": "^0.3.32",
-    "pontx-oas2-parser-plugin": "^0.3.32",
-    "pontx-react-hooks-generate-plugin": "^0.3.32"
+    "pontx-manager": "^0.3.33",
+    "pontx-meta-fetch-plugin": "^0.3.33",
+    "pontx-oas2-parser-plugin": "^0.3.33",
+    "pontx-react-hooks-generate-plugin": "^0.3.33",
+    "signale": "1.4.0"
   },
   "files": [
     "bin",
