@@ -33,11 +33,12 @@ export const entryDefsTs = (specs: PontSpec.PontSpec[]) =>
 
 export const apiTsCode = (api: PontSpec.PontAPI, name: string, specName: string) => {
   const paramTypes = TypeScriptGenerator.generateParametersTsCode(api, specName);
-  const isGet = api.method?.toUpperCase() === "GET";
+  const method = api.method?.toUpperCase?.();
+  const isGet = method === "GET";
   const hasBody = api.parameters?.some((param) => param?.in === "body");
 
   const code = [
-    `const Methods = getAPIMethods({ path: '${api.path}', method: '${api.method}', hasBody: ${hasBody} });`,
+    `const Methods = getAPIMethods({ path: '${api.path}', method: '${method}', hasBody: ${hasBody} });`,
     ``,
     `export ${paramTypes};`,
     `export type APIReponse = ${TypeScriptGenerator.generateSchemaCode(api.responses["200"]?.schema)};`,
