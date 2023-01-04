@@ -11,8 +11,8 @@
     "build": "npm run clean && tsc --build"
   },
   "dependencies": {
-    "oas-spec-ts": "^0.3.34",
-    "pontx-spec": "^0.3.34"
+    "oas-spec-ts": "^0.3.35",
+    "pontx-spec": "^0.3.35"
   },
   "peerDependencies": {
     "lodash": "*",
