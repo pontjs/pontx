@@ -60,12 +60,26 @@ export const generateSchemaCode = (schema: PontSpec.PontJsonSchema, specName?: s
     }
     case "object": {
       if (schema?.properties) {
-        return `{ ${Object.keys(schema.properties)
-          .map((propName) => {
-            const key = needQuotationMark(propName) ? `'${propName}'` : propName;
-            return `${key}: ${generateSchemaCode(schema.properties?.[key] as PontSpec.PontJsonSchema, specName)}`;
-          })
-          .join("; ")} }`;
+        return `{\n${indentation(2)(
+          Object.keys(schema.properties)
+            .map((propName) => {
+              let key = needQuotationMark(propName) ? `'${propName}'` : propName;
+              const struct = schema.properties?.[key];
+              const desc = struct?.description || struct?.title;
+              let comment = "";
+              if (desc) {
+                comment = `/** ${desc} */\n`;
+              }
+              if (!struct?.required) {
+                key = key + "?";
+              }
+              return `${comment}${key}: ${generateSchemaCode(
+                schema.properties?.[propName] as PontSpec.PontJsonSchema,
+                specName,
+              )}`;
+            })
+            .join(";\n"),
+        )} }`;
       }
     }
   }
