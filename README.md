@@ -1,21 +1,30 @@
 # Pontx
 
-[![Version](https://img.shields.io/visual-studio-marketplace/v/jasonhzq.vscode-pontx)](https://marketplace.visualstudio.com/items?itemName=jasonHzq.vscode-pontx)
-[![Installs](https://img.shields.io/visual-studio-marketplace/i/jasonhzq.vscode-pontx)](https://marketplace.visualstudio.com/items?itemName=jasonHzq.vscode-pontx)
-[![Ratings](https://img.shields.io/visual-studio-marketplace/r/jasonhzq.vscode-pontx)](https://marketplace.visualstudio.com/items?itemName=jasonHzq.vscode-pontx)
+<p align="center">
+    <img width="200" src="https://img.alicdn.com/imgextra/i1/O1CN01DfTvFn1MjlQ9g9Dmn_!!6000000001471-2-tps-200-200.png">
+</p>
 
-[pontx](https://github.com/pontjs/pontx) is a lightweight API management tools. Supporting API searching, documentation, debug, design, changement analysis, mocks data auto generating and serving, SDK generating...
+<h1 align="center">PontX</h1>
+
+
+[Pontx](https://github.com/pontjs/pontx) is a lightweight API management tools. Supporting API searching, documentation, debug, design, changement analysis, mocks data auto generating and serving, SDK generating...
 
 pontx provide different types of services: CLI、VSCode IDE Extension、Platform e.g.
 
 pontx can be highly customed with full lifecle plugin. [Plugin development guide](https://github.com/pontjs/pontx/blob/main/PluginContribution.md)
 
+简体中文 | [English](./README.en-US.md)
+
+## Installing
+
 ## Quick Start
   Once the pontx configuration file named `pontx-config.json` is detected, Pontx will be automatic activated.
 
-### Settings
+### Pontx Configuration
 
-#### Settings Sample
+pontx-config.json 
+
+#### Configuration Sample
 
   ```json
   {
@@ -37,8 +46,15 @@ pontx can be highly customed with full lifecle plugin. [Plugin development guide
     }]
   }
   ```
+  
+  For more Pontx Configuration detail, see the [Pontx Configuration Guide](./Configuration.md).
+
 
 #### VSCode Extension Guide
+
+[![Version](https://img.shields.io/visual-studio-marketplace/v/jasonhzq.vscode-pontx)](https://marketplace.visualstudio.com/items?itemName=jasonHzq.vscode-pontx)
+[![Installs](https://img.shields.io/visual-studio-marketplace/i/jasonhzq.vscode-pontx)](https://marketplace.visualstudio.com/items?itemName=jasonHzq.vscode-pontx)
+[![Ratings](https://img.shields.io/visual-studio-marketplace/r/jasonhzq.vscode-pontx)](https://marketplace.visualstudio.com/items?itemName=jasonHzq.vscode-pontx)
 
  * Extension UI Guide
 
@@ -52,7 +68,11 @@ pontx can be highly customed with full lifecle plugin. [Plugin development guide
 
 ![API Serching](https://img.alicdn.com/imgextra/i3/O1CN01gcgW4z1iVUcgbdpNK_!!6000000004418-2-tps-1750-532.png)
 
-## Features Overview
+For more Pontx VSCode Extension details, see the [Pontx VSCode Extension Guide](./VSCodeExtensionGuide.md).
+
+#### Pontx CLI Guide
+
+## Plugins & Tools
 
 ### API Fetching & Parse
 

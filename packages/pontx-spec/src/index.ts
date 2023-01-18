@@ -13,9 +13,9 @@ type ResponseObject = {
   description?: string;
 };
 export class PontAPI {
-  consumes: string[];
+  consumes?: string[] = [];
   parameters: Parameter[];
-  description: string;
+  description?: string;
   responses: {
     [key: string]: ResponseObject;
   };
@@ -58,6 +58,7 @@ export class Mod {
 
 export class PontSpec {
   public name: string;
+  public description?: string;
   public definitions: ObjectMap<PontJsonSchema>;
   /** 如果有 namespace，则 map key 可能为 namespace.apiName，否则为 apiName */
   public apis: ObjectMap<PontAPI>;

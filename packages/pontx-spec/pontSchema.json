@@ -9,6 +9,10 @@
     "name": {
       "type": "string"
     },
+    "description": {
+      "type": "string",
+      "title": "元数据描述"
+    },
     "definitions": {
       "$ref": "#/definitions/definitions"
     },
