@@ -4,13 +4,13 @@ import * as PontSpec from "pontx-spec";
 export type DiffResult<T> = T & { diffs: { [key in keyof T]: any }; diffType: "update" | "create" | "delete" };
 
 export function diffList<T>(localList: T[], remoteList: T[], diffId = "name", customDiff) {
-  const creates = _.differenceBy(remoteList, localList, diffId).map((schema) => {
+  const creates = _.differenceBy(remoteList, localList, diffId as any).map((schema) => {
     return {
       ...schema,
       diffType: "create",
     };
   });
-  const deletes = _.differenceBy(localList, remoteList, diffId).map((schema) => {
+  const deletes = _.differenceBy(localList, remoteList, diffId as any).map((schema) => {
     return {
       ...schema,
       diffType: "delete",
