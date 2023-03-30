@@ -10,7 +10,7 @@ export function diffList<T>(
   customDiff = {} as CustomDiff,
 ): DiffResult[] {
   const diffId = "name";
-  const creates = _.differenceBy(remoteList, localList, diffId).map((schema) => {
+  const creates = _.differenceBy(remoteList, localList, diffId as any).map((schema) => {
     return {
       [diffId]: schema[diffId],
       remoteValue: schema,
@@ -18,7 +18,7 @@ export function diffList<T>(
       type: "create",
     };
   });
-  const deletes = _.differenceBy(localList, remoteList, diffId).map((schema) => {
+  const deletes = _.differenceBy(localList, remoteList, diffId as any).map((schema) => {
     return {
       [diffId]: schema[diffId],
       localValue: schema,

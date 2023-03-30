@@ -21,6 +21,7 @@ lib/services/
 .idea/
 test/services/
 lib/
+scripts/dev/
 yarn-error.log
 packages/vscode-pontx/out/
 .vscode-test/
