@@ -48,26 +48,36 @@ Debug vscode-pontx by select "Debug Extension" in VSCode Debug Panel.
 
 ## 设计理念
 
-拥抱标准、插件化、合理分包，每个包可单独引用。
+拥抱标准、插件化。内核能力基于半结构数据管理框架支持。
 
 ## 规划
 
 ## pontx architecture
 
-![architecture image](https://img.alicdn.com/imgextra/i2/O1CN01qfxgje261ldyXx5rl_!!6000000007602-2-tps-1504-370.png)
-
 ### kernel
 
 - pontx-spec
   描述 Pont 标准数据源的类型，提供 Pont 标准数据源的常用数据处理方法。
-  新版 Pont 标准数据源做了升级，全面拥抱 JSON Schema 标准。
+  新版 Pont 标准数据源做了升级，拥抱 JSONSchema 标准。
 
 - pontx-manager
-  pont 核心包，包括配置文件解析、不同生命周期的插件加载和执行
+  提供 pontx 管理类，主要提供如下能力。
+
+  * 加载 pontx 配置，构建 pontx 管理类
+  * 不同生命周期插件加载和执行
 
 - pontx-ui
 
-以 pontx-spec 元数据渲染的 API 工具页。 包括 API 搜素、目录、文档、试用&调试、mocks 编辑等基本组件。用以组装可部署的 pontx-platform，或以 webview 为基础的 vscode、intellj idea 插件。
+以 pontx-spec 元数据渲染的 API 工具组件库。 包括：
+* API 搜索
+* API 设计
+* 目录
+* API 文档
+* API 调试
+* API mocks 编辑。
+
+以上组件在 pontx-platform 场景中，用于构建 API 管理平台和 API 门户。
+在 IDE 场景中，通过 webview 的方式用于 IDE 相关 API 功能的渲染。
 
 ### plugins
 
@@ -78,22 +88,22 @@ pont 在不同生命周期提供的能力，目前都已进行插件化改造。
 
   内置插件：
 
-  - pontx-meta-fetch-plugin 通过接口请求元数据
+  - pontx-meta-fetch-plugin (done) 通过接口请求元数据
 
 - parser 元数据解析转换插件
 
-  - pontx-oas2-parser-plugin Swagger2 转换为 pontx-spec 的插件
+  - pontx-oas2-parser-plugin (done) Swagger2 转换为 pontx-spec 的插件
 
 - generate
 
-  - pontx-generate-core
+  - pontx-generate-core (done)
     提供 SDK 生成的基本方法，提供调用示例的 snippet。
 
-  - pontx-react-hooks-generate-plugin
+  - pontx-react-hooks-generate-plugin (done)
     生成前端 SDK。包含 React Hooks 的调用方法（use-swr）。
 
-- mocks
+- mocks (WiP)
   提供 mocks 服务。
 
-- report
+- report (WIP)
   记录变更
