@@ -292,17 +292,13 @@ export class PontInnerManagerConfig {
     if (config.preset) {
       const presetPath = findRealPath(configDir, config.preset);
       const presetResult = requireUncached(presetPath);
-      const plugins = presetResult?.default || presetResult;
+      const plugins = presetResult?.default || presetResult || {};
 
-      if (config.plugins) {
-        Object.keys(plugins).forEach((pluginType) => {
-          if (!config.plugins[pluginType]) {
-            config.plugins[pluginType] = loadPresetPluginPath(presetPath, plugins[pluginType]);
-          }
-        });
-      } else {
-        config.plugins = plugins;
-      }
+      Object.keys(plugins).forEach((pluginType) => {
+        if (!config.plugins?.[pluginType] && plugins[pluginType]) {
+          config.plugins[pluginType] = loadPresetPluginPath(presetPath, plugins[pluginType]);
+        }
+      });
     }
 
     if (outDir.startsWith("./") || outDir.startsWith("../")) {
