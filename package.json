@@ -19,7 +19,7 @@
     "lint": "prettier --write --parser typescript \"packages/**/*.ts\"",
     "sync:package": "node scripts/syncRegistry.js",
     "release:all": "npm run release:npm && npm run release:vscode",
-    "release:npm": "node scripts/clean-lock.js && lerna version patch --force-publish --message 'chore: publish' && lerna exec --ignore vscode-pontx --ignore vscode-pontx-media --ignore pontx-report-plugin --ignore jsonschema-form  --stream -- npm publish --registry https://registry.npmjs.org",
+    "release:npm": "rm packages/vscode-pontx/media/package-lock.json || true && node scripts/clean-lock.js && lerna version patch --force-publish --message 'chore: publish' && lerna exec --ignore vscode-pontx --ignore vscode-pontx-media --ignore pontx-report-plugin --ignore jsonschema-form  --stream -- npm publish --registry https://registry.npmjs.org --otp $1",
     "release:dry": "node scripts/release.js --dry",
     "release:vscode": "sh scripts/releaseVscode.sh"
   },
