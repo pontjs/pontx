@@ -160,8 +160,8 @@ export const generateApiRequestCode = (api: PontSpec.PontAPI, specName: string) 
   if (bodyParam) {
     const bodyParamSchema = bodyParam?.schema;
     const bodyParamType = generateSchemaCode(bodyParamSchema, specName);
-    return `(params: Params, bodyParams: ${bodyParamType}): Promise<APIReponse>`;
+    return `(params: Params, bodyParams: ${bodyParamType}, options?: RequestInit): Promise<APIReponse>`;
   }
 
-  return `(params: Params): Promise<APIReponse>`;
+  return `(params: Params, options?: any): Promise<APIReponse>`;
 };

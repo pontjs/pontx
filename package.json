@@ -80,7 +80,7 @@
     "yorkie": "^2.0.0"
   },
   "workspaces": [
-    "packages/**",
+    "/packages/!(vscode-pontx-cp)/**",
     "plugins/**"
   ]
 }
