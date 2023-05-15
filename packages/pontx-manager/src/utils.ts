@@ -90,7 +90,7 @@ export function requireTsFile(rootDir: string, tsfile: TsFileInfo) {
 
   const outDir = path.join(rootDir, `node_modules/.pontx`);
   const relativePath = tsfile.filePath.split(rootDir)[1];
-  const outFile = `${outDir}${path.dirname(relativePath)}/${tsfile.fileName}`;
+  const outFile = path.join(outDir, path.dirname(relativePath), tsfile.fileName);
 
   const program = ts.createProgram([templateFileName], {
     outDir,
