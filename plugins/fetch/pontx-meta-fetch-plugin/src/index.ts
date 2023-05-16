@@ -45,8 +45,8 @@ export default class PontMetaFetchPlugin extends PontxFetchPlugin {
     }
   }
 
-  async apply(originConf: InnerOriginConfig) {
-    Translator = new Translate(this.logger);
+  async apply(originConf: InnerOriginConfig, options: any) {
+    Translator = new Translate(this.logger, options.translate);
     let remoteStr = "";
 
     try {

@@ -4,7 +4,6 @@
   "version": "0.0.1",
   "license": "MIT",
   "scripts": {
-    "install": "lerna bootstrap",
     "test": "jest",
     "changelog": "node -r esm scripts/changelog.js",
     "build:commonjs": "lerna exec --scope pontx-spec* --stream -- npm run build:commonjs",

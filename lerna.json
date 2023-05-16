@@ -1,19 +1,15 @@
 {
-  "packages": [
-    "packages/**",
-    "plugins/**"
-  ],
+  "packages": ["packages/**", "plugins/**"],
   "npmClient": "npm",
-  "npmClientArgs": [
-    "--no-package-lock",
-    "--registry https://registry.npm.taobao.org"
-  ],
+  "npmClientArgs": ["--no-package-lock", "--force", "--registry https://registry.npm.taobao.org"],
   "version": "0.3.40",
   "command": {
+    "publish": {
+      "ignoreChanges": ["package-lock.json", "*.md"],
+      "message": "chore(release): publish %s"
+    },
     "bootstrap": {
-      "npmClientArgs": [
-        "--no-package-lock"
-      ]
+      "npmClientArgs": ["--no-package-lock", "--force", "--registry https://registry.npm.taobao.org"]
     }
   },
   "publishConfig": {
