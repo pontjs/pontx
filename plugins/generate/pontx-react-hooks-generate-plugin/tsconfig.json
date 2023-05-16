@@ -19,9 +19,6 @@
       "path": "../../../packages/pontx-spec"
     },
     {
-      "path": "./tsconfig.builtin.json"
-    },
-    {
       "path": "../../../packages/pontx-manager"
     }
   ]
