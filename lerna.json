@@ -1,7 +1,7 @@
 {
   "packages": ["packages/**", "plugins/**"],
   "npmClient": "npm",
-  "npmClientArgs": ["--no-package-lock", "--force", "--registry https://registry.npm.taobao.org"],
+  "npmClientArgs": ["--no-package-lock", "--legacy-peer-deps", "--force", "--registry https://registry.npm.taobao.org"],
   "version": "0.3.40",
   "command": {
     "publish": {
@@ -9,7 +9,12 @@
       "message": "chore(release): publish %s"
     },
     "bootstrap": {
-      "npmClientArgs": ["--no-package-lock", "--force", "--registry https://registry.npm.taobao.org"]
+      "npmClientArgs": [
+        "--no-package-lock",
+        "--legacy-peer-deps",
+        "--force",
+        "--registry https://registry.npm.taobao.org"
+      ]
     }
   },
   "publishConfig": {
