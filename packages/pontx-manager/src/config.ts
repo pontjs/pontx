@@ -281,6 +281,10 @@ export class PontInnerManagerConfig {
   ): PontInnerManagerConfig {
     let { origin, origins, outDir, plugins, preset, rootDir, url, ...rest } = config;
 
+    if (!config.plugins) {
+      config.plugins = {} as any;
+    }
+
     if (!origins?.length) {
       if (typeof config.url === "string" && config.url) {
         origins = [{ url: config.url } as PublicOriginConfig];
