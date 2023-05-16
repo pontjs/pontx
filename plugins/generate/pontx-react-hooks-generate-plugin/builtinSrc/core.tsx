@@ -2,7 +2,7 @@
  * @description pont内置请求单例
  */
 
-import useSWR, { SWRConfig, ConfigInterface, mutate, trigger } from "swr";
+import useSWR, { SWRConfig, mutate } from "swr";
 import * as React from "react";
 
 const defaultOptions = {
@@ -18,11 +18,11 @@ export function getAPIMethods(apiMetaData: any) {
   const { method, path, hasBody } = apiMetaData;
 
   const methods = {
-    mutate: (params = {}, newValue = undefined, shouldRevalidate = true) => {
-      return mutate(PontCore.getUrlKey(path, params, method), newValue, shouldRevalidate);
+    mutate: (params = {}, newValue = undefined, options) => {
+      return mutate(PontCore.getUrlKey(path, params, method), newValue, options);
     },
-    trigger: (params = {}, shouldRevalidate = true) => {
-      return trigger(PontCore.getUrlKey(path, params, method), shouldRevalidate);
+    trigger: (params = {}) => {
+      return mutate(PontCore.getUrlKey(path, params, method));
     },
     useRequest: (params = {}, swrOptions = {}) => {
       return PontCore.useRequest(path, params, swrOptions);
@@ -150,7 +150,7 @@ class PontHooksCore {
     };
   }
 
-  SWRProvider: React.FC<ConfigInterface> = (props) => {
+  SWRProvider = (props) => {
     const { ...options } = props;
     const configValue = { ...defaultOptions, ...options } as any;
 
