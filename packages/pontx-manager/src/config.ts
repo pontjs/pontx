@@ -92,11 +92,16 @@ export class PontxPlugins {
   generate: PluginItem<PontxGeneratorPlugin>;
   report: PluginItem<PontxReportPlugin>;
 
-  static getDefaultPlugins() {
+  static getDefaultPlugins(plugin?: PurePluginConfig) {
+    let options = {};
+    if (typeof plugin !== "string") {
+      options = plugin?.options || {};
+    }
+
     return {
-      fetch: { use: "pontx-meta-fetch-plugin", options: {} },
-      parser: { use: "pontx-oas2-parser-plugin", options: {} },
-      generate: { use: "pontx-react-hooks-generate-plugin", options: {} },
+      fetch: { use: "pontx-meta-fetch-plugin", options },
+      parser: { use: "pontx-oas2-parser-plugin", options },
+      generate: { use: "pontx-react-hooks-generate-plugin", options },
     };
   }
 }
@@ -186,7 +191,7 @@ export class PontInnerManagerConfig {
 
       return {
         instance,
-        options: pluginConfig.options,
+        options: pluginConfig?.options,
       };
     } catch (e) {}
   }
@@ -210,7 +215,8 @@ export class PontInnerManagerConfig {
         const plugin = configPlugins[pluginType];
 
         return (
-          PontInnerManagerConfig.parsePurePlugin(plugin, originName) || PontxPlugins.getDefaultPlugins()[pluginType]
+          PontInnerManagerConfig.parsePurePlugin(plugin, originName) ||
+          PontxPlugins.getDefaultPlugins(plugin)[pluginType]
         );
       })
       .map((plugin, pluginIndex) => {
@@ -227,7 +233,7 @@ export class PontInnerManagerConfig {
 
           return {
             instance,
-            options: plugin.options,
+            options: plugin?.options,
           };
         } catch (e) {
           logger.error(e.message, e.stack);
@@ -251,7 +257,7 @@ export class PontInnerManagerConfig {
     return Object.keys(configPlugins || {}).reduce((result, pluginType) => {
       const plugin = configPlugins[pluginType];
       const loadedPlugin = PontInnerManagerConfig.loadPlugin(
-        PontInnerManagerConfig.parsePurePlugin(plugin) || PontxPlugins.getDefaultPlugins()[pluginType],
+        PontInnerManagerConfig.parsePurePlugin(plugin) || PontxPlugins.getDefaultPlugins(plugin)[pluginType],
         configDir,
         config.rootDir,
       );
