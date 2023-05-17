@@ -27,7 +27,10 @@ export default class PontMetaFetchPlugin extends PontxFetchPlugin {
       // 例如: 请求参数vo, 请求参数, 替换时先替换 请求参数vo, 后替换请求参数
       chineseKeyCollect.sort((pre, next) => next.length - pre.length);
 
-      let result = await Promise.all(chineseKeyCollect.map((text) => Translator.translateAsync(text)));
+      const result = await Translator.translateCollect(chineseKeyCollect);
+      if (result?.length !== chineseKeyCollect.length) {
+        throw new Error("翻译失败");
+      }
       // const normalizeRegStr = (str: string) => str.replace(/(\W)/g, '$1');
       const toRegStr = (str) => str.replace(/(\W)/g, "\\$1");
       result.forEach((enKey: string, index) => {
