@@ -18,6 +18,16 @@ export class Translate {
           return _.get(res, "trans_result.0.dst");
         });
       },
+      translateCollect: (text) => {
+        const { appId, secret } = this.translateOptions?.baidu || {};
+
+        return baiduTranslator(appId, secret)(text, { to: "en" }).then((res) => {
+          if (res.error_msg) {
+            throw new Error(res.error_msg);
+          }
+          return _.get(res, "trans_result");
+        });
+      },
     },
     {
       name: "google",
@@ -96,6 +106,43 @@ export class Translate {
         `translateEngine:${this.engines[index].name} options:${this.translateOptions} text:${text} err:${err}`,
       );
       return this.translateAsync(text, index + 1);
+    }
+  }
+
+  async translateCollect(texts: string[], engineIndex = 0) {
+    const needTranslatedTexts = texts.filter((text) => !this.dict[text]);
+    const collectText = needTranslatedTexts.join("\n\n");
+
+    if (engineIndex >= this.engines.length) {
+      throw new Error("translate error, all translate engine can not access");
+    }
+
+    if (needTranslatedTexts.length === 0) {
+      return texts.map((text) => this.dict[text]);
+    }
+
+    let enKey;
+    let index = engineIndex;
+
+    try {
+      let collectResults = await this.engines[0].translateCollect(collectText);
+      (collectResults || []).forEach((item) => {
+        const { src, dst } = item;
+        if (src && dst && !src.includes?.("\n")) {
+          this.appendToDict({ cn: src, en: this.startCaseClassName(dst) });
+        }
+      });
+
+      await this.saveCacheFile();
+      return texts.map((text) => this.dict[text]);
+    } catch (err) {
+      this.logger.error(
+        `translateEngine:${this.engines[index].name}`,
+        `options:`,
+        `${this.translateOptions}`,
+        `err:${err}`,
+      );
+      return [];
     }
   }
 }
