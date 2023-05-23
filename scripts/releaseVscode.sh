@@ -11,4 +11,4 @@ vsce publish
 cd ..
 rm -rf vscode-pontx-cp
 cd ..
-lerna bootstrap
+npm run inst

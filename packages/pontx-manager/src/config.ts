@@ -10,6 +10,7 @@ class PublicOriginConfig {
   name: string;
   env: string;
   envs: any;
+  plugins?: PontxPlugins;
 }
 
 type SimplePluginConfig = {
@@ -197,15 +198,16 @@ export class PontInnerManagerConfig {
   }
 
   static loadPlugins(
-    config: PontPublicManagerConfig,
+    plugins: PontPublicManagerConfig["plugins"],
     originName: string,
     configDir: string,
     logger: PontLogger,
     innerConfig: PontInnerManagerConfig,
+    rootDir: string,
   ) {
     const configPlugins = {
       ...PontxPlugins.getDefaultPlugins(),
-      ...(config.plugins || {}),
+      ...(plugins || {}),
     };
 
     const pluginTypes = Object.keys(configPlugins);
@@ -221,7 +223,7 @@ export class PontInnerManagerConfig {
       })
       .map((plugin, pluginIndex) => {
         try {
-          const requiredModule = requireModule(plugin.use, configDir, config.rootDir);
+          const requiredModule = requireModule(plugin.use, configDir, rootDir);
           const LoadedPlugin = requiredModule.default;
           const instance = new LoadedPlugin() as PontxPlugin;
           if (instance) {
@@ -322,32 +324,43 @@ export class PontInnerManagerConfig {
       configDir,
     } as PontInnerManagerConfig;
 
-    (innerConfig.plugins = PontInnerManagerConfig.loadGlobalPlugins(config, configDir, logger, innerConfig)),
-      (innerConfig.origins = origins
-        .map((origin) => {
-          if (origin.envs && origin.env) {
-            const { envs, env, ...rest } = origin;
-            const envConfig = origin.envs[origin.env];
-            if (typeof envConfig === "string") {
-              return {
-                ...rest,
-                url: envConfig,
-              };
-            }
-            return { ...rest, ...envConfig };
+    innerConfig.plugins = PontInnerManagerConfig.loadGlobalPlugins(config, configDir, logger, innerConfig);
+    innerConfig.origins = origins
+      .map((origin) => {
+        if (origin.envs && origin.env) {
+          const { envs, env, ...rest } = origin;
+          const envConfig = origin.envs[origin.env];
+          if (typeof envConfig === "string") {
+            return {
+              ...rest,
+              url: envConfig,
+            };
           }
+          return { ...rest, ...envConfig };
+        }
 
-          if (typeof origin === "string") {
-            return { url: origin };
-          }
-          return origin;
-        })
-        .map((origin) => {
-          return {
-            ...origin,
-            plugins: PontInnerManagerConfig.loadPlugins(config, origin.name, configDir, logger, innerConfig),
-          };
-        }));
+        if (typeof origin === "string") {
+          return { url: origin };
+        }
+        return origin;
+      })
+      .map((origin) => {
+        let originPlugins = config.plugins || ({} as any);
+        if (origin.plugins) {
+          originPlugins = { ...originPlugins, ...origin.plugins };
+        }
+        return {
+          ...origin,
+          plugins: PontInnerManagerConfig.loadPlugins(
+            originPlugins,
+            origin.name,
+            configDir,
+            logger,
+            innerConfig,
+            config.rootDir,
+          ),
+        };
+      });
 
     return innerConfig;
   }
