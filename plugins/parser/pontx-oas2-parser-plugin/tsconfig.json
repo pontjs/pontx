@@ -10,7 +10,6 @@
     "moduleResolution": "node",
     "strictPropertyInitialization": false,
     "forceConsistentCasingInFileNames": true,
-    "noStrictGenericChecks": true,
     "baseUrl": ".",
     "paths": {},
     "composite": true,
