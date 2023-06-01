@@ -80,6 +80,9 @@
     "webpack-node-externals": "^3.0.0",
     "yorkie": "^2.0.0"
   },
+  "engines": {
+    "node": "^18.6.0"
+  },
   "workspaces": [
     "/packages/!(vscode-pontx-cp)/**",
     "plugins/**"
