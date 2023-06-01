@@ -7,6 +7,8 @@ git clone git@github.com:pontjs/pontx.git
 
 cd pontx
 
+npm run inst
+
 lerna bootstrap
 
 # 初始化环境
@@ -63,18 +65,19 @@ Debug vscode-pontx by select "Debug Extension" in VSCode Debug Panel.
 - pontx-manager
   提供 pontx 管理类，主要提供如下能力。
 
-  * 加载 pontx 配置，构建 pontx 管理类
-  * 不同生命周期插件加载和执行
+  - 加载 pontx 配置，构建 pontx 管理类
+  - 不同生命周期插件加载和执行
 
 - pontx-ui
 
 以 pontx-spec 元数据渲染的 API 工具组件库。 包括：
-* API 搜索
-* API 设计
-* 目录
-* API 文档
-* API 调试
-* API mocks 编辑。
+
+- API 搜索
+- API 设计
+- 目录
+- API 文档
+- API 调试
+- API mocks 编辑。
 
 以上组件在 pontx-platform 场景中，用于构建 API 管理平台和 API 门户。
 在 IDE 场景中，通过 webview 的方式用于 IDE 相关 API 功能的渲染。
