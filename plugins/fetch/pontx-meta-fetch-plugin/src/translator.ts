@@ -2,7 +2,7 @@ import * as _ from "lodash";
 const { youdao, baidu, google } = require("translation.js");
 import * as assert from "assert";
 import { PontDictManager } from "./LocalDictManager";
-const baiduTranslator = require("baidu-translate");
+const baiduTranslateService = require("baidu-translate-service");
 
 export class Translate {
   private engines = [
@@ -10,23 +10,37 @@ export class Translate {
       name: "baidu",
       translate: (text) => {
         const { appId, secret } = this.translateOptions?.baidu || {};
-
-        return baiduTranslator(appId, secret)(text, { to: "en" }).then((res) => {
-          if (res.error_msg) {
-            throw new Error(res.error_msg);
-          }
-          return _.get(res, "trans_result.0.dst");
-        });
+        return baiduTranslateService({ appid: appId, key: secret, q: text, to: "en", from: "auto" })
+          .then((data) => {
+            try {
+              if (data.error_msg) {
+                throw new Error(data.error_msg);
+              }
+              return _.get(data, "trans_result.0.dst");
+            } catch (error) {
+              throw new Error(error.message);
+            }
+          })
+          .catch((err) => {
+            throw new Error(err.message);
+          });
       },
       translateCollect: (text) => {
         const { appId, secret } = this.translateOptions?.baidu || {};
-
-        return baiduTranslator(appId, secret)(text, { to: "en" }).then((res) => {
-          if (res.error_msg) {
-            throw new Error(res.error_msg);
-          }
-          return _.get(res, "trans_result");
-        });
+        return baiduTranslateService({ appid: appId, key: secret, q: text, to: "en", from: "auto" })
+          .then((data) => {
+            try {
+              if (data.error_msg) {
+                throw new Error(data.error_msg);
+              }
+              return _.get(data, "trans_result");
+            } catch (error) {
+              throw new Error(error.message);
+            }
+          })
+          .catch((err) => {
+            throw new Error(err.message);
+          });
       },
     },
     {
