@@ -4,7 +4,7 @@
     <img width="200" src="https://img.alicdn.com/imgextra/i1/O1CN01DfTvFn1MjlQ9g9Dmn_!!6000000001471-2-tps-200-200.png">
 </p>
 
-<h1 align="center">PontX</h1>
+<h1 align="center">Pontx</h1>
 
 
 [Pontx](https://github.com/pontjs/pontx) is a lightweight API management tools. Supporting API searching, documentation, debug, design, changement analysis, mocks data auto generating and serving, SDK generating...
