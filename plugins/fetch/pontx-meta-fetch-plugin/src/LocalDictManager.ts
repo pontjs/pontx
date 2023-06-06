@@ -5,9 +5,9 @@ import * as os from "os";
 class LocalDictManager {
   static singleInstance = null as LocalDictManager;
 
-  static getSingleInstance() {
+  static getSingleInstance(options = {}, configDir = "") {
     if (!LocalDictManager.singleInstance) {
-      LocalDictManager.singleInstance = new LocalDictManager();
+      LocalDictManager.singleInstance = new LocalDictManager(options, configDir);
       return LocalDictManager.singleInstance;
     }
 
@@ -16,7 +16,14 @@ class LocalDictManager {
 
   private localDictDir = os.homedir() + "/.pont";
 
-  constructor() {
+  constructor(options, configDir) {
+    if (options?.translateCacheDir) {
+      this.localDictDir = path.join(configDir, options?.translateCacheDir);
+      if (!fs.pathExistsSync(this.localDictDir)) {
+        fs.mkdirpSync(this.localDictDir);
+      }
+      return;
+    }
     if (!fs.pathExistsSync(this.localDictDir)) {
       fs.mkdirpSync(this.localDictDir);
     }
@@ -109,6 +116,6 @@ class LocalDictManager {
   }
 }
 
-const PontDictManager = LocalDictManager.getSingleInstance();
+const PontDictManager = LocalDictManager.getSingleInstance;
 
 export { PontDictManager };
