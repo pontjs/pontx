@@ -49,7 +49,7 @@ export default class PontMetaFetchPlugin extends PontxFetchPlugin {
   }
 
   async apply(originConf: InnerOriginConfig, options: any) {
-    Translator = new Translate(this.logger, options.translate);
+    Translator = new Translate(this.logger, options.translate, originConf);
     let remoteStr = "";
 
     try {
