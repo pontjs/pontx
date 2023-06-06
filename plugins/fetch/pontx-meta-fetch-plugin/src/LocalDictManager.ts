@@ -5,7 +5,7 @@ import * as os from "os";
 class LocalDictManager {
   static singleInstance = null as LocalDictManager;
 
-  static getSingleInstance(localDictDir) {
+  static getSingleInstance(localDictDir?: string) {
     if (!LocalDictManager.singleInstance) {
       LocalDictManager.singleInstance = new LocalDictManager(localDictDir);
       return LocalDictManager.singleInstance;
@@ -14,7 +14,7 @@ class LocalDictManager {
     return LocalDictManager.singleInstance;
   }
 
-  constructor(private localDictDir = "") {
+  constructor(private localDictDir = os.homedir() + "/.pont") {
     if (this.localDictDir && !fs.pathExistsSync(this.localDictDir)) {
       fs.mkdirpSync(this.localDictDir);
     }
