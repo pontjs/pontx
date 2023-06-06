@@ -1,4 +1,3 @@
-import * as os from "os";
 import * as path from "path";
 import * as _ from "lodash";
 const { youdao, baidu, google } = require("translation.js");
@@ -63,7 +62,7 @@ export class Translate {
   dict = {};
 
   constructor(private logger, private translateOptions: any = {}, private config: any = {}) {
-    let localDictDir = os.homedir() + "/.pont";
+    let localDictDir = undefined;
     if (translateOptions?.cacheFilePath) {
       this.dictName = path.basename(translateOptions?.cacheFilePath);
       localDictDir = path.resolve(
