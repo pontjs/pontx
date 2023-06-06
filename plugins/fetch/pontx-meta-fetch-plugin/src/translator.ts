@@ -1,4 +1,5 @@
-import { fetch } from "node-fetch";
+import * as os from "os";
+import * as path from "path";
 import * as _ from "lodash";
 const { youdao, baidu, google } = require("translation.js");
 import * as assert from "assert";
@@ -62,13 +63,15 @@ export class Translate {
   dict = {};
 
   constructor(private logger, private translateOptions: any = {}, private config: any = {}) {
-    this.PontDictManager = PontDictManager(
-      this.translateOptions,
-      this.config?.plugins?.fetch?.instance?.innerConfig?.configDir,
-    );
-    if (translateOptions?.translateCacheDir) {
-      this.dictName = "pontxTranslateCache.json";
+    let localDictDir = os.homedir() + "/.pont";
+    if (translateOptions?.cacheFilePath) {
+      this.dictName = path.basename(translateOptions?.cacheFilePath);
+      localDictDir = path.resolve(
+        this.config?.plugins?.fetch?.instance?.innerConfig?.configDir,
+        path.dirname(translateOptions.cacheFilePath),
+      );
     }
+    this.PontDictManager = PontDictManager(localDictDir);
     const localDict = this.PontDictManager.loadFileIfExistsSync(this.dictName);
 
     if (localDict) {

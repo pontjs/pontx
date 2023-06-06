@@ -5,26 +5,17 @@ import * as os from "os";
 class LocalDictManager {
   static singleInstance = null as LocalDictManager;
 
-  static getSingleInstance(options = {}, configDir = "") {
+  static getSingleInstance(localDictDir) {
     if (!LocalDictManager.singleInstance) {
-      LocalDictManager.singleInstance = new LocalDictManager(options, configDir);
+      LocalDictManager.singleInstance = new LocalDictManager(localDictDir);
       return LocalDictManager.singleInstance;
     }
 
     return LocalDictManager.singleInstance;
   }
 
-  private localDictDir = os.homedir() + "/.pont";
-
-  constructor(options, configDir) {
-    if (options?.translateCacheDir) {
-      this.localDictDir = path.join(configDir, options?.translateCacheDir);
-      if (!fs.pathExistsSync(this.localDictDir)) {
-        fs.mkdirpSync(this.localDictDir);
-      }
-      return;
-    }
-    if (!fs.pathExistsSync(this.localDictDir)) {
+  constructor(private localDictDir = "") {
+    if (this.localDictDir && !fs.pathExistsSync(this.localDictDir)) {
       fs.mkdirpSync(this.localDictDir);
     }
   }
