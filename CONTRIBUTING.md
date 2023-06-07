@@ -12,7 +12,7 @@ npm run inst
 lerna bootstrap
 
 # 初始化环境
-npm i && npm run build
+
 
 # 启动项目
 npm start
