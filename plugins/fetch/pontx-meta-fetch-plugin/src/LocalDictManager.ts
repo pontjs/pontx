@@ -5,19 +5,17 @@ import * as os from "os";
 class LocalDictManager {
   static singleInstance = null as LocalDictManager;
 
-  static getSingleInstance() {
+  static getSingleInstance(localDictDir?: string) {
     if (!LocalDictManager.singleInstance) {
-      LocalDictManager.singleInstance = new LocalDictManager();
+      LocalDictManager.singleInstance = new LocalDictManager(localDictDir);
       return LocalDictManager.singleInstance;
     }
 
     return LocalDictManager.singleInstance;
   }
 
-  private localDictDir = os.homedir() + "/.pont";
-
-  constructor() {
-    if (!fs.pathExistsSync(this.localDictDir)) {
+  constructor(private localDictDir = os.homedir() + "/.pont") {
+    if (this.localDictDir && !fs.pathExistsSync(this.localDictDir)) {
       fs.mkdirpSync(this.localDictDir);
     }
   }
@@ -109,6 +107,6 @@ class LocalDictManager {
   }
 }
 
-const PontDictManager = LocalDictManager.getSingleInstance();
+const PontDictManager = LocalDictManager.getSingleInstance;
 
 export { PontDictManager };
