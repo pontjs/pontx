@@ -1,32 +1,49 @@
+import * as path from "path";
 import * as _ from "lodash";
 const { youdao, baidu, google } = require("translation.js");
 import * as assert from "assert";
 import { PontDictManager } from "./LocalDictManager";
-const baiduTranslator = require("baidu-translate");
+const baiduTranslateService = require("baidu-translate-service");
 
 export class Translate {
+  private PontDictManager = null;
+  private dictName = "dict.json";
   private engines = [
     {
       name: "baidu",
       translate: (text) => {
         const { appId, secret } = this.translateOptions?.baidu || {};
-
-        return baiduTranslator(appId, secret)(text, { to: "en" }).then((res) => {
-          if (res.error_msg) {
-            throw new Error(res.error_msg);
-          }
-          return _.get(res, "trans_result.0.dst");
-        });
+        return baiduTranslateService({ appid: appId, key: secret, q: text, to: "en", from: "auto" })
+          .then((data) => {
+            try {
+              if (data.error_msg) {
+                throw new Error(data.error_msg);
+              }
+              return _.get(data, "trans_result.0.dst");
+            } catch (error) {
+              throw new Error(error.message);
+            }
+          })
+          .catch((err) => {
+            throw new Error(err.message);
+          });
       },
       translateCollect: (text) => {
         const { appId, secret } = this.translateOptions?.baidu || {};
-
-        return baiduTranslator(appId, secret)(text, { to: "en" }).then((res) => {
-          if (res.error_msg) {
-            throw new Error(res.error_msg);
-          }
-          return _.get(res, "trans_result");
-        });
+        return baiduTranslateService({ appid: appId, key: secret, q: text, to: "en", from: "auto" })
+          .then((data) => {
+            try {
+              if (data.error_msg) {
+                throw new Error(data.error_msg);
+              }
+              return _.get(data, "trans_result");
+            } catch (error) {
+              throw new Error(error.message);
+            }
+          })
+          .catch((err) => {
+            throw new Error(err.message);
+          });
       },
     },
     {
@@ -44,27 +61,36 @@ export class Translate {
   ];
   dict = {};
 
-  constructor(private logger, private translateOptions: any = {}, private dictName = "dict.json") {
-    const localDict = PontDictManager.loadFileIfExistsSync(this.dictName);
+  constructor(private logger, private translateOptions: any = {}, private config: any = {}) {
+    let localDictDir = undefined;
+    if (translateOptions?.cacheFilePath) {
+      this.dictName = path.basename(translateOptions?.cacheFilePath);
+      localDictDir = path.resolve(
+        this.config?.plugins?.fetch?.instance?.innerConfig?.configDir,
+        path.dirname(translateOptions.cacheFilePath),
+      );
+    }
+    this.PontDictManager = PontDictManager(localDictDir);
+    const localDict = this.PontDictManager.loadFileIfExistsSync(this.dictName);
 
     if (localDict) {
       try {
         this.dict = JSON.parse(localDict);
       } catch (err) {
         logger.error("[translate] local dict is invalid, attempting auto fix");
-        PontDictManager.removeFile(dictName);
+        this.PontDictManager.removeFile(this.dictName);
         this.dict = {};
       }
     }
   }
 
   async saveCacheFile() {
-    const latestDict = PontDictManager.loadJsonFileIfExistsSync(this.dictName);
+    const latestDict = this.PontDictManager.loadJsonFileIfExistsSync(this.dictName);
     const dict = {
       ...(latestDict || {}),
       ...(this.dict || {}),
     };
-    return PontDictManager.saveFile(this.dictName, JSON.stringify(dict, null, 2));
+    return this.PontDictManager.saveFile(this.dictName, JSON.stringify(dict, null, 2));
   }
 
   async appendToDict(pairKey: { cn: string; en: string }) {
