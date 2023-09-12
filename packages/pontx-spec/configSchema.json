@@ -120,6 +120,11 @@
         }
       }
     },
+    "translate": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "中文翻译配置"
+    },
     "origins": {
       "type": "array",
       "description": "元数据列表",

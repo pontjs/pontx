@@ -5,6 +5,14 @@ import * as assert from "assert";
 import { PontDictManager } from "./LocalDictManager";
 const baiduTranslateService = require("baidu-translate-service");
 
+export class TranslateOptions {
+  cacheFilePath?: string;
+  baidu?: {
+    appId: string;
+    secret: string;
+  };
+}
+
 export class Translate {
   private PontDictManager = null;
   private dictName = "dict.json";
@@ -59,16 +67,13 @@ export class Translate {
       translate: (text) => baidu.translate(text).then((res) => res.result[0]),
     },
   ];
-  dict = {};
+  dict = {} as { [cn: string]: string };
 
-  constructor(private logger, private translateOptions: any = {}, private config: any = {}) {
+  constructor(private logger, private translateOptions: TranslateOptions = {}, private config: any = {}) {
     let localDictDir = undefined;
     if (translateOptions?.cacheFilePath) {
       this.dictName = path.basename(translateOptions?.cacheFilePath);
-      localDictDir = path.resolve(
-        this.config?.plugins?.fetch?.instance?.innerConfig?.configDir,
-        path.dirname(translateOptions.cacheFilePath),
-      );
+      localDictDir = path.resolve(this.config?.configDir, path.dirname(translateOptions.cacheFilePath));
     }
     this.PontDictManager = PontDictManager(localDictDir);
     const localDict = this.PontDictManager.loadFileIfExistsSync(this.dictName);

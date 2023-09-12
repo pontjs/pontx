@@ -1,7 +1,7 @@
 {
-  "name": "pontx-generate-core",
+  "name": "pontx-oas3-parser-plugin",
   "version": "0.3.52",
-  "description": "OpenAPI pont spec",
+  "description": "OpenAPI Spec parse pont",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
@@ -11,10 +11,12 @@
     "build": "npm run clean && tsc --build"
   },
   "dependencies": {
-    "fs-extra": "*",
+    "oas-spec-ts": "^0.3.52",
+    "pontx-spec": "^0.3.52"
+  },
+  "peerDependencies": {
     "lodash": "*",
-    "pontx-spec": "^0.3.52",
-    "prettier": "^2.6.2"
+    "pontx-manager": "*"
   },
   "files": [
     "package.json",
@@ -24,7 +26,6 @@
   "author": "jasonHzq",
   "license": "MIT",
   "devDependencies": {
-    "@types/fs-extra": "*",
     "@types/lodash": "*",
     "typescript": "^4.6.4"
   }

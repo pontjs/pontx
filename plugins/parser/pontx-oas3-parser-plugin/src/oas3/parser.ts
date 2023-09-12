@@ -1,0 +1,265 @@
+import * as PontSpec from "pontx-spec";
+import { OAS2, OAS3 } from "oas-spec-ts";
+import {
+  getIdentifierFromOperatorId,
+  getIdentifierFromUrl,
+  getMaxSamePath,
+  processDuplicateInterfaceName,
+  toDashCase,
+  JsonSchemaContext,
+  deleteDuplicateBaseClass,
+  processTag,
+  processDuplicateNameSpaceName,
+  transformCamelCase,
+  hasChinese,
+} from "./utils";
+import * as _ from "lodash";
+import { compileTemplate, parseAst2PontJsonSchema } from "./compiler";
+import { parseJsonSchema } from "./schema";
+import { Translate } from "pontx-manager/src/translator";
+
+export function parseOAS3Interface(
+  inter: OAS3.OperationObject & { path: string; method: string },
+  context = new JsonSchemaContext(),
+) {
+  const { samePath } = context;
+  const { path, method } = inter;
+  let name = "";
+
+  if (!inter.operationId) {
+    name = getIdentifierFromUrl(path, method, samePath);
+  } else {
+    name = getIdentifierFromOperatorId(inter.operationId);
+  }
+
+  const responses = _.mapValues(inter.responses, (response) => {
+    const { content, headers, description, ...rest } = response || {};
+    const onlyKey = Object.keys(content || {})[0];
+    const schema = content?.[onlyKey]?.schema;
+    const responseSchema = schema ? parseJsonSchema(schema, context) : new PontSpec.PontJsonSchema();
+
+    return { ...rest, schema: responseSchema, headers: headers as any };
+  });
+
+  const parameters = (inter.parameters || []).map((param) => {
+    const { required, name, schema, ...rest } = param;
+    const paramSchema = { ...rest, ...(schema || {}) };
+
+    return {
+      in: param.in as any,
+      name: name.includes("/") ? name.split("/").join("") : name,
+      required,
+      schema: parseJsonSchema(paramSchema as any as OAS3.SchemaObject, { ...context, required }),
+    } as PontSpec.Parameter;
+  });
+  let consumes = [];
+  if (inter.requestBody) {
+    const consume = Object.keys(inter.requestBody.content)[0];
+    if (consume) {
+      consumes = [consume];
+      const bodyParma = {
+        name: "body",
+        in: "body" as any,
+        required: true,
+        schema: parseJsonSchema(inter.requestBody.content[consume]?.schema, context),
+      };
+      parameters.push(bodyParma);
+    }
+  }
+
+  const pontAPI = {
+    summary: inter.summary,
+    consumes,
+    // consumes: inter.consumes,
+    description: inter.description,
+    name,
+    method,
+    path,
+    responses,
+    deprecated: inter.deprecated,
+    /** 后端返回的参数可能重复 */
+    parameters: _.unionBy(parameters, "name"),
+  } as PontSpec.PontAPI;
+
+  return pontAPI;
+}
+
+export async function parseSwagger2APIs(swagger: OAS3.OpenAPIObject, defNames: string[], translator: Translate) {
+  let originTags = ["common"];
+  Object.keys(swagger.paths || {}).forEach((path) => {
+    Object.keys(swagger.paths[path] || {}).forEach((method) => {
+      const op = swagger.paths[path]?.[method] as OAS3.OperationObject;
+      originTags.push(...(op?.tags || []));
+    });
+  });
+  originTags = _.union(originTags);
+  const chineseTags = originTags.filter((tag) => hasChinese(tag));
+  const enTags = await translator.translateCollect(chineseTags);
+  const tags = originTags
+    .filter((tag) => !hasChinese(tag))
+    .map((tag) => {
+      return { namespace: transformCamelCase(tag), tag, title: tag };
+    });
+  enTags.forEach((enTag, index) => {
+    tags.push({ namespace: transformCamelCase(enTag), tag: chineseTags[index], title: chineseTags[index] });
+  });
+
+  const allSwaggerInterfaces = [] as Array<OAS3.OperationObject & { path: string; method: string }>;
+
+  Object.keys(swagger.paths).forEach((path) => {
+    const methodInters = swagger.paths[path];
+
+    // methodInters.parameters
+
+    const methods = ["get", "delete", "put", "post", "patch", "options", "head"];
+    methods.forEach((method) => {
+      const inter = methodInters[method] as OAS3.OperationObject;
+      if (!inter) {
+        return;
+      }
+      allSwaggerInterfaces.push({
+        ...inter,
+        path,
+        method,
+        tags: inter.tags || ["common"],
+        parameters: _.unionBy(inter.parameters, methodInters.parameters || [], "name"),
+      });
+    });
+  });
+
+  const directories = tags
+    .map((tag) => {
+      const tagInterfaces = allSwaggerInterfaces.filter((inter) => {
+        return (
+          inter.tags.includes(tag.tag) ||
+          inter.tags.includes(tag.tag?.toLowerCase()) ||
+          inter.tags.includes(toDashCase(tag.tag))
+        );
+      });
+      const samePath = getMaxSamePath(tagInterfaces.map((inter) => inter.path.slice(1)));
+
+      const standardInterfaces = tagInterfaces.map((inter) => {
+        return parseOAS3Interface(inter, {
+          defNames,
+          samePath,
+          classTemplateArgs: [],
+        });
+      });
+      processDuplicateInterfaceName(standardInterfaces, samePath);
+      const processedTag = transformCamelCase(tag.tag);
+
+      return {
+        title: tag.title,
+        namespace: tag.namespace,
+        interfaces: standardInterfaces,
+      };
+    })
+    .filter((tag) => {
+      return tag.interfaces.length;
+    });
+  const apis = directories.reduce((result: PontSpec.ObjectMap<PontSpec.PontAPI>, dir) => {
+    return dir.interfaces.reduce((currResult, api) => {
+      return {
+        ...currResult,
+        [`${dir.namespace}/${api.name}`]: api,
+      };
+    }, result as PontSpec.ObjectMap<PontSpec.PontAPI>);
+  }, {} as any);
+
+  processDuplicateNameSpaceName(directories);
+
+  const retDirs = _.sortBy(directories, (dir) => dir.namespace).map((dir) => {
+    const { interfaces, ...rest } = dir;
+    return {
+      ...rest,
+      children: interfaces.map((api) => `${dir.namespace}/${api.name}`),
+    };
+  });
+  return {
+    directories: retDirs,
+    apis,
+  };
+}
+
+export async function parseOAS3(
+  swagger: OAS3.OpenAPIObject,
+  name: string,
+  translator: Translate,
+): Promise<PontSpec.PontSpec> {
+  const draftClasses = _.map(swagger?.components?.schemas || {}, (schema, defName) => {
+    const defNameAst = compileTemplate(defName);
+
+    if (!defNameAst) {
+      throw new Error("compiler error in defname: " + defName);
+    }
+
+    return {
+      name: defNameAst.name,
+      defNameAst,
+      schema,
+    };
+  });
+  const defNames = draftClasses.map((clazz) => clazz.name);
+
+  let baseClasses = draftClasses.map((clazz) => {
+    const dataType = parseAst2PontJsonSchema(clazz.defNameAst, {
+      classTemplateArgs: [],
+      defNames,
+    });
+    const { definitions, required, properties, additionalProperties, items, ...rest } = clazz.schema;
+    const clazzSchema = {
+      ...rest,
+      requiredProps: required,
+      typeName: dataType.typeName,
+      templateArgs: dataType.templateArgs,
+    } as PontSpec.PontJsonSchema;
+    if (properties) {
+      clazzSchema.properties = _.mapValues(clazz.schema?.properties || {}, (value, key) => {
+        return parseJsonSchema(value, {
+          classTemplateArgs: dataType.templateArgs,
+          required: required?.includes(key),
+          defNames,
+        });
+      });
+    }
+    if (additionalProperties) {
+      clazzSchema.additionalProperties = parseJsonSchema(additionalProperties, {
+        classTemplateArgs: dataType.templateArgs,
+        defNames,
+      });
+    }
+    if (items) {
+      clazzSchema.items = parseJsonSchema(items, {
+        classTemplateArgs: dataType.templateArgs,
+        defNames,
+      });
+    }
+
+    return {
+      schema: clazzSchema,
+      name: clazz.name,
+    };
+  });
+  baseClasses = deleteDuplicateBaseClass(baseClasses);
+  const { apis, directories } = await parseSwagger2APIs(swagger, defNames, translator);
+
+  const pontDs = {
+    definitions: baseClasses.reduce((result, base) => {
+      return {
+        ...result,
+        [base.name]: base.schema,
+      };
+    }, {}),
+    apis,
+    directories,
+    name,
+  } as PontSpec.PontSpec;
+
+  try {
+    const metaStr = JSON.stringify(pontDs);
+
+    return JSON.parse(metaStr);
+  } catch (e) {
+    return pontDs;
+  }
+}

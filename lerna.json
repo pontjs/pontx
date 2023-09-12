@@ -9,7 +9,7 @@
     "--force",
     "--registry https://registry.npm.taobao.org"
   ],
-  "version": "0.3.51",
+  "version": "0.3.52",
   "command": {
     "publish": {
       "ignoreChanges": [

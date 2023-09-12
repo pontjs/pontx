@@ -9,12 +9,12 @@ export { PontJsonSchema, Parameter, ObjectMap, PontJsonPointer, removeMapKeys };
 
 type ResponseObject = {
   schema: PontJsonSchema;
-  headers: OAS2.HeadersObject;
+  headers?: OAS2.HeadersObject;
   description?: string;
 };
 export class PontAPI {
   consumes?: string[] = [];
-  parameters: Parameter[];
+  parameters?: Parameter[] = [];
   description?: string;
   responses: {
     [key: string]: ResponseObject;
@@ -24,7 +24,7 @@ export class PontAPI {
   title?: string;
   summary?: string;
   path: string;
-  deprecated: boolean;
+  deprecated?: boolean;
   ext?: any;
 }
 
