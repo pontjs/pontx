@@ -1,14 +1,11 @@
 import fetch from "node-fetch";
 import * as _ from "lodash";
 import { InnerOriginConfig, PontxFetchPlugin, PontLogger, PontManager } from "pontx-manager";
-import { Translate } from "./translator";
 import * as fs from "fs-extra";
 import * as path from "path";
-
-let Translator: Translate;
 export default class PontMetaFetchPlugin extends PontxFetchPlugin {
   /** 翻译中文类名等 */
-  static async translateChinese(jsonString: string, errCallback: (err) => any) {
+  async translateChinese(jsonString: string, errCallback: (err) => any) {
     let retString = jsonString;
     try {
       const matchItems = jsonString
@@ -27,7 +24,7 @@ export default class PontMetaFetchPlugin extends PontxFetchPlugin {
       // 例如: 请求参数vo, 请求参数, 替换时先替换 请求参数vo, 后替换请求参数
       chineseKeyCollect.sort((pre, next) => next.length - pre.length);
 
-      const result = await Translator.translateCollect(chineseKeyCollect);
+      const result = await this.innerConfig.translator.translateCollect(chineseKeyCollect);
       if (result?.length !== chineseKeyCollect.length) {
         throw new Error("翻译失败");
       }
@@ -40,7 +37,7 @@ export default class PontMetaFetchPlugin extends PontxFetchPlugin {
           retString = retString.replace(eval(`/${toRegStr(chineseKey)}/g`), enKey);
         }
       });
-      await Translator.saveCacheFile();
+      await this.innerConfig.translator.saveCacheFile();
       return retString;
     } catch (err) {
       errCallback(err);
@@ -49,7 +46,6 @@ export default class PontMetaFetchPlugin extends PontxFetchPlugin {
   }
 
   async apply(originConf: InnerOriginConfig, options: any) {
-    Translator = new Translate(this.logger, options.translate, originConf);
     let remoteStr = "";
 
     try {
@@ -66,7 +62,7 @@ export default class PontMetaFetchPlugin extends PontxFetchPlugin {
     }
 
     try {
-      const metaStr = await PontMetaFetchPlugin.translateChinese(remoteStr, (err) => {
+      const metaStr = await this.translateChinese(remoteStr, (err) => {
         this.logger.error({
           originName: originConf.name,
           message: `元数据中的中文翻译失败，请查看您的网络环境: ${err.message}`,

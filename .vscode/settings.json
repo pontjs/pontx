@@ -27,6 +27,10 @@
     {
       "fileMatch": ["/*-pontx-config.json"],
       "url": "/packages/pontx-spec/configSchema.json"
+    },
+    {
+      "fileMatch": ["/*.rcapi.json"],
+      "url": "/packages/vscode-pontx/resource-control-api-protocol.json"
     }
   ]
 }

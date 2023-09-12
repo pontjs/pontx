@@ -9,6 +9,10 @@
     "name": {
       "type": "string"
     },
+    "info": {
+      "type": "object",
+      "additionalProperties": true
+    },
     "description": {
       "type": "string",
       "title": "元数据描述"

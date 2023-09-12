@@ -2,7 +2,7 @@
   "name": "vscode-pontx",
   "displayName": "pontx",
   "description": "",
-  "version": "0.3.51",
+  "version": "0.3.52",
   "private": true,
   "publisher": "jasonHzq",
   "license": "MIT",
@@ -25,8 +25,14 @@
         "url": "pontx://schemas/config-plugin-schema"
       },
       {
+        "fileMatch": "*.rcapi.json",
+        "url": "./resource-control-api-protocol.json"
+      },
+      {
         "fileMatch": [
           "api-lock.json",
+          "*.pontx",
+          "*.pontx.json",
           "removeSpec.json",
           "spec.json"
         ],
@@ -393,13 +399,13 @@
     "@vscode/codicons": "^0.0.32",
     "fs-extra": "^10.1.0",
     "mockjs": "^1.0.1-beta3",
-    "pontx-generate-core": "^0.3.51",
-    "pontx-manager": "^0.3.51",
-    "pontx-meta-fetch-plugin": "^0.3.51",
-    "pontx-oas2-parser-plugin": "^0.3.51",
-    "pontx-react-hooks-generate-plugin": "^0.3.51",
-    "pontx-spec": "^0.3.51",
-    "pontx-spec-diff": "^0.3.51"
+    "pontx-generate-core": "^0.3.52",
+    "pontx-manager": "^0.3.52",
+    "pontx-meta-fetch-plugin": "^0.3.52",
+    "pontx-oas2-parser-plugin": "^0.3.52",
+    "pontx-react-hooks-generate-plugin": "^0.3.52",
+    "pontx-spec": "^0.3.52",
+    "pontx-spec-diff": "^0.3.52"
   },
   "icon": "resources/pontx.png",
   "repository": {

@@ -4,6 +4,7 @@ import { PontSpec, PontAPI } from "pontx-spec";
 import { PontManager } from "./manager";
 import { PontLogger } from "./logger";
 import { findRealPath, loadPresetPluginPath, requireTsFile, requireUncached } from "./utils";
+import { Translate } from "./translator";
 
 class PublicOriginConfig {
   url: string;
@@ -149,6 +150,7 @@ export class PontPublicManagerConfig {
   url: string;
   outDir: string;
   preset: string;
+  translate: any;
   plugins: {
     fetch: PluginConfig;
     transform: PluginConfig;
@@ -172,6 +174,7 @@ export class PontInnerManagerConfig {
   outDir: string;
   configDir: string;
   plugins: PontxPlugins;
+  translator: any;
 
   static parsePurePlugin(plugin: PurePluginConfig, originName?: string): SimplePluginConfig {
     if (typeof plugin === "string") {
@@ -281,7 +284,7 @@ export class PontInnerManagerConfig {
     logger: PontLogger,
     configDir: string,
   ): PontInnerManagerConfig {
-    let { origin, origins, outDir, plugins, preset, rootDir, url, ...rest } = config;
+    let { origin, origins, outDir, plugins, preset, rootDir, url, translate, ...rest } = config;
 
     if (!config.plugins) {
       config.plugins = {} as any;
@@ -323,6 +326,10 @@ export class PontInnerManagerConfig {
       rootDir: config.rootDir,
       configDir,
     } as PontInnerManagerConfig;
+
+    if (translate) {
+      innerConfig.translator = new Translate(logger, translate, innerConfig);
+    }
 
     innerConfig.plugins = PontInnerManagerConfig.loadGlobalPlugins(config, configDir, logger, innerConfig);
     innerConfig.origins = origins

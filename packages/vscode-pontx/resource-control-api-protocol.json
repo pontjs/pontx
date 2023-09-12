@@ -1,0 +1,170 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "JSON Schema for Resource Control API Protocol",
+  "type": "object",
+  "required": ["name", "resources"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "RCAPI 应用名称(camelCase)"
+    },
+    "info": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "description": {
+      "type": "string",
+      "title": "元数据描述"
+    },
+    "resources": {
+      "type": "object",
+      "title": "资源定义",
+      "additionalProperties": {
+        "$ref": "#/definitions/ResourceDefine"
+      }
+    }
+  },
+  "definitions": {
+    "ResourceOperator": {
+      "type": "object",
+      "properties": {
+        "updateProperties": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/definitions/ResourceProperty"
+              }
+            ]
+          }
+        },
+        "name": {
+          "title": "API 标识名称",
+          "type": "string"
+        },
+        "title": {
+          "title": "API 标题",
+          "type": "string"
+        },
+        "description": {
+          "type": "string",
+          "title": "描述"
+        },
+        "deprecated": {
+          "type": "boolean",
+          "title": "是否弃用"
+        },
+        "consumes": {
+          "description": "A list of MIME types the API can consume.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/mediaTypeList"
+            }
+          ]
+        },
+        "parameters": {
+          "title": "入参",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/parameter"
+          }
+        },
+        "responses": {
+          "title": "返回参数",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/response"
+          }
+        },
+        "ext": {
+          "type": "object"
+        }
+      }
+    },
+    "ResourceProperty": {
+      "allOf": [{ "$ref": "../pontx-spec/pontSchema.json#/definitions/schema" }],
+      "properties": {
+        "resourcePath": {
+          "type": "string"
+        },
+        "placeholder": {
+          "type": "string"
+        }
+      }
+    },
+    "ResourceDefine": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "title": "资源名称"
+        },
+        "resourcePath": {
+          "type": "string",
+          "title": "资源路径"
+        },
+        "identifyDefinition": {
+          "title": "主键定义",
+          "type": "object",
+          "properties": {
+            "identifyFields": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "autoIncreament": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        "attributes": {
+          "title": "资源属性",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/ResourceProperty"
+          }
+        },
+        "operators": {
+          "type": "object",
+          "properties": {
+            "create": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ResourceOperator"
+              }
+            },
+            "get": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ResourceOperator"
+              }
+            },
+            "list": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ResourceOperator"
+              }
+            },
+            "update": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ResourceOperator"
+              }
+            },
+            "delete": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ResourceOperator"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
