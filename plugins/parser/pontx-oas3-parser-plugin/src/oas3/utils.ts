@@ -162,10 +162,16 @@ export function transformCamelCase(name: string) {
   if (typeof name !== "string") {
     throw new Error("mod name is not a string: " + name);
   }
+  if (!name) {
+    return name;
+  }
 
   if (["-", " ", "_", "/", "^", "%", "*", "?", "="].some((char) => name.includes(char))) {
     words = name.split(/[\s-_\/\^%\*\?\=]+/);
   } else {
+    if (name.endsWith("Controller")) {
+      name = name.slice(0, name.length - "Controller".length);
+    }
     return name;
   }
 

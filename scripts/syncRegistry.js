@@ -13,6 +13,7 @@ const packages = [
   "pontx-generate-core",
   "pontx-react-hooks-generate-plugin",
   "pontx-oas2-parser-plugin",
+  "pontx-oas3-parser-plugin",
 ];
 
 const hostname = process.argv[2] || "https://npmmirror.com";

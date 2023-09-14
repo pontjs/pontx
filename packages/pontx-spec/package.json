@@ -33,7 +33,6 @@
   "devDependencies": {
     "@types/lodash": "*",
     "typedoc": "^0.23.8",
-    "typedoc-plugin-markdown": "^3.13.3",
-    "typescript": "4.6"
+    "typedoc-plugin-markdown": "^3.13.3"
   }
 }

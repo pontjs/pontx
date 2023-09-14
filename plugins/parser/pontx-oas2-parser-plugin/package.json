@@ -26,7 +26,6 @@
   "author": "jasonHzq",
   "license": "MIT",
   "devDependencies": {
-    "@types/lodash": "*",
-    "typescript": "^4.6.4"
+    "@types/lodash": "*"
   }
 }
