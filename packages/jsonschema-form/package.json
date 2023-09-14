@@ -1,7 +1,7 @@
 {
   "name": "jsonschema-form",
   "private": true,
-  "version": "0.3.60",
+  "version": "0.3.61",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
