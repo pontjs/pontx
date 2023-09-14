@@ -92,7 +92,7 @@ export class PontJsonSchemaOp extends PontJsonSchema {
       return [currentRow];
     }
 
-    switch (schema.type) {
+    switch (schema.type as string) {
       case "boolean":
       case "number":
       case "integer":
