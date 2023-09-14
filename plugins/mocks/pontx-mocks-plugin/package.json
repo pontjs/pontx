@@ -1,6 +1,6 @@
 {
   "name": "pontx-mocks-plugin",
-  "version": "0.3.57",
+  "version": "0.3.58",
   "description": "OpenAPI pont spec",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -14,7 +14,7 @@
     "lodash": "*"
   },
   "dependencies": {
-    "pontx-spec": "^0.3.57"
+    "pontx-spec": "^0.3.58"
   },
   "files": [
     "package.json",
