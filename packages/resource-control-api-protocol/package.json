@@ -1,6 +1,6 @@
 {
   "name": "resource-control-api-protocol",
-  "version": "0.3.58",
+  "version": "0.3.59",
   "description": "Resource Control API Protocol",
   "main": "lib/index.js",
   "scripts": {
