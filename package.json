@@ -81,6 +81,7 @@
     "yorkie": "^2.0.0"
   },
   "engines": {
+    "npm": "7.18.1",
     "node": "^16"
   },
   "workspaces": [
