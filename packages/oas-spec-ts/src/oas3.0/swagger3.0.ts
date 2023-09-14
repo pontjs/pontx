@@ -37,7 +37,7 @@ export class OpenAPIObject {
   /**
    * A list of tags used by the specification with additional metadata. The order of the tags can be used to reflect on their order by the parsing tools. Not all tags that are used by the <a href="https://swagger.io/specification/#operation-object">Operation Object</a> must be declared. The tags that are not declared MAY be organized randomly or based on the tools' logic. Each tag name in the list MUST be unique.
    */
-  tags?: TagObject;
+  tags?: TagObject[];
 
   /**
    * Additional external documentation.

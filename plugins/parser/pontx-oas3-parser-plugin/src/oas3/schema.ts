@@ -5,7 +5,7 @@ import * as PontSpec from "pontx-spec";
 import * as _ from "lodash";
 
 export function parseJsonSchema(schema: OAS3.SchemaObject, context = new JsonSchemaContext()): PontSpec.PontJsonSchema {
-  const { items, $ref, type, additionalProperties, properties, required, ...rest } = schema;
+  const { items, $ref, type, additionalProperties, properties, required, examples, ...rest } = schema;
   const { required: contextRequied, ...commonContext } = context;
 
   let reTypeName = PrimitiveTypeMap[type as any]?.type;
@@ -17,6 +17,20 @@ export function parseJsonSchema(schema: OAS3.SchemaObject, context = new JsonSch
 
   if (reTypeName) {
     resultSchema.type = reTypeName;
+  }
+  if (examples) {
+    resultSchema.enum = Object.keys(examples);
+    const exampleInsts = Object.values(examples).filter(
+      (example) => example?.value !== example?.description && example?.description,
+    );
+    if (exampleInsts.length) {
+      resultSchema.enumValueTitles = exampleInsts.reduce((result, exampleInst) => {
+        return {
+          ...result,
+          [exampleInst.value]: exampleInst.description,
+        };
+      }, {});
+    }
   }
 
   if ($ref) {

@@ -18,7 +18,8 @@
       "pontx-mocks-plugin": ["plugins/mocks/pontx-mocks-plugin"],
       "pontx-generate-core": ["plugins/generate/core"],
       "pontx-react-hooks-generate-plugin": ["plugins/generate/pontx-react-hooks-generate-plugin"],
-      "pontx-oas2-parser-plugin": ["plugins/parser/pontx-oas2-parser-plugin"]
+      "pontx-oas2-parser-plugin": ["plugins/parser/pontx-oas2-parser-plugin"],
+      "pontx-oas3-parser-plugin": ["plugins/parser/pontx-oas3-parser-plugin"]
     }
   },
   "include": ["packages/", "plugins/"],
@@ -64,6 +65,9 @@
     },
     {
       "path": "plugins/parser/pontx-oas2-parser-plugin"
+    },
+    {
+      "path": "plugins/parser/pontx-oas3-parser-plugin"
     }
   ]
 }

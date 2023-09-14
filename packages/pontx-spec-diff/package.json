@@ -30,7 +30,6 @@
   "license": "MIT",
   "devDependencies": {
     "@types/lodash": "*",
-    "lodash": "*",
-    "typescript": "^4.7.2"
+    "lodash": "*"
   }
 }

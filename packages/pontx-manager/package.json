@@ -18,7 +18,7 @@
     "pontx-oas2-parser-plugin": "^0.3.54",
     "pontx-react-hooks-generate-plugin": "^0.3.54",
     "pontx-spec": "^0.3.54",
-    "typescript": "^4.6.4"
+    "typescript": "^5"
   },
   "files": [
     "lib",
@@ -30,7 +30,6 @@
   "license": "MIT",
   "devDependencies": {
     "@types/fs-extra": "*",
-    "@types/lodash": "*",
-    "typescript": "^4.6.4"
+    "@types/lodash": "*"
   }
 }

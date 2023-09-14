@@ -85,25 +85,13 @@ export function parseOAS3Interface(
 }
 
 export async function parseSwagger2APIs(swagger: OAS3.OpenAPIObject, defNames: string[], translator: Translate) {
-  let originTags = ["common"];
-  Object.keys(swagger.paths || {}).forEach((path) => {
-    Object.keys(swagger.paths[path] || {}).forEach((method) => {
-      const op = swagger.paths[path]?.[method] as OAS3.OperationObject;
-      originTags.push(...(op?.tags || []));
-    });
-  });
-  originTags = _.union(originTags);
-  const chineseTags = originTags.filter((tag) => hasChinese(tag));
-  const enTags = await translator.translateCollect(chineseTags);
-  const tags = originTags
-    .filter((tag) => !hasChinese(tag))
-    .map((tag) => {
-      return { namespace: transformCamelCase(tag), tag, title: tag };
-    });
-  enTags.forEach((enTag, index) => {
-    tags.push({ namespace: transformCamelCase(enTag), tag: chineseTags[index], title: chineseTags[index] });
-  });
-
+  const tags = [
+    ...(swagger.tags || []),
+    {
+      name: "common",
+      description: "common",
+    },
+  ] as OAS2.TagObject[];
   const allSwaggerInterfaces = [] as Array<OAS3.OperationObject & { path: string; method: string }>;
 
   Object.keys(swagger.paths).forEach((path) => {
@@ -130,10 +118,13 @@ export async function parseSwagger2APIs(swagger: OAS3.OpenAPIObject, defNames: s
   const directories = tags
     .map((tag) => {
       const tagInterfaces = allSwaggerInterfaces.filter((inter) => {
+        tag.description = tag.description || "";
+
         return (
-          inter.tags.includes(tag.tag) ||
-          inter.tags.includes(tag.tag?.toLowerCase()) ||
-          inter.tags.includes(toDashCase(tag.tag))
+          inter.tags.includes(tag.name) ||
+          inter.tags.includes(tag.name.toLowerCase()) ||
+          inter.tags.includes(tag.description.toLowerCase()) ||
+          inter.tags.includes(toDashCase(tag.description))
         );
       });
       const samePath = getMaxSamePath(tagInterfaces.map((inter) => inter.path.slice(1)));
@@ -146,11 +137,10 @@ export async function parseSwagger2APIs(swagger: OAS3.OpenAPIObject, defNames: s
         });
       });
       processDuplicateInterfaceName(standardInterfaces, samePath);
-      const processedTag = transformCamelCase(tag.tag);
+      const processedTag = processTag(tag);
 
       return {
-        title: tag.title,
-        namespace: tag.namespace,
+        ...processedTag,
         interfaces: standardInterfaces,
       };
     })
@@ -186,7 +176,7 @@ export async function parseOAS3(
   name: string,
   translator: Translate,
 ): Promise<PontSpec.PontSpec> {
-  const draftClasses = _.map(swagger?.components?.schemas || {}, (schema, defName) => {
+  const draftClasses = _.map(swagger?.components?.schemas || {}, (schema: any, defName) => {
     const defNameAst = compileTemplate(defName);
 
     if (!defNameAst) {
