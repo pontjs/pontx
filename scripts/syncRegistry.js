@@ -11,6 +11,7 @@ const packages = [
   "oas-spec-ts",
   "pontx-meta-fetch-plugin",
   "pontx-generate-core",
+  "pontx-mocks-plugin",
   "pontx-react-hooks-generate-plugin",
   "pontx-oas2-parser-plugin",
   "pontx-oas3-parser-plugin",
