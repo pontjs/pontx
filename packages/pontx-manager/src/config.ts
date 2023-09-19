@@ -67,6 +67,15 @@ export class PontxGeneratorPlugin extends PontxPlugin {
 
 export class PontxMocksPlugin extends PontxPlugin {
   apply(manager: PontManager, options?: any): void {}
+  async getAPIMockCode(
+    manager: PontManager,
+    options: any,
+    apiName: string,
+    modName: string,
+    specName: string,
+  ): Promise<string> {
+    return "";
+  }
 }
 
 export class PontxReportPlugin extends PontxPlugin {
@@ -104,6 +113,7 @@ export class PontxPlugins {
       fetch: { use: "pontx-meta-fetch-plugin", options },
       parser: { use: "pontx-oas2-parser-plugin", options },
       generate: { use: "pontx-react-hooks-generate-plugin", options },
+      mocks: { use: "pontx-mocks-plugin", options },
     };
   }
 }
@@ -115,7 +125,12 @@ export function requireModule(pluginPath: string, configDir: string, rootDir: st
       : findRealPath(configDir, pluginPath);
 
   if (
-    ["pontx-meta-fetch-plugin", "pontx-react-hooks-generate-plugin", "pontx-oas2-parser-plugin"].includes(pluginPath)
+    [
+      "pontx-meta-fetch-plugin",
+      "pontx-react-hooks-generate-plugin",
+      "pontx-oas2-parser-plugin",
+      "pontx-mocks-plugin",
+    ].includes(pluginPath)
   ) {
     requirePath = pluginPath;
   }

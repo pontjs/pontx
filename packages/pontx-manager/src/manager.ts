@@ -251,6 +251,15 @@ export class PontManager {
     }
   }
 
+  static async generateMocks(manager: PontManager) {
+    try {
+      const mocksPlugin = await Promise.resolve(manager.innerManagerConfig.plugins.mocks.instance);
+      return Promise.resolve(mocksPlugin.apply(manager, manager.innerManagerConfig.plugins.mocks.options));
+    } catch (e) {
+      manager.logger.error(e.message, e.stack);
+    }
+  }
+
   // 展示方法
   static showDiffs(manager: PontManager) {}
 

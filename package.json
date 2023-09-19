@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "test": "jest",
-    "inst": "npm run clean && npm i --registry=http://registry.npm.alibaba-inc.com && lerna bootstrap",
+    "inst": "npm run clean-lock && npm run clean && npm i --registry=http://registry.npm.alibaba-inc.com --force && lerna bootstrap",
     "changelog": "node -r esm scripts/changelog.js",
     "build:commonjs": "lerna exec --scope pontx-spec* --stream -- npm run build:commonjs",
     "build:commonjs:watch": "concurrently 'tsc -p ./packages/pontx-spec/tsconfig.lib.json -w' 'tsc -p packages/pontx-spec-diff/tsconfig.commonjs.json -w'",
@@ -17,9 +17,10 @@
     "vs-ui": "cd packages/pontx-ui && npm run build && cd ../vscode-pontx/media && npm run build",
     "clean": "lerna clean --yes && rm -rf ./node_modules",
     "lint": "prettier --write --parser typescript \"packages/**/*.ts\"",
+    "clean-lock": "node scripts/clean-lock.js && rm packages/vscode-pontx/media/package-lock.json || true",
     "sync:package": "node scripts/syncRegistry.js https://web.npm.alibaba-inc.com",
     "release:all": "npm run release:npm && npm run release:vscode",
-    "release:npm": "rm packages/vscode-pontx/media/package-lock.json || true && node scripts/clean-lock.js && lerna version patch --yes --force-publish --message 'chore: publish' && lerna exec --ignore vscode-pontx --ignore vscode-pontx-media --ignore pontx-report-plugin --ignore jsonschema-form  --stream -- npm publish --registry https://registry.npmjs.org --otp $1",
+    "release:npm": "npm run clean-lock && lerna version patch --yes --force-publish --message 'chore: publish' && lerna exec --ignore vscode-pontx --ignore vscode-pontx-media --ignore pontx-report-plugin --ignore jsonschema-form  --stream -- npm publish --registry https://registry.npmjs.org --otp $1",
     "release:dry": "node scripts/release.js --dry",
     "release:vscode": "sh scripts/releaseVscode.sh"
   },
