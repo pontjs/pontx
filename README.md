@@ -13,7 +13,7 @@ pontx provide different types of services: CLI、VSCode IDE Extension、Platform
 
 pontx can be highly customed with full lifecle plugin. [Plugin development guide](https://github.com/pontjs/pontx/blob/main/PluginContribution.md)
 
-简体中文 | [English](./README.en-US.md)
+English | [简体中文](./README.zh-CN.md)
 
 ## Installing
 
@@ -22,7 +22,7 @@ pontx can be highly customed with full lifecle plugin. [Plugin development guide
 
 ### Pontx Configuration
 
-pontx-config.json 
+pontx-config.json
 
 #### Configuration Sample
 
@@ -46,7 +46,7 @@ pontx-config.json
     }]
   }
   ```
-  
+
   For more Pontx Configuration detail, see the [Pontx Configuration Guide](./Configuration.md).
 
 
