@@ -52,6 +52,8 @@ export function parseJsonSchema(schema: OAS3.SchemaObject, context = new JsonSch
       resultSchema.type = refType as any;
     }
     if (typeName) {
+      resultSchema.originRef = $ref;
+      resultSchema.$ref = "#/definitions/" + typeName;
       resultSchema.typeName = typeName;
     }
     resultSchema.templateArgs = templateArgs;

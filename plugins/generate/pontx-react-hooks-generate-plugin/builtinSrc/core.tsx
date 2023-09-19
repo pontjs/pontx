@@ -25,15 +25,16 @@ export function getAPIMethods(apiMetaData: any) {
       return mutate(PontCore.getUrlKey(path, params, method));
     },
     useRequest: (params = {}, swrOptions = {}) => {
-      return PontCore.useRequest(path, params, swrOptions);
+      return PontCore.useRequest(path, params, swrOptions, apiMetaData);
     },
     useDeprecatedRequest: (params = {}, swrOptions = {}) => {
-      return PontCore.useRequest(path, params, swrOptions, { method });
+      return PontCore.useRequest(path, params, swrOptions, apiMetaData);
     },
     request: (params = {}, options = {}) => {
       return PontCore.fetch(PontCore.getUrl(path, params, method), {
         method,
         ...options,
+        ...apiMetaData,
       });
     },
   };

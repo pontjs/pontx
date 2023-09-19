@@ -110,4 +110,38 @@ export class PontJsonSchema {
   }
 
   static getDescription(schema: PontJsonSchema) {}
+
+  static mapPontxSchema(schema: PontJsonSchema, mapper: (schema: PontJsonSchema) => PontJsonSchema) {
+    if (!schema) {
+      return schema;
+    }
+
+    const newSchema = mapper(schema);
+    if (newSchema.type === "object" && newSchema?.properties) {
+      const newProperties = Object.keys(newSchema.properties).reduce((result, key) => {
+        return {
+          ...result,
+          [key]: PontJsonSchema.mapPontxSchema(mapper(newSchema.properties[key]), mapper),
+        };
+      }, {});
+
+      return {
+        ...newSchema,
+        properties: newProperties,
+      };
+    }
+    if (newSchema.type === "array" && newSchema?.items) {
+      return {
+        ...newSchema,
+        items: PontJsonSchema.mapPontxSchema(mapper(newSchema.items), mapper),
+      };
+    }
+    if (newSchema.type === "object" && newSchema?.additionalProperties) {
+      return {
+        ...newSchema,
+        additionalProperties: PontJsonSchema.mapPontxSchema(mapper(newSchema.additionalProperties), mapper),
+      };
+    }
+    return newSchema;
+  }
 }

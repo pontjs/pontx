@@ -1,6 +1,6 @@
 {
   "name": "pontx-report-plugin",
-  "version": "0.3.65",
+  "version": "0.3.68",
   "description": "OpenAPI pont spec",
   "private": true,
   "main": "lib/index.js",
