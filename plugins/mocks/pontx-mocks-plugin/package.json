@@ -1,6 +1,6 @@
 {
   "name": "pontx-mocks-plugin",
-  "version": "0.3.61",
+  "version": "0.3.62",
   "description": "OpenAPI pont spec",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -11,10 +11,13 @@
     "build": "npm run clean && tsc --build"
   },
   "peerDependencies": {
-    "lodash": "*"
+    "lodash": "*",
+    "pontx-manager": "*"
   },
   "dependencies": {
-    "pontx-spec": "^0.3.61"
+    "json-schema-faker": "^0.5.3",
+    "pontx-spec": "^0.3.62",
+    "ts-node": "^10.9.1"
   },
   "files": [
     "package.json",
@@ -22,5 +25,6 @@
   ],
   "keywords": [],
   "author": "jasonHzq",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": "git@github.com:pontjs/pontx.git"
 }
