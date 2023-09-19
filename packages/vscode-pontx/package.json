@@ -2,7 +2,7 @@
   "name": "vscode-pontx",
   "displayName": "pontx",
   "description": "",
-  "version": "0.3.61",
+  "version": "0.3.62",
   "private": true,
   "publisher": "jasonHzq",
   "license": "MIT",
@@ -82,6 +82,16 @@
         "icon": "$(debug-start)"
       },
       {
+        "command": "pontx.generateMocks",
+        "title": "生成Mocks代码",
+        "icon": "$(issues)"
+      },
+      {
+        "command": "pontx.regenerateAPIMocks",
+        "title": "重新生成 API Mocks代码",
+        "icon": "$(issues)"
+      },
+      {
         "command": "pontx.restart",
         "title": "重启 Pont",
         "icon": "$(debug-restart)"
@@ -140,6 +150,11 @@
         "command": "pontx.openMeta",
         "icon": "$(go-to-file)",
         "title": "查看元数据定义"
+      },
+      {
+        "command": "pontx.viewMocks",
+        "icon": "$(go-to-file)",
+        "title": "查看Mocks数据"
       },
       {
         "command": "pontx.addOrigin",
@@ -243,6 +258,10 @@
           "group": "navigation"
         },
         {
+          "command": "pontx.viewMocks",
+          "group": "navigation"
+        },
+        {
           "command": "pontx.openPreviewToTheSide",
           "when": "editorLangId == json && resourceFilename =~ /.api.json$/",
           "group": "pont"
@@ -263,6 +282,11 @@
           "command": "pontx.openPreviewToTheSide",
           "when": "editorLangId == json && resourceFilename =~ /.struct.json$/",
           "group": "navigation"
+        },
+        {
+          "command": "pontx.regenerateAPIMocks",
+          "when": "resourcePath =~ /mocks/ && resourceFilename =~ /.ts$/ && resourceFilename != 'index.ts'",
+          "group": "navigation"
         }
       ],
       "view/title": [
@@ -282,19 +306,24 @@
           "group": "navigation@3"
         },
         {
-          "command": "pontx.findInterface",
+          "command": "pontx.generateMocks",
           "when": "view == pontExplorer",
           "group": "navigation@4"
         },
         {
-          "command": "pontx.config",
+          "command": "pontx.findInterface",
           "when": "view == pontExplorer",
           "group": "navigation@5"
         },
         {
+          "command": "pontx.config",
+          "when": "view == pontExplorer",
+          "group": "navigation@6"
+        },
+        {
           "command": "pontx.addOrigin",
           "when": "view == pontExplorer && pontx.hasPontxOrigins == true",
-          "group": "navigation@6"
+          "group": "navigation@7"
         }
       ],
       "view/item/context": [
@@ -399,13 +428,14 @@
     "@vscode/codicons": "^0.0.32",
     "fs-extra": "^10.1.0",
     "mockjs": "^1.0.1-beta3",
-    "pontx-generate-core": "^0.3.61",
-    "pontx-manager": "^0.3.61",
-    "pontx-meta-fetch-plugin": "^0.3.61",
-    "pontx-oas2-parser-plugin": "^0.3.61",
-    "pontx-react-hooks-generate-plugin": "^0.3.61",
-    "pontx-spec": "^0.3.61",
-    "pontx-spec-diff": "^0.3.61"
+    "pontx-generate-core": "^0.3.62",
+    "pontx-manager": "^0.3.62",
+    "pontx-meta-fetch-plugin": "^0.3.62",
+    "pontx-mocks-plugin": "^0.3.62",
+    "pontx-oas2-parser-plugin": "^0.3.62",
+    "pontx-react-hooks-generate-plugin": "^0.3.62",
+    "pontx-spec": "^0.3.62",
+    "pontx-spec-diff": "^0.3.62"
   },
   "icon": "resources/pontx.png",
   "repository": {
