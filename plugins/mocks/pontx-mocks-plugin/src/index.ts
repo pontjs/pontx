@@ -117,16 +117,26 @@ export class DefaultPontxMocksPlugin extends PontxMocksPlugin {
   }
 
   static getFileStructure(manager: PontManager, options: MocksOptions, mocksData: any) {
-    if (manager.localPontSpecs.length === 1 && !manager.localPontSpecs[0].name) {
-      return DefaultPontxMocksPlugin.getSpecFileStructure(manager.localPontSpecs[0], options, mocksData);
+    const specs = manager.localPontSpecs?.filter((spec) => {
+      const originConf = manager.innerManagerConfig?.origins?.find((origin) => origin?.name == spec?.name);
+      if (originConf) {
+        const mocksOptions = originConf?.plugins?.mocks?.options;
+        if (mocksOptions && Object.prototype.hasOwnProperty.call(mocksOptions, "enable") && !mocksOptions.enabled) {
+          return false;
+        }
+      }
+      return true;
+    });
+    if (specs.length === 1 && !specs[0].name) {
+      return DefaultPontxMocksPlugin.getSpecFileStructure(specs[0], options, mocksData);
     }
-    if (manager.localPontSpecs.length >= 1) {
-      const result = manager.localPontSpecs
+    if (specs.length >= 1) {
+      const result = specs
         .map((spec) => DefaultPontxMocksPlugin.getSpecFileStructure(spec, options, mocksData?.[spec.name]))
         .reduce((pre, curr) => {
           return { ...pre, ...curr };
         }, {});
-      result["index.ts"] = manager.localPontSpecs
+      result["index.ts"] = specs
         .map((spec) => {
           return `export * as ${spec.name} from './${spec.name}/index';`;
         })
@@ -193,11 +203,9 @@ class MocksCodeGenerator {
 
   generateAPIMocksCode(modName: string, api: PontxSpec.PontAPI, indentationCnt = 4) {
     const schema = api?.responses?.["200"]?.schema;
-    let mocksData = null;
-    if (!this.preMocksData && schema) {
+    let mocksData = _.get(this.preMocksData, `${modName}.${api.name}`);
+    if (!mocksData && schema) {
       mocksData = this.generateSchemaMocksData(schema);
-    } else if (this.preMocksData) {
-      mocksData = _.get(this.preMocksData, `${modName}.${api.name}`);
     } else {
       return "";
     }
