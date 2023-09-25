@@ -1,5 +1,6 @@
 import * as path from "path";
 import * as fs from "fs-extra";
+import * as _ from "lodash";
 import { PontSpec, PontAPI } from "pontx-spec";
 import { PontManager } from "./manager";
 import { PontLogger } from "./logger";
@@ -369,7 +370,7 @@ export class PontInnerManagerConfig {
       .map((origin) => {
         let originPlugins = config.plugins || ({} as any);
         if (origin.plugins) {
-          originPlugins = { ...originPlugins, ...origin.plugins };
+          originPlugins = _.merge({}, originPlugins, origin.plugins);
         }
         return {
           ...origin,
