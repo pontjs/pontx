@@ -6,33 +6,43 @@
 
 <h1 align="center">Pontx</h1>
 
+[Pontx](https://github.com/pontjs/pontx) is a lightweight pluggable API management tools by [Pontx API Spec](https://github.com/pontjs/pontx/blob/main/packages/pontx-spec/docs/classes/PontSpec.md), which inherit [OAS2](https://swagger.io/specification/v2/) compatibility.
 
-[Pontx](https://github.com/pontjs/pontx) is a lightweight API management tools. Supporting API searching, documentation, debug, design, changement analysis, mocks data auto generating and serving, SDK generating...
+Pontx provides service by Pontx CLI、[Pontx VSCode IDE Extension](https://marketplace.visualstudio.com/items?itemName=jasonHzq.vscode-pontx) and Web Platform(WIP).
 
-pontx provide different types of services: CLI、VSCode IDE Extension、Platform e.g.
+## Features
 
-pontx can be highly customed with full lifecle plugin. [Plugin development guide](https://github.com/pontjs/pontx/blob/main/PluginContribution.md)
+* <strong>SDK generating</strong>. Pontx generate most popular style SDK like SWR by built-in SDK generate plugin.
+* <strong>API Mocks</strong>. Pontx will generate mocking data automatically. Pontx SDK will return mocks data through Pontx configuration.
+* <strong>API changement manage</strong>. Pontx will generate API changement report in detail, and you can update your local `Pontx API Spec` by select granularly changement.
+* <strong>API documentation</strong>. View clearest and elaborate API documentation in IDE.
+* <strong>API searching</strong>. Searching API in IDE and then insert snippets or view documentation.
+* <strong>API design</strong>. Writing Pontx API Spec with real-time documentation preview. Pontx API Spec can be managed by `git` automatically.
+* <strong>API debug</strong> Support API Debugger in IDE
+
+All lifecle features can be highly customed with Pontx plugin. [Pontx Plugin Development Guide](https://github.com/pontjs/pontx/blob/main/PluginContribution.md)
 
 English | [简体中文](./README.zh-CN.md)
 
-## Installing
-
 ## Quick Start
-  Once the pontx configuration file named `pontx-config.json` is detected, Pontx will be automatic activated.
+
+Config a valid `pontx-config.json` in your project, and pontx will automatically activated.
 
 ### Pontx Configuration
 
-pontx-config.json
 
 #### Configuration Sample
 
   ```json
+  // pontx-config.json
   {
-    "outDir": "",
+    "outDir": "../src/pontx-services",
     "plugins": {
-      // pontx plugin or your custom plugin
+      // pontx built-in plugin or your custom plugin
     },
     "origins": [{
+      // Pontx support mulitple origins in one project.
+      // Pontx support OAS2、OAS3 origin by default. You can contribute Pontx Parse Plugin to support other type of origin.
       "name": "name1",
       "url": "myhost/v2/api-docs.json"
     }, {
@@ -49,8 +59,11 @@ pontx-config.json
 
   For more Pontx Configuration detail, see the [Pontx Configuration Guide](./Configuration.md).
 
+### Usage
 
 #### VSCode Extension Guide
+
+[Pontx VSCode Extension](https://marketplace.visualstudio.com/items?itemName=jasonHzq.vscode-pontx)
 
 [![Version](https://img.shields.io/visual-studio-marketplace/v/jasonhzq.vscode-pontx)](https://marketplace.visualstudio.com/items?itemName=jasonHzq.vscode-pontx)
 [![Installs](https://img.shields.io/visual-studio-marketplace/i/jasonhzq.vscode-pontx)](https://marketplace.visualstudio.com/items?itemName=jasonHzq.vscode-pontx)
@@ -72,28 +85,13 @@ For more Pontx VSCode Extension details, see the [Pontx VSCode Extension Guide](
 
 #### Pontx CLI Guide
 
-## Plugins & Tools
+##### Installation
 
-### API Fetching & Parse
+```sh
+npm i pontx-cli -g
+```
 
-With Pontx, you can fetch API meta data from different and parse to [`Pontx Spec`](https://github.com/pontjs/pontx/blob/main/packages/pontx-spec/docs/classes/PontSpec.md#properties-1).
+##### Guide
 
-### SDK Genenrating
+* <strong>pontx generate</strong> Fetch Origin API Spec and generate SDK.
 
-You can generate SDK codes in different languages by using different Pontx generate plugin, or your can writing your custom SDK generate plugin.
-
-### API Searching
-
-Searching API by shortcut key `cmd + ctrl + p`. Or click search icon in Pontx panel.
-
-### Other Features
-
-* API documentation
-
-* API changes management
-
-* API design
-
-* API mocks
-
-* ...
