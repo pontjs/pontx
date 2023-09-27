@@ -33,7 +33,7 @@ Config a valid `pontx-config.json` in your project, and pontx will automatically
 
 #### Configuration Sample
 
-  ```json
+  ```js
   // pontx-config.json
   {
     "outDir": "../src/pontx-services",
