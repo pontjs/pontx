@@ -411,14 +411,14 @@
     }
   },
   "scripts": {
-    "watch": "rm -rf dist && tsc --build --watch",
+    "watch": "rimraf dist && tsc --build --watch",
     "clean": "rimraf out && rimraf tsconfig.tsbuildinfo",
     "build": "npm run esbuild",
     "media": "cd media && vite --mode browser",
     "build:media": "cd media && vite build",
-    "reinstall": "rm -rf node_modules && npm i",
+    "reinstall": "rimraf node_modules && npm i",
     "afterinstall": "cd ../../ && lerna bootstrap",
-    "vscode:prepublish": "rm -rf dist && npm run esbuild-base -- --minify",
+    "vscode:prepublish": "rimraf dist && npm run esbuild-base -- --minify",
     "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
     "esbuild": "npm run esbuild-base -- --sourcemap",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
