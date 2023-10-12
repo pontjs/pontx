@@ -57,7 +57,7 @@ Config a valid `pontx-config.json` in your project, and pontx will automatically
   }
   ```
 
-  For more Pontx Configuration detail, see the [Pontx Configuration Guide](./Configuration.md).
+  For more Pontx Configuration detail, see the [Pontx Configuration Guide](./docs/Configuration.md).
 
 ### Usage
 
