@@ -30,7 +30,7 @@
                 "secret": "your secret"
             }
         }
-}
+  }
   ```
 
     目前翻译器内置百度翻译。您也可以开发自定义的翻译器插件。
@@ -44,7 +44,7 @@
 * url:  Pontx 默认的 fetch 插件，将通过 url 字段配置拉取元数据。
 * envs: 您可以通过 envs 字段配置多个数据来源，并通过 env 字段进行切换，如：
 
-```
+```json
 {
   "name": "petStore",
   "envs": {
