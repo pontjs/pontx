@@ -29,7 +29,7 @@
       "args": ["--extensionDevelopmentPath=${workspaceRoot}/packages/vscode-pontx"],
       "stopOnEntry": false,
       "sourceMaps": true,
-      "outFiles": ["${workspaceRoot}/packages/vscode-pontx/out/**/*.js"]
+      "outFiles": ["${workspaceRoot}/packages/vscode-pontx/dist/**/*.js"]
     },
     {
       "name": "Debug Extension Tests",
