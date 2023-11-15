@@ -135,7 +135,7 @@ export function requireModule(pluginPath: string, configDir: string, rootDir: st
       "pontx-mocks-plugin",
     ].includes(pluginPath)
   ) {
-    requirePath = pluginPath;
+    return require(pluginPath);
   }
 
   if (!path.extname(requirePath)) {

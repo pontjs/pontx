@@ -6,5 +6,10 @@ src/
 media
 !media/lib
 !media/dist
-tsconfig.json
 !node_modules/@vscode/codicons
+!media/dist/
+**/*.map
+tsconfig.json
+*.d.ts
+*.md
+!README.md

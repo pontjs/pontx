@@ -6,28 +6,28 @@
 
 <h1 align="center">Pontx</h1>
 
-[Pontx](https://github.com/pontjs/pontx) 是一个轻量的 API 生命周期管理工具。支持 API 设计、变更分析、自动化 Mocks、SDK 代码生成、API 文档及调试、API 搜索等功能。
+[Pontx](https://github.com/pontjs/pontx) 是一个轻量的插件化的 API 生命周期管理工具，以 [Pontx API Spec](https://github.com/pontjs/pontx/blob/main/packages/pontx-spec/docs/classes/PontSpec.md) 为标准提供 API 生命周期管理能力。
 
-Pontx 支持不同的 CLI、VSCode IDE Extension、平台服务等方式来提供 API 管理及消费能力。
+[Pontx API Spec](https://github.com/pontjs/pontx/blob/main/packages/pontx-spec/docs/classes/PontSpec.md) 是一个支持 RESTful、RPC 等不同风格的 OpenAPI 设计规范，继承且兼容 [OAS2](https://swagger.io/specification/v2/) 和 [JSONSchema](https://json-schema.org/)。
 
-Pontx 采用插件化的机制进行开发。每个 API 管理生命周期，您都根据使用场景，开发高度定制化的插件。插件开发请查阅[插件开发指南](https://github.com/pontjs/pontx/blob/main/PluginContribution.md)
+Pontx 通过 Pontx CLI、[Pontx VSCode IDE Extension](https://marketplace.visualstudio.com/items?itemName=jasonHzq.vscode-pontx) 和 Pontx Web 平台(WIP) 来提供服务。
 
 简体中文 | [English](./README.md)
 
-## 安装
+## 特性
 
-安装 VSCode 插件： [vscode-pontx](https://marketplace.visualstudio.com/items?itemName=jasonHzq.vscode-pontx)
-
-安装 CLI：
-```sh
-npm i -g pontx-cli
-```
-
-[Pontx 相关工具及插件](https://www.npmjs.com/search?q=pontx-)
+* <strong>SDK 生成</strong> Pontx 内置多种热门 API 调用风格的 SDK 生成插件，如 [SWR](https://github.com/vercel/swr)、标准 fetch 等。Pontx SDK 全面拥抱 Typescript，API Spec 中所有配置，都会转换成 Typescript 特性，帮助开发者更好地编写 OpenAPI 调用程序。
+* <strong>API Mocks</strong> Pontx 内置自动化生成 Mocks 数据的能力，结合 SDK 插件，开发者可按需配置让接口直接返回 Mocks 数据。
+* <strong>API 变更管理</strong> Pontx 通过详细的 API 变更分析，将为您生成详细的 API 变更报表。您也可以通过细粒度的 API 变更管理，有选择的更新您的本地 API 数据。这在多人协作的项目中尤其需要。
+* <strong>API 文档</strong> 通过 Pontx IDE Extension，您可以便捷的查看代码中 API 的文档，了解出入参结构及相关约束信息。
+* <strong>API 设计</strong> 通过实时的 API 文档预览，智能的 Pontx API Spec Editor，资源优先的API设计理念，Pontx 帮助你更高效的设计高质量 API。
+* <strong>API 调试</strong> 在 IDE 中进行便捷的 API 调试。
 
 ## 快速开始
 
-在您的项目中，如检测到有效的 `pontx-config.json` 文件，Pontx 将立即启动。`pontx-config.json` 配置方式请查看下文。
+在您的项目中，配置有效的 `pontx-config.json` 文件，Pontx 将立即启动。
+
+`pontx-config.json` 配置详情请查阅下文。
 
 ### Pontx 配置
 
@@ -61,17 +61,19 @@ npm i -g pontx-cli
 查阅更多 Pontx 配置细节，请参阅 [Pontx 配置指南](./Configuration.md)。
 
 
-#### VSCode Extension 使用指南
+#### VSCode 插件使用指南
+
+[插件地址](https://marketplace.visualstudio.com/items?itemName=jasonHzq.vscode-pontx)
 
 [![Version](https://img.shields.io/visual-studio-marketplace/v/jasonhzq.vscode-pontx)](https://marketplace.visualstudio.com/items?itemName=jasonHzq.vscode-pontx)
 [![Installs](https://img.shields.io/visual-studio-marketplace/i/jasonhzq.vscode-pontx)](https://marketplace.visualstudio.com/items?itemName=jasonHzq.vscode-pontx)
 [![Ratings](https://img.shields.io/visual-studio-marketplace/r/jasonhzq.vscode-pontx)](https://marketplace.visualstudio.com/items?itemName=jasonHzq.vscode-pontx)
 
- * VSCode Extension UI 布局
+ * <strong>功能布局</strong>
 
 ![VSCode Extension Guide](https://img.alicdn.com/imgextra/i3/O1CN01AWodzd1KMkHYgvhiW_!!6000000001150-2-tps-1854-1396.png)
 
- * API 变更分析及管理
+ * <strong>API 变更分析及管理</strong>
 
 如果您的项目涉及多人协作，在数据源不断变化的同时，建议您只更新自己有关的 API，避免整个 SDK 的更新，导致非相关模块类型报错。
 
@@ -79,13 +81,13 @@ npm i -g pontx-cli
 
 ![API changement manage](https://img.alicdn.com/imgextra/i4/O1CN01CJgI7L1Q2wr6VsN3r_!!6000000001919-2-tps-882-366.png)
 
- * API 搜索
+ * </strong>API 搜索</strong>
 
 在 VScode Extension 中，默认 API 搜索的 快捷键为 cmd + ctrl + p. 搜索到 API 后，您可以参阅 API 文档，或快速插入该 API 调用的不同类型的代码段。
 
 ![API Serching](https://img.alicdn.com/imgextra/i3/O1CN01gcgW4z1iVUcgbdpNK_!!6000000004418-2-tps-1750-532.png)
 
- * API Mocks
+ * <strong>API Mocks</strong>
 
 Pontx 默认在 outDir 下生成 mocks 文件夹。Pontx 根据 API 的出参结构，自动为您生成所有 API 的 mocks 数据。
 您可以在 PontSDK Core 中，修改 fetch 方法，根据当前环境和调用配置，判断是否返回 mocks 数据。
@@ -93,3 +95,15 @@ Pontx 默认在 outDir 下生成 mocks 文件夹。Pontx 根据 API 的出参结
 如果您对 mocks 文件进行修改，当 Pontx 重新生成 Mocks 数据时，您的修改会被保留。此外，每个 API 的 mocks 数据都可以重新生成，您可以点击 API mocks 文件右上角 mock icon，重新生成当前 API 的 Mocks 数据。
 
 更多 Pontx VSCode Extension 细节, 请参阅 [Pontx VSCode Extension Guide](./packages/vscode-pontx/README.md).
+
+#### Pontx CLI 使用指南
+
+##### 安装
+
+```sh
+npm i pontx-cli -g
+```
+
+##### 使用
+
+* <strong>`pontx generate`</strong> 拉取并更新API元数据，生成最新的SDK代码。
