@@ -3,6 +3,11 @@
 out/
 src/
 .gitignore
-media/src
+media/
+!media/dist/
+**/*.map
 tsconfig.json
+*.d.ts
+*.md
+!README.md
 !node_modules/@vscode/codicons
