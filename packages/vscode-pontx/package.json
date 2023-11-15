@@ -411,16 +411,16 @@
     }
   },
   "scripts": {
-    "watch": "rm -rf dist && tsc --build --watch",
     "clean": "rimraf dist && rimraf tsconfig.tsbuildinfo",
+    "watch": "rimraf dist && tsc --build --watch",
     "build": "npm run esbuild",
     "media": "cd media && vite --mode browser",
     "build:media": "cd media && vite build",
-    "reinstall": "rm -rf node_modules && npm i",
+    "reinstall": "rimraf node_modules && npm i",
     "afterinstall": "cd ../../ && lerna bootstrap",
     "build:ncc": "rm -rf dist && ncc build ./src/extension.ts -o dist && mv dist/index.js dist/extension.js",
-    "vscode:prepublish": "rm -rf dist && npm run build:ncc",
-    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+    "vscode:prepublish": "rimraf dist && npm run build:ncc",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --minify",
     "esbuild": "npm run esbuild-base -- --sourcemap",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
     "preview": "cd media && vite build --watch"

@@ -7,12 +7,12 @@ git clone git@github.com:pontjs/pontx.git
 
 cd pontx
 
+# suggested use yarn instead of npm to install
 npm run inst
 
 lerna bootstrap
 
 # 初始化环境
-
 
 # 启动项目
 npm start
@@ -40,6 +40,19 @@ npm run release:vscode
 Debug pontx-cli by select "Debug Pontx CLI" in VSCode Debug Panel.
 Debug vscode-pontx by select "Debug Extension" in VSCode Debug Panel.
 
+## Examples
+
+```shell
+cd examples/hooks-app
+
+yarn
+npm install
+pnpm install
+```
+
+使用 vscode-pontx 插件，生成代码，当看到 src 目录下，生成了 services 文件夹即为成功。
+​
+
 ## Code Style
 
 ## 为什么做 Pontx 升级
@@ -58,9 +71,32 @@ Debug vscode-pontx by select "Debug Extension" in VSCode Debug Panel.
 
 ### kernel
 
+- pontx-cli
+
+  pontx 命令行，等同于 pontx 入口，执行时主要经过以下步骤：
+
+  - 寻找 pontx-config.json 文件，生成 pontManager 实例。
+  - 根据 api-lock.json 本地文件或根据 remote 地址，读取数据，并生成代码。
+
 - pontx-spec
   描述 Pont 标准数据源的类型，提供 Pont 标准数据源的常用数据处理方法。
   新版 Pont 标准数据源做了升级，拥抱 JSONSchema 标准。
+
+- pontx-spec-diff
+
+  主要提供对比差异，比如远程数据和本地暂存数据的对比、BaseClass 的对比、API 的对比等等
+
+- oas-spec-ts
+
+  全名 openApiSpecification-spec-typescript,主要提供 openapi 的标准与规范。
+
+  在项目中主要提供 interface，供给 parse 插件使用。
+
+- generate
+
+  根据符合 PontSpec 规范的数据，提供代码解析以及生成 JavaScript 和 TypeScript 代码的功能。
+
+  目前在 pontx-react-hooks-generate-plugin 插件内引用了其中的 typescript 代码生成模块。
 
 - pontx-manager
   提供 pontx 管理类，主要提供如下能力。
@@ -69,6 +105,14 @@ Debug vscode-pontx by select "Debug Extension" in VSCode Debug Panel.
   - 不同生命周期插件加载和执行
 
 - pontx-ui
+
+  pontx 文档界面，采用 React+webpack 作为技术栈，持续开发中...
+
+- vscode-pontx
+
+  集成了 pontx-manager、pontx-spec 模块，提供拉取代码、生成本地代码、mock 代码等功能，更有 UI 界面展示数据结构（vscode-pontx/media）。
+
+  ![image-20231001104251823](./docs/images/pontx-ui.png)
 
 以 pontx-spec 元数据渲染的 API 工具组件库。 包括：
 

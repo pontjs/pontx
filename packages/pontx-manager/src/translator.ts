@@ -1,6 +1,6 @@
 import * as path from "path";
 import * as _ from "lodash";
-const { youdao, baidu, google } = require("translation.js");
+const { youdao, google } = require("translation.js");
 import * as assert from "assert";
 import { PontDictManager } from "./LocalDictManager";
 const baiduTranslateService = require("baidu-translate-service");
@@ -11,6 +11,9 @@ export class TranslateOptions {
     appId: string;
     secret: string;
   };
+  engines?: Array<{
+    translate: string;
+  }>;
 }
 
 export class Translate {
@@ -18,25 +21,8 @@ export class Translate {
   private dictName = "dict.json";
   private engines = [
     {
-      name: "baidu",
+      name: "baiduOpen",
       translate: (text) => {
-        const { appId, secret } = this.translateOptions?.baidu || {};
-        return baiduTranslateService({ appid: appId, key: secret, q: text, to: "en", from: "auto" })
-          .then((data) => {
-            try {
-              if (data.error_msg) {
-                throw new Error(data.error_msg);
-              }
-              return _.get(data, "trans_result.0.dst");
-            } catch (error) {
-              throw new Error(error.message);
-            }
-          })
-          .catch((err) => {
-            throw new Error(err.message);
-          });
-      },
-      translateCollect: (text) => {
         const { appId, secret } = this.translateOptions?.baidu || {};
         return baiduTranslateService({ appid: appId, key: secret, q: text, to: "en", from: "auto" })
           .then((data) => {
@@ -62,10 +48,6 @@ export class Translate {
       name: "youdao",
       translate: (text) => youdao.translate(text).then((res) => res.result[0]),
     },
-    {
-      name: "baidu",
-      translate: (text) => baidu.translate(text).then((res) => res.result[0]),
-    },
   ];
   dict = {} as { [cn: string]: string };
 
@@ -74,6 +56,9 @@ export class Translate {
     if (translateOptions?.cacheFilePath) {
       this.dictName = path.basename(translateOptions?.cacheFilePath);
       localDictDir = path.resolve(this.config?.configDir, path.dirname(translateOptions.cacheFilePath));
+    }
+    if (translateOptions?.engines && translateOptions?.engines.length > 0) {
+      this.loadEngines(translateOptions);
     }
     this.PontDictManager = PontDictManager(localDictDir);
     const localDict = this.PontDictManager.loadFileIfExistsSync(this.dictName);
@@ -87,6 +72,18 @@ export class Translate {
         this.dict = {};
       }
     }
+  }
+
+  loadEngines(translateOptions) {
+    translateOptions?.engines.forEach(async (engine) => {
+      const engineDirname = path.resolve(this.config?.configDir, engine.translate);
+      const translate = await import(engineDirname);
+      const name = engine.translate.includes(".") ? engine.translate.split(".")[0] : engine.translate;
+      this.engines.unshift({
+        name,
+        translate: translate?.default || translate,
+      });
+    });
   }
 
   async saveCacheFile() {
@@ -142,7 +139,6 @@ export class Translate {
 
   async translateCollect(texts: string[], engineIndex = 0) {
     const needTranslatedTexts = texts.filter((text) => !this.dict[text]);
-    const collectText = needTranslatedTexts.join("\n\n");
 
     if (engineIndex >= this.engines.length) {
       throw new Error("translate error, all translate engine can not access");
@@ -152,17 +148,24 @@ export class Translate {
       return texts.map((text) => this.dict[text]);
     }
 
-    let enKey;
     let index = engineIndex;
 
     try {
-      let collectResults = await this.engines[0].translateCollect(collectText);
-      (collectResults || []).forEach((item) => {
-        const { src, dst } = item;
-        if (src && dst && !src.includes?.("\n")) {
-          this.appendToDict({ cn: src, en: this.startCaseClassName(dst) });
-        }
-      });
+      if (this.engines[index].name === "baiduOpen") {
+        const collectText = needTranslatedTexts.join("\n\n");
+        let collectResults = await this.engines[index].translate(collectText);
+        (collectResults || []).forEach((item) => {
+          const { src, dst } = item;
+          if (src && dst && !src.includes?.("\n")) {
+            this.appendToDict({ cn: src, en: this.startCaseClassName(dst) });
+          }
+        });
+      } else {
+        needTranslatedTexts.forEach(async (text) => {
+          let result = await this.engines[index].translate(text);
+          this.appendToDict({ cn: text, en: this.startCaseClassName(result) });
+        });
+      }
 
       await this.saveCacheFile();
       return texts.map((text) => this.dict[text]);
@@ -173,7 +176,7 @@ export class Translate {
         `${this.translateOptions}`,
         `err:${err}`,
       );
-      return [];
+      return this.translateCollect(texts, index + 1);
     }
   }
 }
