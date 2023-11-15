@@ -13,6 +13,7 @@ const packages = [
   "pontx-generate-core",
   "pontx-mocks-plugin",
   "pontx-react-hooks-generate-plugin",
+  "pontx-async-sdk-plugin",
   "pontx-oas2-parser-plugin",
   "pontx-oas3-parser-plugin",
 ];

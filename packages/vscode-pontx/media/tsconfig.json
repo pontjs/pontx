@@ -7,6 +7,8 @@
     "allowJs": false,
     "strict": false,
     "esModuleInterop": false,
+    "declaration": false,
+    "declarationMap": false,
     "outDir": "lib",
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
@@ -15,10 +17,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react",
-    "composite": true,
     "rootDir": "./src"
   },
-  "include": ["./src/vite-env.d.ts", "src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["./src/vite-env.d.ts", "src"]
 }
 // { "path": "../pontx-ui" }

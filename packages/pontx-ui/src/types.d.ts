@@ -1,1 +1,3 @@
-declare module "@uiw/react-markdown-preview";
+declare module "@uiw/react-markdown-preview" {
+  export default any;
+}

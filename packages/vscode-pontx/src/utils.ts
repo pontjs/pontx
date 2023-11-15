@@ -5,7 +5,7 @@ import * as fs from "fs-extra";
 import { PontJsonPointer, PontSpec, PontSpecs } from "pontx-spec";
 const configSchema = require("pontx-spec/configSchema.json");
 
-const { createServerContent } = require("../media/lib/server");
+const { createServerContent } = require("../media/lib/index");
 
 export const pontConsole = vscode.window.createOutputChannel("Pontx");
 

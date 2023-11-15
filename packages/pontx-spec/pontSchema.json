@@ -32,6 +32,14 @@
         "$ref": "#/definitions/directory"
       }
     },
+    "basePath": {
+      "type": "string",
+      "title": "基础路径"
+    },
+    "host": {
+      "type": "string",
+      "title": "接口请求域名"
+    },
     "ext": {
       "type": "object"
     }
@@ -99,6 +107,14 @@
         },
         "consumes": {
           "description": "A list of MIME types the API can consume.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/mediaTypeList"
+            }
+          ]
+        },
+        "produces": {
+          "description": "A list of MIME types the API can produce.",
           "allOf": [
             {
               "$ref": "#/definitions/mediaTypeList"

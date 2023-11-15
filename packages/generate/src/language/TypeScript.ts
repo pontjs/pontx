@@ -92,7 +92,7 @@ export const generateSchemaCode = (schema: PontSpec.PontJsonSchema, specName?: s
   return schema?.type || "any";
 };
 
-export const generateParametersTsCode = (api: PontSpec.PontAPI, specName?: string) => {
+export const generateParametersTsCode = (api: PontSpec.PontAPI, specName = "", useClass = true) => {
   const getParameterCode = (parameter: PontSpec.Parameter) => {
     const optionalSignal = parameter?.required ? "" : "?";
 
@@ -111,10 +111,14 @@ export const generateParametersTsCode = (api: PontSpec.PontAPI, specName?: strin
   const normalParams = api.parameters.filter((param) => param.in === "path" || param.in === "query");
 
   if (!normalParams?.length) {
-    return "class Params { }";
+    if (useClass) {
+      return "class Params { }";
+    } else {
+      return "type Params = {}";
+    }
   }
 
-  return `class Params {
+  return `${useClass ? "class Params" : "type Params ="} {
 ${indentation(2)(normalParams.map((param) => getParameterCode(param)).join("\n"))}
 }`;
 };

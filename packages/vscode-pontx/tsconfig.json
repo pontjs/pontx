@@ -6,10 +6,11 @@
     "outDir": "dist",
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
+    "declarationMap": false,
+    "declaration": false,
     "lib": ["es6", "es7"],
-    "sourceMap": true,
-    "rootDir": "./src",
-    "composite": false
+    "sourceMap": false,
+    "rootDir": "./src"
   },
   "exclude": ["node_modules", ".vscode-test", "out", "media", "dist"],
   "references": [

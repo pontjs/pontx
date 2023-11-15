@@ -1,7 +1,0 @@
-{
-  "outDir": "../src/services",
-  "origin": {
-    "url": "https://petstore.swagger.io/v2/swagger.json",
-    "name": "petstore"
-  }
-}
