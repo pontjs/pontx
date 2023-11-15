@@ -8,7 +8,7 @@ echo 'installing node_modules...'
 npm cache clean --force
 npm i --registry https://registry.npm.taobao.org
 echo 'relese vscode'
-vsce publish
+vsce publish --no-dependencies
 cd ..
 rm -rf vscode-pontx-cp
 cd ..

@@ -56,7 +56,8 @@ export function parseOAS3Interface(
   if (inter.requestBody) {
     const consume = Object.keys(inter.requestBody.content)[0];
     if (consume) {
-      consumes = [consume];
+      const stardardConsume = consume?.split(";")?.[0] || consume;
+      consumes = [stardardConsume];
       const bodyParma = {
         name: "body",
         in: "body" as any,

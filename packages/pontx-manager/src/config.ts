@@ -129,7 +129,9 @@ export function requireModule(pluginPath: string, configDir: string, rootDir: st
     [
       "pontx-meta-fetch-plugin",
       "pontx-react-hooks-generate-plugin",
+      "pontx-async-sdk-plugin",
       "pontx-oas2-parser-plugin",
+      "pontx-oas3-parser-plugin",
       "pontx-mocks-plugin",
     ].includes(pluginPath)
   ) {

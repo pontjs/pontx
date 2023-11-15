@@ -22,6 +22,7 @@
     "pontx-manager": "^0.3.68",
     "pontx-meta-fetch-plugin": "^0.3.68",
     "pontx-oas2-parser-plugin": "^0.3.68",
+    "pontx-oas3-parser-plugin": "^0.3.68",
     "pontx-react-hooks-generate-plugin": "^0.3.68",
     "signale": "1.4.0"
   },

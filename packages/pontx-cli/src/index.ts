@@ -5,7 +5,9 @@ import { PontManager, PontLogger } from "pontx-manager";
 import { cliLog, logger } from "./debugLog";
 import "pontx-meta-fetch-plugin";
 import "pontx-oas2-parser-plugin";
+import "pontx-oas3-parser-plugin";
 import "pontx-react-hooks-generate-plugin";
+import "pontx-async-sdk-plugin";
 
 const packageFilePath = path.join(__dirname, "..", "package.json");
 const packageInfo = JSON.parse(fs.readFileSync(packageFilePath, "utf8"));

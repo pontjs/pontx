@@ -3,6 +3,8 @@
 out/
 src/
 .gitignore
-media/src
+media
+!media/lib
+!media/dist
 tsconfig.json
 !node_modules/@vscode/codicons

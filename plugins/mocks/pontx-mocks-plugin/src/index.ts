@@ -206,7 +206,9 @@ class MocksCodeGenerator {
     let mocksData = _.get(this.preMocksData, `${modName}.${api.name}`);
     if (!mocksData && schema) {
       mocksData = this.generateSchemaMocksData(schema);
-    } else {
+    }
+
+    if (typeof mocksData === undefined && !schema) {
       return "";
     }
 

@@ -14,6 +14,7 @@ type ResponseObject = {
 };
 export class PontAPI {
   consumes?: string[] = [];
+  produces?: string[] = [];
   parameters?: Parameter[] = [];
   description?: string;
   responses: {
@@ -63,6 +64,9 @@ export class PontSpec {
   /** 如果有 namespace，则 map key 可能为 namespace.apiName，否则为 apiName */
   public apis: ObjectMap<PontAPI>;
   public directories: PontDirectory[] = [];
+  public basePath?: string;
+  public host?: string;
+
   /** 扩展字段 */
   public ext?: any;
 

@@ -49,6 +49,7 @@ export function parseOAS2Interface(
   const pontAPI = {
     summary: inter.summary,
     consumes: inter.consumes,
+    produces: inter.produces,
     description: inter.description,
     name,
     method,
@@ -217,6 +218,9 @@ export function parseOAS2(swagger: OAS2.SwaggerObject, name = ""): PontSpec.Pont
     apis,
     directories,
     name,
+    description: swagger.info?.description || swagger.info?.title,
+    host: swagger.host,
+    basePath: swagger.basePath,
   } as PontSpec.PontSpec;
 
   try {
