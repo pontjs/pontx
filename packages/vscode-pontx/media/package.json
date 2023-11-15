@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "pontx-ui": "^0.3.69"
+    "pontx-ui": "^0.3.70"
   },
-  "version": "0.3.69"
+  "version": "0.3.70"
 }
