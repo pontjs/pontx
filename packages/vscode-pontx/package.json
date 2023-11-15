@@ -418,8 +418,8 @@
     "build:media": "cd media && vite build",
     "reinstall": "rimraf node_modules && npm i",
     "afterinstall": "cd ../../ && lerna bootstrap",
-    "vscode:prepublish": "rimraf dist && npm run esbuild-base -- --minify",
-    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+    "vscode:prepublish": "rimraf dist && npm run esbuild-base",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --minify",
     "esbuild": "npm run esbuild-base -- --sourcemap",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
     "preview": "cd media && vite build --watch"
