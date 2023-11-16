@@ -1,10 +1,11 @@
 {
   "packages": [
     "packages/**",
-    "plugins/**"
+    "plugins/**",
+    "sdk/**",
+    "examples/**"
   ],
-  "npmClient": "yarn",
-  "version": "0.3.70",
+  "version": "0.3.71-alpha.0",
   "useWorkspaces": true,
   "command": {
     "registry": "https://registry.npmmirror.com",
