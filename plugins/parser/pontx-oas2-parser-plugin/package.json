@@ -1,6 +1,6 @@
 {
   "name": "pontx-oas2-parser-plugin",
-  "version": "0.3.74",
+  "version": "0.3.75",
   "description": "OpenAPI Spec parse pont",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -11,8 +11,8 @@
     "build": "npm run clean && tsc --build"
   },
   "dependencies": {
-    "oas-spec-ts": "^0.3.74",
-    "pontx-spec": "^0.3.74"
+    "oas-spec-ts": "^0.3.75",
+    "pontx-spec": "^0.3.75"
   },
   "peerDependencies": {
     "lodash": "*",
