@@ -2,7 +2,7 @@
   "name": "vscode-pontx",
   "displayName": "pontx",
   "description": "",
-  "version": "0.3.70",
+  "version": "0.3.74",
   "private": true,
   "publisher": "jasonHzq",
   "license": "MIT",
@@ -436,7 +436,7 @@
     "pontx-mocks-plugin": "^0.3.70",
     "pontx-oas2-parser-plugin": "^0.3.70",
     "pontx-oas3-parser-plugin": "^0.3.70",
-    "pontx-react-hooks-generate-plugin": "^0.3.70",
+    "pontx-react-hooks-sdk-plugin": "^0.3.70",
     "pontx-spec": "^0.3.70",
     "pontx-spec-diff": "^0.3.70"
   },
