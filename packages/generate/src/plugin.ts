@@ -59,6 +59,7 @@ export type GetFilesBySpecs = (
     name: string;
     conf: InnerOriginConfig;
   }>,
+  options?: any,
 ) => Promise<FileStructure>;
 export type GetFilesBySingleSpec = (spec: PontSpec.PontSpec, conf: PontInnerManagerConfig) => Promise<FileStructure>;
 

@@ -16,7 +16,10 @@
   "exclude": ["node_modules", "build", "tests"],
   "references": [
     {
-      "path": "../pontx-sdk-plugin-core/tsconfig.json"
+      "path": "../../../packages/pontx-spec"
+    },
+    {
+      "path": "../../../packages/pontx-manager"
     }
   ]
 }

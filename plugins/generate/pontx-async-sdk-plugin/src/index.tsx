@@ -1,6 +1,5 @@
-import { getFilesBySpecs } from "./getFilesBySpecs";
+import { getFilesBySpecs, snippetsProvider } from "pontx-sdk-plugin-core";
 import { createPontxGeneratePlugin, SnippetsProvider, PontxGeneratorPlugin } from "pontx-generate";
-import { snippetsProvider } from "./snippetsProvider";
 
 export const reactHooksGeneratePlugin: any = createPontxGeneratePlugin({
   snippetsProvider,
@@ -8,3 +7,4 @@ export const reactHooksGeneratePlugin: any = createPontxGeneratePlugin({
 });
 
 export default reactHooksGeneratePlugin;
+export { getFilesBySpecs, snippetsProvider };
