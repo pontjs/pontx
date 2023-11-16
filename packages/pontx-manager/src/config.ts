@@ -113,7 +113,7 @@ export class PontxPlugins {
     return {
       fetch: { use: "pontx-meta-fetch-plugin", options },
       parser: { use: "pontx-oas2-parser-plugin", options },
-      generate: { use: "pontx-react-hooks-generate-plugin", options },
+      generate: { use: "pontx-async-sdk-plugin", options },
       mocks: { use: "pontx-mocks-plugin", options },
     };
   }
@@ -137,6 +137,12 @@ export function requireModule(pluginPath: string, configDir: string, rootDir: st
     return require("pontx-async-sdk-plugin");
   } else if (pluginPath === "pontx-oas3-parser-plugin") {
     return require("pontx-oas3-parser-plugin");
+  } else if (pluginPath === "pontx-react-hooks-sdk-plugin") {
+    return require("pontx-react-hooks-sdk-plugin");
+  } else if (pluginPath === "pontx-async-sdk-plugin") {
+    return require("pontx-async-sdk-plugin");
+  } else if (pluginPath === "pontx-sdk-plugin-core") {
+    return require("pontx-sdk-plugin-core");
   }
 
   if (!path.extname(requirePath)) {
