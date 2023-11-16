@@ -6,7 +6,7 @@
     "examples/**"
   ],
   "npmClient": "yarn",
-  "version": "0.3.73",
+  "version": "0.3.74",
   "useWorkspaces": true,
   "command": {
     "registry": "https://registry.npmmirror.com",
