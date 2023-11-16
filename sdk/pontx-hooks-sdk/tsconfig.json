@@ -9,6 +9,7 @@
     "strictNullChecks": false,
     "outDir": "lib",
     "moduleResolution": "node",
+    "declaration": true,
     "baseUrl": ".",
     "paths": {},
     "rootDir": "./src",

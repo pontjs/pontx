@@ -40,7 +40,13 @@ function App() {
             <span>loading ...</span>
           ) : (
             pets.map((pet, petIndex) => {
-              return <li key={petIndex}>{pet.name}</li>;
+              return (
+                <li key={petIndex}>
+                  {pet.name}
+                  <span className="tag">{pet.status}</span>
+                  {pet.category?.name ? <span className="category tag">{pet.category?.name}</span> : null}
+                </li>
+              );
             })
           )}
         </ul>

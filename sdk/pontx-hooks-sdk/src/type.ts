@@ -9,21 +9,18 @@ type OptionalBodyRequest<Params, BodyParams, Response> = BodyParams extends null
 export type RequestMethods<Params = any, BodyParams = any, Response = any> = BodyParams extends null | undefined
   ? {
       request: OptionalBodyRequest<Params, BodyParams, Response>;
-      useRequest: <Error = any, SWROptions extends SWRConfiguration<Response, Error, Fetcher<Response, SWRKey>>>(
+      useRequest: <SWROptions extends SWRConfiguration<Response, any, Fetcher<Response, SWRKey>>>(
         params: Params,
         swrOptions?: SWROptions,
-      ) => SWRResponse<Response, Error, Fetcher<Response, SWRKey>>;
+      ) => SWRResponse<Response, any, Fetcher<Response, SWRKey>>;
       getSwrKey: (params: Params) => string;
       preload: (params: Params) => Promise<Response>;
     }
   : {
       request: OptionalBodyRequest<Params, BodyParams, Response>;
-      useDeprecatedRequest: <
-        Error = any,
-        SWROptions extends SWRConfiguration<Response, Error, Fetcher<Response, SWRKey>>,
-      >(
+      useDeprecatedRequest: <SWROptions extends SWRConfiguration<Response, any, Fetcher<Response, SWRKey>>>(
         params: Params,
         swrOptions?: SWROptions,
-      ) => SWRResponse<Response, Error, Fetcher<Response, SWRKey>>;
+      ) => SWRResponse<Response, any, Fetcher<Response, SWRKey>>;
       getSwrKey: (params: Params) => string;
     };
