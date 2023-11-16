@@ -1,6 +1,6 @@
 {
   "name": "pontx-sdk-core",
-  "version": "0.3.74",
+  "version": "0.3.75",
   "description": "async await promise sdk oas2 oas3 swagger typescript ts pontx sdk plugin",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -28,9 +28,9 @@
     "@types/fs-extra": "^9.0.13",
     "@types/node": "*",
     "http-server": "*",
-    "pontx-generate": "^0.3.74",
-    "pontx-generate-core": "^0.3.74",
-    "pontx-spec": "^0.3.74",
+    "pontx-generate": "^0.3.75",
+    "pontx-generate-core": "^0.3.75",
+    "pontx-spec": "^0.3.75",
     "react": "^16.14.0"
   }
 }
