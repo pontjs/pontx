@@ -1,6 +1,6 @@
 {
   "name": "pontx-generate",
-  "version": "0.3.72-alpha.0",
+  "version": "0.3.71-alpha.0",
   "description": "OpenAPI pont spec",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,7 +13,7 @@
   "dependencies": {
     "fs-extra": "*",
     "lodash": "*",
-    "pontx-spec": "^0.3.72-alpha.0"
+    "pontx-spec": "^0.3.71-alpha.0"
   },
   "peerDependencies": {
     "pontx-manager": "*"

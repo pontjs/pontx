@@ -5,7 +5,8 @@
     "sdk/**",
     "examples/**"
   ],
-  "version": "0.3.72-alpha.0",
+  "npmClient": "yarn",
+  "version": "0.3.71-alpha.0",
   "useWorkspaces": true,
   "command": {
     "registry": "https://registry.npmmirror.com",
