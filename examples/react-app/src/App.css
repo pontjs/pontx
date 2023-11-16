@@ -24,3 +24,10 @@
   height: 50vh;
   overflow-y: auto;
 }
+
+.pontx-async-sdk-sample ul li .tag {
+	margin-left: 20px;
+	background-color: #ccc;
+	border-radius: 2px;
+	padding: 0 10px;
+}

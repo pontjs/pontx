@@ -36,4 +36,4 @@ export const getHooksFetchAPIs: FetchAPIs = (meta, apiMeta, fetchHelper) => {
   };
 };
 
-export type * from "./type.d.ts";
+export type * from "./type.ts";

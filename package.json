@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "test": "jest",
-    "inst": "npm run clean-lock && rm yarn.lock && npm run clean && yarn install && lerna bootstrap",
+    "inst": "npm run clean-lock && npm run clean && yarn install && lerna bootstrap",
     "changelog": "node -r esm scripts/changelog.js",
     "build:commonjs": "lerna exec --scope pontx-spec* --stream -- npm run build:commonjs",
     "build:commonjs:watch": "concurrently 'tsc -p ./packages/pontx-spec/tsconfig.lib.json -w' 'tsc -p packages/pontx-spec-diff/tsconfig.commonjs.json -w'",
