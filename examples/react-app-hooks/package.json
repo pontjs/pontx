@@ -1,5 +1,5 @@
 {
-  "name": "react-app",
+  "name": "react-app-hooks",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -12,8 +12,8 @@
   },
   "dependencies": {
     "react": "^18.2.0",
-    "pontx-sdk-core": "*",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "swr": "^2.2.4"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

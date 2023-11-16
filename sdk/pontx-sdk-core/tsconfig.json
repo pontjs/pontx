@@ -1,7 +1,7 @@
 {
-  "extends": "../../../tsconfig.build.json",
+  "extends": "../../tsconfig.build.json",
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "ES6",
     "target": "es6",
     "removeComments": true,
     "preserveConstEnums": true,
@@ -16,7 +16,10 @@
   "exclude": ["node_modules", "build", "tests"],
   "references": [
     {
-      "path": "../pontx-sdk-plugin-core/tsconfig.json"
+      "path": "../../packages/pontx-spec"
+    },
+    {
+      "path": "../../packages/pontx-manager"
     }
   ]
 }
