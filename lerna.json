@@ -1,26 +1,16 @@
 {
-  "packages": [
-    "packages/**",
-    "plugins/**",
-    "sdk/**",
-    "examples/**"
-  ],
+  "packages": ["packages/**", "plugins/**", "sdk/**", "examples/**"],
   "npmClient": "yarn",
-  "version": "0.3.71-alpha.0",
+  "version": "0.3.71-alpha.1",
   "useWorkspaces": true,
   "command": {
     "registry": "https://registry.npmmirror.com",
     "publish": {
-      "ignoreChanges": [
-        "package-lock.json",
-        "*.md"
-      ],
+      "ignoreChanges": ["package-lock.json", "*.md"],
       "message": "chore(release): publish %s"
     },
     "bootstrap": {
-      "npmClientArgs": [
-        "--registry https://registry.npmmirror.com"
-      ]
+      "npmClientArgs": ["--registry https://registry.npmmirror.com"]
     }
   },
   "publishConfig": {
