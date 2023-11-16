@@ -1,7 +1,7 @@
 {
-  "name": "pontx-async-sdk-plugin",
+  "name": "pontx-react-hooks-sdk-plugin",
   "version": "0.3.71-alpha.0",
-  "description": "async await promise sdk oas2 oas3 swagger typescript ts pontx sdk plugin",
+  "description": "OpenAPI pont spec",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
@@ -31,6 +31,9 @@
   "license": "MIT",
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",
-    "@types/node": "*"
+    "@types/node": "*",
+    "http-server": "*",
+    "react": "^16.14.0",
+    "swr": "^2.1.5"
   }
 }

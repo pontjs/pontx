@@ -1,5 +1,5 @@
 {
-  "name": "pontx-async-sdk-plugin",
+  "name": "pontx-sdk-plugin-core",
   "version": "0.3.71-alpha.0",
   "description": "async await promise sdk oas2 oas3 swagger typescript ts pontx sdk plugin",
   "main": "lib/index.js",
@@ -13,11 +13,11 @@
   },
   "dependencies": {
     "pontx-generate": "^0.3.71-alpha.0",
-    "pontx-sdk-plugin-core": "^0.3.71-alpha.0",
     "pontx-spec": "^0.3.71-alpha.0"
   },
   "peerDependencies": {
     "fs-extra": "^10.1.0",
+    "lodash": "*",
     "pontx-manager": "*"
   },
   "files": [

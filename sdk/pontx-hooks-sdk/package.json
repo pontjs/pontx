@@ -1,5 +1,5 @@
 {
-  "name": "pontx-async-sdk-plugin",
+  "name": "pontx-hooks-sdk",
   "version": "0.3.71-alpha.0",
   "description": "async await promise sdk oas2 oas3 swagger typescript ts pontx sdk plugin",
   "main": "lib/index.js",
@@ -12,13 +12,19 @@
     "build": "npm run clean && tsc --build"
   },
   "dependencies": {
-    "pontx-generate": "^0.3.71-alpha.0",
-    "pontx-sdk-plugin-core": "^0.3.71-alpha.0",
-    "pontx-spec": "^0.3.71-alpha.0"
+    "swr": "^2.2.4"
   },
-  "peerDependencies": {
+  "devDependencies": {
+    "@types/fs-extra": "^9.0.13",
+    "@types/node": "*",
     "fs-extra": "^10.1.0",
-    "pontx-manager": "*"
+    "http-server": "*",
+    "pontx-generate": "^0.3.71-alpha.0",
+    "pontx-generate-core": "^0.3.71-alpha.0",
+    "pontx-manager": "^0.3.71-alpha.0",
+    "pontx-spec": "^0.3.71-alpha.0",
+    "react": "^16.14.0",
+    "swr": "^2.1.5"
   },
   "files": [
     "package.json",
@@ -28,9 +34,5 @@
   ],
   "keywords": [],
   "author": "jasonHzq",
-  "license": "MIT",
-  "devDependencies": {
-    "@types/fs-extra": "^9.0.13",
-    "@types/node": "*"
-  }
+  "license": "MIT"
 }
