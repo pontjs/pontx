@@ -17,7 +17,7 @@ export class OpenAPIObject {
   /**
    * An array of Server Objects, which provide connectivity information to a target server. If the <code>servers</code> property is not provided, or is an empty array, the default value would be a <a href="https://swagger.io/specification/#server-object">Server Object</a> with a <a href="https://swagger.io/specification/#server-url">url</a> value of <code>/</code>.
    */
-  servers?: ServerObject;
+  servers?: ServerObject[];
 
   /**
    * <strong>REQUIRED</strong>. The available paths and operations for the API.

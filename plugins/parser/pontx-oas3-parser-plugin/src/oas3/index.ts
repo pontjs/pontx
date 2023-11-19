@@ -14,7 +14,11 @@ export class PontOAS3ParserPlugin extends PontxParserPlugin {
         return;
       }
 
-      return Promise.resolve(parseOAS3(swaggerObj, "", this.innerConfig.translator));
+      const origin =
+        this.innerConfig?.origins?.find((origin) => origin?.name === specName) || this.innerConfig?.origins?.[0];
+      const originUrl = origin?.url;
+
+      return Promise.resolve(parseOAS3(swaggerObj, specName, this.innerConfig.translator, originUrl));
     } catch (e) {
       console.log(e.stack);
       this.logger.error(e.message);

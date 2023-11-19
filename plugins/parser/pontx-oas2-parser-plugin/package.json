@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "oas-spec-ts": "^0.3.75",
+    "pontx-oas3-parser-plugin": "^0.3.75",
     "pontx-spec": "^0.3.75"
   },
   "peerDependencies": {

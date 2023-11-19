@@ -446,6 +446,8 @@
     "type": "git"
   },
   "devDependencies": {
+    "typescript": "^5.2.2",
+    "rimraf": "^3.0.2",
     "@types/fs-extra": "^5.1.0",
     "@types/lodash": "^4.14.182",
     "@types/react": "^18.0.8",
