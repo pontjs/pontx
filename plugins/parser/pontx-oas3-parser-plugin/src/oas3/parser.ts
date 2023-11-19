@@ -1,5 +1,6 @@
 import * as PontSpec from "pontx-spec";
 import { OAS2, OAS3 } from "oas-spec-ts";
+import URL from "url";
 import {
   getIdentifierFromOperatorId,
   getIdentifierFromUrl,
@@ -176,6 +177,7 @@ export async function parseOAS3(
   swagger: OAS3.OpenAPIObject,
   name: string,
   translator: Translate,
+  originUrl?: string,
 ): Promise<PontSpec.PontSpec> {
   const draftClasses = _.map(swagger?.components?.schemas || {}, (schema: any, defName) => {
     const defNameAst = compileTemplate(defName);
@@ -234,6 +236,19 @@ export async function parseOAS3(
   baseClasses = deleteDuplicateBaseClass(baseClasses);
   const { apis, directories } = await parseSwagger2APIs(swagger, defNames, translator);
 
+  let host, basePath;
+  const server = (swagger.servers || [])?.[0];
+
+  if (server?.url) {
+    const url = URL.parse(server.url || "");
+    host = url?.hostname;
+    basePath = url?.pathname;
+
+    if (!host && originUrl) {
+      host = URL.parse(originUrl)?.hostname;
+    }
+  }
+
   const pontDs = {
     definitions: baseClasses.reduce((result, base) => {
       return {
@@ -244,6 +259,10 @@ export async function parseOAS3(
     apis,
     directories,
     name,
+    basePath,
+    description: swagger?.info?.description || swagger?.info?.title || "",
+    host,
+    ext: {},
   } as PontSpec.PontSpec;
 
   try {

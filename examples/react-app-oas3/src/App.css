@@ -1,0 +1,33 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.pontx-async-sdk-sample .header {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.pontx-async-sdk-sample select {
+  height: 28px;
+  line-height: 28px;
+  width: 300px;
+  margin-left: 8px;
+}
+
+.pontx-async-sdk-sample ul {
+  border: 1px solid #ccc;
+  padding: 10px 20px;
+  border-radius: 2px;
+  height: 50vh;
+  overflow-y: auto;
+}
+
+.pontx-async-sdk-sample ul li .tag {
+	margin-left: 20px;
+	background-color: #ccc;
+	border-radius: 2px;
+	padding: 0 10px;
+}
