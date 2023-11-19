@@ -13,8 +13,7 @@
   "dependencies": {
     "fs-extra": "*",
     "lodash": "*",
-    "pontx-spec": "^0.3.77",
-    "prettier": "^2.6.2"
+    "pontx-spec": "^0.3.77"
   },
   "files": [
     "package.json",

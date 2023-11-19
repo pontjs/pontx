@@ -1,4 +1,4 @@
-import { PontxMocksPlugin, PontManager, requireTsFile, requireUncached } from "pontx-manager";
+import { PontxMocksPlugin, PontManager, createTsProgram, requireUncached } from "pontx-manager";
 import { indentation, generateFiles } from "pontx-generate";
 import * as PontxSpec from "pontx-spec";
 import * as jsf from "json-schema-faker";
@@ -6,7 +6,6 @@ import * as fp from "lodash/fp";
 import * as _ from "lodash";
 import * as path from "path";
 import { requireModule } from "pontx-manager/lib/config";
-import * as ts from "typescript";
 import { mapPromiseValues } from "./utils";
 
 export const TYPE_TS = `
@@ -45,18 +44,10 @@ export class DefaultPontxMocksPlugin extends PontxMocksPlugin {
     try {
       const mocksPath = path.join(manager.innerManagerConfig.outDir, "mocks/index.ts");
 
-      const program = ts.createProgram([mocksPath], {
+      createTsProgram([mocksPath], {
         outDir: path.join(manager.innerManagerConfig.rootDir, "node_modules/.pontx/mocks"),
         rootDir: path.join(manager.innerManagerConfig.outDir, "mocks"),
-        noEmit: false,
-        target: ts.ScriptTarget.ES2015,
-        module: ts.ModuleKind.CommonJS,
-        moduleResolution: ts.ModuleResolutionKind.NodeJs,
-        experimentalDecorators: true,
-        allowJs: true,
       });
-
-      program.emit();
 
       const compiledFilePath = path.join(manager.innerManagerConfig.rootDir, "node_modules/.pontx/mocks/index.js");
       const currentMocksIndex = requireUncached(compiledFilePath);

@@ -3,6 +3,24 @@ import * as path from "path";
 import * as fs from "fs-extra";
 import { PontLogger } from "./logger";
 
+export const createTsProgram = (includePaths: string[], options = {} as ts.CompilerOptions) => {
+  const { outDir, rootDir } = options;
+  const program = ts.createProgram(includePaths, {
+    outDir,
+    rootDir,
+    noEmit: false,
+    target: ts.ScriptTarget.ES2015,
+    module: ts.ModuleKind.CommonJS,
+    moduleResolution: ts.ModuleResolutionKind.NodeJs,
+    experimentalDecorators: true,
+    allowJs: true,
+    ...options,
+  });
+
+  program.emit();
+  return program;
+};
+
 export async function fetchRemoteCacheSpecs(outDir: string) {
   const remotePath = path.join(outDir, ".remote");
   const state = await fs.stat(remotePath);

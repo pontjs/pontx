@@ -13,7 +13,6 @@
     "start": "tsc --build -w",
     "watch": "concurrently 'npm start' 'npm run build:commonjs:watch'",
     "ui": "cd packages/pontx-ui && npm run start",
-    "vs-ui": "cd packages/pontx-ui && npm run build && cd ../vscode-pontx/media && npm run build",
     "clean": "rimraf ./node_modules && lerna clean --yes",
     "lint": "prettier --write --parser typescript \"packages/**/*.ts\"",
     "clean-lock": "rimraf packages/vscode-pontx/media/package-lock.json && node ./scripts/clean-lock.js || true",
