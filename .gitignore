@@ -46,3 +46,4 @@ packages/pontx-spec-diff/tests
 packages/pontx-ui/src/mocks/*.json
 packages/pontx-ui/src/mocks/remoteSpec.json
 plugins/generate/pontx-react-hooks-generate-plugin/builtin
+*.local.js
