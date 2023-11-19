@@ -1,6 +1,6 @@
 import * as PontSpec from "pontx-spec";
 import { OAS2, OAS3 } from "oas-spec-ts";
-import URL from "url";
+import { parse } from "url";
 import {
   getIdentifierFromOperatorId,
   getIdentifierFromUrl,
@@ -240,12 +240,12 @@ export async function parseOAS3(
   const server = (swagger.servers || [])?.[0];
 
   if (server?.url) {
-    const url = URL.parse(server.url || "");
+    const url = parse(server.url || "");
     host = url?.hostname;
     basePath = url?.pathname;
 
     if (!host && originUrl) {
-      host = URL.parse(originUrl)?.hostname;
+      host = parse(originUrl)?.hostname;
     }
   }
 
