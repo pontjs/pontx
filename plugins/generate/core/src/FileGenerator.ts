@@ -2,7 +2,7 @@ import * as fs from "fs-extra";
 import * as _ from "lodash";
 import * as PontSpec from "pontx-spec";
 import { CodeGenerator } from "./CodeGenerator";
-import prettier from "prettier";
+// import prettier from "prettier";
 import { clearPath } from "./utils";
 import * as path from "path";
 
@@ -67,23 +67,23 @@ export class FileStructure {
     };
   }
 
-  static async applyFormat(fileStructure: FileStructure, options: prettier.Options) {
-    return Object.keys(fileStructure || {}).reduce((result, filename) => {
-      const value = fileStructure[filename];
+  // static async applyFormat(fileStructure: FileStructure, options: prettier.Options) {
+  //   return Object.keys(fileStructure || {}).reduce((result, filename) => {
+  //     const value = fileStructure[filename];
 
-      if (typeof value === "string") {
-        return {
-          ...result,
-          [filename]: prettier.format(value, options),
-        };
-      } else {
-        return {
-          ...result,
-          [filename]: FileStructure.applyFormat(value, options),
-        };
-      }
-    }, {} as FileStructure);
-  }
+  //     if (typeof value === "string") {
+  //       return {
+  //         ...result,
+  //         [filename]: prettier.format(value, options),
+  //       };
+  //     } else {
+  //       return {
+  //         ...result,
+  //         [filename]: FileStructure.applyFormat(value, options),
+  //       };
+  //     }
+  //   }, {} as FileStructure);
+  // }
 }
 export class NoModFileStructure {
   [fileName: string]: string | NoModFileStructure;

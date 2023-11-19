@@ -17,9 +17,7 @@
   "dependencies": {
     "json-schema-faker": "^0.5.3",
     "pontx-generate": "^0.3.77",
-    "pontx-spec": "^0.3.77",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.2.2"
+    "pontx-spec": "^0.3.77"
   },
   "files": [
     "package.json",

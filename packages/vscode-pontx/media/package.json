@@ -5,7 +5,6 @@
   "main": "lib/server.js",
   "scripts": {
     "start": "vite --mode browser",
-    "build": "vite build --config ./vite.config.ts && tsc -p tsconfig.commonjs.json",
     "build:ncc": "ncc build src/server.ts -o lib -m",
     "preview": "vite preview"
   },
