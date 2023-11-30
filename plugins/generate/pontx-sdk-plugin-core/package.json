@@ -1,6 +1,6 @@
 {
   "name": "pontx-sdk-plugin-core",
-  "version": "0.3.77",
+  "version": "0.3.77-alpha.0",
   "description": "async await promise sdk oas2 oas3 swagger typescript ts pontx sdk plugin",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",

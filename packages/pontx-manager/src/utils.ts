@@ -23,7 +23,12 @@ export const createTsProgram = (includePaths: string[], options = {} as ts.Compi
 
 export async function fetchRemoteCacheSpecs(outDir: string) {
   const remotePath = path.join(outDir, ".remote");
+  const isExists = await fs.pathExists(remotePath);
+  if (!isExists) {
+    return null;
+  }
   const state = await fs.stat(remotePath);
+
   if (state.isDirectory()) {
     const files = await fs.readdir(remotePath);
     const specs = await Promise.all(

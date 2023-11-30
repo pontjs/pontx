@@ -26,7 +26,9 @@ export function parseJsonSchema(schema: OAS2.SchemaObject, context = new JsonSch
     );
 
     if (!ast) {
-      return new PontSpec.PontJsonSchema();
+      const result = new PontSpec.PontJsonSchema();
+      result.$ref = $ref;
+      return result;
     }
 
     const { typeName, templateArgs, type: refType } = parseAst2PontJsonSchema(ast, context);
@@ -41,6 +43,7 @@ export function parseJsonSchema(schema: OAS2.SchemaObject, context = new JsonSch
       resultSchema.typeName = typeName;
     }
     resultSchema.templateArgs = templateArgs;
+    resultSchema.$ref = $ref;
   } else if (type === "array" && items) {
     resultSchema = {
       ...resultSchema,

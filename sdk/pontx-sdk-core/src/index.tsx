@@ -1,4 +1,9 @@
-import * as _ from "lodash";
+const mapValues = (obj: any, fn: any) => {
+  return Object.keys(obj || {}).reduce((result: any, key) => {
+    result[key] = fn(obj[key], key);
+    return result;
+  }, {});
+};
 
 type ContextType =
   | "application/json"
@@ -22,6 +27,8 @@ export type SpecMeta = {
   basePath?: string;
   host?: string;
 };
+
+type GetRequest = (apiMeta: any) => (url: any, params: any, options?: any) => Promise<any>;
 
 export class FetchHelper {
   private meta: SpecMeta;
@@ -65,51 +72,53 @@ export class FetchHelper {
     return "";
   };
 
-  request = (apiMeta: APIMeta) => (url, options) => {
-    const requestOptions = { ...options };
-    const contextType = apiMeta.consumes?.[0] || "application/json";
-    if (contextType !== "application/json") {
-      requestOptions["content-type"] = contextType;
-    }
-    if (apiMeta?.hasBody) {
-      if (contextType === "application/json") {
-        requestOptions.body = JSON.stringify(options.body);
-      } else if (contextType === "application/x-www-form-urlencoded") {
-        if (options.body) {
-          const formData = new URLSearchParams();
-          Object.keys(options.body || {}).forEach((key) => {
-            formData.append(key, options.body[key]);
-          });
-          requestOptions.body = formData;
-        }
-      } else if (contextType === "multipart/form-data") {
-        if (options.body) {
-          const formData = new FormData();
-          Object.keys(options.body || {}).forEach((key) => {
-            formData.append(key, options.body[key]);
-          });
-          requestOptions.body = formData;
-        }
-      } else if (contextType === "text/plain") {
-        requestOptions.body = options.body;
+  request: GetRequest =
+    (apiMeta: APIMeta) =>
+    (url, options, ...args: any[]) => {
+      const requestOptions = { ...options };
+      const contextType = apiMeta.consumes?.[0] || "application/json";
+      if (contextType !== "application/json") {
+        requestOptions["content-type"] = contextType;
       }
-    }
+      if (apiMeta?.hasBody) {
+        if (contextType === "application/json") {
+          requestOptions.body = JSON.stringify(options.body);
+        } else if (contextType === "application/x-www-form-urlencoded") {
+          if (options.body) {
+            const formData = new URLSearchParams();
+            Object.keys(options.body || {}).forEach((key) => {
+              formData.append(key, options.body[key]);
+            });
+            requestOptions.body = formData;
+          }
+        } else if (contextType === "multipart/form-data") {
+          if (options.body) {
+            const formData = new FormData();
+            Object.keys(options.body || {}).forEach((key) => {
+              formData.append(key, options.body[key]);
+            });
+            requestOptions.body = formData;
+          }
+        } else if (contextType === "text/plain") {
+          requestOptions.body = options.body;
+        }
+      }
 
-    const result = fetch(url, requestOptions);
-    const responseContentType = apiMeta.produces?.[0] || "application/json";
+      const result = fetch(url, requestOptions);
+      const responseContentType = apiMeta.produces?.[0] || "application/json";
 
-    if (responseContentType === "application/json") {
-      return result.then((res) => res.json());
-    } else if (responseContentType === "application/octet-stream") {
-      return result.then((res) => res.blob());
-    } else if (responseContentType === "application/xml") {
-      return result.then((res) => res.text());
-    } else if (responseContentType === "text/plain") {
-      return result.then((res) => res.text());
-    } else {
-      return result;
-    }
-  };
+      if (responseContentType === "application/json") {
+        return result.then((res) => res.json());
+      } else if (responseContentType === "application/octet-stream") {
+        return result.then((res) => res.blob());
+      } else if (responseContentType === "application/xml") {
+        return result.then((res) => res.text());
+      } else if (responseContentType === "text/plain") {
+        return result.then((res) => res.text());
+      } else {
+        return result;
+      }
+    };
 }
 
 export type FetchAPIs = (
@@ -152,13 +161,13 @@ export class PontxSDK {
     fetchHelper.setMeta(meta);
 
     if (meta.hasController) {
-      client = _.mapValues(meta.apis, (controller) => {
-        return _.mapValues(controller, (action) => {
+      client = mapValues(meta.apis, (controller) => {
+        return mapValues(controller, (action) => {
           return fetchAPIs(meta, action, fetchHelper);
         });
       });
     } else {
-      client = _.mapValues(meta.apis, (action) => {
+      client = mapValues(meta.apis, (action) => {
         return fetchAPIs(meta, action, fetchHelper);
       });
     }

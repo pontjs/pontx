@@ -96,13 +96,13 @@ export class PontxConfigPlugin extends PontxPlugin {
 type PluginItem<T extends PontxPlugin> = { instance: Promise<T>; options: any };
 
 export class PontxPlugins {
-  fetch: PluginItem<PontxFetchPlugin>;
-  transform: PluginItem<PontxTransformPlugin>;
-  parser: PluginItem<PontxParserPlugin>;
-  config: PluginItem<PontxConfigPlugin>;
-  mocks: PluginItem<PontxMocksPlugin>;
-  generate: PluginItem<PontxGeneratorPlugin>;
-  report: PluginItem<PontxReportPlugin>;
+  fetch?: PluginItem<PontxFetchPlugin>;
+  transform?: PluginItem<PontxTransformPlugin>;
+  parser?: PluginItem<PontxParserPlugin>;
+  config?: PluginItem<PontxConfigPlugin>;
+  mocks?: PluginItem<PontxMocksPlugin>;
+  generate?: PluginItem<PontxGeneratorPlugin>;
+  report?: PluginItem<PontxReportPlugin>;
 
   static getDefaultPlugins(plugin?: PurePluginConfig) {
     let options = {};
@@ -284,6 +284,7 @@ export class PontInnerManagerConfig {
       ...PontxPlugins.getDefaultPlugins(),
       ...(config.plugins || {}),
     };
+
     return Object.keys(configPlugins || {}).reduce((result, pluginType) => {
       const plugin = configPlugins[pluginType];
       const loadedPlugin = PontInnerManagerConfig.loadPlugin(
@@ -303,17 +304,76 @@ export class PontInnerManagerConfig {
     }, {} as PontxPlugins);
   }
 
-  // todo, 解析 envs、plugins
-  static constructorFromPublicConfig(
+  static constructorFromPontConfigAndPlugins(
+    config: PontPublicManagerConfig,
+    logger: PontLogger,
+    configDir: string,
+    plugins: PontxPlugins,
+  ) {
+    const innerConfig = PontInnerManagerConfig.constructorInnerConfig(config, logger, configDir);
+
+    innerConfig.plugins = _.mapValues(plugins, (pluginItem: { instance; options }) => {
+      if (pluginItem.instance) {
+        pluginItem.instance.logger = logger;
+        pluginItem.instance.innerConfig = innerConfig;
+      }
+
+      return pluginItem;
+    });
+
+    return innerConfig;
+  }
+
+  static constructorInnerConfigPlugins(
+    config: PontPublicManagerConfig,
+    logger: PontLogger,
+    configDir: string,
+    innerConfig: PontInnerManagerConfig,
+  ) {
+    if (!config.plugins) {
+      config.plugins = {} as any;
+    }
+
+    if (config.preset) {
+      const presetPath = findRealPath(configDir, config.preset);
+      const presetResult = requireUncached(presetPath);
+      const plugins = presetResult?.default || presetResult || {};
+
+      Object.keys(plugins).forEach((pluginType) => {
+        if (!config.plugins?.[pluginType] && plugins[pluginType]) {
+          config.plugins[pluginType] = loadPresetPluginPath(presetPath, plugins[pluginType]);
+        }
+      });
+    }
+
+    innerConfig.plugins = PontInnerManagerConfig.loadGlobalPlugins(config, configDir, logger, innerConfig);
+    innerConfig.origins = innerConfig.origins.map((origin) => {
+      let originPlugins = config.plugins || ({} as any);
+      if (origin.plugins) {
+        originPlugins = _.merge({}, originPlugins, origin.plugins);
+      }
+      return {
+        ...origin,
+        plugins: PontInnerManagerConfig.loadPlugins(
+          originPlugins,
+          origin.name,
+          configDir,
+          logger,
+          innerConfig,
+          config.rootDir,
+        ),
+      } as InnerOriginConfig;
+    });
+
+    return innerConfig;
+  }
+
+  static constructorInnerConfig(
     config: PontPublicManagerConfig,
     logger: PontLogger,
     configDir: string,
   ): PontInnerManagerConfig {
     let { origin, origins, outDir, plugins, preset, rootDir, url, translate, ...rest } = config;
-
-    if (!config.plugins) {
-      config.plugins = {} as any;
-    }
 
     if (!origins?.length) {
       if (typeof config.url === "string" && config.url) {
@@ -327,18 +387,6 @@ export class PontInnerManagerConfig {
 
     if (!origins?.length) {
       logger.error("pont 配置文件错误！未配置数据源信息");
-    }
-
-    if (config.preset) {
-      const presetPath = findRealPath(configDir, config.preset);
-      const presetResult = requireUncached(presetPath);
-      const plugins = presetResult?.default || presetResult || {};
-
-      Object.keys(plugins).forEach((pluginType) => {
-        if (!config.plugins?.[pluginType] && plugins[pluginType]) {
-          config.plugins[pluginType] = loadPresetPluginPath(presetPath, plugins[pluginType]);
-        }
-      });
     }
 
     if (outDir.startsWith("./") || outDir.startsWith("../")) {
@@ -356,44 +404,35 @@ export class PontInnerManagerConfig {
       innerConfig.translator = new Translate(logger, translate, innerConfig);
     }
 
-    innerConfig.plugins = PontInnerManagerConfig.loadGlobalPlugins(config, configDir, logger, innerConfig);
-    innerConfig.origins = origins
-      .map((origin) => {
-        if (origin.envs && origin.env) {
-          const { envs, env, ...rest } = origin;
-          const envConfig = origin.envs[origin.env];
-          if (typeof envConfig === "string") {
-            return {
-              ...rest,
-              url: envConfig,
-            };
-          }
-          return { ...rest, ...envConfig };
+    innerConfig.origins = origins.map((origin) => {
+      if (origin.envs && origin.env) {
+        const { envs, env, ...rest } = origin;
+        const envConfig = origin.envs[origin.env];
+        if (typeof envConfig === "string") {
+          return {
+            ...rest,
+            url: envConfig,
+          };
         }
+        return { ...rest, ...envConfig };
+      }
 
-        if (typeof origin === "string") {
-          return { url: origin };
-        }
-        return origin;
-      })
-      .map((origin) => {
-        let originPlugins = config.plugins || ({} as any);
-        if (origin.plugins) {
-          originPlugins = _.merge({}, originPlugins, origin.plugins);
-        }
-        return {
-          ...origin,
-          plugins: PontInnerManagerConfig.loadPlugins(
-            originPlugins,
-            origin.name,
-            configDir,
-            logger,
-            innerConfig,
-            config.rootDir,
-          ),
-        };
-      });
+      if (typeof origin === "string") {
+        return { url: origin };
+      }
+      return origin;
+    });
 
     return innerConfig;
+  }
+
+  static constructorFromPublicConfig(
+    config: PontPublicManagerConfig,
+    logger: PontLogger,
+    configDir: string,
+  ): PontInnerManagerConfig {
+    const innerConfig = PontInnerManagerConfig.constructorInnerConfig(config, logger, configDir);
+
+    return PontInnerManagerConfig.constructorInnerConfigPlugins(config, logger, configDir, innerConfig);
   }
 }

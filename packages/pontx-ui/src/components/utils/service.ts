@@ -1,6 +1,6 @@
 import { PontSpec } from "pontx-spec";
-// import testSpec from "./mocks/spec.json";
-// import remoteSpec from "./mocks/remoteSpec.json";
+// import testSpec from "./.mocks/spec.json";
+// import remoteSpec from "./.mocks/remoteSpec.json";
 // import { PontSpecDiff } from "pontx-spec-diff";
 // import { PontUIService as LocalPontUIService } from "./service.local";
 

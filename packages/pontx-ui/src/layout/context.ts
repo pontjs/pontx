@@ -47,6 +47,9 @@ const useContext = () => {
       changeRemoteSpecs(result.remoteSpecs);
       changeSpecs(result.localSpecs);
 
+      if (!currSpec) {
+        return;
+      }
       const mods = PontSpec.getMods(currSpec);
       changeSelectedMeta({
         name: mods[0].interfaces[0].name,
@@ -55,7 +58,7 @@ const useContext = () => {
         spec: mods[0].interfaces[0],
       });
     });
-  }, []);
+  }, [currSpec]);
 
   React.useEffect(() => {
     fetchPontSpecs();

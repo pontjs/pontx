@@ -4,9 +4,9 @@
  */
 import * as React from "react";
 import * as PontSpec from "pontx-spec";
-import { PontJsonSchemaOp } from "../SchemaTable/model/BaseClassSchema";
 import classNames from "classnames";
-import { SchemaDynamicTable } from "../SchemaTable/comps/SchemaDynamicTable";
+import { SemixSchemaTable } from "semix-schema-table";
+import { getRefSchema } from "./utils";
 
 export class BaseClassProps {
   name: string;
@@ -28,18 +28,14 @@ export const BaseClass: React.FC<BaseClassProps> = (props) => {
             : ""}
         </div>
       </div>
-
-      <SchemaDynamicTable
-        changeBaseClasss={() => {}}
-        changeResponseBody={() => {}}
-        definitions={props.definitions}
-        onStructClick={props.onStructClick}
-        changeRootApiSchema={() => {}}
-        keyword=""
-        readOnly
-        rows={PontJsonSchemaOp.genrateRows(schema)}
-        tableType="struct"
-      ></SchemaDynamicTable>
+      <div className="baseclass-page-content">
+        <SemixSchemaTable
+          name={name}
+          schema={schema as any}
+          schemas={props.definitions as any}
+          getRefSchema={getRefSchema(props.definitions)}
+        />
+      </div>
     </div>
   );
 };

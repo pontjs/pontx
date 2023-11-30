@@ -5,7 +5,6 @@
 import * as React from "react";
 import { API } from "../../components/docs/API";
 import { BaseClass } from "../../components/docs/BaseClass";
-//  import { DiffManager } from "./DiffManager";
 import { DiffContent } from "../../components/changes/DiffContent";
 
 export class DiffPageProps {
