@@ -38,6 +38,12 @@ export class PontJsonSchema {
   items?: PontJsonSchema | PontJsonSchemaArray;
   additionalProperties?: PontJsonSchema;
   properties?: PontJsonSchemaMap;
+
+  externalDocs?: {
+    url?: string;
+    description?: string;
+  };
+
   ext?: any;
 
   /** 生成表达式，用于预览读取类型信息 */

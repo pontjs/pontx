@@ -1,4 +1,4 @@
-import { JsonSchema } from "src/JsonSchema";
+import { JsonSchema } from "../JsonSchema";
 
 /**
  * This is the root document object of the <a href="https://swagger.io/specification/#oas-document">OpenAPI document</a>.

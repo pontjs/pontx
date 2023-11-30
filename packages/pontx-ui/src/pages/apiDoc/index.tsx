@@ -3,8 +3,6 @@
  * @description API Page Content
  */
 import * as React from "react";
-import * as PontSpec from "pontx-spec";
-import { Table } from "@alicloud/console-components";
 import { LayoutContext, PageType } from "../../layout/context";
 import { LeftMenu } from "./LeftMenu";
 import { BaseClass } from "../../components/docs/BaseClass";

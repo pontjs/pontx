@@ -7,7 +7,7 @@ import { PontJsonPointer } from "./jsonpointer";
 
 export { PontJsonSchema, Parameter, ObjectMap, PontJsonPointer, removeMapKeys };
 
-type ResponseObject = {
+export type ResponseObject = {
   schema: PontJsonSchema;
   headers?: OAS2.HeadersObject;
   description?: string;
@@ -27,6 +27,10 @@ export class PontAPI {
   path: string;
   deprecated?: boolean;
   ext?: any;
+  externalDocs?: {
+    url?: string;
+    description?: string;
+  };
 }
 
 export class PontDirectory {

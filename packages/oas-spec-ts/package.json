@@ -1,11 +1,12 @@
 {
   "name": "oas-spec-ts",
-  "version": "0.3.77",
+  "version": "0.3.77-alpha.1",
   "description": "OpenAPI Spec OAS TS Typescript",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
     "pretest": "npm run build",
+    "release": "npm publish --registry https://registry.npmjs.org/",
     "dev": "tsc -p ./scripts/tsconfig.json -w",
     "generate": "node ./scripts/lib/generateCode.js ./src/oas2.0/definition.json ./src/oas2.0/swagger2.0.ts",
     "watch": "tsc --build --watch",

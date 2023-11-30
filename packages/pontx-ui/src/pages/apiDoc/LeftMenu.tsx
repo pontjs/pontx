@@ -42,13 +42,14 @@ export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
   const menus = (
     <Menu selectedKeys={[selectedMeta?.name]} defaultOpenKeys={[filteredCurrSpec?.[0]?.name]} mode="inline">
       {(filteredCurrSpec?.mods || []).map((mod) => {
+        const modName = typeof mod.name === "string" ? mod.name : "APIs";
         return (
           <Menu.SubMenu
-            key={mod.name as any}
+            key={modName as any}
             label={
               <div className="mod-name">
-                <div className="name" title={mod.name as any}>
-                  {mod.name}({mod.interfaces?.length || 0})
+                <div className="name" title={modName as any}>
+                  {modName}({mod.interfaces?.length || 0})
                 </div>
                 <div className="desc" title={mod.description}>
                   {mod.description}
@@ -65,7 +66,7 @@ export const LeftMenu: React.FC<LeftMenuProps> = (props) => {
                   onClick={() =>
                     changeSelectedMeta({
                       type: "api",
-                      modName: mod.name as any,
+                      modName: modName as any,
                       name: api.name,
                       spec: api,
                     })

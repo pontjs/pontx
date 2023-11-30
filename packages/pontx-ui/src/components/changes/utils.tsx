@@ -7,7 +7,6 @@ import { PontSpec, Mod, PontAPI, PontJsonSchema } from "pontx-spec";
 import { diffPontSpec, DiffResult } from "pontx-spec-diff";
 import * as React from "react";
 import { Table } from "@alicloud/console-components";
-// import { SchemaRow } from "../../components/SchemaTable/comps/SchemaRow";
 
 export type ProcessedDiffs<T> = {
   name?: string;

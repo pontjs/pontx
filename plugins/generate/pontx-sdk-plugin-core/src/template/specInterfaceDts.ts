@@ -63,7 +63,7 @@ ${requestMethodsTypeCode}
   return (
     prefixCode +
     [
-      `export type APIs {`,
+      `export type APIs = {`,
       _.map(spec.apis, (api, name) => {
         const apiContentTsCode = indentation(2)(apiInterface(api, "", spec.name));
         return apiContentTsCode;

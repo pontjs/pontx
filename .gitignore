@@ -25,6 +25,7 @@ scripts/dev/
 yarn-error.log
 packages/vscode-pontx/out/
 .vscode-test/
+sdk/pontx-sdk-core/commonjs
 packages/vscode-pontx/dist/assets
 packages/vscode-pontx/dist/index.html
 tsconfig.tsbuildinfo

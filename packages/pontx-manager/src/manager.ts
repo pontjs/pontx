@@ -1,5 +1,5 @@
 import { PontSpec, PontJsonPointer, PontSpecs } from "pontx-spec";
-import { InnerOriginConfig, PontInnerManagerConfig, PontPublicManagerConfig } from "./config";
+import { InnerOriginConfig, PontInnerManagerConfig, PontPublicManagerConfig, PontxPlugins } from "./config";
 import * as path from "path";
 import * as fs from "fs-extra";
 import { PontLogger, PontLoggerSpec } from "./logger";
@@ -70,6 +70,60 @@ export class PontManager {
     }
   }
 
+  static async constructorFromPontConfigAndPlugins(
+    publicConfig: PontPublicManagerConfig,
+    configDir: string,
+    plugins: PontxPlugins,
+    logger = new PontLogger(),
+  ) {
+    try {
+      let manager = new PontManager();
+      manager.logger = logger;
+      manager.innerManagerConfig = PontInnerManagerConfig.constructorFromPontConfigAndPlugins(
+        publicConfig,
+        logger,
+        configDir,
+        plugins,
+      );
+
+      return PontManager.bootstrap(manager, logger);
+    } catch (e) {
+      logger.error("Pont 创建失败:" + e.message, e.stack);
+    }
+  }
+
+  static async bootstrap(manager: PontManager, logger = new PontLogger()) {
+    try {
+      manager = await PontManager.readLocalPontMeta(manager);
+      manager = await PontManager.fetchRemotePontMeta(manager);
+      if (manager.remotePontSpecs?.length) {
+        await FileGenerator.generateRemoteCache(manager.innerManagerConfig.outDir, manager.remotePontSpecs);
+      }
+
+      const emptySpecs = [] as string[];
+      // 自动用远程 spec，替换本地为空的 spec
+      manager.localPontSpecs = manager.localPontSpecs.map((localSpec, specIndex) => {
+        if (PontSpec.isEmptySpec(localSpec)) {
+          emptySpecs.push(localSpec.name);
+          const remoteSpec = manager.remotePontSpecs?.find((spec) => spec.name === localSpec.name);
+
+          return remoteSpec || manager?.remotePontSpecs?.[specIndex] || localSpec;
+        }
+
+        return localSpec;
+      });
+      if (emptySpecs.length) {
+        logger.info(`本地 ${emptySpecs.join(", ")} SDK为空，已为您自动生成...`);
+        await PontManager.generateCode(manager);
+      }
+
+      return manager;
+    } catch (e) {
+      logger.error("Pont 创建失败:" + e.message, e.stack);
+      return manager;
+    }
+  }
+
   static async constructorFromPontConfig(
     publicConfig: PontPublicManagerConfig,
     configDir: string,
@@ -80,35 +134,7 @@ export class PontManager {
       manager.logger = logger;
       manager.innerManagerConfig = PontInnerManagerConfig.constructorFromPublicConfig(publicConfig, logger, configDir);
 
-      try {
-        manager = await PontManager.readLocalPontMeta(manager);
-        manager = await PontManager.fetchRemotePontMeta(manager);
-        if (manager.remotePontSpecs?.length) {
-          await FileGenerator.generateRemoteCache(manager.innerManagerConfig.outDir, manager.remotePontSpecs);
-        }
-
-        const emptySpecs = [] as string[];
-        // 自动用远程 spec，替换本地为空的 spec
-        manager.localPontSpecs = manager.localPontSpecs.map((localSpec, specIndex) => {
-          if (PontSpec.isEmptySpec(localSpec)) {
-            emptySpecs.push(localSpec.name);
-            const remoteSpec = manager.remotePontSpecs?.find((spec) => spec.name === localSpec.name);
-
-            return remoteSpec || manager?.remotePontSpecs?.[specIndex] || localSpec;
-          }
-
-          return localSpec;
-        });
-        if (emptySpecs.length) {
-          logger.info(`本地 ${emptySpecs.join(", ")} SDK为空，已为您自动生成...`);
-          await PontManager.generateCode(manager);
-        }
-
-        return manager;
-      } catch (e) {
-        logger.error("Pont 创建失败:" + e.message, e.stack);
-        return manager;
-      }
+      return PontManager.bootstrap(manager, logger);
     } catch (e) {
       logger.error("Pont 创建失败:" + e.message, e.stack);
     }
