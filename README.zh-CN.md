@@ -25,30 +25,26 @@ Pontx 通过 Pontx CLI、[Pontx VSCode IDE Extension](https://marketplace.visual
 
 ## 快速开始
 
-在您的项目中，配置有效的 `pontx-config.json` 文件，Pontx 将立即启动。
+在您的项目中，只需要配置合法的 `pontx-config.json` 文件，Pontx 的 VSCode 插件、Cli 便会自动启动。
 
-`pontx-config.json` 配置详情请查阅下文。
-
-### Pontx 配置
-
-#### 配置示例
+### Pontx 配置示例
 
   ```json
   {
-		// SDK 生成路径（相对路径）
+    // SDK 生成路径（相对路径）
     "outDir": "",
     "plugins": {
-      // 插件配置
+      // 插件配置，默认使用 async-sdk，
     },
     "origins": [{
       // 数据源配置，每个数据源需要单独命名。
       "name": "name1",
-			// 数据源地址，如 Swagger 数据源地址
+      // 数据源地址，如 Swagger 数据源地址
       "url": "myhost/v2/api-docs.json"
     }, {
       "name": "name2",
       "envs": {
-				// 多环境配置
+         // 多环境配置
         "daily": "my-daily-host/v2/api-docs.json",
         "pre": "my-pre-host/v2/api-docs.json",
         "prod": "myhost/v2/api-docs.json",
@@ -58,8 +54,24 @@ Pontx 通过 Pontx CLI、[Pontx VSCode IDE Extension](https://marketplace.visual
   }
   ```
 
+Pontx 内置插件如下：
+
+* fetch
+  * pontx-meta-fetch-plugin: 默认的元数据获取插件
+* parser
+  * pontx-oas2-parser-plugin: OAS2（Swagger2）元数据解析插件
+  * pontx-oas3-parser-plugin: OAS3（Swagger3）元数据解析插件
+* generate:
+  * pontx-async-sdk-plugin: 异步接口请求插件
+  * pontx-react-hooks-sdk-plugin: 基于 swr 的 React Hooks 接口请求插件
+* mocks
+  * pontx-mocks-plugin Mocks 插件
+
 查阅更多 Pontx 配置细节，请参阅 [Pontx 配置指南](./Configuration.md)。
 
+### Pontx 使用指南
+
+Pontx 可通过 VSCode 插件、CLI 提供服务。
 
 #### VSCode 插件使用指南
 
@@ -106,4 +118,4 @@ npm i pontx-cli -g
 
 ##### 使用
 
-* <strong>`pontx generate`</strong> 拉取并更新API元数据，生成最新的SDK代码。
+* <strong>`pontx generate`</strong> 拉取 API 元数据，生成 SDK 代码。
