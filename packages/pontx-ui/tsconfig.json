@@ -20,6 +20,9 @@
     "rootDir": "src",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "paths": {
+      "react": ["./node_modules/@types/react"]
+    },
     "jsx": "react"
   },
   "include": ["src", "./src/**/*.json"],

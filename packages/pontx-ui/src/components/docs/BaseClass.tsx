@@ -29,12 +29,14 @@ export const BaseClass: React.FC<BaseClassProps> = (props) => {
         </div>
       </div>
       <div className="baseclass-page-content">
-        <SemixSchemaTable
-          name={name}
-          schema={schema as any}
-          schemas={props.definitions as any}
-          getRefSchema={getRefSchema(props.definitions)}
-        />
+        <div className="mod">
+          <SemixSchemaTable
+            name={name}
+            schema={schema as any}
+            schemas={props.definitions as any}
+            getRefSchema={getRefSchema(props.definitions)}
+          />
+        </div>
       </div>
     </div>
   );

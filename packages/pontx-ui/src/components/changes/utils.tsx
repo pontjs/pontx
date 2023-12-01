@@ -6,7 +6,6 @@ import * as _ from "lodash";
 import { PontSpec, Mod, PontAPI, PontJsonSchema } from "pontx-spec";
 import { diffPontSpec, DiffResult } from "pontx-spec-diff";
 import * as React from "react";
-import { Table } from "@alicloud/console-components";
 
 export type ProcessedDiffs<T> = {
   name?: string;
@@ -159,62 +158,3 @@ export function getNewSpec(diffs: ProcessedDiffs<PontSpec>, localSpec, remoteSpe
     definitions: defs,
   };
 }
-
-export const getDiffs = (diffResult: DiffResult<any>) => {
-  const diffItems = Object.keys(diffResult.diffs || {}).map((key) => {
-    return {
-      fieldName: key,
-      diffType: diffResult.diffs[key]?.diffType,
-      localValue: diffResult[key],
-      remoteValue: diffResult.diffs[key]?.remoteValue,
-    };
-  });
-
-  if (!diffItems?.length) {
-    return null;
-  }
-
-  return (
-    <Table
-      columns={[
-        {
-          dataIndex: "diffType",
-          title: "变更类型",
-          cell: (type) => {
-            const textMap = {
-              update: "变更",
-              create: "新增",
-              delete: "删除",
-            };
-            return textMap[type];
-          },
-        },
-        {
-          dataIndex: "fieldName",
-          title: "字段",
-        },
-        {
-          dataIndex: "localValue",
-          title: "本地数据",
-          cell(value) {
-            if (typeof value === "object") {
-              return JSON.stringify(value, null, 2);
-            }
-            return value;
-          },
-        },
-        {
-          dataIndex: "remoteValue",
-          title: "传入数据",
-          cell(value) {
-            if (typeof value === "object") {
-              return JSON.stringify(value, null, 2);
-            }
-            return value;
-          },
-        },
-      ]}
-      dataSource={diffItems}
-    ></Table>
-  );
-};

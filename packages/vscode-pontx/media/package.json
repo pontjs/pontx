@@ -5,7 +5,8 @@
   "main": "lib/server.js",
   "scripts": {
     "start": "vite --mode browser",
-    "build:ncc": "ncc build src/server.ts -o lib -m",
+    "build:client": "NODE_ENV=production vite build",
+    "build:server": "ncc build src/server.ts -o lib -m -e *.css",
     "preview": "vite preview"
   },
   "dependencies": {
