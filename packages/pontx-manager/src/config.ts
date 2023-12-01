@@ -321,7 +321,7 @@ export class PontInnerManagerConfig {
       return pluginItem;
     });
 
-    return innerConfig;
+    return PontInnerManagerConfig.constructorInnerConfigPlugins(config, logger, configDir, innerConfig);
   }
 
   static constructorInnerConfigPlugins(
