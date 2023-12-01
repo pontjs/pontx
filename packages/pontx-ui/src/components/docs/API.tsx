@@ -18,6 +18,13 @@ export class APIProps {
 export const API: React.FC<APIProps> = (props) => {
   const { selectedApi, definitions } = props;
 
+  const getSchema = React.useCallback(
+    ($ref) => {
+      return getRefSchema(definitions)($ref);
+    },
+    [definitions],
+  );
+
   return (
     <div className="pontx-ui-api">
       {selectedApi ? (
@@ -46,7 +53,7 @@ export const API: React.FC<APIProps> = (props) => {
               </div>
             ) : null}
             <Tab defaultActiveKey="doc">
-              <Tab.Item key="doc" title="出入参">
+              <Tab.Item key="doc" title="API 文档">
                 <div className="content">
                   <div className="mod">
                     <div className="mod-title">入参</div>
@@ -62,7 +69,16 @@ export const API: React.FC<APIProps> = (props) => {
                       name=""
                       schema={selectedApi?.responses["200"]?.schema as any}
                       schemas={definitions as any}
-                      getRefSchema={getRefSchema(definitions)}
+                      getRefSchema={getSchema}
+                      renderEmpty={() => {
+                        return (
+                          <tr>
+                            <td colSpan={2} style={{ padding: "15px 0", textAlign: "center" }}>
+                              无出参定义
+                            </td>
+                          </tr>
+                        );
+                      }}
                     />
                   </div>
                 </div>

@@ -32,7 +32,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/lodash": "*",
-    "typedoc": "^0.23.8",
+    "typedoc": "^0.24.0",
     "typedoc-plugin-markdown": "^3.13.3"
   }
 }

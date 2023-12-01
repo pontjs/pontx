@@ -12,7 +12,7 @@ export const PontUIService = {
   /** 获取本地元数据列表 */
   requestPontSpecs: async () => {
     return {
-      // localSpecs: [localSpec] as any[] as PontSpec[],
+      // localSpecs: [testSpec] as any[] as PontSpec[],
       // remoteSpecs: [remoteSpec] as any[] as PontSpec[],
       localSpecs: [] as any[] as PontSpec[],
       remoteSpecs: [] as any[] as PontSpec[],

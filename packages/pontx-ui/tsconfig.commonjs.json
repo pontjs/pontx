@@ -9,7 +9,9 @@
     "jsx": "react",
     "moduleResolution": "node",
     "baseUrl": "./src",
-    "paths": {},
+    "paths": {
+      "react": ["../node_modules/@types/react"]
+    },
     "rootDir": "./src"
   },
   "include": ["./src/components/*"],

@@ -7,7 +7,6 @@ import * as React from "react";
 import { SemixJsonSchema } from "semix-core";
 import { SemixSchemaTable } from "semix-schema-table";
 import * as PontSpec from "pontx-spec";
-import "./ApiParams.less";
 import { getRefSchema } from "./utils";
 
 export class PontxParamsDocProps {
@@ -34,6 +33,13 @@ export const ApiParamsDoc: React.FC<PontxParamsDocProps> = (props) => {
   }, [props.parameters]);
   const propSchemaCnt = Object.keys(props.schemas || {}).length;
 
+  const getSchema = React.useCallback(
+    ($ref) => {
+      return getRefSchema(props.schemas)($ref);
+    },
+    [props.schemas],
+  );
+
   return React.useMemo(() => {
     return (
       <div className="api-params-doc">
@@ -58,7 +64,7 @@ export const ApiParamsDoc: React.FC<PontxParamsDocProps> = (props) => {
               </div>
             );
           }}
-          getRefSchema={getRefSchema(props.schemas)}
+          getRefSchema={getSchema}
           renderTypeColAppendix={(node) => {
             if (node?.nodeValue?.schema.in) {
               return (
@@ -78,12 +84,21 @@ export const ApiParamsDoc: React.FC<PontxParamsDocProps> = (props) => {
             }
             return null;
           }}
+          renderEmpty={() => {
+            return (
+              <tr>
+                <td colSpan={2} style={{ padding: "15px 0", textAlign: "center" }}>
+                  无参数定义
+                </td>
+              </tr>
+            );
+          }}
           schema={schema}
           schemas={props.schemas}
         />
       </div>
     );
-  }, [schema, propSchemaCnt]);
+  }, [schema, propSchemaCnt, props.schemas]);
 };
 
 ApiParamsDoc.defaultProps = new PontxParamsDocProps();
