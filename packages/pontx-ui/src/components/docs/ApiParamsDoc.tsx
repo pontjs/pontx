@@ -5,7 +5,7 @@
 
 import * as React from "react";
 import { SemixJsonSchema } from "semix-core";
-import { SemixSchemaTable } from "semix-schema-table";
+import { SemixSchemaTable, InnerSchemaTable } from "semix-schema-table";
 import * as PontSpec from "pontx-spec";
 import { getRefSchema } from "./utils";
 
@@ -43,7 +43,7 @@ export const ApiParamsDoc: React.FC<PontxParamsDocProps> = (props) => {
   return React.useMemo(() => {
     return (
       <div className="api-params-doc">
-        <SemixSchemaTable
+        <InnerSchemaTable
           name=""
           renderExpandIcon={(node, onExpand) => {
             return (
@@ -64,26 +64,6 @@ export const ApiParamsDoc: React.FC<PontxParamsDocProps> = (props) => {
               </div>
             );
           }}
-          getRefSchema={getSchema}
-          renderTypeColAppendix={(node) => {
-            if (node?.nodeValue?.schema.in) {
-              return (
-                <div
-                  className="in"
-                  style={{
-                    color: "gray",
-                    fontFamily: "monospace",
-                    fontSize: 12,
-                    fontStyle: "italic",
-                    fontWeight: 600,
-                  }}
-                >
-                  ({node.nodeValue?.schema.in})
-                </div>
-              );
-            }
-            return null;
-          }}
           renderEmpty={() => {
             return (
               <tr>
@@ -94,7 +74,6 @@ export const ApiParamsDoc: React.FC<PontxParamsDocProps> = (props) => {
             );
           }}
           schema={schema}
-          schemas={props.schemas}
         />
       </div>
     );

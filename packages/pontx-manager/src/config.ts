@@ -321,7 +321,18 @@ export class PontInnerManagerConfig {
       return pluginItem;
     });
 
-    return PontInnerManagerConfig.constructorInnerConfigPlugins(config, logger, configDir, innerConfig);
+    innerConfig.origins = innerConfig.origins.map((origin) => {
+      let originPlugins = innerConfig.plugins || ({} as any);
+      if (origin.plugins) {
+        originPlugins = _.merge({}, originPlugins, origin.plugins);
+      }
+      return {
+        ...origin,
+        plugins: originPlugins,
+      } as InnerOriginConfig;
+    });
+
+    return innerConfig;
   }
 
   static constructorInnerConfigPlugins(
