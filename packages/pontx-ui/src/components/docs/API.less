@@ -1,5 +1,29 @@
 // @import url(../../components/style/themes.less);
 
+.semix-markdown {
+  color: #333;
+
+  blockquote {
+    background-color: #eff3f8;
+
+    p {
+      color: #333;
+    }
+  }
+  code {
+    color: #333;
+  }
+}
+
+.semix-schema-table {
+  .param-name .next-tag {
+    color: #656565 !important;
+    border: 1px solid #cccccc;
+    background-color: rgb(239, 239, 239);
+    border-radius: 2px;
+  }
+}
+
 .pontx-ui-api {
   .header {
     background-color: #d6e0e5;
@@ -8,6 +32,10 @@
     padding: 24px 24px 18px;
     // display: flex;
     line-height: 30px;
+    color: black;
+    &.deprecated {
+      color: gray;
+    }
 
     .heading {
       display: flex;
@@ -27,7 +55,6 @@
       }
 
       .title {
-        color: black;
         font-weight: bold;
       }
 
@@ -46,6 +73,7 @@
 
       .left {
         display: flex;
+        align-items: center;
 
         .method {
           margin-right: 12px;
