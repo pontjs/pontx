@@ -1,6 +1,6 @@
 {
   "name": "pontx-ui",
-  "version": "0.3.77",
+  "version": "0.3.78",
   "module": "dist/es6/components/index.js",
   "main": "dist/commonjs/components/index.js",
   "typings": "dist/es6/components/index.d.ts",
@@ -29,8 +29,8 @@
     "@vscode/codicons": "^0.0.30",
     "classnames": "^2.3.1",
     "moment": "2",
-    "pontx-spec": "^0.3.77",
-    "pontx-spec-diff": "^0.3.77",
+    "pontx-spec": "^0.3.78",
+    "pontx-spec-diff": "^0.3.78",
     "react-diff-viewer-continued": "^3.2.3",
     "semix-schema-table": "^0.0.13",
     "unstated-next": "^1.1.0",
