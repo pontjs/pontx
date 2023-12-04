@@ -1,6 +1,6 @@
 {
   "name": "oas-spec-ts",
-  "version": "0.3.78",
+  "version": "0.3.79",
   "description": "OpenAPI Spec OAS TS Typescript",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
