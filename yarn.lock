@@ -7506,8 +7506,8 @@ nth-check@^2.0.0, nth-check@^2.0.1:
     "@nrwl/nx-win32-arm64-msvc" "15.9.7"
     "@nrwl/nx-win32-x64-msvc" "15.9.7"
 
-oas-spec-ts@^0.3.83, "oas-spec-ts@file:/Users/Jason/workspace/open/pontx/packages/oas-spec-ts":
-  version "0.3.83"
+oas-spec-ts@^0.3.85, "oas-spec-ts@file:/Users/Jason/workspace/open/pontx/packages/oas-spec-ts":
+  version "0.3.85"
   resolved "file:packages/oas-spec-ts"
 
 object-assign@^4.1.1:
@@ -7969,68 +7969,68 @@ pkg-dir@^4.2.0:
   dependencies:
     find-up "^4.0.0"
 
-pontx-async-sdk-plugin@^0.3.75, pontx-async-sdk-plugin@^0.3.83, "pontx-async-sdk-plugin@file:/Users/Jason/workspace/open/pontx/plugins/generate/pontx-async-sdk-plugin":
-  version "0.3.83"
+pontx-async-sdk-plugin@^0.3.75, pontx-async-sdk-plugin@^0.3.85, "pontx-async-sdk-plugin@file:/Users/Jason/workspace/open/pontx/plugins/generate/pontx-async-sdk-plugin":
+  version "0.3.85"
   resolved "file:plugins/generate/pontx-async-sdk-plugin"
   dependencies:
-    pontx-generate "^0.3.83"
-    pontx-sdk-plugin-core "^0.3.83"
-    pontx-spec "^0.3.83"
+    pontx-generate "^0.3.85"
+    pontx-sdk-plugin-core "^0.3.85"
+    pontx-spec "^0.3.85"
 
 pontx-cli@^0.3.68, "pontx-cli@file:/Users/Jason/workspace/open/pontx/packages/pontx-cli":
-  version "0.3.83"
+  version "0.3.85"
   resolved "file:packages/pontx-cli"
   dependencies:
     chalk "^4.1.2"
     commander "^9.2.0"
-    pontx-manager "^0.3.83"
-    pontx-meta-fetch-plugin "^0.3.83"
-    pontx-oas2-parser-plugin "^0.3.83"
-    pontx-oas3-parser-plugin "^0.3.83"
+    pontx-manager "^0.3.85"
+    pontx-meta-fetch-plugin "^0.3.85"
+    pontx-oas2-parser-plugin "^0.3.85"
+    pontx-oas3-parser-plugin "^0.3.85"
     pontx-react-hooks-generate-plugin "^0.3.70"
     signale "1.4.0"
 
-pontx-generate-core@^0.3.70, pontx-generate-core@^0.3.75, pontx-generate-core@^0.3.83, "pontx-generate-core@file:/Users/Jason/workspace/open/pontx/plugins/generate/core":
-  version "0.3.83"
+pontx-generate-core@^0.3.70, pontx-generate-core@^0.3.75, pontx-generate-core@^0.3.85, "pontx-generate-core@file:/Users/Jason/workspace/open/pontx/plugins/generate/core":
+  version "0.3.85"
   resolved "file:plugins/generate/core"
   dependencies:
     fs-extra "*"
     lodash "*"
-    pontx-spec "^0.3.83"
+    pontx-spec "^0.3.85"
 
-pontx-generate@^0.3.70, pontx-generate@^0.3.83, "pontx-generate@file:/Users/Jason/workspace/open/pontx/packages/generate":
-  version "0.3.83"
+pontx-generate@^0.3.70, pontx-generate@^0.3.85, "pontx-generate@file:/Users/Jason/workspace/open/pontx/packages/generate":
+  version "0.3.85"
   resolved "file:packages/generate"
   dependencies:
     fs-extra "*"
     lodash "*"
-    pontx-spec "^0.3.83"
+    pontx-spec "^0.3.85"
 
 "pontx-hooks-sdk@file:/Users/Jason/workspace/open/pontx/sdk/pontx-hooks-sdk":
-  version "0.3.83"
+  version "0.3.85"
   resolved "file:sdk/pontx-hooks-sdk"
   dependencies:
     swr "^2.2.4"
 
-pontx-manager@*, pontx-manager@^0.3.75, pontx-manager@^0.3.83, "pontx-manager@file:/Users/Jason/workspace/open/pontx/packages/pontx-manager":
-  version "0.3.83"
+pontx-manager@*, pontx-manager@^0.3.75, pontx-manager@^0.3.85, "pontx-manager@file:/Users/Jason/workspace/open/pontx/packages/pontx-manager":
+  version "0.3.85"
   resolved "file:packages/pontx-manager"
   dependencies:
     fast-json-stable-stringify "^2.1.0"
     fs-extra "^10.1.0"
     lodash "*"
-    pontx-async-sdk-plugin "^0.3.83"
-    pontx-generate-core "^0.3.83"
-    pontx-meta-fetch-plugin "^0.3.83"
-    pontx-mocks-plugin "^0.3.83"
-    pontx-oas2-parser-plugin "^0.3.83"
-    pontx-oas3-parser-plugin "^0.3.83"
-    pontx-react-hooks-sdk-plugin "^0.3.83"
-    pontx-spec "^0.3.83"
+    pontx-async-sdk-plugin "^0.3.85"
+    pontx-generate-core "^0.3.85"
+    pontx-meta-fetch-plugin "^0.3.85"
+    pontx-mocks-plugin "^0.3.85"
+    pontx-oas2-parser-plugin "^0.3.85"
+    pontx-oas3-parser-plugin "^0.3.85"
+    pontx-react-hooks-sdk-plugin "^0.3.85"
+    pontx-spec "^0.3.85"
     typescript "^5"
 
-pontx-meta-fetch-plugin@^0.3.75, pontx-meta-fetch-plugin@^0.3.83, "pontx-meta-fetch-plugin@file:/Users/Jason/workspace/open/pontx/plugins/fetch/pontx-meta-fetch-plugin":
-  version "0.3.83"
+pontx-meta-fetch-plugin@^0.3.75, pontx-meta-fetch-plugin@^0.3.85, "pontx-meta-fetch-plugin@file:/Users/Jason/workspace/open/pontx/plugins/fetch/pontx-meta-fetch-plugin":
+  version "0.3.85"
   resolved "file:plugins/fetch/pontx-meta-fetch-plugin"
   dependencies:
     baidu-translate-service "^1.0.0"
@@ -8038,28 +8038,28 @@ pontx-meta-fetch-plugin@^0.3.75, pontx-meta-fetch-plugin@^0.3.83, "pontx-meta-fe
     node-fetch "^2.6.7"
     translation.js "^0.7.15"
 
-pontx-mocks-plugin@^0.3.75, pontx-mocks-plugin@^0.3.83, "pontx-mocks-plugin@file:/Users/Jason/workspace/open/pontx/plugins/mocks/pontx-mocks-plugin":
-  version "0.3.83"
+pontx-mocks-plugin@^0.3.75, pontx-mocks-plugin@^0.3.85, "pontx-mocks-plugin@file:/Users/Jason/workspace/open/pontx/plugins/mocks/pontx-mocks-plugin":
+  version "0.3.85"
   resolved "file:plugins/mocks/pontx-mocks-plugin"
   dependencies:
     json-schema-faker "^0.5.3"
-    pontx-generate "^0.3.83"
-    pontx-spec "^0.3.83"
+    pontx-generate "^0.3.85"
+    pontx-spec "^0.3.85"
 
-pontx-oas2-parser-plugin@^0.3.75, pontx-oas2-parser-plugin@^0.3.83, "pontx-oas2-parser-plugin@file:/Users/Jason/workspace/open/pontx/plugins/parser/pontx-oas2-parser-plugin":
-  version "0.3.83"
+pontx-oas2-parser-plugin@^0.3.75, pontx-oas2-parser-plugin@^0.3.85, "pontx-oas2-parser-plugin@file:/Users/Jason/workspace/open/pontx/plugins/parser/pontx-oas2-parser-plugin":
+  version "0.3.85"
   resolved "file:plugins/parser/pontx-oas2-parser-plugin"
   dependencies:
-    oas-spec-ts "^0.3.83"
-    pontx-oas3-parser-plugin "^0.3.83"
-    pontx-spec "^0.3.83"
+    oas-spec-ts "^0.3.85"
+    pontx-oas3-parser-plugin "^0.3.85"
+    pontx-spec "^0.3.85"
 
-pontx-oas3-parser-plugin@^0.3.75, pontx-oas3-parser-plugin@^0.3.83, "pontx-oas3-parser-plugin@file:/Users/Jason/workspace/open/pontx/plugins/parser/pontx-oas3-parser-plugin":
-  version "0.3.83"
+pontx-oas3-parser-plugin@^0.3.75, pontx-oas3-parser-plugin@^0.3.85, "pontx-oas3-parser-plugin@file:/Users/Jason/workspace/open/pontx/plugins/parser/pontx-oas3-parser-plugin":
+  version "0.3.85"
   resolved "file:plugins/parser/pontx-oas3-parser-plugin"
   dependencies:
-    oas-spec-ts "^0.3.83"
-    pontx-spec "^0.3.83"
+    oas-spec-ts "^0.3.85"
+    pontx-spec "^0.3.85"
 
 pontx-react-hooks-generate-plugin@^0.3.70:
   version "0.3.70"
@@ -8070,52 +8070,52 @@ pontx-react-hooks-generate-plugin@^0.3.70:
     pontx-generate-core "^0.3.70"
     pontx-spec "^0.3.70"
 
-pontx-react-hooks-sdk-plugin@^0.3.75, pontx-react-hooks-sdk-plugin@^0.3.83, "pontx-react-hooks-sdk-plugin@file:/Users/Jason/workspace/open/pontx/plugins/generate/pontx-react-hooks-sdk-plugin":
-  version "0.3.83"
+pontx-react-hooks-sdk-plugin@^0.3.75, pontx-react-hooks-sdk-plugin@^0.3.85, "pontx-react-hooks-sdk-plugin@file:/Users/Jason/workspace/open/pontx/plugins/generate/pontx-react-hooks-sdk-plugin":
+  version "0.3.85"
   resolved "file:plugins/generate/pontx-react-hooks-sdk-plugin"
   dependencies:
-    pontx-generate "^0.3.83"
-    pontx-sdk-plugin-core "^0.3.83"
-    pontx-spec "^0.3.83"
+    pontx-generate "^0.3.85"
+    pontx-sdk-plugin-core "^0.3.85"
+    pontx-spec "^0.3.85"
 
 "pontx-report-plugin@file:/Users/Jason/workspace/open/pontx/plugins/report/pontx-report-plugin":
   version "0.3.70"
   resolved "file:plugins/report/pontx-report-plugin"
 
 pontx-sdk-core@*, "pontx-sdk-core@file:/Users/Jason/workspace/open/pontx/sdk/pontx-sdk-core":
-  version "0.3.83"
+  version "0.3.85"
   resolved "file:sdk/pontx-sdk-core"
 
-pontx-sdk-plugin-core@^0.3.83, "pontx-sdk-plugin-core@file:/Users/Jason/workspace/open/pontx/plugins/generate/pontx-sdk-plugin-core":
-  version "0.3.83"
+pontx-sdk-plugin-core@^0.3.85, "pontx-sdk-plugin-core@file:/Users/Jason/workspace/open/pontx/plugins/generate/pontx-sdk-plugin-core":
+  version "0.3.85"
   resolved "file:plugins/generate/pontx-sdk-plugin-core"
   dependencies:
-    pontx-generate "^0.3.83"
-    pontx-spec "^0.3.83"
+    pontx-generate "^0.3.85"
+    pontx-spec "^0.3.85"
 
-pontx-spec-diff@^0.3.75, pontx-spec-diff@^0.3.83, "pontx-spec-diff@file:/Users/Jason/workspace/open/pontx/packages/pontx-spec-diff":
-  version "0.3.83"
+pontx-spec-diff@^0.3.75, pontx-spec-diff@^0.3.85, "pontx-spec-diff@file:/Users/Jason/workspace/open/pontx/packages/pontx-spec-diff":
+  version "0.3.85"
   resolved "file:packages/pontx-spec-diff"
   dependencies:
-    pontx-spec "^0.3.83"
+    pontx-spec "^0.3.85"
 
-pontx-spec@^0.3.70, pontx-spec@^0.3.75, pontx-spec@^0.3.83, "pontx-spec@file:/Users/Jason/workspace/open/pontx/packages/pontx-spec":
-  version "0.3.83"
+pontx-spec@^0.3.70, pontx-spec@^0.3.75, pontx-spec@^0.3.85, "pontx-spec@file:/Users/Jason/workspace/open/pontx/packages/pontx-spec":
+  version "0.3.85"
   resolved "file:packages/pontx-spec"
   dependencies:
-    oas-spec-ts "^0.3.83"
+    oas-spec-ts "^0.3.85"
 
 pontx-ui@^0.3.70, "pontx-ui@file:/Users/Jason/workspace/open/pontx/packages/pontx-ui":
-  version "0.3.84"
+  version "0.3.85"
   resolved "file:packages/pontx-ui"
   dependencies:
     "@vscode/codicons" "^0.0.30"
     classnames "^2.3.1"
     moment "2"
-    pontx-spec "^0.3.83"
-    pontx-spec-diff "^0.3.83"
+    pontx-spec "^0.3.85"
+    pontx-spec-diff "^0.3.85"
     react-diff-viewer-continued "^3.2.3"
-    semix-schema-table "^0.0.13"
+    semix-schema-table "^0.0.15"
     unstated-next "^1.1.0"
     vsce "^2.15.0"
 
@@ -9989,6 +9989,11 @@ typescript@*, typescript@^5, typescript@^5.0.2, typescript@^5.2.2, typescript@>=
   resolved "https://registry.npmmirror.com/typescript/-/typescript-4.9.5.tgz"
   integrity sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==
 
+typescript@5:
+  version "5.3.3"
+  resolved "https://registry.npmmirror.com/typescript/-/typescript-5.3.3.tgz"
+  integrity sha512-pXWcraxM0uxAS+tN0AG/BF2TyqmHO014Z070UsJ+pFvYuRSq8KH8DmWpnbXe0pEPDHXZV3FcAbJkijJ5oNEnWw==
+
 uc.micro@^1.0.1, uc.micro@^1.0.5:
   version "1.0.6"
   resolved "https://registry.npmmirror.com/uc.micro/-/uc.micro-1.0.6.tgz"
@@ -10323,7 +10328,7 @@ vscode-oniguruma@^1.7.0:
     pontx-ui "^0.3.70"
 
 "vscode-pontx@file:/Users/Jason/workspace/open/pontx/packages/vscode-pontx":
-  version "0.3.77"
+  version "0.3.85"
   resolved "file:packages/vscode-pontx"
   dependencies:
     "@vscode/codicons" "^0.0.32"
