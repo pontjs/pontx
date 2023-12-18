@@ -3,7 +3,8 @@ import * as fs from "fs-extra";
 import * as PontSpec from "pontx-spec";
 import { PontAPI } from "pontx-spec";
 import { InnerOriginConfig, PontInnerManagerConfig, PontManager, PontxGeneratorPlugin, Snippet } from "pontx-manager";
-import { clearPath } from "./utils";
+import { clearPath } from "../utils";
+import * as path from "path";
 
 export type FileStructure = {
   [fileName: string]: string | FileStructure;
@@ -42,6 +43,19 @@ export async function generateFiles(fileStructure: FileStructure, basePath: stri
   clearPath(basePath);
   await fs.mkdirp(basePath);
   await _generateFiles(fileStructure, basePath);
+}
+
+export async function generateRemoteCache(outDir: string, specs: PontSpec.PontSpec[]) {
+  if (specs?.length && specs.some((spec) => spec?.name)) {
+    const struct = {};
+    specs.forEach((spec) => {
+      if (spec?.name) {
+        struct[spec.name + ".json"] = JSON.stringify(spec, null, 2);
+      }
+    });
+
+    return generateFiles(struct, path.join(outDir, ".remote"));
+  }
 }
 
 export async function generateSdk(fileStructure: FileStructure, basePath: string) {

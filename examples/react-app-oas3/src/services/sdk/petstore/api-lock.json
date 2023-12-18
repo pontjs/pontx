@@ -1,0 +1,1099 @@
+{
+  "apis": {
+    "pet/addPet": {
+      "consumes": [
+        "application/json"
+      ],
+      "description": "Add a new pet to the store",
+      "method": "post",
+      "name": "addPet",
+      "parameters": [
+        {
+          "in": "body",
+          "name": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/Pet",
+            "originRef": "#/components/schemas/Pet",
+            "templateArgs": [],
+            "typeName": "Pet"
+          }
+        }
+      ],
+      "path": "/pet",
+      "responses": {
+        "200": {
+          "schema": {
+            "$ref": "#/definitions/Pet",
+            "originRef": "#/components/schemas/Pet",
+            "templateArgs": [],
+            "typeName": "Pet"
+          }
+        },
+        "405": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        }
+      },
+      "summary": "Add a new pet to the store"
+    },
+    "pet/deletePet": {
+      "consumes": [],
+      "description": "",
+      "method": "delete",
+      "name": "deletePet",
+      "parameters": [
+        {
+          "in": "header",
+          "name": "api_key",
+          "required": false,
+          "schema": {
+            "description": "",
+            "in": "header",
+            "required": false,
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "petId",
+          "required": true,
+          "schema": {
+            "description": "Pet id to delete",
+            "format": "int64",
+            "in": "path",
+            "required": true,
+            "type": "number"
+          }
+        }
+      ],
+      "path": "/pet/{petId}",
+      "responses": {
+        "400": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        }
+      },
+      "summary": "Deletes a pet"
+    },
+    "pet/findPetsByStatus": {
+      "consumes": [],
+      "description": "Multiple status values can be provided with comma separated strings",
+      "method": "get",
+      "name": "findPetsByStatus",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema": {
+            "default": "available",
+            "description": "Status values that need to be considered for filter",
+            "enum": [
+              "available",
+              "pending",
+              "sold"
+            ],
+            "explode": true,
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        }
+      ],
+      "path": "/pet/findByStatus",
+      "responses": {
+        "200": {
+          "schema": {
+            "items": {
+              "$ref": "#/definitions/Pet",
+              "originRef": "#/components/schemas/Pet",
+              "templateArgs": [],
+              "typeName": "Pet"
+            },
+            "type": "array"
+          }
+        },
+        "400": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        }
+      },
+      "summary": "Finds Pets by status"
+    },
+    "pet/findPetsByTags": {
+      "consumes": [],
+      "description": "Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.",
+      "method": "get",
+      "name": "findPetsByTags",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "tags",
+          "required": false,
+          "schema": {
+            "description": "Tags to filter by",
+            "explode": true,
+            "in": "query",
+            "items": {
+              "type": "string"
+            },
+            "required": false,
+            "type": "array"
+          }
+        }
+      ],
+      "path": "/pet/findByTags",
+      "responses": {
+        "200": {
+          "schema": {
+            "items": {
+              "$ref": "#/definitions/Pet",
+              "originRef": "#/components/schemas/Pet",
+              "templateArgs": [],
+              "typeName": "Pet"
+            },
+            "type": "array"
+          }
+        },
+        "400": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        }
+      },
+      "summary": "Finds Pets by tags"
+    },
+    "pet/getPetById": {
+      "consumes": [],
+      "description": "Returns a single pet",
+      "method": "get",
+      "name": "getPetById",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "petId",
+          "required": true,
+          "schema": {
+            "description": "ID of pet to return",
+            "format": "int64",
+            "in": "path",
+            "required": true,
+            "type": "number"
+          }
+        }
+      ],
+      "path": "/pet/{petId}",
+      "responses": {
+        "200": {
+          "schema": {
+            "$ref": "#/definitions/Pet",
+            "originRef": "#/components/schemas/Pet",
+            "templateArgs": [],
+            "typeName": "Pet"
+          }
+        },
+        "400": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        },
+        "404": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        }
+      },
+      "summary": "Find pet by ID"
+    },
+    "pet/updatePet": {
+      "consumes": [
+        "application/json"
+      ],
+      "description": "Update an existing pet by Id",
+      "method": "put",
+      "name": "updatePet",
+      "parameters": [
+        {
+          "in": "body",
+          "name": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/Pet",
+            "originRef": "#/components/schemas/Pet",
+            "templateArgs": [],
+            "typeName": "Pet"
+          }
+        }
+      ],
+      "path": "/pet",
+      "responses": {
+        "200": {
+          "schema": {
+            "$ref": "#/definitions/Pet",
+            "originRef": "#/components/schemas/Pet",
+            "templateArgs": [],
+            "typeName": "Pet"
+          }
+        },
+        "400": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        },
+        "404": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        },
+        "405": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        }
+      },
+      "summary": "Update an existing pet"
+    },
+    "pet/updatePetWithForm": {
+      "consumes": [],
+      "description": "",
+      "method": "post",
+      "name": "updatePetWithForm",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "petId",
+          "required": true,
+          "schema": {
+            "description": "ID of pet that needs to be updated",
+            "format": "int64",
+            "in": "path",
+            "required": true,
+            "type": "number"
+          }
+        },
+        {
+          "in": "query",
+          "name": "name",
+          "schema": {
+            "description": "Name of pet that needs to be updated",
+            "in": "query",
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "schema": {
+            "description": "Status of pet that needs to be updated",
+            "in": "query",
+            "type": "string"
+          }
+        }
+      ],
+      "path": "/pet/{petId}",
+      "responses": {
+        "405": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        }
+      },
+      "summary": "Updates a pet in the store with form data"
+    },
+    "pet/uploadFile": {
+      "consumes": [
+        "application/octet-stream"
+      ],
+      "description": "",
+      "method": "post",
+      "name": "uploadFile",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "petId",
+          "required": true,
+          "schema": {
+            "description": "ID of pet to update",
+            "format": "int64",
+            "in": "path",
+            "required": true,
+            "type": "number"
+          }
+        },
+        {
+          "in": "query",
+          "name": "additionalMetadata",
+          "required": false,
+          "schema": {
+            "description": "Additional Metadata",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        },
+        {
+          "in": "body",
+          "name": "body",
+          "required": true,
+          "schema": {
+            "format": "binary",
+            "type": "string"
+          }
+        }
+      ],
+      "path": "/pet/{petId}/uploadImage",
+      "responses": {
+        "200": {
+          "schema": {
+            "$ref": "#/definitions/ApiResponse",
+            "originRef": "#/components/schemas/ApiResponse",
+            "templateArgs": [],
+            "typeName": "ApiResponse"
+          }
+        }
+      },
+      "summary": "uploads an image"
+    },
+    "store/deleteOrder": {
+      "consumes": [],
+      "description": "For valid response try integer IDs with value < 1000. Anything above 1000 or nonintegers will generate API errors",
+      "method": "delete",
+      "name": "deleteOrder",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "orderId",
+          "required": true,
+          "schema": {
+            "description": "ID of the order that needs to be deleted",
+            "format": "int64",
+            "in": "path",
+            "required": true,
+            "type": "number"
+          }
+        }
+      ],
+      "path": "/store/order/{orderId}",
+      "responses": {
+        "400": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        },
+        "404": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        }
+      },
+      "summary": "Delete purchase order by ID"
+    },
+    "store/getInventory": {
+      "consumes": [],
+      "description": "Returns a map of status codes to quantities",
+      "method": "get",
+      "name": "getInventory",
+      "parameters": [],
+      "path": "/store/inventory",
+      "responses": {
+        "200": {
+          "schema": {
+            "additionalProperties": {
+              "format": "int32",
+              "type": "number"
+            },
+            "type": "object"
+          }
+        }
+      },
+      "summary": "Returns pet inventories by status"
+    },
+    "store/getOrderById": {
+      "consumes": [],
+      "description": "For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.",
+      "method": "get",
+      "name": "getOrderById",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "orderId",
+          "required": true,
+          "schema": {
+            "description": "ID of order that needs to be fetched",
+            "format": "int64",
+            "in": "path",
+            "required": true,
+            "type": "number"
+          }
+        }
+      ],
+      "path": "/store/order/{orderId}",
+      "responses": {
+        "200": {
+          "schema": {
+            "$ref": "#/definitions/Order",
+            "originRef": "#/components/schemas/Order",
+            "templateArgs": [],
+            "typeName": "Order"
+          }
+        },
+        "400": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        },
+        "404": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        }
+      },
+      "summary": "Find purchase order by ID"
+    },
+    "store/placeOrder": {
+      "consumes": [
+        "application/json"
+      ],
+      "description": "Place a new order in the store",
+      "method": "post",
+      "name": "placeOrder",
+      "parameters": [
+        {
+          "in": "body",
+          "name": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/Order",
+            "originRef": "#/components/schemas/Order",
+            "templateArgs": [],
+            "typeName": "Order"
+          }
+        }
+      ],
+      "path": "/store/order",
+      "responses": {
+        "200": {
+          "schema": {
+            "$ref": "#/definitions/Order",
+            "originRef": "#/components/schemas/Order",
+            "templateArgs": [],
+            "typeName": "Order"
+          }
+        },
+        "405": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        }
+      },
+      "summary": "Place an order for a pet"
+    },
+    "user/createUser": {
+      "consumes": [
+        "application/json"
+      ],
+      "description": "This can only be done by the logged in user.",
+      "method": "post",
+      "name": "createUser",
+      "parameters": [
+        {
+          "in": "body",
+          "name": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/User",
+            "originRef": "#/components/schemas/User",
+            "templateArgs": [],
+            "typeName": "User"
+          }
+        }
+      ],
+      "path": "/user",
+      "responses": {
+        "default": {
+          "schema": {
+            "$ref": "#/definitions/User",
+            "originRef": "#/components/schemas/User",
+            "templateArgs": [],
+            "typeName": "User"
+          }
+        }
+      },
+      "summary": "Create user"
+    },
+    "user/createUsersWithListInput": {
+      "consumes": [
+        "application/json"
+      ],
+      "description": "Creates list of users with given input array",
+      "method": "post",
+      "name": "createUsersWithListInput",
+      "parameters": [
+        {
+          "in": "body",
+          "name": "body",
+          "required": true,
+          "schema": {
+            "items": {
+              "$ref": "#/definitions/User",
+              "originRef": "#/components/schemas/User",
+              "templateArgs": [],
+              "typeName": "User"
+            },
+            "type": "array"
+          }
+        }
+      ],
+      "path": "/user/createWithList",
+      "responses": {
+        "200": {
+          "schema": {
+            "$ref": "#/definitions/User",
+            "originRef": "#/components/schemas/User",
+            "templateArgs": [],
+            "typeName": "User"
+          }
+        },
+        "default": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        }
+      },
+      "summary": "Creates list of users with given input array"
+    },
+    "user/deleteUser": {
+      "consumes": [],
+      "description": "This can only be done by the logged in user.",
+      "method": "delete",
+      "name": "deleteUser",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "username",
+          "required": true,
+          "schema": {
+            "description": "The name that needs to be deleted",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        }
+      ],
+      "path": "/user/{username}",
+      "responses": {
+        "400": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        },
+        "404": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        }
+      },
+      "summary": "Delete user"
+    },
+    "user/getUserByName": {
+      "consumes": [],
+      "description": "",
+      "method": "get",
+      "name": "getUserByName",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "username",
+          "required": true,
+          "schema": {
+            "description": "The name that needs to be fetched. Use user1 for testing. ",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        }
+      ],
+      "path": "/user/{username}",
+      "responses": {
+        "200": {
+          "schema": {
+            "$ref": "#/definitions/User",
+            "originRef": "#/components/schemas/User",
+            "templateArgs": [],
+            "typeName": "User"
+          }
+        },
+        "400": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        },
+        "404": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        }
+      },
+      "summary": "Get user by user name"
+    },
+    "user/loginUser": {
+      "consumes": [],
+      "description": "",
+      "method": "get",
+      "name": "loginUser",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "username",
+          "required": false,
+          "schema": {
+            "description": "The user name for login",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "name": "password",
+          "required": false,
+          "schema": {
+            "description": "The password for login in clear text",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        }
+      ],
+      "path": "/user/login",
+      "responses": {
+        "200": {
+          "headers": {
+            "X-Expires-After": {
+              "description": "date in UTC when token expires",
+              "schema": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            "X-Rate-Limit": {
+              "description": "calls per hour allowed by the user",
+              "schema": {
+                "format": "int32",
+                "type": "integer"
+              }
+            }
+          },
+          "schema": {
+            "type": "string"
+          }
+        },
+        "400": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        }
+      },
+      "summary": "Logs user into the system"
+    },
+    "user/logoutUser": {
+      "consumes": [],
+      "description": "",
+      "method": "get",
+      "name": "logoutUser",
+      "parameters": [],
+      "path": "/user/logout",
+      "responses": {
+        "default": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        }
+      },
+      "summary": "Logs out current logged in user session"
+    },
+    "user/updateUser": {
+      "consumes": [
+        "application/json"
+      ],
+      "description": "This can only be done by the logged in user.",
+      "method": "put",
+      "name": "updateUser",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "username",
+          "required": true,
+          "schema": {
+            "description": "name that need to be deleted",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        },
+        {
+          "in": "body",
+          "name": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/User",
+            "originRef": "#/components/schemas/User",
+            "templateArgs": [],
+            "typeName": "User"
+          }
+        }
+      ],
+      "path": "/user/{username}",
+      "responses": {
+        "default": {
+          "schema": {
+            "templateArgs": [],
+            "templateIndex": -1
+          }
+        }
+      },
+      "summary": "Update user"
+    }
+  },
+  "basePath": "/api/v3",
+  "definitions": {
+    "Address": {
+      "properties": {
+        "city": {
+          "example": "Palo Alto",
+          "type": "string"
+        },
+        "state": {
+          "example": "CA",
+          "type": "string"
+        },
+        "street": {
+          "example": "437 Lytton",
+          "type": "string"
+        },
+        "zip": {
+          "example": "94301",
+          "type": "string"
+        }
+      },
+      "templateArgs": [],
+      "type": "object",
+      "typeName": "Address",
+      "xml": {
+        "name": "address"
+      }
+    },
+    "ApiResponse": {
+      "properties": {
+        "code": {
+          "format": "int32",
+          "type": "number"
+        },
+        "message": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "templateArgs": [],
+      "type": "object",
+      "typeName": "ApiResponse",
+      "xml": {
+        "name": "##default"
+      }
+    },
+    "Category": {
+      "properties": {
+        "id": {
+          "example": 1,
+          "format": "int64",
+          "type": "number"
+        },
+        "name": {
+          "example": "Dogs",
+          "type": "string"
+        }
+      },
+      "templateArgs": [],
+      "type": "object",
+      "typeName": "Category",
+      "xml": {
+        "name": "category"
+      }
+    },
+    "Customer": {
+      "properties": {
+        "address": {
+          "items": {
+            "$ref": "#/definitions/Address",
+            "originRef": "#/components/schemas/Address",
+            "templateArgs": [],
+            "typeName": "Address"
+          },
+          "type": "array",
+          "xml": {
+            "name": "addresses",
+            "wrapped": true
+          }
+        },
+        "id": {
+          "example": 100000,
+          "format": "int64",
+          "type": "number"
+        },
+        "username": {
+          "example": "fehguy",
+          "type": "string"
+        }
+      },
+      "templateArgs": [],
+      "type": "object",
+      "typeName": "Customer",
+      "xml": {
+        "name": "customer"
+      }
+    },
+    "Order": {
+      "properties": {
+        "complete": {
+          "type": "boolean"
+        },
+        "id": {
+          "example": 10,
+          "format": "int64",
+          "type": "number"
+        },
+        "petId": {
+          "example": 198772,
+          "format": "int64",
+          "type": "number"
+        },
+        "quantity": {
+          "example": 7,
+          "format": "int32",
+          "type": "number"
+        },
+        "shipDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "status": {
+          "description": "Order Status",
+          "enum": [
+            "placed",
+            "approved",
+            "delivered"
+          ],
+          "example": "approved",
+          "type": "string"
+        }
+      },
+      "templateArgs": [],
+      "type": "object",
+      "typeName": "Order",
+      "xml": {
+        "name": "order"
+      }
+    },
+    "Pet": {
+      "properties": {
+        "category": {
+          "$ref": "#/definitions/Category",
+          "originRef": "#/components/schemas/Category",
+          "required": false,
+          "templateArgs": [],
+          "typeName": "Category"
+        },
+        "id": {
+          "example": 10,
+          "format": "int64",
+          "required": false,
+          "type": "number"
+        },
+        "name": {
+          "example": "doggie",
+          "required": true,
+          "type": "string"
+        },
+        "photoUrls": {
+          "items": {
+            "type": "string",
+            "xml": {
+              "name": "photoUrl"
+            }
+          },
+          "required": true,
+          "type": "array",
+          "xml": {
+            "wrapped": true
+          }
+        },
+        "status": {
+          "description": "pet status in the store",
+          "enum": [
+            "available",
+            "pending",
+            "sold"
+          ],
+          "required": false,
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "$ref": "#/definitions/Tag",
+            "originRef": "#/components/schemas/Tag",
+            "templateArgs": [],
+            "typeName": "Tag"
+          },
+          "required": false,
+          "type": "array",
+          "xml": {
+            "wrapped": true
+          }
+        }
+      },
+      "requiredProps": [
+        "name",
+        "photoUrls"
+      ],
+      "templateArgs": [],
+      "type": "object",
+      "typeName": "Pet",
+      "xml": {
+        "name": "pet"
+      }
+    },
+    "Tag": {
+      "properties": {
+        "id": {
+          "format": "int64",
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "templateArgs": [],
+      "type": "object",
+      "typeName": "Tag",
+      "xml": {
+        "name": "tag"
+      }
+    },
+    "User": {
+      "properties": {
+        "email": {
+          "example": "john@email.com",
+          "type": "string"
+        },
+        "firstName": {
+          "example": "John",
+          "type": "string"
+        },
+        "id": {
+          "example": 10,
+          "format": "int64",
+          "type": "number"
+        },
+        "lastName": {
+          "example": "James",
+          "type": "string"
+        },
+        "password": {
+          "example": "12345",
+          "type": "string"
+        },
+        "phone": {
+          "example": "12345",
+          "type": "string"
+        },
+        "userStatus": {
+          "description": "User Status",
+          "example": 1,
+          "format": "int32",
+          "type": "number"
+        },
+        "username": {
+          "example": "theUser",
+          "type": "string"
+        }
+      },
+      "templateArgs": [],
+      "type": "object",
+      "typeName": "User",
+      "xml": {
+        "name": "user"
+      }
+    }
+  },
+  "description": "This is a sample Pet Store Server based on the OpenAPI 3.0 specification.  You can find out more about\nSwagger at [http://swagger.io](http://swagger.io). In the third iteration of the pet store, we've switched to the design first approach!\nYou can now help us improve the API whether it's by making changes to the definition itself or to the code.\nThat way, with time, we can improve the API in general, and expose some of the new features in OAS3.\n\nSome useful links:\n- [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)\n- [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)",
+  "directories": [
+    {
+      "children": [
+        "pet/updatePet",
+        "pet/addPet",
+        "pet/findPetsByStatus",
+        "pet/findPetsByTags",
+        "pet/getPetById",
+        "pet/deletePet",
+        "pet/updatePetWithForm",
+        "pet/uploadFile"
+      ],
+      "namespace": "pet",
+      "title": "Everything about your Pets"
+    },
+    {
+      "children": [
+        "store/getInventory",
+        "store/placeOrder",
+        "store/getOrderById",
+        "store/deleteOrder"
+      ],
+      "namespace": "store",
+      "title": "Access to Petstore orders"
+    },
+    {
+      "children": [
+        "user/createUser",
+        "user/createUsersWithListInput",
+        "user/loginUser",
+        "user/logoutUser",
+        "user/getUserByName",
+        "user/deleteUser",
+        "user/updateUser"
+      ],
+      "namespace": "user",
+      "title": "Operations about user"
+    }
+  ],
+  "ext": {},
+  "host": "petstore3.swagger.io",
+  "name": "petstore"
+}

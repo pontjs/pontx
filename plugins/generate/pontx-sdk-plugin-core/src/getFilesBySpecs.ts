@@ -1,4 +1,4 @@
-import { GetFilesBySpecs, indentation, SnippetsProvider, TypeScriptGenerator } from "pontx-generate";
+import { GetFilesBySpecs, SnippetsProvider, TypeScriptGenerator } from "pontx-generate";
 import * as PontSpec from "pontx-spec";
 import * as _ from "lodash";
 import { PontManager } from "pontx-manager";
@@ -8,9 +8,8 @@ import { specJSON } from "./template/metaJSON";
 import { specInterfaceDts } from "./template/specInterfaceDts";
 
 export const getFilesBySpecs: GetFilesBySpecs = async (origins, requestMethodsTypeCode?: string) => {
-  const specs = (origins || []).map((origin) => origin.spec);
-
-  const specDirs = _.map(specs, (spec) => {
+  const specDirs = _.map(origins, (origin) => {
+    const spec = origin.spec;
     const withoutControllers = PontSpec.PontSpec.getMods(spec)?.[0]?.name === PontSpec.WithoutModsName;
     const specDts = withoutControllers ? specIndexDTsWithoutController(spec) : specIndexDTsWithController(spec);
 

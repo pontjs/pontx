@@ -1,23 +1,40 @@
-import { FetchAPIs, getFetchAPIs } from "pontx-sdk-core";
+import { APIMeta, PontxFetcher, SdkMethods } from "pontx-sdk-core";
 import useSWR, { preload } from "swr";
 
-export const getHooksFetchAPIs: FetchAPIs = (meta, apiMeta, fetchHelper) => {
-  const defaultFetchAPIs = getFetchAPIs(meta, apiMeta, fetchHelper);
-  const request = defaultFetchAPIs.request;
+export const SdkMethodsFn = (apiMeta: APIMeta, fetcher: PontxFetcher): SdkMethods => {
+  const myFetch = async (url, options) => {
+    const result = await fetch(url, options);
+    return fetcher.handleResponse(result, url, options, { apiMeta });
+  };
+  fetcher.request = async (params, requestOptions, config) => {
+    const { url, options } = await fetcher.beforeRequest(params, requestOptions, config);
+
+    return myFetch(url, options);
+  };
+  const request = (params, fetchOptions = {}) => {
+    return fetcher.request(params, fetchOptions, { apiMeta });
+  };
 
   const getSwrKey = (params: any) => {
-    const swrKey = fetchHelper.getUrl(apiMeta.path, params);
+    const swrKey = fetcher.getUrl(apiMeta.path, params);
     return swrKey;
   };
-  const originRequest = fetchHelper.request(apiMeta);
 
   if (apiMeta.method?.toUpperCase() === "GET") {
     return {
       request,
       getSwrKey,
-      useRequest: (params: any, swrOptions: any) => {
+      useRequest: (params: any, requestOptions, swrOptions: any) => {
         const swrKey = getSwrKey(params);
-        return useSWR(swrKey, originRequest, swrOptions);
+        const fetchOptions = fetcher.getFetchOptions(swrKey, requestOptions, { apiMeta });
+
+        return useSWR(
+          swrKey,
+          (url) => {
+            return myFetch(fetcher.getUrlPrefix() + url, fetchOptions);
+          },
+          swrOptions,
+        );
       },
       preload: (params: any) => {
         const swrKey = getSwrKey(params);
@@ -31,7 +48,7 @@ export const getHooksFetchAPIs: FetchAPIs = (meta, apiMeta, fetchHelper) => {
     getSwrKey,
     useDeprecatedRequest: (params: any, swrOptions: any) => {
       const swrKey = getSwrKey(params);
-      return useSWR(swrKey, originRequest, swrOptions);
+      return useSWR(swrKey, request, swrOptions);
     },
   };
 };

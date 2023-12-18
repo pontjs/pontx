@@ -11,6 +11,7 @@ export type RequestMethods<Params = any, BodyParams = any, Response = any> = Bod
       request: OptionalBodyRequest<Params, BodyParams, Response>;
       useRequest: <SWROptions extends SWRConfiguration<Response, any, Fetcher<Response, SWRKey>>>(
         params: Params,
+        requestOptions?: RequestInit,
         swrOptions?: SWROptions,
       ) => SWRResponse<Response, any, Fetcher<Response, SWRKey>>;
       getSwrKey: (params: Params) => string;
@@ -20,6 +21,7 @@ export type RequestMethods<Params = any, BodyParams = any, Response = any> = Bod
       request: OptionalBodyRequest<Params, BodyParams, Response>;
       useDeprecatedRequest: <SWROptions extends SWRConfiguration<Response, any, Fetcher<Response, SWRKey>>>(
         params: Params,
+        requestOptions?: RequestInit,
         swrOptions?: SWROptions,
       ) => SWRResponse<Response, any, Fetcher<Response, SWRKey>>;
       getSwrKey: (params: Params) => string;
