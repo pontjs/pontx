@@ -1,4 +1,4 @@
-import { getFilesBySpecs, snippetsProvider } from "pontx-sdk-plugin-core";
+import { getFilesBySpecs, snippetsProvider } from "pontx-generate";
 import { createPontxGeneratePlugin, SnippetsProvider, PontxGeneratorPlugin } from "pontx-generate";
 
 export const reactHooksGeneratePlugin: any = createPontxGeneratePlugin({

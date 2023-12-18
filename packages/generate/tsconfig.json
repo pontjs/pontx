@@ -7,14 +7,16 @@
     "removeComments": true,
     "preserveConstEnums": true,
     "outDir": "lib",
+    "noEmit": false,
     "moduleResolution": "node",
+    "declaration": true,
     "baseUrl": ".",
     "paths": {},
     "composite": true,
     "rootDir": "./src"
   },
   "include": ["./src/**/*"],
-  "exclude": ["node_modules", "build"],
+  "exclude": ["node_modules"],
   "references": [
     {
       "path": "../pontx-spec"

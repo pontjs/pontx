@@ -1,5 +1,3 @@
-import type { APIs } from "./services/sdk/petstore/spec";
-import { PontxSDK } from "pontx-sdk-core";
-import metaJSON from "./services/sdk/petstore/meta.json";
+import { API } from "./services/sdk";
 
-export const PetStoreAPIs = new PontxSDK().getClient<APIs>(metaJSON);
+export const PetStoreAPIs = API.petstore;

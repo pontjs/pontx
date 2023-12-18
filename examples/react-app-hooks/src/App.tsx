@@ -1,10 +1,9 @@
 import "./App.css";
 import * as React from "react";
-import { defs } from "./services/sdk/petstore/type";
 import { PetStoreAPIs } from "./api";
 
 function App() {
-  const [status, setStatus] = React.useState<defs.Pet["status"]>("available");
+  const [status, setStatus] = React.useState<defs.petstore.Pet["status"]>("available");
   const { data: pets, isLoading: isPetsLoading } = PetStoreAPIs.pet.findPetsByStatus.useRequest({
     status: status ? [status] : [],
   });
@@ -20,9 +19,9 @@ function App() {
             setStatus((e.target as HTMLSelectElement).value as any);
           }}
         >
-          <option value={"available" as defs.Pet["status"]}>available</option>
-          <option value={"pending" as defs.Pet["status"]}>pending</option>
-          <option value={"sold" as defs.Pet["status"]}>sold</option>
+          <option value={"available" as defs.petstore.Pet["status"]}>available</option>
+          <option value={"pending" as defs.petstore.Pet["status"]}>pending</option>
+          <option value={"sold" as defs.petstore.Pet["status"]}>sold</option>
         </select>
       </div>
       {

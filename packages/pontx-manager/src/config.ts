@@ -141,8 +141,6 @@ export function requireModule(pluginPath: string, configDir: string, rootDir: st
     return require("pontx-react-hooks-sdk-plugin");
   } else if (pluginPath === "pontx-async-sdk-plugin") {
     return require("pontx-async-sdk-plugin");
-  } else if (pluginPath === "pontx-sdk-plugin-core") {
-    return require("pontx-sdk-plugin-core");
   }
 
   if (!path.extname(requirePath)) {

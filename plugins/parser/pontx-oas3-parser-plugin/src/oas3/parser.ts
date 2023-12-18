@@ -94,6 +94,7 @@ export async function parseSwagger2APIs(swagger: OAS3.OpenAPIObject, defNames: s
       description: "common",
     },
   ] as OAS2.TagObject[];
+
   const allSwaggerInterfaces = [] as Array<OAS3.OperationObject & { path: string; method: string }>;
 
   Object.keys(swagger.paths).forEach((path) => {
@@ -114,6 +115,22 @@ export async function parseSwagger2APIs(swagger: OAS3.OpenAPIObject, defNames: s
         tags: inter.tags || ["common"],
         parameters: _.unionBy(inter.parameters, methodInters.parameters || [], "name"),
       });
+    });
+  });
+
+  allSwaggerInterfaces.forEach((inter) => {
+    const tagNames = inter.tags || [];
+
+    tagNames.forEach((tagName) => {
+      const foundTag = tags.find((tag) => (tag.name as string) === tagName);
+      if (foundTag) {
+        return;
+      }
+
+      tags.push({
+        name: tagName,
+        description: tagName,
+      } as OAS2.TagObject);
     });
   });
 
