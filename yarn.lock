@@ -6521,7 +6521,7 @@ memoize-one@^6.0.0:
 
 "memoize-one@>=3.1.1 <6":
   version "5.2.1"
-  resolved "https://registry.npmmirror.com/memoize-one/-/memoize-one-5.2.1.tgz"
+  resolved "https://registry.npmjs.org/memoize-one/-/memoize-one-5.2.1.tgz"
   integrity sha512-zYiwtZUcYyXKo/np96AGZAckk+FWWsUdJ3cHGGmld7+AhvcWmQyGCYUh1hc4Q/pkOhb65dQR/pqCyK0cOaHz4Q==
 
 meow@^8.0.0:
@@ -8106,7 +8106,7 @@ pontx-spec@^0.3.70, pontx-spec@^0.3.75, pontx-spec@^0.3.83, "pontx-spec@file:/Us
     oas-spec-ts "^0.3.83"
 
 pontx-ui@^0.3.70, "pontx-ui@file:/Users/Jason/workspace/open/pontx/packages/pontx-ui":
-  version "0.3.83"
+  version "0.3.84"
   resolved "file:packages/pontx-ui"
   dependencies:
     "@vscode/codicons" "^0.0.30"
@@ -8506,7 +8506,7 @@ react-transition-group@^2.2.1:
 
 react-window@^1.8.8:
   version "1.8.10"
-  resolved "https://registry.npmmirror.com/react-window/-/react-window-1.8.10.tgz"
+  resolved "https://registry.npmjs.org/react-window/-/react-window-1.8.10.tgz"
   integrity sha512-Y0Cx+dnU6NLa5/EvoHukUD0BklJ8qITCtVEPY1C/nL8wwoZ0b5aEw8Ff1dOVHw7fCzMt55XfJDd8S8W8LCaUCg==
   dependencies:
     "@babel/runtime" "^7.0.0"
@@ -9008,22 +9008,22 @@ secure-compare@3.0.1:
 
 semix-core@^0.0.11:
   version "0.0.11"
-  resolved "https://registry.npmmirror.com/semix-core/-/semix-core-0.0.11.tgz"
+  resolved "https://registry.npmjs.org/semix-core/-/semix-core-0.0.11.tgz"
   integrity sha512-y4qAqFXYfMFclxqgIUkmINaoEajVGtWtDy5zi+tXbS2dSKz/zFkUv2s8mhq4oOALqjELSsrvilkaZlVBTM1ApA==
 
-semix-schema-table@^0.0.13:
-  version "0.0.13"
-  resolved "https://registry.npmmirror.com/semix-schema-table/-/semix-schema-table-0.0.13.tgz"
-  integrity sha512-81EA3GfcLNtkofj81ASWkAqT4QU3El3KvaRVR/KW6aU0LSGj/mJdAn6J0kVLuzxuuVZGIPkr0nzMVO5fZf4M0w==
+semix-schema-table@^0.0.15:
+  version "0.0.15"
+  resolved "https://registry.npmjs.org/semix-schema-table/-/semix-schema-table-0.0.15.tgz"
+  integrity sha512-2zkTdiBy7qhJ4HjVzuEbrrZpckGv/VpPh+WdwVLij1OY+D/FjLbuuckAduHETgGm9KVGdtszxHdlwh6xOTOevQ==
   dependencies:
     "@uiw/react-markdown-preview" "^4.0.2"
-    semix-table "0.0.3"
+    semix-table "^0.0.4"
     unstated-next "^1.1.0"
 
-semix-table@0.0.3:
-  version "0.0.3"
-  resolved "https://registry.npmmirror.com/semix-table/-/semix-table-0.0.3.tgz"
-  integrity sha512-E/smhauk5+Wvhvm+vTHE9owe1yvWiNcIdTzMnqdwAdS41byuldSA6mZZ+lnIU1SOlWDj5pyA5XBorLkOg3HOVA==
+semix-table@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.npmjs.org/semix-table/-/semix-table-0.0.4.tgz"
+  integrity sha512-x7sPIAUBBkm8/XcWGQAfF8FX/nCoVoaNlTuRrp81gaCIGucECm+XSwY9qZXQ0cXuf8+RyQxD6Yat06DhK1tNcA==
   dependencies:
     classnames "^2.2.6"
     react-window "^1.8.8"
