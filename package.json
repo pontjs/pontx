@@ -18,7 +18,7 @@
     "clean-lock": "rimraf packages/vscode-pontx/media/package-lock.json && node ./scripts/clean-lock.js || true",
     "sync:package": "node scripts/syncRegistry.js https://web.npm.alibaba-inc.com",
     "release:all": "npm run release:npm && npm run release:vscode",
-    "release:npm": "npm run clean-lock && lerna version patch --no-private --yes --force-publish --message 'chore: publish' && lerna exec --ignore vscode-pontx --ignore vscode-pontx-media --ignore pontx-report-plugin --ignore jsonschema-form --ignore react-app --ignore react-app-hooks --ignore react-app-oas3 --ignore alicloud-sdk --stream -- npm publish --registry //registry.npmjs.org --otp $1",
+    "release:npm": "npm run clean-lock && lerna version patch --no-private --yes --force-publish --message 'chore: publish' && lerna exec --ignore vscode-pontx --ignore vscode-pontx-media --ignore pontx-report-plugin --ignore jsonschema-form --ignore react-app --ignore node-app --ignore react-app-hooks --ignore react-app-oas3 --ignore alicloud-sdk --stream -- npm publish --registry //registry.npmjs.org --otp $1",
     "release:dry": "node scripts/release.js --dry",
     "release:vscode": "sh scripts/releaseVscode.sh"
   },

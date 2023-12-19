@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020"],
+    "module": "Node16",
+    "outDir": "lib",
+    "skipLibCheck": true,
+    /* Bundler mode */
+    "moduleResolution": "Node16",
+    "resolveJsonModule": true,
+    "strictFunctionTypes": false,
+    "isolatedModules": true,
+    "strictNullChecks": false,
+    /* Linting */
+    "strict": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": false
+  },
+  "include": ["src"]
+}

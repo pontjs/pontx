@@ -1,0 +1,20 @@
+{
+  "name": "node-app",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "do": "node ./lib/index.js",
+    "sdk": "pontx generate"
+  },
+  "dependencies": {
+    "node-fetch": "^2",
+    "pontx-sdk-core": "*"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "*",
+    "pontx-cli": "^0.3.68",
+    "typescript": "^5.0.2"
+  }
+}
