@@ -67,7 +67,7 @@ Pontx 内置插件如下：
 * mocks
   * pontx-mocks-plugin Mocks 插件
 
-查阅更多 Pontx 配置细节，请参阅 [Pontx 配置指南](./Configuration.md)。
+查阅更多 Pontx 配置细节，请参阅 [Pontx 配置指南](./docs/Configuration.md)。
 
 ### Pontx 使用指南
 
