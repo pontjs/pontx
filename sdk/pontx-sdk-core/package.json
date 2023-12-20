@@ -1,17 +1,17 @@
 {
   "name": "pontx-sdk-core",
-  "version": "0.3.85",
+  "version": "0.3.86",
   "description": "async await promise sdk oas2 oas3 swagger typescript ts pontx sdk plugin",
   "module": "lib/index.js",
   "main": "commonjs/index.js",
-  "typings": "lib/index.d.ts",
+  "typings": "commonjs/index.d.ts",
   "scripts": {
     "pretest": "npm run build",
     "watch": "tsc --build --watch",
-    "build:cjs": "tsc --outDir commonjs --module commonjs",
+    "build:commonjs": "tsc --outDir commonjs --module commonjs",
     "release": "npm publish --registry https://registry.npmjs.org/",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
-    "build": "npm run clean && tsc --build"
+    "build": "npm run clean && npm run build:commonjs && tsc --build"
   },
   "peerDependencies": {
     "fs-extra": "^10.1.0",
@@ -31,9 +31,9 @@
     "@types/fs-extra": "^9.0.13",
     "@types/node": "*",
     "http-server": "*",
-    "pontx-generate": "^0.3.85",
-    "pontx-generate-core": "^0.3.85",
-    "pontx-spec": "^0.3.85",
+    "pontx-generate": "^0.3.86",
+    "pontx-generate-core": "^0.3.86",
+    "pontx-spec": "^0.3.86",
     "react": "^16.14.0"
   }
 }
