@@ -213,6 +213,26 @@ export namespace API {
   /** Operations about user */
   export namespace user {
     /**
+     * @path: /user/createWithArray
+     * @summary: Creates list of users with given input array
+     */
+    export namespace createUsersWithArrayInput {
+      export type Params = {};
+      export type bodyParams = Array<defs.User>;
+      export type APIReponse = any;
+    };
+
+    /**
+     * @path: /user/createWithList
+     * @summary: Creates list of users with given input array
+     */
+    export namespace createUsersWithListInput {
+      export type Params = {};
+      export type bodyParams = Array<defs.User>;
+      export type APIReponse = any;
+    };
+
+    /**
      * @path: /user/{username}
      * @summary: Get user by user name
      */
@@ -275,26 +295,6 @@ export namespace API {
     export namespace logoutUser {
       export type Params = {};
       export type bodyParams = undefined;
-      export type APIReponse = any;
-    };
-
-    /**
-     * @path: /user/createWithArray
-     * @summary: Creates list of users with given input array
-     */
-    export namespace createUsersWithArrayInput {
-      export type Params = {};
-      export type bodyParams = Array<defs.User>;
-      export type APIReponse = any;
-    };
-
-    /**
-     * @path: /user/createWithList
-     * @summary: Creates list of users with given input array
-     */
-    export namespace createUsersWithListInput {
-      export type Params = {};
-      export type bodyParams = Array<defs.User>;
       export type APIReponse = any;
     };
 

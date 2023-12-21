@@ -1148,13 +1148,13 @@
     },
     {
       "children": [
+        "user/createUsersWithArrayInput",
+        "user/createUsersWithListInput",
         "user/getUserByName",
         "user/deleteUser",
         "user/updateUser",
         "user/loginUser",
         "user/logoutUser",
-        "user/createUsersWithArrayInput",
-        "user/createUsersWithListInput",
         "user/createUser"
       ],
       "namespace": "user",

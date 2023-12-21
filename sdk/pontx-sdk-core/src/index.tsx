@@ -40,30 +40,45 @@ export type SpecMeta = {
 
 export type RequestConfig = {
   apiMeta?: any;
+  specMeta?: SpecMeta;
   [x: string]: any;
 };
 type RequestType = (url: any, options?: any, config?: RequestConfig) => Promise<any>;
 
 /** 构造请求方法的辅助类 */
 export class PontxFetcher {
-  specMeta: SpecMeta;
+  protocol = "//";
 
   /** path 参数未传入时，path 参数取值的占位符 */
   placemarker: string = "";
 
   /** join url protocol, hostname, basePath */
-  getUrlPrefix = () => {
-    if (window.location.hostname === "localhost") {
-      if (this.specMeta.host) {
-        if (this.specMeta.basePath) {
-          return "//" + this.specMeta.host + this.specMeta.basePath;
-        }
-        return this.specMeta.host;
-      }
-      if (this.specMeta.basePath) {
-        return this.specMeta.basePath;
-      }
+  getUrlPrefix = (specMeta: SpecMeta) => {
+    if (!specMeta) {
+      return "";
     }
+
+    if (typeof window === "undefined") {
+      if (specMeta?.host) {
+        if (specMeta.basePath) {
+          return this.protocol + specMeta.host + specMeta.basePath;
+        }
+        return this.protocol + specMeta.host;
+      }
+      return "";
+    }
+
+    if (specMeta.host) {
+      if (specMeta.basePath) {
+        return this.protocol + specMeta.host + specMeta.basePath;
+      }
+      return specMeta.host;
+    }
+    // browser 环境下，默认使用当前域名
+    if (specMeta.basePath) {
+      return specMeta.basePath;
+    }
+
     return "";
   };
 
@@ -120,7 +135,7 @@ export class PontxFetcher {
   }
 
   async beforeRequest(params: any, requestOptions, config: RequestConfig) {
-    const fetchUrl = this.getUrlPrefix() + this.getUrl(config.apiMeta.path, params);
+    const fetchUrl = this.getUrlPrefix(config.specMeta) + this.getUrl(config.apiMeta.path, params);
     const fetchOptions = this.getFetchOptions(fetchUrl, requestOptions, config);
 
     return {
@@ -148,9 +163,12 @@ export class PontxFetcher {
   request: RequestType = async (params: any, requestOptions, config: RequestConfig) => {
     const { url, options } = await this.beforeRequest(params, requestOptions, config);
 
-    const result = await fetch(url, options);
+    const result = await this.fetch(url, options);
     return this.handleResponse(result, url, options, config);
   };
+
+  // 默认使用浏览器标准 fetch
+  fetch: FetchType = fetch;
 }
 
 export type SdkMethods = {
@@ -158,7 +176,11 @@ export type SdkMethods = {
   [x: string]: any;
 };
 
-export type SdkMethodsFnType = (apiMeta: APIMeta, fetcher?: PontxFetcher) => SdkMethods;
+export type SdkMethodsFnType = (
+  apiMeta: APIMeta,
+  fetche: PontxFetcher,
+  options: { specMeta: SpecMeta; [x: string]: any },
+) => SdkMethods;
 
 export class PontxSDK {
   /** 接口请求的辅助方法 */
@@ -171,16 +193,15 @@ export class PontxSDK {
   constructor(options?: { specMeta?: SpecMeta; SdkMethodsFn?: SdkMethodsFnType }) {
     if (options?.specMeta) {
       this.specMeta = options.specMeta;
-      this.fetcher.specMeta = options.specMeta;
     }
 
     if (options?.SdkMethodsFn) {
       this.SdkMethodsFn = options.SdkMethodsFn;
     } else {
-      this.SdkMethodsFn = (apiMeta, fetcher) => {
+      this.SdkMethodsFn = (apiMeta, fetcher, { specMeta }) => {
         return {
           request: (params: any, fetchOptions: any = {}, ...args) => {
-            return fetcher.request(params, fetchOptions, { apiMeta });
+            return fetcher.request(params, fetchOptions, { apiMeta, specMeta });
           },
         };
       };
@@ -191,19 +212,18 @@ export class PontxSDK {
     let client = {} as any;
     if (specMeta) {
       this.specMeta = specMeta;
-      this.fetcher.specMeta = specMeta;
     }
     const meta = this.specMeta;
 
     if (meta.hasController) {
       client = mapValues(meta.apis, (controller) => {
         return mapValues(controller, (action) => {
-          return this.SdkMethodsFn(action, this.fetcher);
+          return this.SdkMethodsFn(action, this.fetcher, { specMeta: this.specMeta });
         });
       });
     } else {
       client = mapValues(meta.apis, (action) => {
-        return this.SdkMethodsFn(action, this.fetcher);
+        return this.SdkMethodsFn(action, this.fetcher, { specMeta: this.specMeta });
       });
     }
     return client;
