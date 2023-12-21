@@ -164,6 +164,36 @@
       }
     },
     "user": {
+      "createUsersWithArrayInput": {
+        "method": "post",
+        "hasBody": true,
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "apiName": "createUsersWithArrayInput",
+        "path": "/user/createWithArray",
+        "specName": "petstore",
+        "controllerName": "user"
+      },
+      "createUsersWithListInput": {
+        "method": "post",
+        "hasBody": true,
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "apiName": "createUsersWithListInput",
+        "path": "/user/createWithList",
+        "specName": "petstore",
+        "controllerName": "user"
+      },
       "getUserByName": {
         "method": "get",
         "hasBody": false,
@@ -224,36 +254,6 @@
         ],
         "apiName": "logoutUser",
         "path": "/user/logout",
-        "specName": "petstore",
-        "controllerName": "user"
-      },
-      "createUsersWithArrayInput": {
-        "method": "post",
-        "hasBody": true,
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json",
-          "application/xml"
-        ],
-        "apiName": "createUsersWithArrayInput",
-        "path": "/user/createWithArray",
-        "specName": "petstore",
-        "controllerName": "user"
-      },
-      "createUsersWithListInput": {
-        "method": "post",
-        "hasBody": true,
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json",
-          "application/xml"
-        ],
-        "apiName": "createUsersWithListInput",
-        "path": "/user/createWithList",
         "specName": "petstore",
         "controllerName": "user"
       },

@@ -1,7 +1,7 @@
 import { APIMeta, PontxFetcher, SdkMethods } from "pontx-sdk-core";
 import useSWR, { preload } from "swr";
 
-export const SdkMethodsFn = (apiMeta: APIMeta, fetcher: PontxFetcher): SdkMethods => {
+export const SdkMethodsFn = (apiMeta: APIMeta, fetcher: PontxFetcher, { specMeta }): SdkMethods => {
   const myFetch = async (url, options) => {
     const result = await fetch(url, options);
     return fetcher.handleResponse(result, url, options, { apiMeta });
@@ -31,7 +31,7 @@ export const SdkMethodsFn = (apiMeta: APIMeta, fetcher: PontxFetcher): SdkMethod
         return useSWR(
           swrKey,
           (url) => {
-            return myFetch(fetcher.getUrlPrefix() + url, fetchOptions);
+            return myFetch(fetcher.getUrlPrefix(specMeta) + url, fetchOptions);
           },
           swrOptions,
         );

@@ -97,6 +97,18 @@ export type APIs = {
   /** Operations about user */
   user: {
     /**
+     * @path: /user/createWithArray
+     * @summary: Creates list of users with given input array
+     */
+    createUsersWithArrayInput: RequestMethods<API.user.createUsersWithArrayInput.Params, API.user.createUsersWithArrayInput.bodyParams, API.user.createUsersWithArrayInput.APIReponse>;
+
+    /**
+     * @path: /user/createWithList
+     * @summary: Creates list of users with given input array
+     */
+    createUsersWithListInput: RequestMethods<API.user.createUsersWithListInput.Params, API.user.createUsersWithListInput.bodyParams, API.user.createUsersWithListInput.APIReponse>;
+
+    /**
      * @path: /user/{username}
      * @summary: Get user by user name
      */
@@ -127,18 +139,6 @@ export type APIs = {
      * @summary: Logs out current logged in user session
      */
     logoutUser: RequestMethods<API.user.logoutUser.Params, API.user.logoutUser.bodyParams, API.user.logoutUser.APIReponse>;
-
-    /**
-     * @path: /user/createWithArray
-     * @summary: Creates list of users with given input array
-     */
-    createUsersWithArrayInput: RequestMethods<API.user.createUsersWithArrayInput.Params, API.user.createUsersWithArrayInput.bodyParams, API.user.createUsersWithArrayInput.APIReponse>;
-
-    /**
-     * @path: /user/createWithList
-     * @summary: Creates list of users with given input array
-     */
-    createUsersWithListInput: RequestMethods<API.user.createUsersWithListInput.Params, API.user.createUsersWithListInput.bodyParams, API.user.createUsersWithListInput.APIReponse>;
 
     /**
      * @path: /user
