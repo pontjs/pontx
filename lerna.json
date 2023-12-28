@@ -1,6 +1,6 @@
 {
   "packages": ["packages/**", "plugins/**", "sdk/**", "examples/**"],
-  "version": "0.3.87",
+  "version": "0.3.88",
   "useWorkspaces": true,
   "command": {
     "registry": "https://registry.npmmirror.com",
