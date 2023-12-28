@@ -7,24 +7,10 @@ type OriginConf = {
   conf: InnerOriginConfig;
 };
 
-export const rootApiTs = (origins: OriginConf[]) => {
-  return `/**
- * This file is the default generated SDK usage.
- * You can also implement and expose your custom pontx usage outside of pontx outDir.
- */
-import { pontxSDK } from './core';
+const upperCase = (word: string) => {
+  if (!word) return word;
 
-${origins
-  .map(
-    (origin) => `import ${origin.name}Meta from './${origin.name}/meta.json';
-import type { APIs as ${origin.name}APIs } from './${origin.name}/spec';`,
-  )
-  .join("\n")}
-
-${origins
-  .map((origin) => `export const ${origin.name} = pontxSDK.getClient<${origin.name}APIs>(${origin.name}Meta as any);`)
-  .join("\n")}
-`;
+  return word[0].toUpperCase() + word.slice(1);
 };
 
 export const rootDefsTs = (origins: OriginConf[]) => {
@@ -37,29 +23,69 @@ export const rootDefsTs = (origins: OriginConf[]) => {
   );
 };
 
-export const rootCoreTs = (origins: OriginConf[], SdkMethodsFn = "") => {
-  const SdkMethodsFnCode = SdkMethodsFn || origins?.[0]?.conf?.plugins?.generate?.options?.SdkMethodsFn || "";
-  return `/**
- * This file is the default generated SDK usage.
- * You can also implement and expose your custom pontx usage outside of pontx outDir.
- */
-${SdkMethodsFnCode}import { PontxSDK } from 'pontx-sdk-core';
-
-export const pontxSDK = new PontxSDK(${SdkMethodsFnCode ? "{ SdkMethodsFn }" : ""});
-`;
+export const rootAPITs = (origins: OriginConf[], SdkMethodsFn = "") => {
+  return (
+    origins
+      .map((origin) => {
+        return `export type { API as ${origin.name} } from './${origin.name}/type';`;
+      })
+      .join("\n") + "\n"
+  );
 };
 
 export const rootIndexTs = (origins: OriginConf[]) => {
+  return `import * as API from "./api";
+import * as defs from "./defs";
+import type { PontxSDK } from "pontx-sdk-core";
+
+export declare const pontxSDK: PontxSDK;
+
+${origins
+  .map((origin) => {
+    return `import type { APIs as ${origin.name}APIs } from "./${origin.name}/spec";`;
+  })
+  .join("\n")}
+
+${origins
+  .map((origin) => {
+    return `export declare const ${upperCase(origin.name)}APIs: ${origin.name}APIs;`;
+  })
+  .join("\n")}
+
+export declare const APIs = {
+${origins.map((origin) => {
+  return `  ${origin.name}: ${upperCase(origin.name)}APIs,`;
+})}
+};
+export { API, defs };
+`;
+};
+
+export const rootIndexJs = (
+  origins: OriginConf[],
+  pontxSDKConfigCode = `import { PontxSDK } from "pontx-sdk-core";\nexport const pontxSDK = new PontxSDK();`,
+) => {
   return `/**
  * This file is the default generated SDK usage.
  * You can also implement and expose your custom pontx usage outside of pontx outDir.
  */
-import * as API from './api';
-import * as defs from './defs';
+${pontxSDKConfigCode}
 
-export {
-	API,
-	defs
+${origins
+  .map((origin) => {
+    return [
+      `import ${origin.name}Meta from "./${origin.name}/meta.json";`,
+      `export const ${upperCase(origin.name)}APIs = pontxSDK.getClient(${origin.name}Meta);`,
+    ].join("\n");
+  })
+  .join("\n\n")}
+
+export const APIs = {
+${origins
+  .map((origin) => {
+    return `  ${origin.name}: ${upperCase(origin.name)}APIs,`;
+  })
+  .join("\n")}
 };
 `;
 };
@@ -73,7 +99,7 @@ Pontx SDK 分为两部分
 
 1、类型信息和元数据信息。这部分在 origin name 文件夹中。这部分代码随着 API 元数据的变化而变化。
 
-2、构造 SDK 的部分。这部分借助类型信息和元数据信息，构造 SDK。这部分代码包括 \`api.ts\`, \`core.ts\`, \`defs.ts\`, \`index.ts\`。这部分代码是固定不变的，也是 Pontx 默认生成的，你可以不使用这部分代码，自己构造一份定制化的 SDK。
+2、构造 SDK 的部分。这部分借助类型信息和元数据信息，构造 SDK。这部分代码包括 \`api.d.ts\`, \`defs.d.ts\`, \`index.d.ts\`, \`index.js\`。这部分代码是固定不变的，也是 Pontx 默认生成的，你可以不使用这部分代码，自己构造一份定制化的 SDK。
 
 ## 使用 Pontx 默认的 SDK
 
@@ -137,10 +163,10 @@ const myPet: PetstoreDefs.Pet = {
 
 export const getRootFiles = (origins: OriginConf[]) => {
   return {
-    "api.ts": rootApiTs(origins),
-    "defs.ts": rootDefsTs(origins),
-    "core.ts": rootCoreTs(origins),
-    "index.ts": rootIndexTs(origins),
+    "api.d.ts": rootAPITs(origins),
+    "defs.d.ts": rootDefsTs(origins),
+    "index.d.ts": rootIndexTs(origins),
+    "index.js": rootIndexJs(origins),
     "README.md": rootDocs(origins),
   };
 };

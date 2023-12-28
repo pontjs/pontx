@@ -5,8 +5,23 @@
   height: @nav-height;
   display: flex;
   align-items: center;
-  background-color: #dddddd;
   border-bottom: 1px solid #e7e7e7;
+  padding: 0 20px;
+
+  a.logo {
+    text-decoration: none;
+
+    img {
+      width: 30px;
+      border-radius: 3px;
+      margin-right: 10px;
+    }
+    .text {
+      display: inline-block;
+      font-size: 24px;
+      color: #ff6c0b;
+    }
+  }
 
   .top-menu {
     display: inline-flex;
@@ -27,7 +42,7 @@
       line-height: @nav-height;
 
       &.selected {
-        background-color: white;
+        color: @primary-color;
       }
 
       .next-menu-item-text {

@@ -2,9 +2,8 @@
   "outDir": "../src/services",
   "plugins": {
     "generate": {
-      "use": "pontx-async-sdk-plugin",
-      "options": {
-      }
+      "use": "../../../plugins/generate/pontx-async-sdk-plugin",
+      "options": {}
     }
   },
   "origin": {

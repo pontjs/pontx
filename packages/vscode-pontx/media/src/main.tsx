@@ -2,7 +2,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import "./registerService";
 import "./main.css";
-import "pontx-ui/dist/static/main.css";
+import "pontx-ui/dist/static/components.css";
 import { App } from "./components/App";
 
 ReactDOM.hydrate(

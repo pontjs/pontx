@@ -43,11 +43,11 @@ export type RequestConfig = {
   specMeta?: SpecMeta;
   [x: string]: any;
 };
-type RequestType = (url: any, options?: any, config?: RequestConfig) => Promise<any>;
+type RequestType = (params: any, requestOptions: any, config: RequestConfig) => Promise<any>;
 
 /** 构造请求方法的辅助类 */
 export class PontxFetcher {
-  protocol = "//";
+  protocol = "";
 
   /** path 参数未传入时，path 参数取值的占位符 */
   placemarker: string = "";
@@ -57,20 +57,28 @@ export class PontxFetcher {
     if (!specMeta) {
       return "";
     }
+    let protocolPrefix = "//";
+    if (this.protocol === "http") {
+      protocolPrefix = "http://";
+    } else if (this.protocol === "https") {
+      protocolPrefix = "https://";
+    } else if (this.protocol) {
+      protocolPrefix = this.protocol;
+    }
 
     if (typeof window === "undefined") {
       if (specMeta?.host) {
         if (specMeta.basePath) {
-          return this.protocol + specMeta.host + specMeta.basePath;
+          return protocolPrefix + specMeta.host + specMeta.basePath;
         }
-        return this.protocol + specMeta.host;
+        return protocolPrefix + specMeta.host;
       }
       return "";
     }
 
     if (specMeta.host) {
       if (specMeta.basePath) {
-        return this.protocol + specMeta.host + specMeta.basePath;
+        return protocolPrefix + specMeta.host + specMeta.basePath;
       }
       return specMeta.host;
     }
@@ -168,7 +176,9 @@ export class PontxFetcher {
   };
 
   // 默认使用浏览器标准 fetch
-  fetch: FetchType = fetch;
+  fetch: FetchType = (...args) => {
+    return fetch(...args);
+  };
 }
 
 export type SdkMethods = {

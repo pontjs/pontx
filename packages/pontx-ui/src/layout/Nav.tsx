@@ -2,7 +2,7 @@
  * @author jasonHzq
  * @description
  */
-import { Balloon, Button, Icon, Menu, Message, Select } from "@alicloud/console-components";
+// import { Balloon, Button, Icon, Menu, Message, Select } from "@alicloud/console-components";
 import { PontSpec } from "pontx-spec";
 import * as React from "react";
 import { LayoutContext, PageType } from "./context";
@@ -15,7 +15,11 @@ export const Nav: React.FC<NavProps> = (props) => {
 
   return (
     <div className="pontx-ui-nav">
-      <Menu
+      <a href="javascript:;" className="logo" style={{ display: "flex", alignItems: "center" }}>
+        <img src="/src/components/resources/pontx.png" height={30} />
+        <span className="text">PontX</span>
+      </a>
+      {/* <Menu
         className="top-menu"
         mode="inline"
         direction="hoz"
@@ -24,8 +28,6 @@ export const Nav: React.FC<NavProps> = (props) => {
         selectedKeys={[page]}
         header={
           <div className="menu-header">
-            <div className="title">Pont UI</div>
-
             <div className="ops" style={{ marginLeft: 30 }}>
               {specs?.length > 1 ? (
                 <Select
@@ -73,7 +75,7 @@ export const Nav: React.FC<NavProps> = (props) => {
         >
           <i className="codicon codicon-book"></i>API 文档
         </Menu.Item>
-      </Menu>
+      </Menu> */}
     </div>
   );
 };

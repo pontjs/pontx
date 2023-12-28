@@ -3,10 +3,11 @@
  * @description API Page Content
  */
 import * as React from "react";
-import { LayoutContext, PageType } from "../../layout/context";
-import { LeftMenu } from "./LeftMenu";
+import { LayoutContext, Meta, PageType } from "../../layout/context";
 import { BaseClass } from "../../components/docs/BaseClass";
 import { API } from "../../components/docs/API";
+import { APIDirectory } from "../../common/LeftMenu/APIDirectory";
+import "../../common/LeftMenu/APIDirectory.scss";
 
 export class ApiDocProps {}
 
@@ -40,7 +41,24 @@ export const ApiDoc: React.FC<ApiDocProps> = (props) => {
 
   return (
     <>
-      <LeftMenu></LeftMenu>
+      <APIDirectory
+        pontxSpec={currSpec}
+        onSelect={(name, type) => {
+          let modName = "";
+          let apiName = name;
+          if (name.includes("/")) {
+            [modName, apiName] = name.split("/");
+          }
+          const apiSpec = currSpec?.apis?.[name];
+
+          changeSelectedMeta({
+            name: apiName,
+            type: type === "api" ? "api" : "baseClass",
+            modName,
+            spec: apiSpec,
+          } as Meta);
+        }}
+      />
       <div className="pontx-ui-page">{apiDoc}</div>
     </>
   );

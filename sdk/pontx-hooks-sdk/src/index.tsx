@@ -1,8 +1,8 @@
-import { APIMeta, PontxFetcher, SdkMethods } from "pontx-sdk-core";
+import { APIMeta, PontxFetcher, SdkMethods, PontxSDK } from "pontx-sdk-core";
 import useSWR, { preload } from "swr";
 
 export const SdkMethodsFn = (apiMeta: APIMeta, fetcher: PontxFetcher, { specMeta }): SdkMethods => {
-  const myFetch = async (url, options) => {
+  const myFetch = async (url, options = {}) => {
     const result = await fetch(url, options);
     return fetcher.handleResponse(result, url, options, { apiMeta });
   };
@@ -12,11 +12,12 @@ export const SdkMethodsFn = (apiMeta: APIMeta, fetcher: PontxFetcher, { specMeta
     return myFetch(url, options);
   };
   const request = (params, fetchOptions = {}) => {
-    return fetcher.request(params, fetchOptions, { apiMeta });
+    return fetcher.request(params, fetchOptions, { apiMeta, specMeta });
   };
 
   const getSwrKey = (params: any) => {
-    const swrKey = fetcher.getUrl(apiMeta.path, params);
+    const prefix = fetcher.getUrlPrefix(specMeta);
+    const swrKey = prefix + fetcher.getUrl(apiMeta.path, params);
     return swrKey;
   };
 
@@ -31,14 +32,15 @@ export const SdkMethodsFn = (apiMeta: APIMeta, fetcher: PontxFetcher, { specMeta
         return useSWR(
           swrKey,
           (url) => {
-            return myFetch(fetcher.getUrlPrefix(specMeta) + url, fetchOptions);
+            return myFetch(url, fetchOptions);
           },
           swrOptions,
         );
       },
       preload: (params: any) => {
         const swrKey = getSwrKey(params);
-        return preload(swrKey, request);
+
+        return preload(swrKey, myFetch);
       },
     };
   }
@@ -54,3 +56,5 @@ export const SdkMethodsFn = (apiMeta: APIMeta, fetcher: PontxFetcher, { specMeta
 };
 
 export type * from "./type.ts";
+
+export * from "pontx-sdk-core";

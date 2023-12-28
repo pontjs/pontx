@@ -1,6 +1,13 @@
 import { PontSpec } from "pontx-spec";
+
+let localPontSpecs = {};
+
 // import testSpec from "./.mocks/spec.json";
-// import remoteSpec from "./.mocks/remoteSpec.json";
+// localPontSpecs = {
+//   localSpecs: [testSpec as any],
+// };
+
+// import remoteSpec from "./.mocks/remoteSpec.jpon";
 // import { PontSpecDiff } from "pontx-spec-diff";
 // import { PontUIService as LocalPontUIService } from "./service.local";
 
@@ -12,11 +19,10 @@ export const PontUIService = {
   /** 获取本地元数据列表 */
   requestPontSpecs: async () => {
     return {
-      // localSpecs: [testSpec] as any[] as PontSpec[],
-      // remoteSpecs: [remoteSpec] as any[] as PontSpec[],
       localSpecs: [] as any[] as PontSpec[],
       remoteSpecs: [] as any[] as PontSpec[],
       currentOriginName: "",
+      ...localPontSpecs,
     };
   },
 

@@ -1,0 +1,23 @@
+@import url(../components/style/themes.less);
+
+.pontx-directory {
+  width: 400px;
+  height: calc(100vh - 50px);
+}
+
+.pontx-ui {
+  height: 100vh;
+
+  .main-content {
+    height: calc(100vh - @nav-height);
+    display: flex;
+    align-items: center;
+  }
+
+  .pontx-ui-page {
+    flex-grow: 1;
+    height: 100%;
+    // padding: 20px;
+    overflow-y: auto;
+  }
+}

@@ -45,6 +45,10 @@
       "git add"
     ]
   },
+  "resolutions": {
+    "semix-core": "0.0.13",
+    "react": "^18.2.0"
+  },
   "devDependencies": {
     "@types/commander": "^2.12.2",
     "@types/fs-extra": "^5.1.0",
@@ -70,6 +74,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "rimraf": "^3.0.2",
+    "sass": "^1.69.5",
     "style-loader": "^3.3.1",
     "ts-jest": "^29.1.1",
     "ts-loader": "^9.4.1",

@@ -1,5 +1,5 @@
-import { getFilesBySpecs, snippetsProvider } from "pontx-generate";
-import { createPontxGeneratePlugin, SnippetsProvider, rootCoreTs, GetFilesBySpecs } from "pontx-generate";
+import { getFilesBySpecs, rootIndexJs, snippetsProvider } from "pontx-generate";
+import { createPontxGeneratePlugin, SnippetsProvider, GetFilesBySpecs } from "pontx-generate";
 
 const mySnippetsProvider: SnippetsProvider = (info) => {
   const defaultSnippets = snippetsProvider(info);
@@ -23,7 +23,13 @@ const myFilesGenerator: GetFilesBySpecs = async (origins) => {
   const SdkMethodsFn = `import { SdkMethodsFn } from "pontx-hooks-sdk";\n`;
 
   const result = await getFilesBySpecs(origins, REQUEST_METHODS_TYPE_CODE);
-  result["core.ts"] = rootCoreTs(origins, SdkMethodsFn);
+  result["index.js"] = rootIndexJs(
+    origins,
+    [
+      `import { SdkMethodsFn, PontxSDK } from "pontx-hooks-sdk";`,
+      `export const pontxSDK = new PontxSDK({ SdkMethodsFn });`,
+    ].join("\n"),
+  );
   return result;
 };
 

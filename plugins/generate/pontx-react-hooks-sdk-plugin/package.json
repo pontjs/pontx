@@ -33,7 +33,7 @@
     "@types/fs-extra": "^9.0.13",
     "@types/node": "*",
     "http-server": "*",
-    "react": "^16.14.0",
+    "react": "^18.0.0",
     "swr": "^2.1.5"
   }
 }

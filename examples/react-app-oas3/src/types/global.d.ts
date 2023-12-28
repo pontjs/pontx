@@ -1,1 +1,0 @@
-import defs = PontxSDK.defs;

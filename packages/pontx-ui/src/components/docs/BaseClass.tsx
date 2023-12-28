@@ -6,7 +6,7 @@ import * as React from "react";
 import * as PontSpec from "pontx-spec";
 import classNames from "classnames";
 import { SemixSchemaTable } from "semix-schema-table";
-import { getRefSchema } from "./utils";
+import { getRefSchema, renderExpandIcon } from "./utils";
 
 export class BaseClassProps {
   name: string;
@@ -32,6 +32,7 @@ export const BaseClass: React.FC<BaseClassProps> = (props) => {
         <div className="mod">
           <SemixSchemaTable
             name={name}
+            renderExpandIcon={renderExpandIcon}
             schema={schema as any}
             schemas={props.definitions as any}
             getRefSchema={getRefSchema(props.definitions)}

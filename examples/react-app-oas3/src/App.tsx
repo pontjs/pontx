@@ -1,6 +1,6 @@
 import "./App.css";
 import * as React from "react";
-import { PetStoreAPIs } from "./api";
+import { PetstoreAPIs, defs } from "./services/sdk";
 
 function App() {
   const [status, setStatus] = React.useState<defs.petstore.Pet["status"]>("pending");
@@ -11,7 +11,7 @@ function App() {
 
   React.useEffect(() => {
     setIsPetsLoading(true);
-    PetStoreAPIs.pet.findPetsByStatus.request(status ? { status } : {}).then((petList) => {
+    PetstoreAPIs.pet.findPetsByStatus.request(status ? { status } : {}).then((petList) => {
       setIsPetsLoading(false);
       setPets(petList);
     });

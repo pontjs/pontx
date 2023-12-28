@@ -1,4 +1,4 @@
-import * as PontxSDK from "../services/sdk/index";
+import * as PontxSDK from "../services/sdk/api";
 
 export import defs = PontxSDK.defs;
 

@@ -1,7 +1,7 @@
 {
   "outDir": "../src/services",
   "plugins": {
-    "generate": "pontx-react-hooks-sdk-plugin"
+    "generate": "../../../plugins/generate/pontx-react-hooks-sdk-plugin"
   },
   "origin": {
     "url": "https://petstore.swagger.io/v2/swagger.json",

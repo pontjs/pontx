@@ -1,12 +1,14 @@
 ## bugfix
 
-- pontx-config.json provider 待
+- pontx @summary 和注释信息相同
 - 控制台
 - Diff 解决冲突
 - ext diff 时，无法 update diff。展示也有问题
 
 ## feature
 
+- pontx ai generate frontend code
+- pontx init
 - ui editor action as view meta/edit mocks/
 - 离线状态 完成。
 - pont ui plugin
