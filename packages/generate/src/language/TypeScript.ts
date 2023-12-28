@@ -5,8 +5,8 @@ import * as _ from "lodash";
 export const apiComment = (api: PontSpec.PontAPI) => {
   const path = api.path ? `\n * @path: ${api.path}` : "";
   const desc = api.description ? `\n * ${api.description.split("\n").join("\n * ")}` : "";
-  const title = api.title ? `\n * @title: ${api.title}` : "";
-  const summary = api.summary ? `\n * @summary: ${api.summary}` : "";
+  const title = api.title && api.title !== desc ? `\n * @title: ${api.title}` : "";
+  const summary = api.summary && api.summary !== desc ? `\n * @summary: ${api.summary}` : "";
   const deprecated = api.deprecated ? `\n * @deprecated` : "";
 
   return `/**${path}${desc}${summary || title}${deprecated}\n */\n`;

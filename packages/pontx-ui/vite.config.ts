@@ -12,6 +12,16 @@ export default defineConfig({
     //   },
     // },
   },
+  resolve: {
+    alias: [
+      {
+        find: /^~.+/,
+        replacement: (val) => {
+          return val.replace(/^~/, "");
+        },
+      } as any,
+    ],
+  },
   plugins: [
     react(),
     // virtualHtmlPlugin({

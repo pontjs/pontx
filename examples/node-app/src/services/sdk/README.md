@@ -1,12 +1,32 @@
 # SDK 使用指南
 
+## Pontx SDK 简介
+
 Pontx SDK 分为两部分
 
-1、类型信息和元数据信息。此部分随着 API 元数据的变化，可以不断动态生成。
+1、类型信息和元数据信息。这部分在 origin name 文件夹中。这部分代码随着 API 元数据的变化而变化。
 
-2、借助类型信息和元数据信息，构建生成 SDK。包括 `api.ts`, `core.ts`, `defs.ts`, `index.ts`。这部分文件是 Pontx 默认生成的，你可以不使用他们，自己构建一份定制化的 SDK。
+2、构造 SDK 的部分。这部分借助类型信息和元数据信息，构造 SDK。这部分代码包括 `api.d.ts`, `defs.d.ts`, `index.d.ts`, `index.js`。这部分代码是固定不变的，也是 Pontx 默认生成的，你可以不使用这部分代码，自己构造一份定制化的 SDK。
 
-此处提供一个最简单的构建 SDK 的 Sample。
+## 使用 Pontx 默认的 SDK
+
+你可以通过覆写 pontxSDK 的请求器，来实现一定程度的 SDK 定制。例如，你可以覆盖 API 请求的构造方式。
+
+```ts
+pontxSDK.fetcher.fetch = (url, options) => {
+	return nodeFetch(url, options);
+}
+
+pontxSDK.fetcher.getUrlPrefix = function(specMeta) {
+	return 'http://your-hostname.com/api';
+}
+
+```
+
+## 定制自己的 SDK
+
+Pontx 默认 SDK 无法满足你的诉求时，可以在 pontx outDir 之外，构造你自己的 SDK。
+举个例子，您可以通过以下代码，借助 petstore 中的类型信息和元数据信息，构造你自己的 SDK：
 
 ```ts
 // 引用元数据

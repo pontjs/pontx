@@ -5,7 +5,6 @@
 import * as React from "react";
 import { Nav } from "./layout/Nav";
 import { LayoutContext, PageType } from "./layout/context";
-import "./components/styles.less";
 import { Page } from "./layout/Page";
 
 export class AppProps {}

@@ -1,10 +1,21 @@
 import "./App.css";
 import * as React from "react";
-import { PetStoreAPIs } from "./api";
+import { PetstoreAPIs, pontxSDK } from "./services/sdk";
+
+pontxSDK.fetcher.protocol = "https://";
+
+PetstoreAPIs.pet.findPetsByStatus.preload({
+  status: ["available"],
+});
 
 function App() {
   const [status, setStatus] = React.useState<defs.petstore.Pet["status"]>("available");
-  const { data: pets, isLoading: isPetsLoading } = PetStoreAPIs.pet.findPetsByStatus.useRequest({
+  const {
+    data: pets,
+    isLoading: isPetsLoading,
+    isValidating,
+    mutate,
+  } = PetstoreAPIs.pet.findPetsByStatus.useRequest({
     status: status ? [status] : [],
   });
 
@@ -24,8 +35,12 @@ function App() {
           <option value={"sold" as defs.petstore.Pet["status"]}>sold</option>
         </select>
       </div>
+      <div className="operators">
+        <button onClick={() => mutate()}>refresh</button>
+      </div>
       {
         <ul>
+          {isValidating && !isPetsLoading && <span>validating ...</span>}
           {isPetsLoading ? (
             <span>loading ...</span>
           ) : (
@@ -39,6 +54,7 @@ function App() {
               );
             })
           )}
+          {!isPetsLoading && !pets?.length && <span>no pets</span>}
         </ul>
       }
     </div>

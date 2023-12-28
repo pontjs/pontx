@@ -148,8 +148,8 @@ export const htmlTemplate = (context: { cspSource: string; getUri: (uri: string)
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'none'; img-src ${context.cspSource} https:;font-src ${context.cspSource}; script-src ${
-    context.cspSource
-  }; style-src ${context.cspSource} 'self' 'unsafe-inline';"
+        context.cspSource
+      }; style-src ${context.cspSource} 'self' 'unsafe-inline';"
     />
     <input type="hidden" id="router-meta-data" value="${encodeURI(JSON.stringify(pageConfig))}"></input>
     </script>

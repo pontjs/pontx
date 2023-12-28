@@ -3,12 +3,16 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
   mode: "production",
-  entry: path.resolve(__dirname, "src/components/components.less"),
+  entry: [
+    path.resolve(__dirname, "src/components/components.scss"),
+    path.resolve(__dirname, "src/components/components.less"),
+  ],
   output: {
     path: path.resolve(__dirname, "dist/static"),
   },
   resolve: {
-    extensions: [".css", ".less"],
+    extensions: [".css", ".less", ".scss", ".js"],
+    modules: ["node_modules"],
     alias: {},
   },
   module: {
@@ -31,7 +35,25 @@ module.exports = {
         ],
       },
       {
+        test: /\.scss$/,
+        include: [path.resolve(__dirname, "src"), path.resolve(__dirname, "node_modules")],
+        use: [
+          MiniCssExtractPlugin.loader,
+          "css-loader",
+          {
+            loader: "postcss-loader",
+            options: {
+              postcssOptions: {
+                plugins: [require("postcss-nested")()],
+              },
+            },
+          },
+          "sass-loader",
+        ],
+      },
+      {
         test: /\.css$/,
+        include: [path.resolve(__dirname, "src"), path.resolve(__dirname, "node_modules")],
         use: [MiniCssExtractPlugin.loader, "css-loader"],
       },
       {

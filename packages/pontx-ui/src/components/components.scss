@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "semix-schema-table/module/index.css";
+@import "@vscode/codicons/dist/codicon.css";
+@import "rc-input/assets/index.css";
+@import "rc-tabs/assets/index.css";
+@import "rc-menu/assets/index.css";
+@import "../common/LeftMenu/APIDirectory.scss";

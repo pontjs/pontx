@@ -11,8 +11,11 @@
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "build": "npm run clean && tsc --build"
   },
-  "dependencies": {
+  "peerDependencies": {
     "swr": "^2.2.4"
+  },
+  "dependencies": {
+    "pontx-sdk-core": "^0.3.87"
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",

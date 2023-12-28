@@ -6,6 +6,7 @@ import * as React from "react";
 import { ApiDoc } from "../pages/apiDoc";
 import { DiffPage } from "../pages/diffManager";
 import { LayoutContext, PageType } from "./context";
+import "./Page.less";
 
 export class PageProps {}
 

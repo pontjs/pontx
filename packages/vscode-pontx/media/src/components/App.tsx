@@ -8,13 +8,13 @@ const getRouterMeta = (): any => {
     return {};
   }
 
-  const routerMetaStr = (document.getElementById("router-meta-data") as any).value;
+  const routerMetaStr = (document.getElementById("router-meta-data") as any)?.value;
   let value = {};
   try {
     value = JSON.parse(decodeURI(routerMetaStr));
+    getVSCode().setState(value);
   } catch (e) {}
 
-  getVSCode().setState(value);
   return value;
 };
 

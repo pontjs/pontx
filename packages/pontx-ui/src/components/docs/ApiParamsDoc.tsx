@@ -7,7 +7,7 @@ import * as React from "react";
 import { SemixJsonSchema } from "semix-core";
 import { SemixSchemaTable, InnerSchemaTable } from "semix-schema-table";
 import * as PontSpec from "pontx-spec";
-import { getRefSchema } from "./utils";
+import { getRefSchema, renderExpandIcon } from "./utils";
 
 export class PontxParamsDocProps {
   parameters?: PontSpec.Parameter[];
@@ -17,7 +17,7 @@ export class PontxParamsDocProps {
 
 export const ApiParamsDoc: React.FC<PontxParamsDocProps> = (props) => {
   const schema = React.useMemo(() => {
-    const schema = {
+    let schema = {
       type: "object",
       properties: {},
     } as SemixJsonSchema;
@@ -43,41 +43,27 @@ export const ApiParamsDoc: React.FC<PontxParamsDocProps> = (props) => {
   return React.useMemo(() => {
     return (
       <div className="api-params-doc">
-        <InnerSchemaTable
-          name=""
-          renderExpandIcon={(node, onExpand) => {
-            return (
-              <div
-                className="relative flex items-center justify-center cursor-pointer rounded hover:bg-darken-3"
-                style={{
-                  marginLeft: -23.5,
-                  width: 20,
-                  height: 20,
-                  marginRight: 3,
-                  textAlign: "center",
-                }}
-                onClick={() => {
-                  onExpand(node);
-                }}
-              >
-                <i className={node.isExpanded ? "codicon codicon-chevron-down" : "codicon codicon-chevron-right"}></i>
-              </div>
-            );
-          }}
-          renderEmpty={() => {
-            return (
-              <tr>
-                <td colSpan={2} style={{ padding: "15px 0", textAlign: "center" }}>
-                  无参数定义
-                </td>
-              </tr>
-            );
-          }}
-          schema={schema}
-        />
+        {!props.parameters?.length ? (
+          <div className="empty-params">本 API 无入参定义</div>
+        ) : (
+          <InnerSchemaTable
+            name=""
+            renderExpandIcon={renderExpandIcon}
+            renderEmpty={() => {
+              return (
+                <tr>
+                  <td colSpan={2} style={{ padding: "15px 0", textAlign: "center" }}>
+                    无参数定义
+                  </td>
+                </tr>
+              );
+            }}
+            schema={schema}
+          />
+        )}
       </div>
     );
-  }, [schema, propSchemaCnt, props.schemas]);
+  }, [props.parameters, propSchemaCnt, props.schemas]);
 };
 
 ApiParamsDoc.defaultProps = new PontxParamsDocProps();

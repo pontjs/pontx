@@ -3,13 +3,15 @@
  * @description
  */
 import * as React from "react";
-import { Tab } from "@alicloud/console-components";
+import Tabs, { TabPane } from "rc-tabs";
 import ReactDiffViewer from "react-diff-viewer-continued";
 import { BaseClass } from "../docs/BaseClass";
 import { API } from "../docs/API";
 import * as PontSpec from "pontx-spec";
 import { BaseClazzDiffOp, diffApi, diffBaseClass } from "pontx-spec-diff";
 import { ApiDiffOp, getBaseClassDiffDom } from "./APIDiff";
+import TabBar from "rc-tabs/lib/TabBar";
+import TabContent from "rc-tabs/lib/TabContent";
 
 export class DiffContentProps {
   localMeta: any;
@@ -40,23 +42,17 @@ export const DiffContent: React.FC<DiffContentProps> = (props) => {
         <div className="desc">{props.localMeta.title}</div>
         <div className="title">{props.localMeta?.name}</div>
       </div>
-      <Tab defaultActiveKey="view">
-        <Tab.Item key="view" title="变更分析">
+      <Tabs defaultActiveKey="view" renderTabBar={() => <TabBar />} renderTabContent={() => <TabContent />}>
+        <TabPane key="view" tab="变更分析">
           <div className="">
             <div>
               {(diffs || []).map((diff) => {
                 return props.type === "api" ? ApiDiffOp.getAPIDiffItems(diff) : getBaseClassDiffDom(diff);
               })}
             </div>
-            {/* <div>
-              <div className="title">变更分析代码（自己看）</div>
-              <pre>
-                <code>{diffStr}</code>
-              </pre>
-            </div> */}
           </div>
-        </Tab.Item>
-        <Tab.Item key="code" title="元数据对比">
+        </TabPane>
+        <TabPane key="code" tab="元数据对比">
           <ReactDiffViewer
             oldValue={localCode}
             newValue={newCode}
@@ -64,8 +60,8 @@ export const DiffContent: React.FC<DiffContentProps> = (props) => {
             splitView={false}
             hideLineNumbers
           ></ReactDiffViewer>
-        </Tab.Item>
-        <Tab.Item key="detail" title="查看文档(新元数据)">
+        </TabPane>
+        <TabPane key="detail" tab="查看文档(新元数据)">
           {props.remoteMeta?.responses || props?.remoteMeta?.parameters ? (
             <API selectedApi={props.remoteMeta} definitions={props.definitions} onStructClick={props.onStructClick} />
           ) : (
@@ -76,8 +72,8 @@ export const DiffContent: React.FC<DiffContentProps> = (props) => {
               onStructClick={props.onStructClick}
             />
           )}
-        </Tab.Item>
-      </Tab>
+        </TabPane>
+      </Tabs>
     </div>
   );
 };
