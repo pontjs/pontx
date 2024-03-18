@@ -10,6 +10,8 @@
 
 Pontx provides service by Pontx CLI、[Pontx VSCode IDE Extension](https://marketplace.visualstudio.com/items?itemName=jasonHzq.vscode-pontx) and Web Platform(WIP).
 
+English | [简体中文](./README.zh-CN.md)
+
 ## Features
 
 * <strong>SDK generating</strong>. Pontx generate most popular style SDK like SWR by built-in SDK generate plugin.
@@ -21,8 +23,6 @@ Pontx provides service by Pontx CLI、[Pontx VSCode IDE Extension](https://marke
 * <strong>API debug</strong> Support API Debugger in IDE
 
 All lifecle features can be highly customed with Pontx plugin. [Pontx Plugin Development Guide](https://github.com/pontjs/pontx/blob/main/PluginContribution.md)
-
-English | [简体中文](./README.zh-CN.md)
 
 ## Quick Start
 
