@@ -1,4 +1,4 @@
-import { InnerOriginConfig } from "pontx-manager";
+import type { InnerOriginConfig } from "pontx-manager";
 import { PontSpec } from "pontx-spec";
 
 type OriginConf = {
@@ -7,7 +7,7 @@ type OriginConf = {
   conf: InnerOriginConfig;
 };
 
-const upperCase = (word: string) => {
+export const upperCase = (word: string) => {
   if (!word) return word;
 
   return word[0].toUpperCase() + word.slice(1);
@@ -17,7 +17,7 @@ export const rootDefsTs = (origins: OriginConf[]) => {
   return (
     origins
       .map((origin) => {
-        return `export type { defs as ${origin.name} } from './${origin.name}/type';`;
+        return `export { defs as ${origin.name} } from './${origin.name}/type';`;
       })
       .join("\n") + "\n"
   );
@@ -27,58 +27,53 @@ export const rootAPITs = (origins: OriginConf[], SdkMethodsFn = "") => {
   return (
     origins
       .map((origin) => {
-        return `export type { API as ${origin.name} } from './${origin.name}/type';`;
+        return `export { API as ${origin.name} } from './${origin.name}/type';`;
       })
       .join("\n") + "\n"
   );
 };
 
-export const rootIndexTs = (origins: OriginConf[]) => {
-  return `import * as API from "./api";
-import * as defs from "./defs";
-import type { PontxSDK } from "pontx-sdk-core";
-
-export declare const pontxSDK: PontxSDK;
-
-${origins
-  .map((origin) => {
-    return `import type { APIs as ${origin.name}APIs } from "./${origin.name}/spec";`;
-  })
-  .join("\n")}
-
-${origins
-  .map((origin) => {
-    return `export declare const ${upperCase(origin.name)}APIs: ${origin.name}APIs;`;
-  })
-  .join("\n")}
-
-export declare const APIs = {
-${origins.map((origin) => {
-  return `  ${origin.name}: ${upperCase(origin.name)}APIs,`;
-})}
-};
-export { API, defs };
-`;
-};
-
-export const rootIndexJs = (
-  origins: OriginConf[],
-  pontxSDKConfigCode = `import { PontxSDK } from "pontx-sdk-core";\nexport const pontxSDK = new PontxSDK();`,
-) => {
-  return `/**
- * This file is the default generated SDK usage.
- * You can also implement and expose your custom pontx usage outside of pontx outDir.
- */
-${pontxSDKConfigCode}
-
+export const rootIndexDTs = (origins: OriginConf[]) => {
+  return `import * as defs from "./defs";
 ${origins
   .map((origin) => {
     return [
-      `import ${origin.name}Meta from "./${origin.name}/meta.json";`,
-      `export const ${upperCase(origin.name)}APIs = pontxSDK.getClient(${origin.name}Meta);`,
+      `import type { API as ${upperCase(origin.name)}API } from "./${origin.name}/type";`,
+      `import type { APIs as ${upperCase(origin.name)}APIs } from "./${origin.name}/spec";`,
     ].join("\n");
   })
-  .join("\n\n")}
+  .join("\n")}
+
+export namespace APIs {
+${origins
+  .map((origin) => {
+    return `export { ${upperCase(origin.name)}APIs as ${origin.name} };`;
+  })
+  .join("\n")}
+}
+
+export namespace API {
+${origins
+  .map((origin) => {
+    return `export { ${upperCase(origin.name)}API as ${origin.name} };`;
+  })
+  .join("\n")}
+}
+
+export { defs };
+`;
+};
+
+export const rootIndexTs = (origins: OriginConf[]) => {
+  return `import type * as defs from "./defs";
+import type * as API from "./api";
+${origins
+  .map((origin) => {
+    return [`import { APIs as ${upperCase(origin.name)}APIs } from "./${origin.name}/";`].join("\n");
+  })
+  .join("\n")}
+import { rootDefaults } from "./defaults";
+import { DefaultsType, RootDefaultsType, setSpecDefaults, SpecNames, DefaultsMapType } from "./request";
 
 export const APIs = {
 ${origins
@@ -86,6 +81,71 @@ ${origins
     return `  ${origin.name}: ${upperCase(origin.name)}APIs,`;
   })
   .join("\n")}
+}
+
+export const setRootDefaults = (defaults: RootDefaultsType) => {
+  Object.keys(defaults).forEach((key) => {
+    rootDefaults[key] = defaults[key];
+  });
+};
+
+export const setDefaultsAll = (defaults: RootDefaultsType) => {
+  Object.keys(defaults).forEach((key) => {
+    rootDefaults[key] = defaults[key];
+  });
+
+  Object.keys(APIs).forEach((specName: any) => {
+    setSpecDefaults(specName);
+  });
+};
+
+export const setDefaults = (
+  defaultsMap: DefaultsMapType
+) => {
+  Object.keys(APIs).forEach((specName: any) => {
+    const defaults = defaultsMap?.[specName];
+
+    if (defaults && Object.keys(defaults)?.length > 0) {
+      setSpecDefaults(specName, defaults);
+    }
+  });
+};
+
+export { defs, API, ${origins.map((origin) => `${upperCase(origin.name)}APIs`).join(", ")} };
+`;
+};
+
+export const requestTs = (origins: OriginConf[]) => {
+  return `${origins
+    .map(
+      (origin) =>
+        `import { setDefaults as set${upperCase(origin.name)}Defaults, DefaultsType as ${upperCase(origin.name)}DefaultsType  } from "./${origin.name}/request";`,
+    )
+    .join("\n")}
+
+export type SpecNames = ${origins.map((origin) => `'${origin.name}'`).join(" | ")};
+
+export type DefaultsMapType = {
+${origins.map((origin) => `  ${origin.name}: ${upperCase(origin.name)}DefaultsType;`).join("\n")}
+};
+
+export type DefaultsType<SpecName extends SpecNames> = DefaultsMapType[SpecName];
+
+export type RootDefaultsType = ${origins.map((origin) => `${upperCase(origin.name)}DefaultsType`).join(" & ")};
+
+export const setSpecDefaults = <SpecName extends SpecNames, >(specName: SpecName, defaults: DefaultsType<SpecName> = {} as any) => {
+  switch (specName) {
+${origins
+  .map((origin) => {
+    return [
+      `    case "${origin.name}": {`,
+      `      set${upperCase(origin.name)}Defaults(defaults as any);`,
+      `      break;`,
+      `    }`,
+    ].join("\n");
+  })
+  .join("\n")}
+  }
 };
 `;
 };
@@ -107,11 +167,11 @@ Pontx SDK 分为两部分
 
 \`\`\`ts
 pontxSDK.fetcher.fetch = (url, options) => {
-	return nodeFetch(url, options);
+  return nodeFetch(url, options);
 }
 
 pontxSDK.fetcher.getUrlPrefix = function(specMeta) {
-	return 'http://your-hostname.com/api';
+  return 'http://your-hostname.com/api';
 }
 
 \`\`\`
@@ -165,8 +225,11 @@ export const getRootFiles = (origins: OriginConf[]) => {
   return {
     "api.d.ts": rootAPITs(origins),
     "defs.d.ts": rootDefsTs(origins),
-    "index.d.ts": rootIndexTs(origins),
-    "index.js": rootIndexJs(origins),
+    "index.ts": rootIndexTs(origins),
+    "request.ts": requestTs(origins),
+    // "index.d.ts": rootIndexTs(origins),
+    // "index.js": rootIndexJs(origins),
     "README.md": rootDocs(origins),
+    "defaults.ts": `export const rootDefaults = {} as any;`,
   };
 };

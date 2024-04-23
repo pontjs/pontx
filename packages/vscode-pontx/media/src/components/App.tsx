@@ -1,6 +1,11 @@
 import * as React from "react";
-import { API as APIDocumment, DiffContent, StructDocument, PontUIService, DiffPage } from "pontx-ui";
 import { getVSCode } from "../utils/utils";
+
+import { PontUIService } from "pontx-ui/dist/es6/components/utils/service";
+
+import { DiffPage } from "pontx-ui/dist/es6/components/changes/DiffPage";
+import { APIDoc } from "pontx-ui/dist/es6/common/APIDoc/APIDoc";
+import { StructDoc } from "pontx-ui/dist/es6/common/StructDoc/index";
 
 // (window as any).routerMeta = {};
 const getRouterMeta = (): any => {
@@ -63,8 +68,8 @@ export const App: React.FC<AppProps> = (props) => {
       if (schemaType === "api") {
         return (
           <div className="vscode-page">
-            <APIDocumment
-              selectedApi={itemMeta}
+            <APIDoc
+              api={itemMeta}
               definitions={defs}
               onStructClick={(struct) => {
                 PontUIService.openMeta({ ...struct, specName });
@@ -75,7 +80,7 @@ export const App: React.FC<AppProps> = (props) => {
       } else if (schemaType === "struct") {
         return (
           <div className="vscode-page">
-            <StructDocument
+            <StructDoc
               name={name}
               schema={itemMeta}
               definitions={defs}

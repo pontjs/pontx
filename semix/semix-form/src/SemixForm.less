@@ -1,0 +1,20 @@
+.semix-form {
+  &.row .semix-form-field,
+  .semix-form-field.row {
+    display: flex;
+    flex-flow: row nowrap;
+  }
+
+  .semix-form-field.vertical {
+    display: flex;
+    flex-flow: row wrap;
+    flex-wrap: nowrap;
+    flex-direction: column;
+  }
+
+	.semix-form-field.vertical > .semix-form-title {
+		flex-basis: 0;
+		min-width: 150px;
+		width: 150px;
+	}
+}

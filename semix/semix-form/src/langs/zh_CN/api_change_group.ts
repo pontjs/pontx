@@ -1,0 +1,21 @@
+export default {
+  index: {
+    noChange: '暂无变更记录',
+    thereIsNo: '无',
+    interfaceDescription: '接口描述：',
+    '，': '，',
+    change: '变更',
+    goOffline: '下线',
+    add: '新增',
+    viewChanges2: '查看变更集',
+    viewChanges: '查看API变更历史',
+    operation: '操作',
+    changeContent: '变更内容概要',
+    changeTime: '变更时间',
+    name: 'OpenAPI 名称',
+    delete: '删除',
+    returnParameter: '返回参数',
+    requestParameter: '请求参数',
+    errorCode: '错误码',
+  },
+};

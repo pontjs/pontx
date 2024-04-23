@@ -1,0 +1,40 @@
+{
+  "name": "pontx-semix-rule-center",
+  "version": "0.4.12",
+  "homepage": "",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "start": "tsc -w",
+    "clean:js": "rm src/*.js",
+    "build": "tsc && npm run less",
+    "less": "node-cpio --src src --dist dist -e less",
+    "postpublish": "tnpm sync semix-rule-center"
+  },
+  "dependencies": {
+    "react-diff-viewer": "^3.1.1",
+    "react-window": "^1.8.6",
+    "semix-rule-lint": "*",
+    "semix-validate": "*"
+  },
+  "devDependencies": {
+    "@types/classnames": "*",
+    "@types/react": "*",
+    "@types/react-dom": "*",
+    "@types/react-window": "*",
+    "copyfiles": "^2.4.1",
+    "lodash": "*"
+  },
+  "peerDependencies": {
+    "classnames": "^2.3.1",
+    "lodash": "*"
+  }
+}

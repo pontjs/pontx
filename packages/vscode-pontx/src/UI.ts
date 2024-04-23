@@ -1,7 +1,7 @@
 import { PontManager } from "pontx-manager";
-import { diffPontSpec, diffPontSpecs } from "pontx-spec-diff";
 import * as vscode from "vscode";
 import * as _ from "lodash";
+import { PontSpec } from "pontx-spec";
 
 export class PontVSCodeUI {
   pontBar: vscode.StatusBarItem;
@@ -35,7 +35,9 @@ export class PontVSCodeUI {
   }
 
   update(pontManager: PontManager) {
-    const diffs = diffPontSpecs(pontManager.localPontSpecs, pontManager.remotePontSpecs);
+    const diffs = PontSpec.diffSpecs(pontManager.localPontSpecs, pontManager.remotePontSpecs);
+
+    pontManager.localPontSpecs, pontManager.remotePontSpecs;
     const diffsCnt = diffs.length;
 
     if (this.pontBar) {

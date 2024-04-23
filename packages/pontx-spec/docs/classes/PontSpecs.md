@@ -40,7 +40,7 @@
 
 #### Defined in
 
-[src/index.ts:222](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/index.ts#L222)
+[pontx-spec/src/type.ts:986](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L986)
 
 ___
 
@@ -61,7 +61,7 @@ ___
 
 #### Defined in
 
-[src/index.ts:226](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/index.ts#L226)
+[pontx-spec/src/type.ts:990](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L990)
 
 ___
 
@@ -82,7 +82,7 @@ ___
 
 #### Defined in
 
-[src/index.ts:230](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/index.ts#L230)
+[pontx-spec/src/type.ts:994](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L994)
 
 ___
 
@@ -103,7 +103,7 @@ ___
 
 #### Defined in
 
-[src/index.ts:240](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/index.ts#L240)
+[pontx-spec/src/type.ts:1004](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L1004)
 
 ___
 
@@ -125,4 +125,4 @@ ___
 
 #### Defined in
 
-[src/index.ts:204](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/index.ts#L204)
+[pontx-spec/src/type.ts:968](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L968)

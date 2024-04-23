@@ -1,6 +1,6 @@
 import { OAS2 } from "oas-spec-ts";
-import { PontAPI, PontJsonSchema, PontDirectory } from "pontx-spec";
-import * as _ from "lodash";
+import { PontAPI, PontJsonSchema } from "pontx-spec";
+import _ from "lodash";
 import { PontSpec } from "pontx-manager";
 
 /**
@@ -194,7 +194,7 @@ export function transformCamelCase(name: string) {
 }
 
 /** 如果两个模块忽略大小写名称一致，则加以区分 */
-export function processDuplicateNameSpaceName(directories: PontSpec.PontDirectory[]) {
+export function processDuplicateNameSpaceName(directories: { namespace: string }[]) {
   directories.forEach((dir, dirIndex) => {
     const currName = dir.namespace;
     const sameMods = directories
@@ -227,12 +227,12 @@ export function processTag(tag: OAS2.TagObject) {
     return {
       title: tag.name,
       namespace: transformCamelCase(tag.description),
-    } as PontDirectory;
+    };
   } else {
     return {
       title: tag.description,
       namespace: transformCamelCase(tag.name),
-    } as PontDirectory;
+    };
   }
 }
 

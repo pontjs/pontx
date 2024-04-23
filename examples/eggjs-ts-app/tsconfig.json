@@ -1,0 +1,14 @@
+{
+  "extends": "@eggjs/tsconfig",
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "declaration": false,
+		"strict": false,
+		"noUnusedLocals": false,
+		"noUnusedParameters": false,
+    "paths": {
+      "@/module/*": ["app/module/*"]
+    },
+    "baseUrl": "."
+  }
+}

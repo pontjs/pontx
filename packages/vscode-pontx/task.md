@@ -16,7 +16,6 @@
 - 定时更新
 - spec 进阶
 - test case
-- OAS3 parser plugin
 - OneAPI parser plugin
 - more generators
 - usage report plugin

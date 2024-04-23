@@ -1,4 +1,3 @@
-import { diffPontSpec, DiffResult } from "pontx-spec-diff";
 import {
   PontSpec,
   Mod,
@@ -8,7 +7,6 @@ import {
   PontJsonPointer,
   removeMapKeys,
   PontSpecs,
-  PontDirectory,
 } from "pontx-spec";
 import { PontManager } from "pontx-manager";
 
@@ -274,13 +272,10 @@ export class PontSpecDiffs extends PontSpec {
         const fromSpecIndex = PontSpecs.getUpdateSpecIndex(fromSpecs, meta.specName);
         const toSpecIndex = PontSpecs.getSpecIndex(toSpecs, meta.specName);
         const toApis = toSpecs[toSpecIndex]?.apis;
-        const toDir = PontJsonPointer.get(
-          toSpecs,
-          `${toSpecIndex}.directories[namespace=${meta.modName}]`,
-        ) as PontDirectory;
-        if (!toDir) {
-          const result = PontJsonPointer.remove(fromSpecs, `${fromSpecIndex}.directories[namespace=${meta.modName}]`);
-          return PontJsonPointer.removeMapKeyBy(result, `${fromSpecIndex}.apis`, (key) => {
+        const toNamespaceApis = PontSpec.getApisInNamespace(toSpecs[toSpecIndex], meta.modName);
+
+        if (!toNamespaceApis?.length) {
+          return PontJsonPointer.removeMapKeyBy(fromSpecs, `${fromSpecIndex}.apis`, (key) => {
             if ((key + "" || "").split("/")?.[0] === meta.modName) {
               return true;
             }
@@ -288,15 +283,14 @@ export class PontSpecDiffs extends PontSpec {
           });
         }
 
-        const result = PontJsonPointer.set(fromSpecs, `${fromSpecIndex}.directories[namespace=${meta.modName}]`, toDir);
         // 删除原有 API
-        const deletedAPIsResult = PontJsonPointer.removeMapKeyBy(result, `${fromSpecIndex}.apis`, (key) => {
+        const deletedAPIsResult = PontJsonPointer.removeMapKeyBy(fromSpecs, `${fromSpecIndex}.apis`, (key) => {
           if ((key + "" || "").split("/")?.[0] === meta.modName) {
             return true;
           }
           return false;
         });
-        const newApis = (toDir?.children || []).reduce((result, name: string) => {
+        const newApis = (toNamespaceApis || []).reduce((result, name: string) => {
           return {
             ...result,
             [name]: toApis[name],
@@ -335,20 +329,8 @@ export class PontSpecDiffs extends PontSpec {
             [apiKey]: toApi,
           };
         });
-        // 更新 directories
-        const foundDirIndex = fromSpecs[fromSpecIndex]?.directories?.findIndex((dir) => dir.namespace === meta.modName);
-        if (foundDirIndex === -1) {
-          return updatedApiResult;
-        }
-        const newDirChildren = Object.keys(updatedApiResult[fromSpecIndex]?.apis || {})?.filter((key) =>
-          key?.includes(`${meta.modName}/`),
-        );
-        return PontJsonPointer.update(updatedApiResult, `${fromSpecIndex}.directories.${foundDirIndex}`, (dir) => {
-          return {
-            ...dir,
-            children: newDirChildren,
-          };
-        });
+
+        return updatedApiResult;
       }
       case MetaType.Struct: {
         const fromSpecIndex = PontSpecs.getUpdateSpecIndex(fromSpecs, meta.specName);
@@ -358,5 +340,21 @@ export class PontSpecDiffs extends PontSpec {
         return PontJsonPointer.set(fromSpecs, `${fromSpecIndex}.definitions.${meta.structName}`, toStruct);
       }
     }
+  }
+}
+
+export function getMetaTypeByContextValue(contextValue: string) {
+  if (contextValue.endsWith("ChangesAPI")) {
+    return MetaType.API;
+  } else if (contextValue.endsWith("ChangesStruct")) {
+    return MetaType.Struct;
+  } else if (contextValue.endsWith("ChangesSpec")) {
+    return MetaType.Spec;
+  } else if (contextValue.endsWith("ChangesDefinitions")) {
+    return MetaType.Definitions;
+  } else if (contextValue.endsWith("ChangesMod")) {
+    return MetaType.Mod;
+  } else if (contextValue.endsWith("Changes")) {
+    return MetaType.All;
   }
 }

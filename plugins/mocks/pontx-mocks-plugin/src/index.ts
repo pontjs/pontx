@@ -112,7 +112,7 @@ export class DefaultPontxMocksPlugin extends PontxMocksPlugin {
       const originConf = manager.innerManagerConfig?.origins?.find((origin) => origin?.name == spec?.name);
       if (originConf) {
         const mocksOptions = originConf?.plugins?.mocks?.options;
-        if (mocksOptions && Object.prototype.hasOwnProperty.call(mocksOptions, "enable") && !mocksOptions.enabled) {
+        if (mocksOptions && Object.prototype.hasOwnProperty.call(mocksOptions, "enable") && !mocksOptions.enable) {
           return false;
         }
       }
@@ -140,17 +140,20 @@ export class DefaultPontxMocksPlugin extends PontxMocksPlugin {
   static getSpecFileStructure(spec: PontxSpec.PontSpec, options: MocksOptions, mocksData: any) {
     const oas3Spec = transformSchema(buildOas3Spec(spec), options.schemaMapper);
     const generator = new MocksCodeGenerator(oas3Spec, options, mocksData);
-    const specStructure = {
-      ["index.ts"]: generator.generateSpecIndexCode(),
-    };
+    let specStructure = {};
     const mods = PontxSpec.PontSpec.getMods(oas3Spec);
-    mods.forEach((mod) => {
-      if (typeof mod.name === "string") {
-        specStructure[mod.name] = generator.generateModMocksCode(mod);
-      } else {
-        specStructure["mod"] = generator.generateModMocksCode(mod);
-      }
-    });
+    if (mods?.length === 1 && typeof mods[0]?.name === "symbol") {
+      specStructure = generator.generateSpecIndexCode();
+    } else {
+      specStructure[`index.ts`] = generator.generateSpecIndexCode();
+      mods.forEach((mod) => {
+        if (typeof mod.name === "string") {
+          specStructure[mod.name] = generator.generateModMocksCode(mod);
+        } else {
+          specStructure["mod"] = generator.generateModMocksCode(mod);
+        }
+      });
+    }
     if (oas3Spec.name) {
       return { [oas3Spec.name]: specStructure };
     }
@@ -174,6 +177,10 @@ class MocksCodeGenerator {
   generateSpecIndexCode() {
     const mods = PontxSpec.PontSpec.getMods(this.oas3Spec);
 
+    if (mods.length === 1 && typeof mods[0]?.name === "symbol") {
+      return this.generateModMocksCode(mods[0], this.oas3Spec?.name);
+    }
+
     return mods
       .map((mod) => {
         return `export * as ${mod.name} from './${mod.name}';`;
@@ -194,7 +201,14 @@ class MocksCodeGenerator {
 
   generateAPIMocksCode(modName: string, api: PontxSpec.PontAPI, indentationCnt = 4) {
     const schema = api?.responses?.["200"]?.schema;
-    let mocksData = _.get(this.preMocksData, `${modName}.${api.name}`);
+    let mocksData;
+
+    if (typeof modName === "symbol") {
+      mocksData = _.get(this.preMocksData, `${api.name}`);
+    } else {
+      mocksData = _.get(this.preMocksData, `${modName}.${api.name}`);
+    }
+
     if (!mocksData && schema) {
       mocksData = this.generateSchemaMocksData(schema);
     }
@@ -207,16 +221,26 @@ class MocksCodeGenerator {
     return indentation(indentationCnt)(mocksCode).trimStart();
   }
 
-  generateModMocksCode(mod: PontxSpec.Mod) {
-    const namespace = mod.name;
-    const namespacePath = this.oas3Spec?.name ? `API.${this.oas3Spec.name}.${namespace}` : `API.${namespace}`;
+  generateModMocksCode(mod: PontxSpec.Mod, specName = "") {
+    const isSymbol = typeof mod.name === "symbol";
+    const namespace = isSymbol ? "mod" : (mod.name as string);
+    let namespacePath = this.oas3Spec?.name ? `API.${this.oas3Spec.name}.${namespace}` : `API.${namespace}`;
 
     if (mod.interfaces.length) {
       const apiFiles = mod.interfaces
         .map((api) => {
+          if (isSymbol) {
+            return [
+              `import { API } from "../../sdk/${specName}/type";`,
+              ``,
+              `export const ${api.name} = async (params): Promise<API.${api.name}.APIResponse> => {`,
+              `  return ${this.generateAPIMocksCode(mod.name as any, api, 4)};`,
+              `};`,
+            ].join("\n");
+          }
           return [
             `export const ${api.name}: typeof ${namespacePath}.${api.name}.request = async (params) => {`,
-            `  return ${this.generateAPIMocksCode(mod.name as string, api, 4)};`,
+            `  return ${this.generateAPIMocksCode(namespace as string, api, 4)};`,
             `};`,
           ].join("\n");
         })
@@ -254,6 +278,12 @@ const buildOas3Spec = (spec: PontxSpec.PontSpec) => {
         $ref: "#/definitions/" + schema.originRef,
         ...rest,
       };
+    }
+    if ((schema.type as any) === "any") {
+      return {
+        ...schema,
+        type: "object",
+      } as any;
     }
     return schema;
   };

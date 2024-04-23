@@ -1,6 +1,6 @@
 {
   "name": "pontx-spec-diff",
-  "version": "0.3.88",
+  "version": "0.4.12",
   "description": "pont spec",
   "module": "es6/index.js",
   "main": "lib/index.js",
@@ -8,16 +8,16 @@
   "scripts": {
     "watch": "tsc --build --watch",
     "clean": "rimraf lib",
-    "build:commonjs": "npm run clean && tsc -p ./tsconfig.commonjs.json",
+    "build:extra": "tsc -p ./tsconfig.commonjs.json",
     "build:commonjs:watch": "npm run clean && tsc -p ./tsconfig.commonjs.json -w",
-    "build": "npm run clean && tsc --build && tsc -m CommonJS --outDir lib",
+    "build": "tsc --build",
     "test": "tsc -p tests/tsconfig.json"
   },
   "peerDependencies": {
     "lodash": "*"
   },
   "dependencies": {
-    "pontx-spec": "^0.3.88"
+    "pontx-spec": "^0.4.12"
   },
   "files": [
     "lib/",

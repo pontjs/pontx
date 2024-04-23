@@ -1,0 +1,4 @@
+{
+  "type": "object",
+  "$ref": "pont-schema.json#/definitions/api"
+}

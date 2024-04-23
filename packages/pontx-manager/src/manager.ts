@@ -9,6 +9,14 @@ import * as _ from "lodash";
 import { FileGenerator } from "pontx-generate-core";
 import { fetchRemoteCacheSpec } from "./utils";
 import stringify from "fast-json-stable-stringify";
+import { URL } from "url";
+import {
+  GenerateAIOption,
+  GenerateResponse,
+  createAICodeGenerator,
+  listPrompts,
+  listPromptsByOption,
+} from "./generateAICode";
 
 const enhancedImmutableUpdate = (path: any[], updator, value) => {
   if (!path?.length) {
@@ -34,6 +42,7 @@ export class PontManager {
   /** 从远程更新的元数据 */
   remotePontSpecs = [] as PontSpec[];
   logger = new PontLogger();
+  prompts = [];
 
   /** 当前管理的 originName */
   currentOriginName = "";
@@ -116,6 +125,8 @@ export class PontManager {
         logger.info(`本地 ${emptySpecs.join(", ")} SDK为空，已为您自动生成...`);
         await PontManager.generateCode(manager);
       }
+
+      await PontManager.fetchAIPrompts(manager, logger);
 
       return manager;
     } catch (e) {
@@ -220,13 +231,21 @@ export class PontManager {
   static async fetchRemotePontMeta(manager: PontManager): Promise<PontManager> {
     const remoteSpecPromises = manager.innerManagerConfig.origins.map(async (origin) => {
       const fetchPlugin = await Promise.resolve(origin.plugins.fetch.instance);
+      const transformAfterFetchPlugin = await Promise.resolve(origin.plugins.transformAfterFetch?.instance);
       const transformPlugin = await Promise.resolve(origin.plugins.transform?.instance);
-      const metaStr = await fetchPlugin.apply(origin, origin.plugins.fetch.options);
+      let metaStr = await fetchPlugin.apply(origin, origin.plugins.fetch.options);
 
       if (!metaStr) {
         // manager.logger.error("未获取到远程数据");
         const cacheSpec = await fetchRemoteCacheSpec(manager.logger, manager.innerManagerConfig.outDir, origin.name);
         return cacheSpec;
+      }
+      if (transformAfterFetchPlugin?.apply) {
+        metaStr = await transformAfterFetchPlugin.apply(
+          metaStr,
+          origin.name,
+          origin.plugins.transformAfterFetch?.options,
+        );
       }
 
       const parserPlugin = await Promise.resolve(origin.plugins.parser.instance);
@@ -272,6 +291,85 @@ export class PontManager {
     try {
       const generatorPlugin = await Promise.resolve(manager.innerManagerConfig.plugins.generate.instance);
       return Promise.resolve(generatorPlugin.apply(manager, manager.innerManagerConfig.plugins.generate.options));
+    } catch (e) {
+      manager.logger.error(e.message, e.stack);
+    }
+  }
+
+  static checkIsPlatform(manager: PontManager) {
+    return (manager.innerManagerConfig?.origins || [])?.some((origin) => {
+      try {
+        const url = new URL(origin.url);
+
+        if (url?.searchParams?.get("token") && url.pathname?.match(/^\/openapi\/projects\/[a-zA-Z0-9-_]+\/spec$/)) {
+          return true;
+        }
+      } catch (e) {}
+    });
+  }
+
+  static async fetchAIPrompts(manager: PontManager, logger: PontLogger) {
+    try {
+      const promises = (manager.innerManagerConfig?.origins || [])?.map(async (origin) => {
+        let token = origin?.ai?.token;
+        let projectName = origin?.ai?.projectName;
+
+        if (token && projectName) {
+          const prompts = await listPrompts(projectName, token);
+
+          if (!Array.isArray(prompts) || !prompts?.length) {
+            logger.error("获取 Pontx AI 提示词失败");
+            origin.ai.prompts = [];
+          } else {
+            origin.ai.prompts = (prompts || []).map((prompt) => {
+              return {
+                specName: origin?.name,
+                ...(prompt || {}),
+              };
+            });
+          }
+        }
+        return Promise.resolve([]);
+      });
+
+      return Promise.all(promises);
+    } catch (e) {
+      logger.error("获取 Pontx AI 提示词失败: " + e.messager, e.stack);
+    }
+  }
+
+  static listPromptsBySpecType(manager: PontManager, specName: string, specType: GenerateAIOption["specType"]) {
+    const origin =
+      manager.innerManagerConfig.origins.find((origin) => origin.name === specName) ||
+      manager.innerManagerConfig.origins?.[0];
+
+    if (origin?.ai?.prompts?.length) {
+      return listPromptsByOption(origin?.ai?.prompts, { specType, specName } as any, { languages: [], scenes: [] });
+    }
+    return [];
+  }
+
+  static async generateAICode(manager: PontManager, options: GenerateAIOption): Promise<GenerateResponse> {
+    try {
+      const specName = options.specName || manager.currentOriginName;
+      const origin =
+        manager.innerManagerConfig.origins.find((origin) => origin.name === specName) ||
+        manager.innerManagerConfig.origins?.[0];
+
+      if (!origin?.ai?.prompts?.length) {
+        return;
+      }
+
+      const foundPrompt = origin.ai.prompts?.find((prompt) => prompt.id === options.promptId);
+      if (foundPrompt && origin.ai.token) {
+        return createAICodeGenerator(
+          options.promptId,
+          origin.ai.projectName,
+          options.variables,
+          options.userPrompt,
+          origin.ai.token,
+        );
+      }
     } catch (e) {
       manager.logger.error(e.message, e.stack);
     }

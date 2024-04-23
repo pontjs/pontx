@@ -11,7 +11,7 @@ export class FileStructure {
 
   static async generateFiles(fileStructure: FileStructure, basePath: string) {
     const promises = _.map(fileStructure, async (value: string | {}, name) => {
-      const currPath = `${basePath}/${name}`;
+      const currPath = path.join(basePath, name);
 
       if (typeof value === "string") {
         return fs.writeFile(currPath, value, "utf8");
@@ -148,6 +148,7 @@ export class FileGenerator {
         fileStructure: struct,
       });
     } else if (specs.length) {
+      fs.mkdirpSync(outDir);
       return fs.writeFile(path.join(outDir, ".remote"), JSON.stringify(specs, null, 2), "utf8");
     }
   }

@@ -1,16 +1,9 @@
 import fetch from "node-fetch";
-import { APIs, defs, pontxSDK } from "./services/sdk";
+import { APIs, setDefaults, setRootDefaults } from "./services/sdk";
 
-const myPontxFetcher = pontxSDK.fetcher;
-
-myPontxFetcher.protocol = "https";
-
-myPontxFetcher.request = async function (params: any, requestOptions, config) {
-  const { url, options } = await this.beforeRequest(params, requestOptions, config!);
-
-  const result = await fetch(url, options);
-  return this.handleResponse(result as any, url, options, config!);
-};
+setRootDefaults({
+  baseURL: "https://petstore.swagger.io/v2",
+});
 
 // reqeust API by Node.js
 APIs.petstore.pet.findPetsByStatus
@@ -23,22 +16,15 @@ APIs.petstore.pet.findPetsByStatus
     });
   });
 APIs.petstore.pet.addPet
-  .request(
-    // params
-    {},
-    // request header
-    {
-      body: {
-        name: "doggie",
-        photoUrls: ["string"],
-        tags: [
-          {
-            id: 0,
-            name: "string",
-          },
-        ],
-        status: "available",
+  .request({
+    name: "doggie",
+    photoUrls: ["string"],
+    tags: [
+      {
+        id: 0,
+        name: "string",
       },
-    },
-  )
+    ],
+    status: "available",
+  })
   .then((pets) => {});

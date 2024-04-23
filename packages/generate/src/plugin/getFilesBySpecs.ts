@@ -5,24 +5,25 @@ import { PontManager } from "pontx-manager";
 import { specIndexDTsWithoutController } from "./template/specIndexDTsWithoutController";
 import { specIndexDTsWithController } from "./template/specIndexDTsWithController";
 import { specJSON } from "./template/metaJSON";
-import { specInterfaceDts } from "./template/specInterfaceDts";
 import { getRootFiles } from "./template/rootFiles";
+import { SpecTsOptions, apiRequestTs, specDTs, specJs } from "./template/specTs";
+import { getFetchTs } from "./template/fetch";
+import { specIndexTs } from "./template/specIndex";
 
-export const getFilesBySpecs: GetFilesBySpecs = async (origins, requestMethodsTypeCode?: string) => {
+export const getFilesBySpecs: GetFilesBySpecs = async (origins, options) => {
   const specDirs = _.map(origins, (origin) => {
     const spec = origin.spec;
     const withoutControllers = PontSpec.PontSpec.getMods(spec)?.[0]?.name === PontSpec.WithoutModsName;
-    const specDts = withoutControllers ? specIndexDTsWithoutController(spec) : specIndexDTsWithController(spec);
-    const myRequestMethodsTypeCode =
-      origin.conf?.plugins?.generate?.options?.requestMethodsCode ||
-      origin.conf?.plugins?.generate?.options?.requestMethods ||
-      requestMethodsTypeCode;
+    const typeDts = withoutControllers ? specIndexDTsWithoutController(spec) : specIndexDTsWithController(spec);
+    const apiSDKOptions = new SpecTsOptions(options);
 
     return {
       [spec.name]: {
-        "type.d.ts": specDts,
-        "meta.json": specJSON(spec),
-        "spec.d.ts": specInterfaceDts(spec, myRequestMethodsTypeCode),
+        "type.d.ts": typeDts,
+        "meta.js": specJSON(spec),
+        "spec.d.ts": specDTs(spec),
+        "index.ts": specIndexTs(),
+        "request.ts": apiRequestTs(apiSDKOptions),
         [PontManager.lockFilename]: JSON.stringify(spec, null, 2),
       },
     };

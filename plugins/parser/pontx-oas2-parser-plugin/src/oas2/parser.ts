@@ -11,7 +11,7 @@ import {
   processTag,
   processDuplicateNameSpaceName,
 } from "./utils";
-import * as _ from "lodash";
+import _ from "lodash";
 import { compileTemplate, parseAst2PontJsonSchema } from "./compiler";
 import { parseJsonSchema } from "./schema";
 
@@ -35,7 +35,7 @@ export function parseOAS2Interface(
   });
 
   const parameters = (inter.parameters || []).map((param) => {
-    const { required, name, schema, ...rest } = param;
+    const { required, name, schema, ["in"]: paramIn, ...rest } = param;
     const paramSchema = { ...rest, ...(schema || {}) };
 
     return {
@@ -73,17 +73,30 @@ export function parseSwagger2APIs(swagger: OAS2.SwaggerObject, defNames: string[
   ] as OAS2.TagObject[];
   const allSwaggerInterfaces = [] as Array<OAS2.OperationObject & { path: string; method: string }>;
 
-  Object.keys(swagger.paths).forEach((path) => {
-    const methodInters = swagger.paths[path];
+  if (!swagger.paths) {
+    return {
+      directories: [],
+      apis: {},
+    };
+  }
 
-    // methodInters.parameters
+  Object.keys(swagger.paths).forEach((path) => {
+    const methodInters = swagger.paths?.[path] || {};
 
     const methods = ["get", "delete", "put", "post", "patch", "options", "head"];
     methods.forEach((method) => {
-      const inter = methodInters[method] as OAS2.OperationObject;
+      const inter = methodInters?.[method] as OAS2.OperationObject;
       if (!inter) {
         return;
       }
+      if (inter.tags?.length && tags.every((tag) => tag.name !== inter.tags[0])) {
+        tags.push({
+          name: inter.tags[0],
+          description: inter.tags[0],
+          externalDocs: null,
+        });
+      }
+
       allSwaggerInterfaces.push({
         ...inter,
         path,
@@ -137,15 +150,14 @@ export function parseSwagger2APIs(swagger: OAS2.SwaggerObject, defNames: string[
 
   processDuplicateNameSpaceName(directories);
 
-  const retDirs = _.sortBy(directories, (dir) => dir.namespace).map((dir) => {
-    const { interfaces, ...rest } = dir;
-    return {
-      ...rest,
-      children: interfaces.map((api) => `${dir.namespace}/${api.name}`),
-    };
+  const namespaces = {};
+  _.sortBy(directories, (dir) => dir.namespace).forEach((dir) => {
+    if (dir.namespace && dir.title) {
+      namespaces[dir.namespace] = dir.title;
+    }
   });
   return {
-    directories: retDirs,
+    namespaces,
     apis,
   };
 }
@@ -186,6 +198,10 @@ export function parseOAS2(swagger: OAS2.SwaggerObject, name = ""): PontSpec.Pont
           defNames,
         });
       });
+      // 修复一些不合法的数据源，只有 properties 属性，没有 type 属性。
+      if (!clazzSchema.type && !clazzSchema.additionalProperties && !clazzSchema.items) {
+        clazzSchema.type = "object";
+      }
     }
     if (additionalProperties) {
       clazzSchema.additionalProperties = parseJsonSchema(additionalProperties, {
@@ -206,7 +222,7 @@ export function parseOAS2(swagger: OAS2.SwaggerObject, name = ""): PontSpec.Pont
     };
   });
   baseClasses = deleteDuplicateBaseClass(baseClasses);
-  const { apis, directories } = parseSwagger2APIs(swagger, defNames);
+  const { apis, namespaces } = parseSwagger2APIs(swagger, defNames);
 
   const pontDs = {
     definitions: baseClasses.reduce((result, base) => {
@@ -216,11 +232,16 @@ export function parseOAS2(swagger: OAS2.SwaggerObject, name = ""): PontSpec.Pont
       };
     }, {}),
     apis,
-    directories,
+    namespaces,
     name,
-    description: swagger.info?.description || swagger.info?.title,
+    securitySchemes: swagger.securityDefinitions,
+    security: swagger.security,
+    version: swagger.info?.version,
+    title: swagger.info?.title,
+    description: swagger.info?.description,
     host: swagger.host,
     basePath: swagger.basePath,
+    externalDocs: swagger.externalDocs,
   } as PontSpec.PontSpec;
 
   try {

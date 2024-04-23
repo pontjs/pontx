@@ -1,0 +1,40 @@
+.semix-form-title {
+  line-height: 30px;
+  position: relative;
+  text-align: right;
+
+  .title {
+    &.required {
+      &::before {
+        display: inline-block;
+        margin-right: 4px;
+        color: #ff4d4f;
+        font-size: 14px;
+        line-height: 1;
+        content: "*";
+      }
+    }
+  }
+
+  .title {
+    font-size: 12px;
+    color: #1a1a1a;
+    font-weight: normal;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .desc {
+    font-size: 12px;
+    color: #666;
+    margin-left: 8px;
+  }
+
+  .pull-right {
+    float: right;
+
+    .op {
+      margin-right: 8px;
+    }
+  }
+}

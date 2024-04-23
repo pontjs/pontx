@@ -18,11 +18,9 @@
       "pontx-mocks-plugin": ["plugins/mocks/pontx-mocks-plugin"],
       "pontx-generate-core": ["plugins/generate/core"],
       "pontx-async-sdk-plugin": ["plugins/generate/pontx-async-sdk-plugin"],
-      "pontx-react-hooks-sdk-plugin": ["plugins/generate/pontx-react-hooks-sdk-plugin"],
       "pontx-oas2-parser-plugin": ["plugins/parser/pontx-oas2-parser-plugin"],
       "pontx-oas3-parser-plugin": ["plugins/parser/pontx-oas3-parser-plugin"],
-      "pontx-sdk-core": ["sdk/pontx-sdk-core"],
-      "pontx-hooks-sdk": ["sdk/pontx-hooks-sdk"]
+      "pontx-sdk-core": ["sdk/pontx-sdk-core"]
     }
   },
   "include": ["packages/", "plugins/"],
@@ -31,6 +29,8 @@
     "packages/pontx-ui/node_modules/",
     "packages/oas-spec-ts/scripts/",
     "packages/pontx-ui",
+    "packages/pontx-platform",
+    "packages/pontx-server",
     "packages/vscode-pontx",
     "packages/pontx-spec-diff/tests/",
     "packages/jsonschema-form"
@@ -64,9 +64,6 @@
       "path": "plugins/mocks/pontx-mocks-plugin"
     },
     {
-      "path": "plugins/generate/pontx-react-hooks-sdk-plugin"
-    },
-    {
       "path": "plugins/generate/pontx-async-sdk-plugin"
     },
     {
@@ -77,9 +74,6 @@
     },
     {
       "path": "sdk/pontx-sdk-core"
-    },
-    {
-      "path": "sdk/pontx-hooks-sdk"
     }
   ]
 }

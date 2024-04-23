@@ -90,6 +90,21 @@ export function parseAst2PontJsonSchema(
   return schema;
 }
 
+export function checkHasAst(template: string, keyword = "#/definitions/") {
+  if (template.startsWith(keyword)) {
+    template = template.slice(keyword.length);
+  }
+  if (!template) {
+    return false;
+  }
+
+  if (template?.includes("«") || template?.includes("»") || template?.includes(",")) {
+    return true;
+  }
+
+  return false;
+}
+
 // swagger v2 中 definitions 在 OpenAPI 3 中标准化为了 components，为复用该函数，抽取出 keyword 参数
 export function compileTemplate(template: string, keyword = "#/definitions/") {
   // 词法分析

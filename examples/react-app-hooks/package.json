@@ -7,14 +7,14 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "sdk": "pontx generate",
+    "sdk:test": "../../packages/pontx-cli/bin/init.js generate",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
   "dependencies": {
     "swr": "^2.2.4",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "pontx-hooks-sdk": "^0.3.87"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",
@@ -25,7 +25,7 @@
     "eslint": "^8.45.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
-    "pontx-cli": "^0.3.68",
+    "pontx-cli": "^0.4.4",
     "typescript": "^5.0.2",
     "vite": "^4.4.5"
   },

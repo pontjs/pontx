@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs-extra";
 import { PontJsonPointer, PontSpec, PontSpecs } from "pontx-spec";
-const configSchema = require("pontx-spec/configSchema.json");
+const configSchema = require("pontx-spec/schemas/pontx-config-schema.json");
 
 const { createServerContent } = require("../media/lib/index");
 

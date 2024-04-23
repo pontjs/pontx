@@ -1,8 +1,6 @@
 {
   "outDir": "../src/services",
-  "plugins": {
-    "generate": "../../../plugins/generate/pontx-async-sdk-plugin"
-  },
+  "plugins": {},
   "origin": {
     "url": "https://petstore.swagger.io/v2/swagger.json",
     "name": "petstore"

@@ -1,6 +1,6 @@
 {
-  "packages": ["packages/**", "plugins/**", "sdk/**", "examples/**"],
-  "version": "0.3.88",
+  "packages": ["packages/**", "plugins/**", "sdk/**", "examples/**", "semix/**"],
+  "version": "0.4.12",
   "useWorkspaces": true,
   "command": {
     "registry": "https://registry.npmmirror.com",
@@ -9,6 +9,7 @@
       "message": "chore(release): publish %s"
     },
     "bootstrap": {
+      "npmClient": "yarn",
       "npmClientArgs": ["--registry https://registry.npmmirror.com"]
     }
   },

@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 import { pontUI } from "./UI";
 import { PontSpec } from "pontx-spec";
-import { PontAPIExplorer, PontExplorer } from "./explorer";
+import { PontExplorer } from "./explorer";
 import { PontCommands } from "./commands";
 import * as _ from "lodash";
 import { batchDispose, showProgress, VSCodeLogger } from "./utils";

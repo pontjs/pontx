@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.build.json",
+  "include": ["./src/"],
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": false,
+    "jsx": "react",
+    "lib": ["ES2017", "ESNext", "DOM"],
+    "moduleResolution": "node",
+    "composite": true
+  }
+}

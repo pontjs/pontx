@@ -2,7 +2,7 @@
   "name": "vscode-pontx",
   "displayName": "pontx",
   "description": "",
-  "version": "0.3.85",
+  "version": "0.4.6",
   "private": true,
   "publisher": "jasonHzq",
   "license": "MIT",
@@ -22,11 +22,11 @@
     "jsonValidation": [
       {
         "fileMatch": "pontx-config.json",
-        "url": "pontx://schemas/config-plugin-schema"
+        "url": "./schemas/pontx-config-schema.json"
       },
       {
         "fileMatch": "*.rcapi.json",
-        "url": "./resource-control-api-protocol.json"
+        "url": "./schemas/resource-control-api-protocol.json"
       },
       {
         "fileMatch": [
@@ -36,19 +36,19 @@
           "removeSpec.json",
           "spec.json"
         ],
-        "url": "./node_modules/pontx-spec/pontSchema.json"
+        "url": "./schemas/pontx-schema.json"
       },
       {
         "fileMatch": [
           "*.api.json"
         ],
-        "url": "./node_modules/pontx-spec/apiSchema.json"
+        "url": "./schemas/api-schema.json"
       },
       {
         "fileMatch": [
           "*.struct.json"
         ],
-        "url": "./node_modules/pontx-spec/structSchema.json"
+        "url": "./schemas/struct-schema.json"
       }
     ],
     "commands": [
@@ -408,7 +408,46 @@
           "group": "inline"
         }
       ]
+    },
+    "configuration": {
+      "title": "Pontx 配置",
+      "properties": {
+        "pontx.ai.enable": {
+          "type": "boolean",
+          "title": "是否启用 AI",
+          "default": true
+        },
+        "pontx.ai.variables.ui-library": {
+          "type": "string",
+          "title": "前端组件库",
+          "description": "前端组件库",
+          "default": "antd",
+          "enum": [
+            "antd",
+            "@alicloud/console-components",
+            "@arco-design/web-react"
+          ]
+        },
+        "pontx.ai.variables": {
+          "type": "object",
+          "title": "AI 变量配置",
+          "additionalProperties": {
+            "type": "string",
+            "description": "变量"
+          }
+        }
+      }
+    },
+    "configurationDefaults": {
+      "pontx.ai.enable": true,
+      "pontx.ai.variables.ui-library": "antd",
+      "pontx.ai.variables": {
+        "ui-library": "antd"
+      }
     }
+  },
+  "resolutions": {
+    "typescript": "5.3.3"
   },
   "scripts": {
     "clean": "rimraf dist && rimraf tsconfig.tsbuildinfo",
@@ -419,6 +458,8 @@
     "reinstall": "rimraf node_modules && npm i",
     "afterinstall": "cd ../../ && lerna bootstrap",
     "package": "vsce package",
+    "release": "vsce publish",
+    "build:analy": "ncc build ./src/extension.ts -o dist --stats-out stats.json && webpack-bundle-analyzer stats.json",
     "build:ncc": "rimraf dist && ncc build ./src/extension.ts -o dist -m --license license.txt && mv dist/index.js dist/extension.js && mv dist/license.txt ./LICENSE.txt",
     "vscode:prepublish": "npm run build:ncc",
     "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --minify",
@@ -430,16 +471,15 @@
     "@vscode/codicons": "^0.0.32",
     "fs-extra": "^10.1.0",
     "mockjs": "^1.0.1-beta3",
-    "pontx-async-sdk-plugin": "^0.3.75",
-    "pontx-generate-core": "^0.3.75",
-    "pontx-manager": "^0.3.75",
-    "pontx-meta-fetch-plugin": "^0.3.75",
-    "pontx-mocks-plugin": "^0.3.75",
-    "pontx-oas2-parser-plugin": "^0.3.75",
-    "pontx-oas3-parser-plugin": "^0.3.75",
-    "pontx-react-hooks-sdk-plugin": "^0.3.75",
-    "pontx-spec": "^0.3.75",
-    "pontx-spec-diff": "^0.3.75"
+    "pontx-async-sdk-plugin": "^0.4.4",
+    "pontx-generate-core": "^0.4.4",
+    "pontx-generate": "^0.4.4",
+    "pontx-manager": "^0.4.4",
+    "pontx-meta-fetch-plugin": "^0.4.4",
+    "pontx-mocks-plugin": "^0.4.4",
+    "pontx-oas2-parser-plugin": "^0.4.4",
+    "pontx-oas3-parser-plugin": "^0.4.4",
+    "pontx-spec": "^0.4.4"
   },
   "icon": "resources/pontx.png",
   "repository": {
@@ -457,8 +497,8 @@
     "@vitejs/plugin-react": "^1.3.2",
     "prettier": "*",
     "rimraf": "^3.0.2",
+    "webpack-bundle-analyzer": "^4.10.1",
     "typescript": "^5.2.2",
-    "vite": "^2.9.7",
     "vsce": "^2.15.0"
   }
 }

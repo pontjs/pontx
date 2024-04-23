@@ -1,6 +1,5 @@
 import * as PontSpec from "pontx-spec";
 import { OAS2, OAS3 } from "oas-spec-ts";
-import { parse } from "url";
 import {
   getIdentifierFromOperatorId,
   getIdentifierFromUrl,
@@ -14,7 +13,7 @@ import {
   transformCamelCase,
   hasChinese,
 } from "./utils";
-import * as _ from "lodash";
+import _ from "lodash";
 import { compileTemplate, parseAst2PontJsonSchema } from "./compiler";
 import { parseJsonSchema } from "./schema";
 import { Translate } from "pontx-manager/src/translator";
@@ -177,23 +176,21 @@ export async function parseSwagger2APIs(swagger: OAS3.OpenAPIObject, defNames: s
 
   processDuplicateNameSpaceName(directories);
 
-  const retDirs = _.sortBy(directories, (dir) => dir.namespace).map((dir) => {
+  const namespaces = {};
+  _.sortBy(directories, (dir) => dir.namespace).forEach((dir) => {
     const { interfaces, ...rest } = dir;
-    return {
-      ...rest,
-      children: interfaces.map((api) => `${dir.namespace}/${api.name}`),
-    };
+
+    if (dir.namespace && dir.title) {
+      namespaces[dir.namespace] = dir.title;
+    }
   });
-  return {
-    directories: retDirs,
-    apis,
-  };
+  return { namespaces, apis };
 }
 
 export async function parseOAS3(
   swagger: OAS3.OpenAPIObject,
   name: string,
-  translator: Translate,
+  translator?: Translate,
   originUrl?: string,
 ): Promise<PontSpec.PontSpec> {
   const draftClasses = _.map(swagger?.components?.schemas || {}, (schema: any, defName) => {
@@ -251,18 +248,24 @@ export async function parseOAS3(
     };
   });
   baseClasses = deleteDuplicateBaseClass(baseClasses);
-  const { apis, directories } = await parseSwagger2APIs(swagger, defNames, translator);
+  const { apis, namespaces } = await parseSwagger2APIs(swagger, defNames, translator);
 
   let host, basePath;
   const server = (swagger.servers || [])?.[0];
 
   if (server?.url) {
-    const url = parse(server.url || "");
-    host = url?.hostname;
-    basePath = url?.pathname;
+    if (server?.url?.startsWith?.("/")) {
+      basePath = server.url;
+    } else {
+      try {
+        const url = new URL(server.url || "");
+        host = url?.hostname;
+        basePath = url?.pathname;
+      } catch (e) {}
+    }
 
     if (!host && originUrl) {
-      host = parse(originUrl)?.hostname;
+      host = new URL(originUrl)?.hostname;
     }
   }
 
@@ -274,7 +277,7 @@ export async function parseOAS3(
       };
     }, {}),
     apis,
-    directories,
+    namespaces,
     name,
     basePath,
     description: swagger?.info?.description || swagger?.info?.title || "",

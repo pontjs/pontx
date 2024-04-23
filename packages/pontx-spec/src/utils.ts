@@ -1,5 +1,5 @@
 import immutableSet from "lodash/fp/set";
-import * as _ from "lodash";
+import _ from "lodash";
 
 export type ObjectMap<T> = {
   [key: string]: T;

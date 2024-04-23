@@ -1,6 +1,14 @@
 import "./App.css";
 import * as React from "react";
-import { PetstoreAPIs } from "./services/sdk";
+import { PetstoreAPIs, defs } from "./services/sdk";
+import { setDefaults } from "./services/sdk/petstore";
+
+setDefaults({
+  headers: {
+    accept: "application/json",
+  },
+  baseURL: "https://petstore.swagger.io/v2",
+});
 
 function App() {
   const [status, setStatus] = React.useState<defs.petstore.Pet["status"]>("available");

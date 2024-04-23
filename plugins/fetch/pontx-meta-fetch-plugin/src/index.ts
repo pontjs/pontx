@@ -48,17 +48,24 @@ export default class PontMetaFetchPlugin extends PontxFetchPlugin {
   async apply(originConf: InnerOriginConfig, options: any) {
     let remoteStr = "";
 
-    try {
-      remoteStr = await fetch(originConf.url, {}).then((res) => res.text());
-    } catch (e) {
-      this.logger.error({
-        originName: originConf.name,
-        message: `远程数据获取失败，请确认您配置的 pont origin url(${
-          originConf.url || ""
-        })，在您当前的网络环境中允许访问。${e.message}`,
-        processType: "fetch",
-      });
-      return;
+    if (originConf.url?.startsWith("./") || originConf.url?.startsWith("../")) {
+      const filePath = path.join(this.innerConfig.configDir, originConf.url);
+      try {
+        remoteStr = await fs.readFile(filePath, "utf-8");
+      } catch (e) {}
+    } else {
+      try {
+        remoteStr = await fetch(originConf.url, {}).then((res) => res.text());
+      } catch (e) {
+        this.logger.error({
+          originName: originConf.name,
+          message: `远程数据获取失败，请确认您配置的 pont origin url(${
+            originConf.url || ""
+          })，在您当前的网络环境中允许访问。${e.message}`,
+          processType: "fetch",
+        });
+        return;
+      }
     }
 
     try {

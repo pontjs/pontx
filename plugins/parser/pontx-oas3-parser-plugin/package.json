@@ -1,6 +1,6 @@
 {
   "name": "pontx-oas3-parser-plugin",
-  "version": "0.3.88",
+  "version": "0.4.12",
   "description": "OpenAPI Spec parse pont",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -8,12 +8,14 @@
     "pretest": "npm run build",
     "watch": "tsc --build --watch",
     "release": "npm publish",
+    "build:extra": "tsc -p tsconfig.es6.json",
+    "build:extra:watch": "tsc -p tsconfig.es6.json -w",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "build": "npm run clean && tsc --build"
   },
   "dependencies": {
-    "oas-spec-ts": "^0.3.88",
-    "pontx-spec": "^0.3.88"
+    "oas-spec-ts": "^0.4.12",
+    "pontx-spec": "^0.4.12"
   },
   "peerDependencies": {
     "lodash": "*",

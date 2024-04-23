@@ -1,6 +1,6 @@
 {
   "name": "pontx-meta-fetch-plugin",
-  "version": "0.3.88",
+  "version": "0.4.12",
   "description": "OpenAPI pont spec",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",

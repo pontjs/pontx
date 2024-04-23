@@ -1,0 +1,199 @@
+{
+  "title": "JSON schema for rap2ts configuration files",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "definitions": {
+    "originUrl": {
+      "description": "api spec remote url",
+      "type": "string"
+    },
+    "originEnv": {
+      "description": "指定不同环境的配置信息，方便切换配置",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/originUrl"
+        },
+        {
+          "url": {
+            "$ref": "#/definitions/originUrl"
+          }
+        }
+      ]
+    },
+    "originConfig": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "有多个元数据来源时，指定每个数据元名称"
+        },
+        "url": {
+          "$ref": "#/definitions/originUrl"
+        },
+        "env": {
+          "type": "string",
+          "description": "指定使用 envs 当中，哪个环境配置"
+        },
+        "envs": {
+          "description": "配置不同环境的配置信息，方便高频切换配置",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/originEnv"
+          }
+        }
+      }
+    },
+    "simplePluginConfig": {
+      "type": "object",
+      "properties": {
+        "use": {
+          "type": "string",
+          "description": "指定使用的插件,您可以使用npm包名称，或者本地 js 插件代码的相对路径"
+        },
+        "options": {
+          "type": "object",
+          "description": "插件配置项"
+        }
+      }
+    },
+    "purePluginConfig": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/simplePluginConfig"
+        },
+        {
+          "type": "string",
+          "description": "指定使用的插件,您可以使用npm包名称，或者本地 js 插件代码的相对路径。"
+        }
+      ]
+    },
+    "pluginConfig": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/purePluginConfig"
+        },
+        {
+          "type": "object",
+          "description": "您可以对不同数据元来源，配置使用不同的插件",
+          "additionalProperties": {
+            "$ref": "#/definitions/purePluginConfig"
+          }
+        }
+      ]
+    }
+  },
+  "properties": {
+    "outDir": {
+      "description": "the directory code generated to, a relative path to the config file",
+      "type": "string",
+      "default": "./services"
+    },
+    "url": {
+      "$ref": "#/definitions/originUrl"
+    },
+    "origin": {
+      "$ref": "#/definitions/originConfig"
+    },
+    "plugins": {
+      "type": "object",
+      "description": "进行插件开发请参考 https://github.com/pontjs/pontx/tree/main/packages/pontx-manager/PluginContribution.md",
+      "properties": {
+        "fetch": {
+          "$ref": "#/definitions/pluginConfig",
+          "description": "请求元数据的插件"
+        },
+        "parser": {
+          "$ref": "#/definitions/pluginConfig",
+          "description": "元数据解析转换的插件，将您的元数据转换为 Pont 规范的元数据，官方内置 oas2/oas3 插件"
+        },
+        "generate": {
+          "$ref": "#/definitions/pluginConfig",
+          "description": "定制生成代码的插件"
+        },
+        "transform": {
+          "$ref": "#/definitions/pluginConfig",
+          "description": "元数据处理插件，您可以在元数据使用前，进行事先过滤和处理"
+        },
+        "mocks": {
+          "$ref": "#/definitions/pluginConfig",
+          "description": "接口 mocks 插件。"
+        }
+      }
+    },
+    "translate": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "中文翻译配置"
+    },
+    "origins": {
+      "type": "array",
+      "description": "元数据列表",
+      "items": {
+        "$ref": "#/definitions/originConfig"
+      }
+    },
+    "ai": {
+      "type": "object",
+      "properties": {
+        "projectName": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        },
+        "languages": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "SQL",
+              "Javascript",
+              "Typescript",
+              "Java",
+              "Python",
+              "CSharp",
+              "Go",
+              "Php",
+              "Swift",
+              "Kotlin",
+              "ObjectiveC",
+              "Ruby",
+              "C",
+              "Rust",
+              "Scala",
+              "Perl",
+              "Lua",
+              "Haskell",
+              "R",
+              "Erlang",
+              "Clojure",
+              "Groovy",
+              "VisualBasic",
+              "FSharp",
+              "Dart",
+              "PowerShell",
+              "Shell",
+              "Racket",
+              "Scheme",
+              "OCaml",
+              "Elixir",
+              "Nim",
+              "Julia",
+              "Crystal",
+              "Pascal",
+              "Haxe",
+              "Other"
+            ]
+          }
+        },
+        "scenes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["frontend", "backend", "sql", "pontx", "other"]
+          }
+        }
+      }
+    }
+  }
+}

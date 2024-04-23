@@ -1,144 +1,236 @@
 import type { API, defs } from './type.d.ts';
+import { provider } from './request';
 
-import type { RequestMethods } from "pontx-hooks-sdk";
+type SDKMethods2<Method, Response> = ReturnType<typeof provider.getSDKMethods<Method, Response>>;
+type SDKMethods3<Method, Params, Response> = ReturnType<typeof provider.getSDKMethods<Method, Params, Response>>;
+type SDKMethods4<Method, Params, BodyParams, Response> = ReturnType<
+  typeof provider.getSDKMethods<Method, Params, BodyParams, Response>
+>;
 
-export type APIs = {
-  /** Everything about your Pets */
-  pet: {
+type OctetStreamSDKMethods3<Method, Params, Response> = ReturnType<typeof provider.getOctetStreamSDKMethods<Method, Params, Response>>;
+type OctetStreamSDKMethods4<Method, Params, BodyParams, Response> = ReturnType<
+  typeof provider.getOctetStreamSDKMethods<Method, Params, BodyParams, Response>
+>;
+
+type EventStreamSDKMethods2<Method, Response> = ReturnType<typeof provider.getEventStreamSDKMethods<Method, Response>>;
+type EventStreamSDKMethods3<Method, Params, Response> = ReturnType<typeof provider.getEventStreamSDKMethods<Method, Params, Response>>;
+type EventStreamSDKMethods4<Method, Params, BodyParams, Response> = ReturnType<
+  typeof provider.getEventStreamSDKMethods<Method, Params, BodyParams, Response>
+>;
+
+export namespace APIs {
+  export namespace pet {
     /**
-     * @path: /pet/{petId}/uploadImage
-     * @summary: uploads an image
-     */
-    uploadFile: RequestMethods<API.pet.uploadFile.Params, API.pet.uploadFile.bodyParams, API.pet.uploadFile.APIReponse>;
-
-    /**
-     * @path: /pet
-     * @summary: Update an existing pet
-     */
-    updatePet: RequestMethods<API.pet.updatePet.Params, API.pet.updatePet.bodyParams, API.pet.updatePet.APIReponse>;
-
-    /**
-     * @path: /pet
+     * POST /pet
      * @summary: Add a new pet to the store
      */
-    addPet: RequestMethods<API.pet.addPet.Params, API.pet.addPet.bodyParams, API.pet.addPet.APIReponse>;
+    export const addPet: SDKMethods3<
+      API.pet.addPet.method,
+      API.pet.addPet.bodyParams,
+      API.pet.addPet.APIResponse
+    >;
 
     /**
-     * @path: /pet/findByStatus
+     * DELETE /pet/{petId}
+     * @summary: Deletes a pet
+     */
+    export const deletePet: SDKMethods3<
+      API.pet.deletePet.method,
+      API.pet.deletePet.Params,
+      API.pet.deletePet.APIResponse
+    >;
+
+    /**
+     * GET /pet/findByStatus
      * Multiple status values can be provided with comma separated strings
      * @summary: Finds Pets by status
      */
-    findPetsByStatus: RequestMethods<API.pet.findPetsByStatus.Params, API.pet.findPetsByStatus.bodyParams, API.pet.findPetsByStatus.APIReponse>;
+    export const findPetsByStatus: SDKMethods3<
+      API.pet.findPetsByStatus.method,
+      API.pet.findPetsByStatus.Params,
+      API.pet.findPetsByStatus.APIResponse
+    >;
 
     /**
-     * @path: /pet/findByTags
+     * GET /pet/findByTags
      * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
      * @summary: Finds Pets by tags
      * @deprecated
      */
-    findPetsByTags: RequestMethods<API.pet.findPetsByTags.Params, API.pet.findPetsByTags.bodyParams, API.pet.findPetsByTags.APIReponse>;
+    export const findPetsByTags: SDKMethods3<
+      API.pet.findPetsByTags.method,
+      API.pet.findPetsByTags.Params,
+      API.pet.findPetsByTags.APIResponse
+    >;
 
     /**
-     * @path: /pet/{petId}
+     * GET /pet/{petId}
      * Returns a single pet
      * @summary: Find pet by ID
      */
-    getPetById: RequestMethods<API.pet.getPetById.Params, API.pet.getPetById.bodyParams, API.pet.getPetById.APIReponse>;
+    export const getPetById: SDKMethods3<
+      API.pet.getPetById.method,
+      API.pet.getPetById.Params,
+      API.pet.getPetById.APIResponse
+    >;
 
     /**
-     * @path: /pet/{petId}
-     * @summary: Deletes a pet
+     * PUT /pet
+     * @summary: Update an existing pet
      */
-    deletePet: RequestMethods<API.pet.deletePet.Params, API.pet.deletePet.bodyParams, API.pet.deletePet.APIReponse>;
+    export const updatePet: SDKMethods3<
+      API.pet.updatePet.method,
+      API.pet.updatePet.bodyParams,
+      API.pet.updatePet.APIResponse
+    >;
 
     /**
-     * @path: /pet/{petId}
+     * POST /pet/{petId}
      * @summary: Updates a pet in the store with form data
      */
-    updatePetWithForm: RequestMethods<API.pet.updatePetWithForm.Params, API.pet.updatePetWithForm.bodyParams, API.pet.updatePetWithForm.APIReponse>;
+    export const updatePetWithForm: SDKMethods3<
+      API.pet.updatePetWithForm.method,
+      API.pet.updatePetWithForm.Params,
+      API.pet.updatePetWithForm.APIResponse
+    >;
+
+    /**
+     * POST /pet/{petId}/uploadImage
+     * @summary: uploads an image
+     */
+    export const uploadFile: SDKMethods3<
+      API.pet.uploadFile.method,
+      API.pet.uploadFile.Params,
+      API.pet.uploadFile.APIResponse
+    >;
   }
 
-  /** Access to Petstore orders */
-  store: {
+  export namespace store {
     /**
-     * @path: /store/order
-     * @summary: Place an order for a pet
-     */
-    placeOrder: RequestMethods<API.store.placeOrder.Params, API.store.placeOrder.bodyParams, API.store.placeOrder.APIReponse>;
-
-    /**
-     * @path: /store/order/{orderId}
-     * For valid response try integer IDs with value >= 1 and <= 10. Other values will generated exceptions
-     * @summary: Find purchase order by ID
-     */
-    getOrderById: RequestMethods<API.store.getOrderById.Params, API.store.getOrderById.bodyParams, API.store.getOrderById.APIReponse>;
-
-    /**
-     * @path: /store/order/{orderId}
+     * DELETE /store/order/{orderId}
      * For valid response try integer IDs with positive integer value. Negative or non-integer values will generate API errors
      * @summary: Delete purchase order by ID
      */
-    deleteOrder: RequestMethods<API.store.deleteOrder.Params, API.store.deleteOrder.bodyParams, API.store.deleteOrder.APIReponse>;
+    export const deleteOrder: SDKMethods3<
+      API.store.deleteOrder.method,
+      API.store.deleteOrder.Params,
+      API.store.deleteOrder.APIResponse
+    >;
 
     /**
-     * @path: /store/inventory
+     * GET /store/inventory
      * Returns a map of status codes to quantities
      * @summary: Returns pet inventories by status
      */
-    getInventory: RequestMethods<API.store.getInventory.Params, API.store.getInventory.bodyParams, API.store.getInventory.APIReponse>;
+    export const getInventory: SDKMethods2<
+      API.store.getInventory.method,
+      API.store.getInventory.APIResponse
+    >;
+
+    /**
+     * GET /store/order/{orderId}
+     * For valid response try integer IDs with value >= 1 and <= 10. Other values will generated exceptions
+     * @summary: Find purchase order by ID
+     */
+    export const getOrderById: SDKMethods3<
+      API.store.getOrderById.method,
+      API.store.getOrderById.Params,
+      API.store.getOrderById.APIResponse
+    >;
+
+    /**
+     * POST /store/order
+     * @summary: Place an order for a pet
+     */
+    export const placeOrder: SDKMethods3<
+      API.store.placeOrder.method,
+      API.store.placeOrder.bodyParams,
+      API.store.placeOrder.APIResponse
+    >;
   }
 
-  /** Operations about user */
-  user: {
+  export namespace user {
     /**
-     * @path: /user/createWithArray
-     * @summary: Creates list of users with given input array
-     */
-    createUsersWithArrayInput: RequestMethods<API.user.createUsersWithArrayInput.Params, API.user.createUsersWithArrayInput.bodyParams, API.user.createUsersWithArrayInput.APIReponse>;
-
-    /**
-     * @path: /user/createWithList
-     * @summary: Creates list of users with given input array
-     */
-    createUsersWithListInput: RequestMethods<API.user.createUsersWithListInput.Params, API.user.createUsersWithListInput.bodyParams, API.user.createUsersWithListInput.APIReponse>;
-
-    /**
-     * @path: /user/{username}
-     * @summary: Get user by user name
-     */
-    getUserByName: RequestMethods<API.user.getUserByName.Params, API.user.getUserByName.bodyParams, API.user.getUserByName.APIReponse>;
-
-    /**
-     * @path: /user/{username}
-     * This can only be done by the logged in user.
-     * @summary: Delete user
-     */
-    deleteUser: RequestMethods<API.user.deleteUser.Params, API.user.deleteUser.bodyParams, API.user.deleteUser.APIReponse>;
-
-    /**
-     * @path: /user/{username}
-     * This can only be done by the logged in user.
-     * @summary: Updated user
-     */
-    updateUser: RequestMethods<API.user.updateUser.Params, API.user.updateUser.bodyParams, API.user.updateUser.APIReponse>;
-
-    /**
-     * @path: /user/login
-     * @summary: Logs user into the system
-     */
-    loginUser: RequestMethods<API.user.loginUser.Params, API.user.loginUser.bodyParams, API.user.loginUser.APIReponse>;
-
-    /**
-     * @path: /user/logout
-     * @summary: Logs out current logged in user session
-     */
-    logoutUser: RequestMethods<API.user.logoutUser.Params, API.user.logoutUser.bodyParams, API.user.logoutUser.APIReponse>;
-
-    /**
-     * @path: /user
+     * POST /user
      * This can only be done by the logged in user.
      * @summary: Create user
      */
-    createUser: RequestMethods<API.user.createUser.Params, API.user.createUser.bodyParams, API.user.createUser.APIReponse>;
+    export const createUser: SDKMethods3<
+      API.user.createUser.method,
+      API.user.createUser.bodyParams,
+      API.user.createUser.APIResponse
+    >;
+
+    /**
+     * POST /user/createWithArray
+     * @summary: Creates list of users with given input array
+     */
+    export const createUsersWithArrayInput: SDKMethods3<
+      API.user.createUsersWithArrayInput.method,
+      API.user.createUsersWithArrayInput.bodyParams,
+      API.user.createUsersWithArrayInput.APIResponse
+    >;
+
+    /**
+     * POST /user/createWithList
+     * @summary: Creates list of users with given input array
+     */
+    export const createUsersWithListInput: SDKMethods3<
+      API.user.createUsersWithListInput.method,
+      API.user.createUsersWithListInput.bodyParams,
+      API.user.createUsersWithListInput.APIResponse
+    >;
+
+    /**
+     * DELETE /user/{username}
+     * This can only be done by the logged in user.
+     * @summary: Delete user
+     */
+    export const deleteUser: SDKMethods3<
+      API.user.deleteUser.method,
+      API.user.deleteUser.Params,
+      API.user.deleteUser.APIResponse
+    >;
+
+    /**
+     * GET /user/{username}
+     * @summary: Get user by user name
+     */
+    export const getUserByName: SDKMethods3<
+      API.user.getUserByName.method,
+      API.user.getUserByName.Params,
+      API.user.getUserByName.APIResponse
+    >;
+
+    /**
+     * GET /user/login
+     * @summary: Logs user into the system
+     */
+    export const loginUser: SDKMethods3<
+      API.user.loginUser.method,
+      API.user.loginUser.Params,
+      API.user.loginUser.APIResponse
+    >;
+
+    /**
+     * GET /user/logout
+     * @summary: Logs out current logged in user session
+     */
+    export const logoutUser: SDKMethods2<
+      API.user.logoutUser.method,
+      API.user.logoutUser.APIResponse
+    >;
+
+    /**
+     * PUT /user/{username}
+     * This can only be done by the logged in user.
+     * @summary: Updated user
+     */
+    export const updateUser: SDKMethods4<
+      API.user.updateUser.method,
+      API.user.updateUser.Params,
+      API.user.updateUser.bodyParams,
+      API.user.updateUser.APIResponse
+    >;
   }
 }

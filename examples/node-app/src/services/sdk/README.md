@@ -14,11 +14,11 @@ Pontx SDK 分为两部分
 
 ```ts
 pontxSDK.fetcher.fetch = (url, options) => {
-	return nodeFetch(url, options);
+  return nodeFetch(url, options);
 }
 
 pontxSDK.fetcher.getUrlPrefix = function(specMeta) {
-	return 'http://your-hostname.com/api';
+  return 'http://your-hostname.com/api';
 }
 
 ```

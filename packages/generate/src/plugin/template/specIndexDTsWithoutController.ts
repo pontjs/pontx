@@ -24,7 +24,7 @@ export namespace API {
     const apiCommentCode = TypeScriptGenerator.apiComment(api);
     const apiNamespaceCode = indentation(2)(`${apiCommentCode}export namespace ${name} {
 ${apiContentTsCode}
-};`);
+}`);
     return apiNamespaceCode;
   }).join("\n\n")}
 }

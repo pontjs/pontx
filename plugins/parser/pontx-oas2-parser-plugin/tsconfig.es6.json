@@ -1,0 +1,28 @@
+{
+  "extends": "../../../tsconfig.build.json",
+  "compilerOptions": {
+    "module": "ES6",
+    "target": "es6",
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "useDefineForClassFields": true,
+    "outDir": "module",
+    "moduleResolution": "Node",
+    "strictPropertyInitialization": false,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {},
+    "composite": true,
+    "rootDir": "./src"
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules", "build"],
+  "references": [
+    {
+      "path": "../../../packages/pontx-manager"
+    },
+    {
+      "path": "../../../packages/pontx-spec"
+    }
+  ]
+}

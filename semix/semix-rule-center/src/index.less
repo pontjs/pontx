@@ -1,0 +1,159 @@
+@border-color: rgba(24, 32, 38, 0.2);
+
+.semix-linter-table {
+  position: relative;
+  width: max-content;
+  min-width: 600px;
+  min-height: 250px;
+  border: 1px solid #dbe0eb;
+
+  .semix-content-table {
+    border-collapse: collapse;
+    border-spacing: 0;
+  }
+
+  a {
+    cursor: pointer;
+  }
+
+  .semix-linter-table-body {
+    max-height: 500px;
+    overflow-y: auto;
+  }
+
+  .next-loading-inline {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: inline-block;
+    margin-top: -25px;
+    margin-left: -25px;
+  }
+
+  tr {
+    // height: 35px;
+
+    td {
+      height: 19px;
+    }
+  }
+
+  tr.even {
+    background-color: #f7f7f7;
+  }
+
+  td {
+    min-height: 30px;
+    padding: 8px 14px;
+    overflow: hidden;
+    font-size: 12px;
+    text-overflow: ellipsis;
+
+    &.error {
+      color: red;
+    }
+
+    &.warning {
+      color: orange;
+    }
+
+    a.op {
+      height: 18px;
+      margin-right: 12px;
+      font-size: 12px;
+      white-space: pre;
+    }
+
+    &.level {
+      width: 80px;
+      max-width: 80px;
+    }
+    // &.scene {
+    //   max-width: 90px;
+    //   width: 90px;
+    // }
+    &.path {
+      width: 130px;
+      max-width: 170px;
+    }
+    &.desc {
+      min-width: 180px;
+      max-width: 240px;
+      white-space: pre;
+    }
+    &.op {
+      min-width: 180px;
+      max-width: 220px;
+    }
+  }
+}
+
+button.semix-switch-button {
+  border-radius: 3px;
+  background: 0;
+  outline: 0;
+  border: 1px solid @border-color;
+  box-shadow: none;
+  padding: 0 16px;
+  line-height: 32px;
+  height: 32px;
+  color: #333333;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+
+  .cnt {
+    margin-left: 3px;
+    margin-right: 6px;
+  }
+
+  &.active {
+    background: #ebedf2;
+    box-shadow: none;
+    color: #2a61bd;
+    border-color: @border-color;
+  }
+
+  &.disabled {
+    cursor: not-allowed;
+    // background-color: rgb(220, 220, 220);
+    &:hover {
+      background-color: white;
+      color: #333333;
+    }
+  }
+
+  &:hover {
+    transition: all 0.3s ease;
+    background: #eeeff2;
+    box-shadow: none;
+    color: #6b8eca;
+    text-decoration: none;
+    border-color: @border-color;
+  }
+}
+
+.semix-lint-button {
+  display: inline-block;
+}
+
+.semix-switch-button-group {
+  display: inline-flex;
+
+  .semix-switch-button {
+    &:first-child {
+      border-bottom-right-radius: 0;
+      border-top-right-radius: 0;
+    }
+
+    & + .semix-switch-button {
+      margin-left: -1px;
+      border-radius: 0;
+    }
+
+    &:last-child {
+      border-bottom-left-radius: 0;
+      border-top-left-radius: 0;
+    }
+  }
+}

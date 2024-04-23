@@ -1303,7 +1303,6 @@ pontx-manager@^0.3.75:
     pontx-mocks-plugin "^0.3.85"
     pontx-oas2-parser-plugin "^0.3.85"
     pontx-oas3-parser-plugin "^0.3.85"
-    pontx-react-hooks-sdk-plugin "^0.3.85"
     pontx-spec "^0.3.85"
     typescript "^5"
 
@@ -1341,15 +1340,6 @@ pontx-oas3-parser-plugin@^0.3.75, pontx-oas3-parser-plugin@^0.3.85:
   integrity sha512-B7GA8BNGrnhlVroSP/wV6KHyUytBIdp3EPiWZm8r6Q8zC+KUh2bQEWwbdWNavuO0B2NRb7ZhM0s2ivzCJSuU/w==
   dependencies:
     oas-spec-ts "^0.3.85"
-    pontx-spec "^0.3.85"
-
-pontx-react-hooks-sdk-plugin@^0.3.75, pontx-react-hooks-sdk-plugin@^0.3.85:
-  version "0.3.85"
-  resolved "https://registry.npmmirror.com/pontx-react-hooks-sdk-plugin/-/pontx-react-hooks-sdk-plugin-0.3.85.tgz#1b5c5cfd514290395b6d45f79efd52b11909374e"
-  integrity sha512-FXMSeVoIX8/OvJnKXA/z1eYEtbBmeSgOBsRbWBKVpGtVWBtrHu4xtNlzoslbLXVn/S/Z4Kf8vCQ39lcu8qlkNg==
-  dependencies:
-    pontx-generate "^0.3.85"
-    pontx-sdk-plugin-core "^0.3.85"
     pontx-spec "^0.3.85"
 
 pontx-sdk-plugin-core@^0.3.85:

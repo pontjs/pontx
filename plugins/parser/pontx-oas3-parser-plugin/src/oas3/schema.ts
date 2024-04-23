@@ -2,7 +2,7 @@ import { OAS3 } from "oas-spec-ts";
 import { compileTemplate, parseAst2PontJsonSchema } from "./compiler";
 import { JsonSchemaContext, PrimitiveTypeMap, PRIMITIVE_TYPES } from "./utils";
 import * as PontSpec from "pontx-spec";
-import * as _ from "lodash";
+import _ from "lodash";
 
 export function parseJsonSchema(schema: OAS3.SchemaObject, context = new JsonSchemaContext()): PontSpec.PontJsonSchema {
   const { items, $ref, type, additionalProperties, properties, required, examples, ...rest } = schema;
@@ -12,7 +12,7 @@ export function parseJsonSchema(schema: OAS3.SchemaObject, context = new JsonSch
   let resultSchema = {
     ...rest,
     type,
-    required: contextRequied,
+    required: contextRequied as any,
   } as PontSpec.PontJsonSchema;
 
   if (reTypeName) {

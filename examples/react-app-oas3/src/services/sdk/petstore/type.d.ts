@@ -66,32 +66,35 @@ export namespace defs {
 }
 
 export namespace API {
-    /** Everything about your Pets */
-  export namespace pet {
+    export namespace pet {
     /**
-     * @path: /pet
-     * Update an existing pet by Id
-     * @summary: Update an existing pet
-     */
-    export namespace updatePet {
-      export type Params = {};
-      export type bodyParams = defs.Pet;
-      export type APIReponse = defs.Pet;
-    };
-
-    /**
-     * @path: /pet
+     * POST /pet
      * Add a new pet to the store
      * @summary: Add a new pet to the store
      */
     export namespace addPet {
       export type Params = {};
+      export type method = 'POST';
       export type bodyParams = defs.Pet;
-      export type APIReponse = defs.Pet;
-    };
+      export type APIResponse = defs.Pet;
+    }
 
     /**
-     * @path: /pet/findByStatus
+     * DELETE /pet/{petId}
+     * @summary: Deletes a pet
+     */
+    export namespace deletePet {
+      export type Params = {
+        /** Pet id to delete */
+        petId: number;
+      };
+      export type method = 'DELETE';
+      export type bodyParams = undefined;
+      export type APIResponse = any;
+    }
+
+    /**
+     * GET /pet/findByStatus
      * Multiple status values can be provided with comma separated strings
      * @summary: Finds Pets by status
      */
@@ -100,12 +103,13 @@ export namespace API {
         /** Status values that need to be considered for filter */
         status?: 'available' | 'pending' | 'sold';
       };
+      export type method = 'GET';
       export type bodyParams = undefined;
-      export type APIReponse = Array<defs.Pet>;
-    };
+      export type APIResponse = Array<defs.Pet>;
+    }
 
     /**
-     * @path: /pet/findByTags
+     * GET /pet/findByTags
      * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
      * @summary: Finds Pets by tags
      */
@@ -114,12 +118,13 @@ export namespace API {
         /** Tags to filter by */
         tags?: Array<string>;
       };
+      export type method = 'GET';
       export type bodyParams = undefined;
-      export type APIReponse = Array<defs.Pet>;
-    };
+      export type APIResponse = Array<defs.Pet>;
+    }
 
     /**
-     * @path: /pet/{petId}
+     * GET /pet/{petId}
      * Returns a single pet
      * @summary: Find pet by ID
      */
@@ -128,25 +133,25 @@ export namespace API {
         /** ID of pet to return */
         petId: number;
       };
+      export type method = 'GET';
       export type bodyParams = undefined;
-      export type APIReponse = defs.Pet;
-    };
+      export type APIResponse = defs.Pet;
+    }
 
     /**
-     * @path: /pet/{petId}
-     * @summary: Deletes a pet
+     * PUT /pet
+     * Update an existing pet by Id
+     * @summary: Update an existing pet
      */
-    export namespace deletePet {
-      export type Params = {
-        /** Pet id to delete */
-        petId: number;
-      };
-      export type bodyParams = undefined;
-      export type APIReponse = any;
-    };
+    export namespace updatePet {
+      export type Params = {};
+      export type method = 'PUT';
+      export type bodyParams = defs.Pet;
+      export type APIResponse = defs.Pet;
+    }
 
     /**
-     * @path: /pet/{petId}
+     * POST /pet/{petId}
      * @summary: Updates a pet in the store with form data
      */
     export namespace updatePetWithForm {
@@ -158,12 +163,13 @@ export namespace API {
         /** Status of pet that needs to be updated */
         status?: string;
       };
+      export type method = 'POST';
       export type bodyParams = undefined;
-      export type APIReponse = any;
-    };
+      export type APIResponse = any;
+    }
 
     /**
-     * @path: /pet/{petId}/uploadImage
+     * POST /pet/{petId}/uploadImage
      * @summary: uploads an image
      */
     export namespace uploadFile {
@@ -173,51 +179,15 @@ export namespace API {
         /** Additional Metadata */
         additionalMetadata?: string;
       };
+      export type method = 'POST';
       export type bodyParams = string;
-      export type APIReponse = defs.ApiResponse;
-    };
+      export type APIResponse = defs.ApiResponse;
+    }
   }
 
-  /** Access to Petstore orders */
   export namespace store {
     /**
-     * @path: /store/inventory
-     * Returns a map of status codes to quantities
-     * @summary: Returns pet inventories by status
-     */
-    export namespace getInventory {
-      export type Params = {};
-      export type bodyParams = undefined;
-      export type APIReponse = object;
-    };
-
-    /**
-     * @path: /store/order
-     * Place a new order in the store
-     * @summary: Place an order for a pet
-     */
-    export namespace placeOrder {
-      export type Params = {};
-      export type bodyParams = defs.Order;
-      export type APIReponse = defs.Order;
-    };
-
-    /**
-     * @path: /store/order/{orderId}
-     * For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
-     * @summary: Find purchase order by ID
-     */
-    export namespace getOrderById {
-      export type Params = {
-        /** ID of order that needs to be fetched */
-        orderId: number;
-      };
-      export type bodyParams = undefined;
-      export type APIReponse = defs.Order;
-    };
-
-    /**
-     * @path: /store/order/{orderId}
+     * DELETE /store/order/{orderId}
      * For valid response try integer IDs with value < 1000. Anything above 1000 or nonintegers will generate API errors
      * @summary: Delete purchase order by ID
      */
@@ -226,37 +196,107 @@ export namespace API {
         /** ID of the order that needs to be deleted */
         orderId: number;
       };
+      export type method = 'DELETE';
       export type bodyParams = undefined;
-      export type APIReponse = any;
-    };
+      export type APIResponse = any;
+    }
+
+    /**
+     * GET /store/inventory
+     * Returns a map of status codes to quantities
+     * @summary: Returns pet inventories by status
+     */
+    export namespace getInventory {
+      export type Params = {};
+      export type method = 'GET';
+      export type bodyParams = undefined;
+      export type APIResponse = object;
+    }
+
+    /**
+     * GET /store/order/{orderId}
+     * For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
+     * @summary: Find purchase order by ID
+     */
+    export namespace getOrderById {
+      export type Params = {
+        /** ID of order that needs to be fetched */
+        orderId: number;
+      };
+      export type method = 'GET';
+      export type bodyParams = undefined;
+      export type APIResponse = defs.Order;
+    }
+
+    /**
+     * POST /store/order
+     * Place a new order in the store
+     * @summary: Place an order for a pet
+     */
+    export namespace placeOrder {
+      export type Params = {};
+      export type method = 'POST';
+      export type bodyParams = defs.Order;
+      export type APIResponse = defs.Order;
+    }
   }
 
-  /** Operations about user */
   export namespace user {
     /**
-     * @path: /user
+     * POST /user
      * This can only be done by the logged in user.
      * @summary: Create user
      */
     export namespace createUser {
       export type Params = {};
+      export type method = 'POST';
       export type bodyParams = defs.User;
-      export type APIReponse = any;
-    };
+      export type APIResponse = any;
+    }
 
     /**
-     * @path: /user/createWithList
+     * POST /user/createWithList
      * Creates list of users with given input array
      * @summary: Creates list of users with given input array
      */
     export namespace createUsersWithListInput {
       export type Params = {};
+      export type method = 'POST';
       export type bodyParams = Array<defs.User>;
-      export type APIReponse = defs.User;
-    };
+      export type APIResponse = defs.User;
+    }
 
     /**
-     * @path: /user/login
+     * DELETE /user/{username}
+     * This can only be done by the logged in user.
+     * @summary: Delete user
+     */
+    export namespace deleteUser {
+      export type Params = {
+        /** The name that needs to be deleted */
+        username: string;
+      };
+      export type method = 'DELETE';
+      export type bodyParams = undefined;
+      export type APIResponse = any;
+    }
+
+    /**
+     * GET /user/{username}
+     * @summary: Get user by user name
+     */
+    export namespace getUserByName {
+      export type Params = {
+        /** The name that needs to be fetched. Use user1 for testing.  */
+        username: string;
+      };
+      export type method = 'GET';
+      export type bodyParams = undefined;
+      export type APIResponse = defs.User;
+    }
+
+    /**
+     * GET /user/login
      * @summary: Logs user into the system
      */
     export namespace loginUser {
@@ -266,59 +306,35 @@ export namespace API {
         /** The password for login in clear text */
         password?: string;
       };
+      export type method = 'GET';
       export type bodyParams = undefined;
-      export type APIReponse = string;
-    };
+      export type APIResponse = string;
+    }
 
     /**
-     * @path: /user/logout
+     * GET /user/logout
      * @summary: Logs out current logged in user session
      */
     export namespace logoutUser {
       export type Params = {};
+      export type method = 'GET';
       export type bodyParams = undefined;
-      export type APIReponse = any;
-    };
+      export type APIResponse = any;
+    }
 
     /**
-     * @path: /user/{username}
-     * @summary: Get user by user name
-     */
-    export namespace getUserByName {
-      export type Params = {
-        /** The name that needs to be fetched. Use user1 for testing.  */
-        username: string;
-      };
-      export type bodyParams = undefined;
-      export type APIReponse = defs.User;
-    };
-
-    /**
-     * @path: /user/{username}
-     * This can only be done by the logged in user.
-     * @summary: Delete user
-     */
-    export namespace deleteUser {
-      export type Params = {
-        /** The name that needs to be deleted */
-        username: string;
-      };
-      export type bodyParams = undefined;
-      export type APIReponse = any;
-    };
-
-    /**
-     * @path: /user/{username}
+     * PUT /user/{username}
      * This can only be done by the logged in user.
      * @summary: Update user
      */
     export namespace updateUser {
       export type Params = {
-        /** name that need to be deleted */
+        /** name that needs to be updated */
         username: string;
       };
+      export type method = 'PUT';
       export type bodyParams = defs.User;
-      export type APIReponse = any;
-    };
+      export type APIResponse = any;
+    }
   }
 }

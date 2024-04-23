@@ -12,10 +12,52 @@
 
 - origins: 数据源列表，每个数据源配置请参看 PontxOrigin 配置
 - plugins: 插件配置，目前支持以下不同生命周期的插件配置。
+
+	插件配置示例：
+
+	```json
+	{
+		"plugins": {
+			"fetch": "npm package name",
+			"generate": {
+				"use": "npm package name",
+				"options": {
+					// your config
+				}
+			},
+			"parser": "./xx.ts", // 也可以使用相对路径
+			"mocks": "./xx.js" // 支持 TS/JS
+		},
+		"origins: [{
+			"name": "a",
+			"plugins": {
+				// 元数据内的插件配置，可以覆盖全局插件配置
+				"fetch": ""
+			}
+		}]
+	}
+	```
+
   - fetch：元数据拉取。默认插件为 pontx-meta-fetch-plugin。拉取 origin.url 指定资源的文本内容。
-  - parser: 元数据转换插件。将拉取的文本内容转换为 Pontx Spec。默认插件为 pontx-oas2-parser-plugin(Swagger2) 插件，Pontx 也内置 pontx-oas3-parser-plugin.
-  - generate: SDK 生成插件。生成 Pontx SDK。默认插件为 pontx-react-hooks-generate-plugin.
-  - mocks: Mocks 数据生成插件，通过 OpenAPI responses 指定的 JSONSchema，自动生成接口 Mocks 数据。Pontx Mocks 功能使用请参阅 [VSCode Pontx Mocks 使用指南]()
+  - parser: 元数据转换插件。将拉取的数据转换为 Pontx Spec。默认的 parser 插件支持 OAS2、OAS3（Swagger）的元数据解析和转换。
+  - generate: SDK 生成插件。生成 Pontx SDK。默认插件支持异步接口请求、React Hooks、Nodejs http 请求等。且支持 SSE 流式返回。配置方式如下。
+
+	```json
+	{
+		"plugins": {
+			"generate": {
+				"options": {
+					"sdkType": "react-hooks",
+					// 不配置：默认生成异步接口请求的 SDK
+					// react-hooks: 支持声明式接口请求
+					// nodejs: 支持 Nodejs 接口调用
+				}
+			}
+		}
+	}
+	```
+
+  - mocks: Mocks 数据生成插件，通过 OpenAPI responses 指定的 JSONSchema，自动生成接口 Mocks 数据。Pontx Mocks 功能使用请参阅 [VSCode Pontx Mocks 使用指南](./PontxMocks.md)
 - translate: 翻译插件配置。
 
   翻译插件用来解决数据源不正确的问题，如某字段名为中文。翻译插件可将中文变量名经过翻译转换为 camelCase 的英文变量名。翻译插件配置示例：

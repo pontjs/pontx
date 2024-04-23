@@ -490,16 +490,10 @@ MIT
 pontx-oas3-parser-plugin
 MIT
 
-pontx-react-hooks-generate-plugin
-MIT
-
-pontx-react-hooks-sdk-plugin
+pontx-simple-react-hooks-sdk-plugin
 MIT
 
 pontx-spec
-MIT
-
-pontx-spec-diff
 MIT
 
 safer-buffer

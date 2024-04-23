@@ -1,4 +1,4 @@
-import { PontUIService } from "pontx-ui";
+import { PontUIService } from "pontx-ui/dist/es6/components/utils/service";
 import * as React from "react";
 import { useEffect } from "react";
 import { PontSpec } from "pontx-spec";
@@ -6,7 +6,7 @@ import { WebviewApi } from "vscode-webview";
 
 declare let acquireVsCodeApi: any;
 export const getVSCode = () => {
-  if (((window as any).vscode)) {
+  if ((window as any).vscode) {
     return (window as any).vscode;
   }
 
@@ -14,7 +14,7 @@ export const getVSCode = () => {
   (window as any).vscode = vscode;
 
   return vscode;
-}
+};
 
 export function useCurrentSpec() {
   const [currentSpec, setCurrentSpec] = React.useState(undefined as PontSpec);
@@ -31,4 +31,3 @@ export function useCurrentSpec() {
     currentSpec,
   };
 }
-

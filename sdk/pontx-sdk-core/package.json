@@ -1,6 +1,6 @@
 {
   "name": "pontx-sdk-core",
-  "version": "0.3.88",
+  "version": "0.4.12",
   "description": "async await promise sdk oas2 oas3 swagger typescript ts pontx sdk plugin",
   "module": "lib/index.js",
   "main": "commonjs/index.js",
@@ -9,14 +9,11 @@
     "pretest": "npm run build",
     "watch": "tsc --build --watch",
     "build:module": "tsc",
-    "build:commonjs": "tsc --outDir commonjs --module commonjs",
+    "build:extra:watch": "tsc --outDir commonjs --module commonjs -w",
+    "build:extra": "tsc --outDir commonjs --module commonjs",
     "release": "npm publish --registry https://registry.npmjs.org/",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
-    "build": "npm run clean && npm run build:commonjs && tsc --build"
-  },
-  "peerDependencies": {
-    "fs-extra": "^10.1.0",
-    "pontx-manager": "*"
+    "build": "npm run clean && tsc --build"
   },
   "files": [
     "commonjs",
@@ -32,9 +29,11 @@
     "@types/fs-extra": "^9.0.13",
     "@types/node": "*",
     "http-server": "*",
-    "pontx-generate": "^0.3.88",
-    "pontx-generate-core": "^0.3.88",
-    "pontx-spec": "^0.3.88",
-    "react": "^16.14.0"
+    "pontx-generate": "^0.4.12",
+    "pontx-generate-core": "^0.4.12",
+    "pontx-spec": "^0.4.12",
+    "react": "^18",
+    "swr": "^2.2.5",
+    "web-streams-nodejs": "^0.1.1"
   }
 }

@@ -6,7 +6,6 @@ import { cliLog, logger } from "./debugLog";
 import "pontx-meta-fetch-plugin";
 import "pontx-oas2-parser-plugin";
 import "pontx-oas3-parser-plugin";
-import "pontx-react-hooks-generate-plugin";
 import "pontx-async-sdk-plugin";
 
 const packageFilePath = path.join(__dirname, "..", "package.json");
@@ -51,32 +50,14 @@ program.description("powerful api code generator");
         manager.logger.info(manager.innerManagerConfig.origins.map((origin) => origin.name).join("\n"));
       });
 
-    // program
-    //   .command("diff")
-    //   .description("对比数据源")
-    //   .action(() => {
-    //     manager.calDiffs();
-    //     const { modDiffs, boDiffs } = manager.diffs;
-
-    //     console.log("模块：");
-    //     console.log(
-    //       modDiffs
-    //         .map((mod) => `${mod.name}(${mod.details.join(",").slice(0, 20)})`)
-    //         .join("\n")
-    //     );
-    //     console.log("基类");
-    //     console.log(
-    //       boDiffs
-    //         .map((bo) => `${bo.name}(${bo.details.join(",").slice(0, 20)})`)
-    //         .join("\n")
-    //     );
-    //   });
-
     program
-      .command("select <dsName>")
-      .description("选择数据源")
-      .action((dsName) => {
-        manager = PontManager.switchOriginName(manager, dsName);
+      .command("mocks")
+      .description("拉取远程数据源并生成 Mocks")
+      .action(async () => {
+        manager.localPontSpecs = manager.remotePontSpecs;
+        logger.success("Pontx 已切换使用最新远程数据");
+        await PontManager.generateMocks(manager);
+        logger.success("Pontx Mocks 生成完毕!");
       });
 
     // program

@@ -1,0 +1,10 @@
+{
+  "outDir": "../app/pontx",
+  "plugins": {
+    "generate": "../../../plugins/generate/pontx-eggjs-sdk-plugin"
+  },
+  "origin": {
+    "url": "https://petstore.swagger.io/v2/swagger.json",
+    "name": "petstore"
+  }
+}

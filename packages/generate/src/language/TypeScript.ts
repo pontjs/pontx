@@ -3,11 +3,27 @@ import { indentation, needQuotationMark } from "../utils";
 import * as _ from "lodash";
 
 export const apiComment = (api: PontSpec.PontAPI) => {
-  const path = api.path ? `\n * @path: ${api.path}` : "";
-  const desc = api.description ? `\n * ${api.description.split("\n").join("\n * ")}` : "";
+  const path = api.path ? `\n * ${api.method?.toUpperCase?.() || ""} ${api.path}` : "";
+  let desc = api.description ? `\n * ${api.description.split("\n").join("\n * ")}` : "";
   const title = api.title && api.title !== desc ? `\n * @title: ${api.title}` : "";
   const summary = api.summary && api.summary !== desc ? `\n * @summary: ${api.summary}` : "";
   const deprecated = api.deprecated ? `\n * @deprecated` : "";
+
+  if (api?.externalDocs?.url) {
+    let externalComment = api.externalDocs.description
+      ? `@see ${api.externalDocs.description} ${api.externalDocs.url}`
+      : `@see ${api.externalDocs.url}`;
+
+    if (desc) {
+      desc = `${desc}\n * ${externalComment}`;
+    } else {
+      desc = `\n * ${externalComment}`;
+    }
+  }
+
+  if (!path && !desc && !title && !summary && !deprecated) {
+    return "";
+  }
 
   return `/**${path}${desc}${summary || title}${deprecated}\n */\n`;
 };
@@ -42,7 +58,17 @@ export const generateSchemaCode = (schema: PontSpec.PontJsonSchema, specName?: s
     return defName;
   }
 
-  switch (schema?.type || schema?.typeName) {
+  let typeName = schema.typeName;
+
+  if (!typeName && schema.$ref) {
+    const seps = schema.$ref?.split("/");
+    const lastSep = seps[seps.length - 1];
+    if (lastSep) {
+      typeName = lastSep;
+    }
+  }
+
+  switch (schema?.type || typeName) {
     case "long":
     case "integer": {
       return "number";
@@ -84,9 +110,15 @@ export const generateSchemaCode = (schema: PontSpec.PontJsonSchema, specName?: s
     }
   }
 
-  if (schema.typeName) {
-    const defName = `defs.${specName ? `${specName}.${schema.typeName}` : schema.typeName}`;
+  if (typeName) {
+    const defName = `defs.${specName ? `${specName}.${typeName}` : typeName}`;
     return defName;
+  }
+  if (schema.$ref) {
+    const refName = schema.$ref.split("/").pop();
+    if (refName) {
+      return `defs.${specName ? `${specName}.${refName}` : refName}`;
+    }
   }
 
   return schema?.type || "any";
@@ -164,8 +196,8 @@ export const generateApiRequestCode = (api: PontSpec.PontAPI, specName: string) 
   if (bodyParam) {
     const bodyParamSchema = bodyParam?.schema;
     const bodyParamType = generateSchemaCode(bodyParamSchema, specName);
-    return `(params: Params, bodyParams: ${bodyParamType}, options?: RequestInit): Promise<APIReponse>`;
+    return `(params: Params, bodyParams: ${bodyParamType}, options?: RequestInit): Promise<APIResponse>`;
   }
 
-  return `(params: Params, options?: any): Promise<APIReponse>`;
+  return `(params: Params, options?: any): Promise<APIResponse>`;
 };

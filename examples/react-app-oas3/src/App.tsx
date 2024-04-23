@@ -1,6 +1,16 @@
 import "./App.css";
 import * as React from "react";
-import { PetstoreAPIs, defs } from "./services/sdk";
+import { PetstoreAPIs, defs, setDefaultsAll } from "./services/sdk";
+
+setDefaultsAll({
+  baseURL: "https://petstore.swagger.io/v2",
+  transformResponse: (response) => {
+    if (response?.code === 500) {
+      throw new Error(response?.message || "返回失败");
+    }
+    return response;
+  },
+});
 
 function App() {
   const [status, setStatus] = React.useState<defs.petstore.Pet["status"]>("pending");
@@ -8,13 +18,20 @@ function App() {
   // const [userData, setUserData] = React.useState<defs.petstore.User>();
   const [isPetsLoading, setIsPetsLoading] = React.useState(false);
   const [pets, setPets] = React.useState<defs.petstore.Pet[]>([]);
+  const [errorMsg, setErrorMsg] = React.useState("");
 
   React.useEffect(() => {
     setIsPetsLoading(true);
-    PetstoreAPIs.pet.findPetsByStatus.request(status ? { status } : {}).then((petList) => {
-      setIsPetsLoading(false);
-      setPets(petList);
-    });
+    PetstoreAPIs.pet.findPetsByStatus.request(status ? { status } : {}).then(
+      (petList) => {
+        setIsPetsLoading(false);
+        setErrorMsg("");
+        setPets(petList);
+      },
+      (e) => {
+        setErrorMsg(e.message);
+      },
+    );
   }, [status]);
 
   return (
@@ -33,7 +50,9 @@ function App() {
           <option value={"sold" as defs.petstore.Pet["status"]}>sold</option>
         </select>
       </div>
-      {
+      {errorMsg ? (
+        <div style={{ color: "red" }}>{errorMsg}</div>
+      ) : (
         <ul>
           {isPetsLoading ? (
             <span>loading ...</span>
@@ -49,7 +68,7 @@ function App() {
             })
           )}
         </ul>
-      }
+      )}
     </div>
   );
 }

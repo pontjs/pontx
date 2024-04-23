@@ -1,5 +1,5 @@
 import { PontSpec } from "pontx-spec";
-import { PontUIService } from "pontx-ui";
+import { PontUIService } from "pontx-ui/dist/es6/components/utils/service";
 import * as _ from "lodash";
 import { getVSCode } from "./utils/utils";
 

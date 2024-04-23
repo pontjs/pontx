@@ -1,0 +1,23 @@
+export default {
+  index: {
+    change: '变更',
+    deLabel: 'OpenAPI 去除了 deprecated 标记',
+    addedMark: 'OpenAPI 添加了 deprecated 标记',
+    returnParameter: '返回参数结构发生变更',
+    parameterStructure: '参数结构：',
+    changeDetails: '变更详情',
+    parameterPosition: '参数位置：',
+    parameterExample: '参数示例：',
+    no: '否',
+    is: '是',
+    isItRequired: '是否必填：',
+    parameters: '参数：',
+    after: '后：',
+    before: '前：',
+    errorCodeSending: '错误码发生变更',
+    deleteError: '删除错误码',
+    errorCode: '错误码',
+    delete: '删除',
+    add: '新增',
+  },
+};

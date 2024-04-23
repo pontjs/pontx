@@ -6,6 +6,7 @@ import { PontWebView } from "./webview";
 import { pontService } from "./Service";
 import { PontSpec } from "pontx-spec";
 import * as fs from "fs-extra";
+import { GenerateResponse } from "pontx-manager/src/generateAICode";
 
 // import { PontService } from "./Service";
 // const fs = require("fs");
@@ -26,18 +27,119 @@ const insertCode = (code: string) => {
   }
 };
 
+const insertStreamingCode = async (codeGenerator: Promise<GenerateResponse>) => {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    vscode.window.showErrorMessage("没有打开的文件，无法输出代码");
+    return;
+  }
+  const position = editor.selection.active;
+  // const selection = editor.selection;
+  let insertedCode = "";
+  let writedCode = "";
+
+  let replaceCode = async (newCode: string) => {
+    return editor
+      .edit((builder) => {
+        const lineCnt = writedCode?.split("\n").length - 1;
+        const lastLineCharCnt = writedCode?.split("\n")?.[writedCode?.split("\n").length - 1]?.length;
+        let newLine = position.line + lineCnt;
+        let newCharactor = lineCnt ? lastLineCharCnt : position.character + lastLineCharCnt;
+        let newPos = new vscode.Position(newLine, newCharactor);
+        const selection = new vscode.Selection(position, newPos);
+        try {
+          builder.replace(selection, newCode);
+        } catch (e) {
+          console.log(e.message, e.stack);
+        }
+      })
+      .then(
+        (success, ...args) => {
+          if (!success) {
+            console.log(...args);
+          } else {
+            insertedCode = newCode;
+          }
+        },
+        (e) => {
+          console.log(e.message, e.stack);
+        },
+      );
+  };
+  let writeStreamCode = async (newCode: string) => {
+    return editor
+      .edit((builder) => {
+        const lineCnt = writedCode?.split("\n").length - 1;
+        const lastLineCharCnt = writedCode?.split("\n")?.[writedCode?.split("\n").length - 1]?.length;
+        let newLine = position.line + lineCnt;
+        let newCharactor = lineCnt ? lastLineCharCnt : position.character + lastLineCharCnt;
+        let newPos = new vscode.Position(newLine, newCharactor);
+        try {
+          builder.insert(newPos, newCode);
+        } catch (e) {
+          console.log(e.message, e.stack);
+        }
+      })
+      .then(
+        (success, ...args) => {
+          if (!success) {
+            console.log(...args);
+          } else {
+            writedCode += newCode;
+          }
+        },
+        (e) => {
+          console.log(e.message, e.stack);
+        },
+      );
+  };
+  let prefixCode = "// 以下代码通过 Pontx AI 生成... \n";
+  await writeStreamCode(prefixCode);
+  await wait(100);
+
+  let generator = await codeGenerator;
+
+  while (true) {
+    generator = await generator.next();
+    const { code, isDone, codeAdded, errorMessage } = generator;
+
+    if (isDone) {
+      await replaceCode(prefixCode + code);
+      vscode.window.showInformationMessage("代码生成成功！");
+      return;
+    }
+    if (errorMessage) {
+      vscode.window.showErrorMessage(errorMessage);
+      return;
+    }
+
+    await writeStreamCode(codeAdded);
+  }
+};
 export class PontCommands {
   static getPickItems(pontSpec: PontSpec) {
+    const hasMod = PontSpec.checkHasMods(pontSpec);
     const hasSingleMod = PontSpec.getMods(pontSpec).length <= 1;
     const items = PontSpec.getMods(pontSpec)
       .map((mod) => {
-        return mod.interfaces.map((inter) => {
+        const modItem = hasMod
+          ? [
+              {
+                label: mod.name,
+                detail: pontSpec.name ? `${pontSpec.name}.${mod.name}` : mod.name,
+                description: mod.description,
+              },
+            ]
+          : [];
+        const apiItems = mod.interfaces.map((inter) => {
           return {
             label: `${inter.method ? `[${inter.method}] ` : ""}${inter.path ? inter.path : inter.name}`,
             detail: `${pontSpec.name ? pontSpec.name + "." : ""}${hasSingleMod ? "" : mod.name + "."}${inter.name}`,
             description: `${inter.description || inter.summary || ""}`,
           };
         });
+
+        return [...modItem, ...apiItems];
       })
       .reduce((pre, next) => pre.concat(next), []);
 
@@ -91,7 +193,7 @@ export class PontCommands {
         .reduce((pre, next) => pre.concat(next), []);
 
       return vscode.window
-        .showQuickPick(items, {
+        .showQuickPick(items as any, {
           matchOnDescription: true,
           matchOnDetail: true,
         })
@@ -105,7 +207,7 @@ export class PontCommands {
           if (hasSpecName) {
             specName = detailItems[0];
             const spec = service.pontManager.localPontSpecs.find((spec) => spec.name === specName);
-            if (PontSpec.getMods(spec)?.length > 1) {
+            if (PontSpec.checkHasMods(spec)) {
               modName = detailItems[1];
               apiName = detailItems[2];
             } else {
@@ -113,7 +215,7 @@ export class PontCommands {
             }
           } else {
             const spec = service.pontManager.localPontSpecs[0];
-            if (PontSpec.getMods(spec)?.length > 1) {
+            if (PontSpec.checkHasMods(spec)) {
               modName = detailItems[0];
               apiName = detailItems[1];
             } else {
@@ -128,38 +230,118 @@ export class PontCommands {
           const apiMeta = modMeta?.interfaces?.find((api) => api.name === apiName);
 
           Promise.resolve(service.pontManager.innerManagerConfig.plugins.generate?.instance).then((generatePlugin) => {
-            const snippets = generatePlugin?.providerSnippets?.(apiMeta, modName, pontSpec.name, {
-              spec: pontSpec,
-            });
+            let snippets = [];
+            let specType = "";
+
+            if (!apiName && modName) {
+              specType = "controller";
+              snippets = generatePlugin?.providerControllerSnippets?.(modName, specName, {
+                spec: pontSpec,
+              });
+            } else {
+              snippets = generatePlugin?.providerSnippets?.(apiMeta, modName, pontSpec.name, {
+                spec: pontSpec,
+              });
+            }
+
+            if (apiName) {
+              specType = "api";
+            }
+
+            const aiPrompts = PontManager.listPromptsBySpecType(service.pontManager, specName, specType as any);
+
+            if (aiPrompts?.length) {
+              snippets.push(
+                ...aiPrompts
+                  .map((prompt) => {
+                    let description = "";
+                    if (prompt.sceneType === "frontend") {
+                      description = "[前端场景]";
+                    } else if (prompt.sceneType === "backend") {
+                      description = "[后端场景]";
+                    } else if (prompt.sceneType === "sql") {
+                      description = "[SQL场景]";
+                    } else if (prompt.sceneType === "pontx") {
+                      return null;
+                    }
+                    return {
+                      name: prompt.name,
+                      id: prompt.id,
+                      isPromptSnippet: true,
+                      description,
+                    };
+                  })
+                  .filter((id) => id),
+              );
+            }
 
             if (snippets?.length) {
               if (snippets.length === 1) {
                 insertCode[snippets[0].code];
               }
               const VIEW_API_DOC_ID = "VSCODE_PONTX_SHOW_PICK_ITEM_VIEW_API_DOC";
-              const pickItems = [
-                {
-                  label: "查看文档",
-                  id: VIEW_API_DOC_ID,
-                },
-                ...snippets.map((snippet) => {
+              const snippetItems = snippets.map((snippet) => {
+                if (snippet?.isPromptSnippet) {
                   return {
-                    label: "插入代码段: " + snippet.name,
-                    id: snippet.name,
-                    description: snippet.description,
+                    label: "通过 AI 生成代码: " + snippet.name,
+                    id: snippet.id,
+                    description: snippet.description || "",
+                    isPromptSnippet: true,
                   };
-                }),
-              ];
+                }
+
+                return {
+                  label: "插入代码段: " + snippet.name,
+                  id: snippet.name,
+                  description: snippet.description,
+                };
+              });
+
+              let pickItems = snippetItems;
+              if (apiName) {
+                pickItems = [
+                  {
+                    label: "查看文档",
+                    id: VIEW_API_DOC_ID,
+                    description: "",
+                  },
+                  ...snippetItems,
+                ];
+              }
 
               return vscode.window
                 .showQuickPick(pickItems, {
                   matchOnDescription: true,
                   matchOnDetail: true,
                 })
-                .then((snippet) => {
-                  const foundSnippet = snippets.find((inst) => inst.name === snippet?.id);
+                .then(async (snippet) => {
+                  const foundSnippet = snippets.find((inst) => inst?.id === snippet?.id || inst.name === snippet?.id);
                   if (foundSnippet) {
-                    insertCode(foundSnippet.code);
+                    if (foundSnippet?.isPromptSnippet) {
+                      let config = vscode.workspace.getConfiguration("pontx");
+                      let variables = { ...((config.get("ai.variables") as any) || {}) };
+
+                      if (apiName) {
+                        if (modName) {
+                          variables.apiName = [modName, apiName].join("/");
+                        } else {
+                          variables.apiName = apiName;
+                        }
+                      } else if (!apiName && modName && typeof modName === "string") {
+                        variables.controllerName = modName;
+                      }
+                      variables.specName = specName || "";
+
+                      const codeGenerator = PontManager.generateAICode(service.pontManager, {
+                        promptId: foundSnippet.id,
+                        variables,
+                        specName: variables?.specName,
+                        userPrompt: "",
+                      } as any);
+                      insertStreamingCode(codeGenerator);
+                    } else {
+                      insertCode(foundSnippet.code);
+                    }
                   } else if (snippet.id === VIEW_API_DOC_ID) {
                     vscode.commands.executeCommand("pontx.openPontUI", {
                       specName,
@@ -407,322 +589,3 @@ export class PontCommands {
     // });
   }
 }
-
-// export class Commands {
-//   static pontManager: PontManager;
-
-//   commands = {
-//     switchOrigin: "pontx.switchOrigin",
-//     // updateMod: 'pontx.updateMod',
-//     // updateBo: 'pontx.updateBo',
-//     // updateAll: 'pontx.updateAll',
-//     // syncRemote: 'pontx.syncRemote',
-//     findInterface: "pontx.findInterface",
-//     // refreshMocks: 'pontx.refreshMocks',
-//     regenerate: "pontx.regenerate",
-//   };
-//   dispose: Function;
-
-//   watchLocalFile() {
-//     const config = this.manager.currConfig;
-//     const lockWatcher = vscode.workspace.createFileSystemWatcher(
-//       path.join(config.outDir, this.manager.lockFilename),
-//       true,
-//       false,
-//       true
-//     );
-//     let lockDispose = lockWatcher.onDidChange(async () => {
-//       await this.manager.readLocalDataSource();
-//       this.manager.calDiffs();
-//       this.ui.reRender();
-//     });
-
-//     this.dispose = () => {
-//       lockDispose.dispose();
-//     };
-//   }
-
-//   constructor(manager: Manager) {
-//     this.createCommands();
-
-//     this.manager = manager;
-
-//     this.watchLocalFile();
-//     createMenuCommand(this.manager);
-//   }
-
-//   get isMultiple() {
-//     return this.manager.allConfigs.length > 1;
-//   }
-
-//   createCommands() {
-//     _.forEach(this.commands, (value, key) => {
-//       vscode.commands.registerCommand(value, this[key].bind(this));
-//     });
-//   }
-
-//   refreshMocks() {
-//     if (MocksServer.singleInstance) {
-//       MocksServer.singleInstance.refreshMocksCode();
-//     }
-//   }
-
-//   findInterface(ignoreEdit = false) {
-//     const items = this.manager.currLocalDataSource.mods
-//       .map((mod) => {
-//         return mod.interfaces.map((inter) => {
-//           return {
-//             label: `[${inter.method}] ${inter.path}`,
-//             detail: `${mod.name}.${inter.name}`,
-//             description: `${inter.description}`,
-//           } as vscode.QuickPickItem;
-//         });
-//       })
-//       .reduce((pre, next) => pre.concat(next), []);
-
-//     return vscode.window
-//       .showQuickPick(items, {
-//         matchOnDescription: true,
-//         matchOnDetail: true,
-//       })
-//       .then((item) => {
-//         if (!item) {
-//           return;
-//         }
-
-//         let code = `API.${item.detail}.`;
-
-//         if (this.manager.allLocalDataSources.length > 1) {
-//           code = `API.${this.manager.currLocalDataSource.name}.${item.detail}.`;
-//         }
-
-//         const editor = vscode.window.activeTextEditor;
-
-//         if (!ignoreEdit) {
-//           editor.edit((builder) => {
-//             if (editor.selection.isEmpty) {
-//               const position = editor.selection.active;
-
-//               builder.insert(position, code);
-//             } else {
-//               builder.replace(editor.selection, code);
-//             }
-//           });
-//         }
-
-//         return code.split(".").filter((id) => id);
-//       });
-//   }
-
-//   switchOrigin() {
-//     const origins = this.manager.allConfigs.map((conf) => {
-//       return {
-//         label: conf.name,
-//         description: conf.originUrl,
-//       } as vscode.QuickPickItem;
-//     });
-
-//     vscode.window.showQuickPick(origins).then(
-//       async (item) => {
-//         vscode.window.withProgress(
-//           {
-//             location: vscode.ProgressLocation.Notification,
-//             title: "",
-//           },
-//           async (p) => {
-//             this.manager.setReport((info) => {
-//               p.report({ message: info });
-//             });
-//             try {
-//               await this.manager.selectDataSource(item.label);
-//               this.manager.calDiffs();
-//               this.ui.reRender();
-
-//               MocksServer.getSingleInstance(this.manager).checkMocksPath();
-//             } catch (e) {
-//               vscode.window.showErrorMessage(e.message);
-//             }
-//           }
-//         );
-//       },
-//       (e) => {
-//         vscode.window.showErrorMessage(e.message);
-//       }
-//     );
-//   }
-
-//   updateMod() {
-//     const modDiffs = this.manager.diffs.modDiffs;
-//     const items = modDiffs.map((item) => {
-//       return {
-//         label: item.name,
-//         description: `${item.details[0]}等 ${item.details.length} 条更新`,
-//       } as vscode.QuickPickItem;
-//     });
-//     const oldFiles = this.manager.getGeneratedFiles();
-
-//     vscode.window.showQuickPick(items).then(
-//       (thenItems) => {
-//         if (!thenItems) {
-//           return;
-//         }
-
-//         const modName = thenItems.label;
-
-//         vscode.window.withProgress(
-//           {
-//             location: vscode.ProgressLocation.Notification,
-//             title: "updateMod",
-//           },
-//           (p) => {
-//             return new Promise<void>(async (resolve, reject) => {
-//               try {
-//                 p.report({ message: "开始更新..." });
-
-//                 this.manager.makeSameMod(modName);
-//                 await this.manager.lock();
-
-//                 this.manager.calDiffs();
-//                 this.ui.reRender();
-//                 await this.manager.update(oldFiles);
-
-//                 p.report({ message: "更新成功！" });
-//                 vscode.window.showInformationMessage(modName + "更新成功!");
-//                 resolve();
-//               } catch (e) {
-//                 reject(e);
-//               }
-//             });
-//           }
-//         );
-//       },
-//       (e) => {}
-//     );
-//   }
-
-//   updateBo() {
-//     const boDiffs = this.manager.diffs.boDiffs;
-//     const oldFiles = this.manager.getGeneratedFiles();
-
-//     const items = boDiffs.map((item) => {
-//       return {
-//         label: item.name,
-//         description: item.details.join(", "),
-//       } as vscode.QuickPickItem;
-//     });
-
-//     vscode.window.showQuickPick(items).then(
-//       (item) => {
-//         if (!item) {
-//           return;
-//         }
-
-//         let boName = item.label;
-
-//         vscode.window.withProgress(
-//           {
-//             location: vscode.ProgressLocation.Notification,
-//             title: "updateBo",
-//           },
-//           (p) => {
-//             return new Promise<void>(async (resolve, reject) => {
-//               try {
-//                 p.report({ message: "开始更新..." });
-
-//                 this.manager.makeSameBase(boName);
-//                 await this.manager.lock();
-
-//                 this.manager.calDiffs();
-//                 this.ui.reRender();
-//                 await this.manager.update(oldFiles);
-
-//                 p.report({ message: "更新成功！" });
-//                 vscode.window.showInformationMessage(boName + "更新成功!");
-//                 resolve();
-//               } catch (e) {
-//                 reject(e);
-//               }
-//             });
-//           }
-//         );
-//       },
-//       (e) => {}
-//     );
-//   }
-
-//   updateAll() {
-//     vscode.window.showInformationMessage("确定全量更新吗？", "确定").then(
-//       (text) => {
-//         if (!text) {
-//           return;
-//         }
-
-//         vscode.window.withProgress(
-//           {
-//             location: vscode.ProgressLocation.Notification,
-//             title: "updateAll",
-//           },
-//           (p) => {
-//             return new Promise<void>(async (resolve, reject) => {
-//               try {
-//                 p.report({ message: "开始更新..." });
-
-//                 this.manager.makeAllSame();
-
-//                 await this.manager.lock();
-
-//                 this.manager.calDiffs();
-//                 this.ui.reRender();
-
-//                 p.report({ message: "更新成功！" });
-//                 vscode.window.showInformationMessage("更新成功!");
-
-//                 resolve();
-//               } catch (e) {
-//                 reject(e);
-//               }
-//             });
-//           }
-//         );
-//       },
-//       (e) => {}
-//     );
-//   }
-
-//   syncRemote() {
-//     showProgress("syncRemote", this.manager, async (report) => {
-//       report("远程更新中...");
-
-//       try {
-//         await this.manager.readRemoteDataSource();
-
-//         report("同步成功！");
-//         report("差异比对中...");
-//         this.manager.calDiffs();
-
-//         report("同步完成！");
-//         this.ui.reRender();
-//       } catch (e) {
-//         vscode.window.showErrorMessage(e.message);
-//       }
-//     });
-//   }
-
-//   async regenerate() {
-//     const e = new events.EventEmitter();
-
-//     showProgress("生成代码", this.manager, async (report) => {
-//       report("代码生成中...");
-//       await wait(100);
-
-//       await this.manager.regenerateFiles();
-
-//       report("代码生成成功！");
-//       vscode.window.showInformationMessage("文件生成成功！");
-//     });
-//   }
-
-//   async syncNpm() {
-//     await syncNpm();
-//   }
-// }

@@ -41,6 +41,7 @@ pont 中的数据类型，集成 JSONSchema。
 - [exclusiveMaximum](PontJsonSchema.md#exclusivemaximum)
 - [exclusiveMinimum](PontJsonSchema.md#exclusiveminimum)
 - [ext](PontJsonSchema.md#ext)
+- [externalDocs](PontJsonSchema.md#externaldocs)
 - [format](PontJsonSchema.md#format)
 - [if](PontJsonSchema.md#if)
 - [items](PontJsonSchema.md#items)
@@ -75,6 +76,10 @@ pont 中的数据类型，集成 JSONSchema。
 - [checkIsMap](PontJsonSchema.md#checkismap)
 - [create](PontJsonSchema.md#create)
 - [getDescription](PontJsonSchema.md#getdescription)
+- [getUsedStructNames](PontJsonSchema.md#getusedstructnames)
+- [mapPontxSchema](PontJsonSchema.md#mappontxschema)
+- [merge](PontJsonSchema.md#merge)
+- [parseFromSample](PontJsonSchema.md#parsefromsample)
 - [toString](PontJsonSchema.md#tostring)
 
 ## Constructors
@@ -99,7 +104,7 @@ CoreSchemaMetaSchema.$comment
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:13
+oas-spec-ts/lib/JsonSchema.d.ts:13
 
 ___
 
@@ -113,7 +118,7 @@ CoreSchemaMetaSchema.$id
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:10
+oas-spec-ts/lib/JsonSchema.d.ts:10
 
 ___
 
@@ -127,7 +132,7 @@ CoreSchemaMetaSchema.$ref
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:12
+oas-spec-ts/lib/JsonSchema.d.ts:12
 
 ___
 
@@ -141,7 +146,7 @@ CoreSchemaMetaSchema.$schema
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:11
+oas-spec-ts/lib/JsonSchema.d.ts:11
 
 ___
 
@@ -155,7 +160,7 @@ CoreSchemaMetaSchema.additionalItems
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:32
+oas-spec-ts/lib/JsonSchema.d.ts:32
 
 ___
 
@@ -165,7 +170,7 @@ ___
 
 #### Defined in
 
-[src/dataType.ts:39](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/dataType.ts#L39)
+[pontx-spec/src/dataType.ts:40](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/dataType.ts#L40)
 
 ___
 
@@ -179,7 +184,7 @@ CoreSchemaMetaSchema.allOf
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:48
+oas-spec-ts/lib/JsonSchema.d.ts:48
 
 ___
 
@@ -193,7 +198,7 @@ CoreSchemaMetaSchema.anyOf
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:49
+oas-spec-ts/lib/JsonSchema.d.ts:49
 
 ___
 
@@ -207,7 +212,7 @@ CoreSchemaMetaSchema.const
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:39
+oas-spec-ts/lib/JsonSchema.d.ts:39
 
 ___
 
@@ -221,7 +226,7 @@ CoreSchemaMetaSchema.contains
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:30
+oas-spec-ts/lib/JsonSchema.d.ts:30
 
 ___
 
@@ -235,7 +240,7 @@ CoreSchemaMetaSchema.contentEncoding
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:44
+oas-spec-ts/lib/JsonSchema.d.ts:44
 
 ___
 
@@ -249,7 +254,7 @@ CoreSchemaMetaSchema.contentMediaType
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:43
+oas-spec-ts/lib/JsonSchema.d.ts:43
 
 ___
 
@@ -263,7 +268,7 @@ CoreSchemaMetaSchema.default
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:16
+oas-spec-ts/lib/JsonSchema.d.ts:16
 
 ___
 
@@ -281,7 +286,7 @@ CoreSchemaMetaSchema.dependencies
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:35
+oas-spec-ts/lib/JsonSchema.d.ts:35
 
 ___
 
@@ -295,7 +300,7 @@ CoreSchemaMetaSchema.description
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:15
+oas-spec-ts/lib/JsonSchema.d.ts:15
 
 ___
 
@@ -309,7 +314,7 @@ CoreSchemaMetaSchema.else
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:47
+oas-spec-ts/lib/JsonSchema.d.ts:47
 
 ___
 
@@ -323,7 +328,7 @@ CoreSchemaMetaSchema.enum
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:40
+oas-spec-ts/lib/JsonSchema.d.ts:40
 
 ___
 
@@ -333,7 +338,7 @@ ___
 
 #### Defined in
 
-[src/dataType.ts:32](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/dataType.ts#L32)
+[pontx-spec/src/dataType.ts:33](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/dataType.ts#L33)
 
 ___
 
@@ -347,7 +352,7 @@ CoreSchemaMetaSchema.examples
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:18
+oas-spec-ts/lib/JsonSchema.d.ts:18
 
 ___
 
@@ -361,7 +366,7 @@ CoreSchemaMetaSchema.exclusiveMaximum
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:21
+oas-spec-ts/lib/JsonSchema.d.ts:21
 
 ___
 
@@ -375,7 +380,7 @@ CoreSchemaMetaSchema.exclusiveMinimum
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:23
+oas-spec-ts/lib/JsonSchema.d.ts:23
 
 ___
 
@@ -385,7 +390,24 @@ ___
 
 #### Defined in
 
-[src/dataType.ts:41](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/dataType.ts#L41)
+[pontx-spec/src/dataType.ts:48](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/dataType.ts#L48)
+
+___
+
+### externalDocs
+
+• `Optional` **externalDocs**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `description?` | `string` |
+| `url?` | `string` |
+
+#### Defined in
+
+[pontx-spec/src/dataType.ts:43](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/dataType.ts#L43)
 
 ___
 
@@ -399,7 +421,7 @@ CoreSchemaMetaSchema.format
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:42
+oas-spec-ts/lib/JsonSchema.d.ts:42
 
 ___
 
@@ -413,7 +435,7 @@ CoreSchemaMetaSchema.if
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:45
+oas-spec-ts/lib/JsonSchema.d.ts:45
 
 ___
 
@@ -423,7 +445,7 @@ ___
 
 #### Defined in
 
-[src/dataType.ts:38](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/dataType.ts#L38)
+[pontx-spec/src/dataType.ts:39](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/dataType.ts#L39)
 
 ___
 
@@ -437,7 +459,7 @@ CoreSchemaMetaSchema.maxItems
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:27
+oas-spec-ts/lib/JsonSchema.d.ts:27
 
 ___
 
@@ -451,7 +473,7 @@ CoreSchemaMetaSchema.maxLength
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:24
+oas-spec-ts/lib/JsonSchema.d.ts:24
 
 ___
 
@@ -465,7 +487,7 @@ CoreSchemaMetaSchema.maxProperties
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:31
+oas-spec-ts/lib/JsonSchema.d.ts:31
 
 ___
 
@@ -479,7 +501,7 @@ CoreSchemaMetaSchema.maximum
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:20
+oas-spec-ts/lib/JsonSchema.d.ts:20
 
 ___
 
@@ -493,7 +515,7 @@ CoreSchemaMetaSchema.minItems
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:28
+oas-spec-ts/lib/JsonSchema.d.ts:28
 
 ___
 
@@ -507,7 +529,7 @@ CoreSchemaMetaSchema.minLength
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:25
+oas-spec-ts/lib/JsonSchema.d.ts:25
 
 ___
 
@@ -521,7 +543,7 @@ CoreSchemaMetaSchema.minProperties
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:33
+oas-spec-ts/lib/JsonSchema.d.ts:33
 
 ___
 
@@ -535,7 +557,7 @@ CoreSchemaMetaSchema.minimum
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:22
+oas-spec-ts/lib/JsonSchema.d.ts:22
 
 ___
 
@@ -549,7 +571,7 @@ CoreSchemaMetaSchema.multipleOf
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:19
+oas-spec-ts/lib/JsonSchema.d.ts:19
 
 ___
 
@@ -563,7 +585,7 @@ CoreSchemaMetaSchema.not
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:51
+oas-spec-ts/lib/JsonSchema.d.ts:51
 
 ___
 
@@ -577,7 +599,7 @@ CoreSchemaMetaSchema.oneOf
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:50
+oas-spec-ts/lib/JsonSchema.d.ts:50
 
 ___
 
@@ -591,7 +613,7 @@ CoreSchemaMetaSchema.pattern
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:26
+oas-spec-ts/lib/JsonSchema.d.ts:26
 
 ___
 
@@ -605,7 +627,7 @@ CoreSchemaMetaSchema.patternProperties
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:34
+oas-spec-ts/lib/JsonSchema.d.ts:34
 
 ___
 
@@ -615,7 +637,7 @@ ___
 
 #### Defined in
 
-[src/dataType.ts:40](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/dataType.ts#L40)
+[pontx-spec/src/dataType.ts:41](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/dataType.ts#L41)
 
 ___
 
@@ -629,7 +651,7 @@ CoreSchemaMetaSchema.propertyNames
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:38
+oas-spec-ts/lib/JsonSchema.d.ts:38
 
 ___
 
@@ -643,17 +665,17 @@ CoreSchemaMetaSchema.readOnly
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:17
+oas-spec-ts/lib/JsonSchema.d.ts:17
 
 ___
 
 ### required
 
-• `Optional` **required**: `boolean`
+• `Optional` **required**: `string`[]
 
 #### Defined in
 
-[src/dataType.ts:34](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/dataType.ts#L34)
+[pontx-spec/src/dataType.ts:35](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/dataType.ts#L35)
 
 ___
 
@@ -663,7 +685,7 @@ ___
 
 #### Defined in
 
-[src/dataType.ts:36](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/dataType.ts#L36)
+[pontx-spec/src/dataType.ts:37](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/dataType.ts#L37)
 
 ___
 
@@ -677,7 +699,7 @@ ___
 
 #### Defined in
 
-[src/dataType.ts:30](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/dataType.ts#L30)
+[pontx-spec/src/dataType.ts:31](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/dataType.ts#L31)
 
 ___
 
@@ -690,7 +712,7 @@ ___
 
 #### Defined in
 
-[src/dataType.ts:20](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/dataType.ts#L20)
+[pontx-spec/src/dataType.ts:21](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/dataType.ts#L21)
 
 ___
 
@@ -704,7 +726,7 @@ CoreSchemaMetaSchema.then
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:46
+oas-spec-ts/lib/JsonSchema.d.ts:46
 
 ___
 
@@ -718,7 +740,7 @@ CoreSchemaMetaSchema.title
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:14
+oas-spec-ts/lib/JsonSchema.d.ts:14
 
 ___
 
@@ -732,7 +754,7 @@ CoreSchemaMetaSchema.type
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:41
+oas-spec-ts/lib/JsonSchema.d.ts:41
 
 ___
 
@@ -744,7 +766,7 @@ ___
 
 #### Defined in
 
-[src/dataType.ts:23](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/dataType.ts#L23)
+[pontx-spec/src/dataType.ts:24](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/dataType.ts#L24)
 
 ___
 
@@ -758,7 +780,7 @@ CoreSchemaMetaSchema.uniqueItems
 
 #### Defined in
 
-node_modules/oas-spec-ts/lib/JsonSchema.d.ts:29
+oas-spec-ts/lib/JsonSchema.d.ts:29
 
 ## Methods
 
@@ -778,7 +800,7 @@ node_modules/oas-spec-ts/lib/JsonSchema.d.ts:29
 
 #### Defined in
 
-[src/dataType.ts:105](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/dataType.ts#L105)
+[pontx-spec/src/dataType.ts:115](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/dataType.ts#L115)
 
 ___
 
@@ -792,7 +814,7 @@ ___
 
 #### Defined in
 
-[src/dataType.ts:101](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/dataType.ts#L101)
+[pontx-spec/src/dataType.ts:111](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/dataType.ts#L111)
 
 ___
 
@@ -812,7 +834,89 @@ ___
 
 #### Defined in
 
-[src/dataType.ts:112](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/dataType.ts#L112)
+[pontx-spec/src/dataType.ts:122](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/dataType.ts#L122)
+
+___
+
+### getUsedStructNames
+
+▸ `Static` **getUsedStructNames**(`schema`): `string`[]
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `schema` | [`PontJsonSchema`](PontJsonSchema.md) |
+
+#### Returns
+
+`string`[]
+
+#### Defined in
+
+[pontx-spec/src/dataType.ts:162](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/dataType.ts#L162)
+
+___
+
+### mapPontxSchema
+
+▸ `Static` **mapPontxSchema**(`schema`, `mapper`): `any`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `schema` | [`PontJsonSchema`](PontJsonSchema.md) |
+| `mapper` | (`schema`: [`PontJsonSchema`](PontJsonSchema.md)) => [`PontJsonSchema`](PontJsonSchema.md) |
+
+#### Returns
+
+`any`
+
+#### Defined in
+
+[pontx-spec/src/dataType.ts:124](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/dataType.ts#L124)
+
+___
+
+### merge
+
+▸ `Static` **merge**(`schema`, `newSchema`): `any`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `schema` | [`PontJsonSchema`](PontJsonSchema.md) |
+| `newSchema` | [`PontJsonSchema`](PontJsonSchema.md) |
+
+#### Returns
+
+`any`
+
+#### Defined in
+
+[pontx-spec/src/dataType.ts:226](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/dataType.ts#L226)
+
+___
+
+### parseFromSample
+
+▸ `Static` **parseFromSample**(`json`): [`PontJsonSchema`](PontJsonSchema.md)
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `json` | `any` |
+
+#### Returns
+
+[`PontJsonSchema`](PontJsonSchema.md)
+
+#### Defined in
+
+[pontx-spec/src/dataType.ts:175](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/dataType.ts#L175)
 
 ___
 
@@ -834,4 +938,4 @@ ___
 
 #### Defined in
 
-[src/dataType.ts:44](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/dataType.ts#L44)
+[pontx-spec/src/dataType.ts:51](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/dataType.ts#L51)

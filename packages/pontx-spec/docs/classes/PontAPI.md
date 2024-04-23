@@ -11,16 +11,23 @@
 ### Properties
 
 - [consumes](PontAPI.md#consumes)
-- [produces](PontAPI.md#produces)
 - [deprecated](PontAPI.md#deprecated)
 - [description](PontAPI.md#description)
 - [ext](PontAPI.md#ext)
+- [externalDocs](PontAPI.md#externaldocs)
 - [method](PontAPI.md#method)
 - [name](PontAPI.md#name)
 - [parameters](PontAPI.md#parameters)
 - [path](PontAPI.md#path)
+- [produces](PontAPI.md#produces)
 - [responses](PontAPI.md#responses)
+- [security](PontAPI.md#security)
+- [summary](PontAPI.md#summary)
 - [title](PontAPI.md#title)
+
+### Methods
+
+- [getUsedStructNames](PontAPI.md#getusedstructnames)
 
 ## Constructors
 
@@ -32,31 +39,31 @@
 
 ### consumes
 
-• **consumes**: `string`[]
+• `Optional` **consumes**: `string`[] = `[]`
 
 #### Defined in
 
-[src/index.ts:16](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/index.ts#L16)
+[pontx-spec/src/type.ts:23](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L23)
 
 ___
 
 ### deprecated
 
-• **deprecated**: `boolean`
+• `Optional` **deprecated**: `boolean`
 
 #### Defined in
 
-[src/index.ts:26](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/index.ts#L26)
+[pontx-spec/src/type.ts:34](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L34)
 
 ___
 
 ### description
 
-• **description**: `string`
+• `Optional` **description**: `string`
 
 #### Defined in
 
-[src/index.ts:18](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/index.ts#L18)
+[pontx-spec/src/type.ts:26](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L26)
 
 ___
 
@@ -66,7 +73,24 @@ ___
 
 #### Defined in
 
-[src/index.ts:27](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/index.ts#L27)
+[pontx-spec/src/type.ts:35](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L35)
+
+___
+
+### externalDocs
+
+• `Optional` **externalDocs**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `description?` | `string` |
+| `url?` | `string` |
+
+#### Defined in
+
+[pontx-spec/src/type.ts:39](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L39)
 
 ___
 
@@ -76,27 +100,29 @@ ___
 
 #### Defined in
 
-[src/index.ts:22](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/index.ts#L22)
+[pontx-spec/src/type.ts:30](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L30)
 
 ___
 
 ### name
 
-• **name**: `string`
+• `Optional` **name**: `string`
+
+**`Deprecated`**
 
 #### Defined in
 
-[src/index.ts:23](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/index.ts#L23)
+[pontx-spec/src/type.ts:22](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L22)
 
 ___
 
 ### parameters
 
-• **parameters**: [`Parameter`](Parameter.md)[]
+• `Optional` **parameters**: [`Parameter`](Parameter.md)[] = `[]`
 
 #### Defined in
 
-[src/index.ts:17](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/index.ts#L17)
+[pontx-spec/src/type.ts:25](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L25)
 
 ___
 
@@ -106,7 +132,17 @@ ___
 
 #### Defined in
 
-[src/index.ts:25](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/index.ts#L25)
+[pontx-spec/src/type.ts:33](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L33)
+
+___
+
+### produces
+
+• `Optional` **produces**: `string`[] = `[]`
+
+#### Defined in
+
+[pontx-spec/src/type.ts:24](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L24)
 
 ___
 
@@ -116,11 +152,31 @@ ___
 
 #### Index signature
 
-▪ [key: `string`]: `ResponseObject`
+▪ [key: `string`]: [`ResponseObject`](../modules.md#responseobject)
 
 #### Defined in
 
-[src/index.ts:19](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/index.ts#L19)
+[pontx-spec/src/type.ts:27](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L27)
+
+___
+
+### security
+
+• `Optional` **security**: \{ `[x: string]`: `string`[];  }[]
+
+#### Defined in
+
+[pontx-spec/src/type.ts:36](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L36)
+
+___
+
+### summary
+
+• `Optional` **summary**: `string`
+
+#### Defined in
+
+[pontx-spec/src/type.ts:32](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L32)
 
 ___
 
@@ -130,4 +186,24 @@ ___
 
 #### Defined in
 
-[src/index.ts:24](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/index.ts#L24)
+[pontx-spec/src/type.ts:31](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L31)
+
+## Methods
+
+### getUsedStructNames
+
+▸ `Static` **getUsedStructNames**(`api`): `string`[]
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `api` | [`PontAPI`](PontAPI.md) |
+
+#### Returns
+
+`string`[]
+
+#### Defined in
+
+[pontx-spec/src/type.ts:44](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L44)

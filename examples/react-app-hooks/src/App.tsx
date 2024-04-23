@@ -1,8 +1,12 @@
 import "./App.css";
 import * as React from "react";
-import { PetstoreAPIs, pontxSDK } from "./services/sdk";
+import { PetstoreAPIs, setDefaults } from "./services/sdk";
 
-pontxSDK.fetcher.protocol = "https://";
+setDefaults((specName) => {
+	return {
+		baseURL: "https://petstore.swagger.io/v2",
+	}
+});
 
 PetstoreAPIs.pet.findPetsByStatus.preload({
   status: ["available"],

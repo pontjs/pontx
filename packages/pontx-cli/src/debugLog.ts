@@ -16,7 +16,7 @@ export function cliLog(message: string, logType: string) {
     }
     case "error": {
       logger.error(message);
-      process.exit(1);
+      // process.exit(1);
       break;
     }
   }

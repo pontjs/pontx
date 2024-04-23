@@ -7,10 +7,12 @@
     "start": "vite --mode browser",
     "build:client": "NODE_ENV=production vite build",
     "build:server": "ncc build src/server.ts -o lib -m -e *.css",
+    "build:server:dev": "ncc build src/server.ts -o lib -e *.css",
+    "build": "npm run build:client && npm run build:server",
     "preview": "vite preview"
   },
   "dependencies": {
-    "pontx-ui": "^0.3.70"
+    "pontx-ui": "^0.4.4"
   },
-  "version": "0.3.70"
+  "version": "0.4.4"
 }

@@ -4,19 +4,27 @@
 
 ## Table of contents
 
+### Enumerations
+
+- [PontxDirectoryNodeType](enums/PontxDirectoryNodeType.md)
+
 ### Classes
 
+- [DiffItem](classes/DiffItem.md)
 - [Mod](classes/Mod.md)
 - [Parameter](classes/Parameter.md)
 - [PontAPI](classes/PontAPI.md)
-- [PontDirectory](classes/PontDirectory.md)
 - [PontJsonSchema](classes/PontJsonSchema.md)
+- [PontNamespace](classes/PontNamespace.md)
 - [PontSpec](classes/PontSpec.md)
 - [PontSpecs](classes/PontSpecs.md)
+- [PontxDirectoryNode](classes/PontxDirectoryNode.md)
+- [SpecDiffTree](classes/SpecDiffTree.md)
 
 ### Type Aliases
 
 - [ObjectMap](modules.md#objectmap)
+- [ResponseObject](modules.md#responseobject)
 
 ### Variables
 
@@ -25,13 +33,14 @@
 
 ### Functions
 
+- [parsePontSpec2OAS2](modules.md#parsepontspec2oas2)
 - [removeMapKeys](modules.md#removemapkeys)
 
 ## Type Aliases
 
 ### ObjectMap
 
-Ƭ **ObjectMap**<`T`\>: `Object`
+Ƭ **ObjectMap**\<`T`\>: `Object`
 
 #### Type parameters
 
@@ -45,7 +54,25 @@
 
 #### Defined in
 
-[src/utils.ts:4](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/utils.ts#L4)
+[pontx-spec/src/utils.ts:4](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/utils.ts#L4)
+
+___
+
+### ResponseObject
+
+Ƭ **ResponseObject**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `description?` | `string` |
+| `headers?` | `OAS2.HeadersObject` |
+| `schema` | [`PontJsonSchema`](classes/PontJsonSchema.md) |
+
+#### Defined in
+
+[pontx-spec/src/type.ts:15](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L15)
 
 ## Variables
 
@@ -65,7 +92,7 @@
 
 #### Defined in
 
-[src/jsonpointer.ts:163](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/jsonpointer.ts#L163)
+[pontx-spec/src/jsonpointer.ts:163](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/jsonpointer.ts#L163)
 
 ___
 
@@ -75,19 +102,39 @@ ___
 
 #### Defined in
 
-[src/index.ts:50](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/index.ts#L50)
+[pontx-spec/src/type.ts:225](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L225)
 
 ## Functions
 
+### parsePontSpec2OAS2
+
+▸ **parsePontSpec2OAS2**(`spec`): `SwaggerObject` \| \{ `apis`: [`ObjectMap`](modules.md#objectmap)\<[`PontAPI`](classes/PontAPI.md)\> = spec.apis; `basePath`: `string` = spec.basePath; `definitions`: [`ObjectMap`](modules.md#objectmap)\<[`PontJsonSchema`](classes/PontJsonSchema.md)\> = spec.definitions; `externalDocs`: `ExternalDocumentationObject` = spec.externalDocs; `host`: `string` = spec.host; `info`: \{ `description`: `string` = spec.description; `title`: `string` = spec.title; `version`: `string` = spec.version } ; `swagger`: `string` = "2.0"; `tags`: \{ `description`: `string` ; `name`: `string`  }[]  }
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `spec` | [`PontSpec`](classes/PontSpec.md) |
+
+#### Returns
+
+`SwaggerObject` \| \{ `apis`: [`ObjectMap`](modules.md#objectmap)\<[`PontAPI`](classes/PontAPI.md)\> = spec.apis; `basePath`: `string` = spec.basePath; `definitions`: [`ObjectMap`](modules.md#objectmap)\<[`PontJsonSchema`](classes/PontJsonSchema.md)\> = spec.definitions; `externalDocs`: `ExternalDocumentationObject` = spec.externalDocs; `host`: `string` = spec.host; `info`: \{ `description`: `string` = spec.description; `title`: `string` = spec.title; `version`: `string` = spec.version } ; `swagger`: `string` = "2.0"; `tags`: \{ `description`: `string` ; `name`: `string`  }[]  }
+
+#### Defined in
+
+[pontx-spec/src/parse.ts:6](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/parse.ts#L6)
+
+___
+
 ### removeMapKeys
 
-▸ **removeMapKeys**<`T`\>(`obj`, `checkRemoveKey`): `T`
+▸ **removeMapKeys**\<`T`\>(`obj`, `checkRemoveKey`): `T`
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `T` | extends [`ObjectMap`](modules.md#objectmap)<`any`\> |
+| `T` | extends [`ObjectMap`](modules.md#objectmap)\<`any`\> |
 
 #### Parameters
 
@@ -102,4 +149,4 @@ ___
 
 #### Defined in
 
-[src/utils.ts:117](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/utils.ts#L117)
+[pontx-spec/src/utils.ts:117](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/utils.ts#L117)

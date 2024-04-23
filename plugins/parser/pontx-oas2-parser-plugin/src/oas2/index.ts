@@ -18,6 +18,12 @@ export class PontOAS2ParserPlugin extends PontxParserPlugin {
 
           return oas3Parser.apply(metaStr, specName, options);
         }
+        if (
+          (swaggerObj as any as PontSpec).pontx ||
+          ((swaggerObj as any as PontSpec).apis && (swaggerObj as any as PontSpec).definitions)
+        ) {
+          return Promise.resolve(swaggerObj as PontSpec);
+        }
       } catch (e) {
         this.logger.error("当前获取到的远程元数据不符合 JSON 格式，无法解析为 pont spec。元数据为：" + metaStr);
         return;
@@ -30,3 +36,5 @@ export class PontOAS2ParserPlugin extends PontxParserPlugin {
     }
   }
 }
+
+export { parseOAS2 };

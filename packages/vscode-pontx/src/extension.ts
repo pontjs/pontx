@@ -8,7 +8,7 @@ import { findPontxConfig, pontConsole, registerConfigSchema, VSCodeLogger } from
 import { PontCommands } from "./commands";
 import { pontUI } from "./UI";
 import { PontSerializer, PontWebView } from "./webview";
-import { PontAPIExplorer, PontFileDecoration } from "./explorer";
+import { PontFileDecoration } from "./explorer";
 
 export async function activate(context: vscode.ExtensionContext) {
   if (!vscode.workspace.rootPath) {

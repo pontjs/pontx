@@ -47,3 +47,7 @@ packages/pontx-ui/src/mocks/*.json
 packages/pontx-ui/src/mocks/remoteSpec.json
 plugins/generate/pontx-react-hooks-generate-plugin/builtin
 *.local.js
+semix/semix-form/dist
+plugins/parser/pontx-oas3-parser-plugin/module/
+plugins/parser/pontx-oas2-parser-plugin/module/
+semix/semix-rule-center/dist

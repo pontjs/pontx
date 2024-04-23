@@ -12,8 +12,6 @@ const packages = [
   "pontx-meta-fetch-plugin",
   "pontx-generate-core",
   "pontx-mocks-plugin",
-  "pontx-react-hooks-sdk-plugin",
-  "pontx-hooks-sdk",
   "pontx-sdk-core",
   "pontx-sdk-plugin-core",
   "pontx-async-sdk-plugin",

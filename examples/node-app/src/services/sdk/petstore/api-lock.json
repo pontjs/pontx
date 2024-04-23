@@ -16,10 +16,7 @@
           "schema": {
             "$ref": "#/definitions/Pet",
             "description": "Pet object that needs to be added to the store",
-            "in": "body",
-            "required": true,
-            "templateArgs": [],
-            "typeName": "Pet"
+            "required": true
           }
         }
       ],
@@ -49,7 +46,6 @@
           "name": "api_key",
           "required": false,
           "schema": {
-            "in": "header",
             "required": false,
             "type": "string"
           }
@@ -61,7 +57,6 @@
           "schema": {
             "description": "Pet id to delete",
             "format": "int64",
-            "in": "path",
             "required": true,
             "type": "number"
           }
@@ -102,7 +97,6 @@
           "schema": {
             "collectionFormat": "multi",
             "description": "Status values that need to be considered for filter",
-            "in": "query",
             "items": {
               "default": "available",
               "enum": [
@@ -127,9 +121,7 @@
           "description": "successful operation",
           "schema": {
             "items": {
-              "$ref": "#/definitions/Pet",
-              "templateArgs": [],
-              "typeName": "Pet"
+              "$ref": "#/definitions/Pet"
             },
             "type": "array"
           }
@@ -157,7 +149,6 @@
           "schema": {
             "collectionFormat": "multi",
             "description": "Tags to filter by",
-            "in": "query",
             "items": {
               "type": "string"
             },
@@ -176,9 +167,7 @@
           "description": "successful operation",
           "schema": {
             "items": {
-              "$ref": "#/definitions/Pet",
-              "templateArgs": [],
-              "typeName": "Pet"
+              "$ref": "#/definitions/Pet"
             },
             "type": "array"
           }
@@ -205,7 +194,6 @@
           "schema": {
             "description": "ID of pet to return",
             "format": "int64",
-            "in": "path",
             "required": true,
             "type": "number"
           }
@@ -220,9 +208,7 @@
         "200": {
           "description": "successful operation",
           "schema": {
-            "$ref": "#/definitions/Pet",
-            "templateArgs": [],
-            "typeName": "Pet"
+            "$ref": "#/definitions/Pet"
           }
         },
         "400": {
@@ -258,10 +244,7 @@
           "schema": {
             "$ref": "#/definitions/Pet",
             "description": "Pet object that needs to be added to the store",
-            "in": "body",
-            "required": true,
-            "templateArgs": [],
-            "typeName": "Pet"
+            "required": true
           }
         }
       ],
@@ -310,7 +293,6 @@
           "schema": {
             "description": "ID of pet that needs to be updated",
             "format": "int64",
-            "in": "path",
             "required": true,
             "type": "number"
           }
@@ -321,7 +303,6 @@
           "required": false,
           "schema": {
             "description": "Updated name of the pet",
-            "in": "formData",
             "required": false,
             "type": "string"
           }
@@ -332,7 +313,6 @@
           "required": false,
           "schema": {
             "description": "Updated status of the pet",
-            "in": "formData",
             "required": false,
             "type": "string"
           }
@@ -369,7 +349,6 @@
           "schema": {
             "description": "ID of pet to update",
             "format": "int64",
-            "in": "path",
             "required": true,
             "type": "number"
           }
@@ -380,7 +359,6 @@
           "required": false,
           "schema": {
             "description": "Additional data to pass to server",
-            "in": "formData",
             "required": false,
             "type": "string"
           }
@@ -391,7 +369,6 @@
           "required": false,
           "schema": {
             "description": "file to upload",
-            "in": "formData",
             "required": false,
             "type": "file"
           }
@@ -405,9 +382,7 @@
         "200": {
           "description": "successful operation",
           "schema": {
-            "$ref": "#/definitions/ApiResponse",
-            "templateArgs": [],
-            "typeName": "ApiResponse"
+            "$ref": "#/definitions/ApiResponse"
           }
         }
       },
@@ -425,7 +400,6 @@
           "schema": {
             "description": "ID of the order that needs to be deleted",
             "format": "int64",
-            "in": "path",
             "minimum": 1,
             "required": true,
             "type": "number"
@@ -490,7 +464,6 @@
           "schema": {
             "description": "ID of pet that needs to be fetched",
             "format": "int64",
-            "in": "path",
             "maximum": 10,
             "minimum": 1,
             "required": true,
@@ -507,9 +480,7 @@
         "200": {
           "description": "successful operation",
           "schema": {
-            "$ref": "#/definitions/Order",
-            "templateArgs": [],
-            "typeName": "Order"
+            "$ref": "#/definitions/Order"
           }
         },
         "400": {
@@ -544,10 +515,7 @@
           "schema": {
             "$ref": "#/definitions/Order",
             "description": "order placed for purchasing the pet",
-            "in": "body",
-            "required": true,
-            "templateArgs": [],
-            "typeName": "Order"
+            "required": true
           }
         }
       ],
@@ -560,9 +528,7 @@
         "200": {
           "description": "successful operation",
           "schema": {
-            "$ref": "#/definitions/Order",
-            "templateArgs": [],
-            "typeName": "Order"
+            "$ref": "#/definitions/Order"
           }
         },
         "400": {
@@ -590,10 +556,7 @@
           "schema": {
             "$ref": "#/definitions/User",
             "description": "Created user object",
-            "in": "body",
-            "required": true,
-            "templateArgs": [],
-            "typeName": "User"
+            "required": true
           }
         }
       ],
@@ -627,11 +590,8 @@
           "required": true,
           "schema": {
             "description": "List of user object",
-            "in": "body",
             "items": {
-              "$ref": "#/definitions/User",
-              "templateArgs": [],
-              "typeName": "User"
+              "$ref": "#/definitions/User"
             },
             "required": true,
             "type": "array"
@@ -668,11 +628,8 @@
           "required": true,
           "schema": {
             "description": "List of user object",
-            "in": "body",
             "items": {
-              "$ref": "#/definitions/User",
-              "templateArgs": [],
-              "typeName": "User"
+              "$ref": "#/definitions/User"
             },
             "required": true,
             "type": "array"
@@ -706,7 +663,6 @@
           "required": true,
           "schema": {
             "description": "The name that needs to be deleted",
-            "in": "path",
             "required": true,
             "type": "string"
           }
@@ -746,7 +702,6 @@
           "required": true,
           "schema": {
             "description": "The name that needs to be fetched. Use user1 for testing. ",
-            "in": "path",
             "required": true,
             "type": "string"
           }
@@ -761,9 +716,7 @@
         "200": {
           "description": "successful operation",
           "schema": {
-            "$ref": "#/definitions/User",
-            "templateArgs": [],
-            "typeName": "User"
+            "$ref": "#/definitions/User"
           }
         },
         "400": {
@@ -794,7 +747,6 @@
           "required": true,
           "schema": {
             "description": "The user name for login",
-            "in": "query",
             "required": true,
             "type": "string"
           }
@@ -805,7 +757,6 @@
           "required": true,
           "schema": {
             "description": "The password for login in clear text",
-            "in": "query",
             "required": true,
             "type": "string"
           }
@@ -880,7 +831,6 @@
           "required": true,
           "schema": {
             "description": "name that need to be updated",
-            "in": "path",
             "required": true,
             "type": "string"
           }
@@ -892,10 +842,7 @@
           "schema": {
             "$ref": "#/definitions/User",
             "description": "Updated user object",
-            "in": "body",
-            "required": true,
-            "templateArgs": [],
-            "typeName": "User"
+            "required": true
           }
         }
       ],
@@ -1001,9 +948,7 @@
       "properties": {
         "category": {
           "$ref": "#/definitions/Category",
-          "required": false,
-          "templateArgs": [],
-          "typeName": "Category"
+          "required": false
         },
         "id": {
           "format": "int64",
@@ -1041,8 +986,6 @@
         "tags": {
           "items": {
             "$ref": "#/definitions/Tag",
-            "templateArgs": [],
-            "typeName": "Tag",
             "xml": {
               "name": "tag"
             }
@@ -1121,46 +1064,33 @@
     }
   },
   "description": "This is a sample server Petstore server.  You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For this sample, you can use the api key `special-key` to test the authorization filters.",
-  "directories": [
-    {
-      "children": [
-        "pet/uploadFile",
-        "pet/updatePet",
-        "pet/addPet",
-        "pet/findPetsByStatus",
-        "pet/findPetsByTags",
-        "pet/getPetById",
-        "pet/deletePet",
-        "pet/updatePetWithForm"
-      ],
-      "namespace": "pet",
-      "title": "Everything about your Pets"
-    },
-    {
-      "children": [
-        "store/placeOrder",
-        "store/getOrderById",
-        "store/deleteOrder",
-        "store/getInventory"
-      ],
-      "namespace": "store",
-      "title": "Access to Petstore orders"
-    },
-    {
-      "children": [
-        "user/createUsersWithArrayInput",
-        "user/createUsersWithListInput",
-        "user/getUserByName",
-        "user/deleteUser",
-        "user/updateUser",
-        "user/loginUser",
-        "user/logoutUser",
-        "user/createUser"
-      ],
-      "namespace": "user",
-      "title": "Operations about user"
-    }
-  ],
+  "externalDocs": {
+    "description": "Find out more about Swagger",
+    "url": "http://swagger.io"
+  },
   "host": "petstore.swagger.io",
-  "name": "petstore"
+  "name": "petstore",
+  "namespaces": {
+    "pet": "Everything about your Pets",
+    "store": "Access to Petstore orders",
+    "user": "Operations about user"
+  },
+  "securitySchemes": {
+    "api_key": {
+      "in": "header",
+      "name": "api_key",
+      "type": "apiKey"
+    },
+    "petstore_auth": {
+      "authorizationUrl": "https://petstore.swagger.io/oauth/authorize",
+      "flow": "implicit",
+      "scopes": {
+        "read:pets": "read your pets",
+        "write:pets": "modify pets in your account"
+      },
+      "type": "oauth2"
+    }
+  },
+  "title": "Swagger Petstore",
+  "version": "1.0.7"
 }

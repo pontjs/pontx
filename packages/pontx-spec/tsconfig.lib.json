@@ -6,6 +6,8 @@
     "removeComments": true,
     "preserveConstEnums": true,
     "outDir": "lib",
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
     "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {},

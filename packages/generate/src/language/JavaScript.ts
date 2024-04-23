@@ -3,6 +3,10 @@ import { indentation, needQuotationMark } from "../utils";
 import * as _ from "lodash";
 
 export const getSchemaInitValue = (schema: PontSpec.PontJsonSchema) => {
+  if (!schema) {
+    return null;
+  }
+
   if (schema.typeName === "Array") {
     return "[]";
   }

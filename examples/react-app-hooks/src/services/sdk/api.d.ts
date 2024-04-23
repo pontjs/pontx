@@ -1,1 +1,1 @@
-export type { API as petstore } from './petstore/type';
+export { API as petstore } from './petstore/type';

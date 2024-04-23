@@ -6,15 +6,17 @@
     "build": "tsc",
     "watch": "tsc -w",
     "do": "node ./lib/index.js",
+    "sdk:test": "../../packages/pontx-cli/bin/init.js generate",
     "sdk": "pontx generate"
   },
   "dependencies": {
     "node-fetch": "^2",
+    "web-streams-nodejs": "^0.1.1",
     "pontx-sdk-core": "*"
   },
   "devDependencies": {
     "@types/node-fetch": "*",
-    "pontx-cli": "^0.3.68",
+    "pontx-cli": "^0.4.4",
     "typescript": "^5.0.2"
   }
 }

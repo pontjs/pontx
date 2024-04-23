@@ -1,0 +1,41 @@
+{
+  "name": "pontx-eggjs-sdk",
+  "version": "0.4.12",
+  "description": "async await promise sdk oas2 oas3 swagger typescript ts pontx sdk plugin",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "pretest": "npm run build",
+    "watch": "tsc --build --watch",
+    "builtin": "tsc -p ./tsconfig.builtin.json",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "build": "npm run clean && tsc --build"
+  },
+  "peerDependencies": {
+    "egg": "^3.17.5",
+    "lodash": "*"
+  },
+  "dependencies": {
+    "pontx-spec": "^0.4.12"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^9.0.13",
+    "@types/node": "*",
+    "egg": "^3.17.5",
+    "fs-extra": "^10.1.0",
+    "http-server": "*",
+    "pontx-generate": "^0.4.12",
+    "pontx-generate-core": "^0.4.12",
+    "pontx-manager": "^0.4.12",
+    "react": "^18"
+  },
+  "files": [
+    "package.json",
+    "builtin",
+    "builtinSrc",
+    "lib"
+  ],
+  "keywords": [],
+  "author": "jasonHzq",
+  "license": "MIT"
+}

@@ -1,0 +1,60 @@
+.semix-string-item {
+  .input-area {
+    position: relative;
+    &:hover .input-emptystring-button {
+      display: block;
+    }
+    .input-emptystring-button {
+      position: absolute;
+      bottom: -1px;
+      left: 156px;
+      z-index: 99;
+      display: none;
+      font-size: 12px;
+    }
+    .clear-emptystring-button {
+      position: absolute;
+      bottom: -1px;
+      left: 156px;
+      z-index: 99;
+      display: block;
+      font-size: 12px;
+    }
+    .close-mini {
+      margin-right: 6px;
+      color: #7a7a7a;
+    }
+    .close-mini:hover {
+      background-color: #f7f9fa;
+      border-radius: 50%;
+    }
+  }
+  .enum-item {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    .enum-item-title {
+      margin-left: 10px;
+      overflow: hidden;
+      color: #787878;
+      font-size: 12px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  }
+  .generate-form-text-area {
+    position: relative;
+    .generate-form-text-area-icon {
+      position: absolute;
+      right: 5px;
+      bottom: 5px;
+      cursor: pointer;
+      opacity: 0;
+    }
+    &:hover {
+      .generate-form-text-area-icon {
+        opacity: 1;
+      }
+    }
+  }
+}

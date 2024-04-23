@@ -28,17 +28,17 @@
 
 #### Defined in
 
-[src/index.ts:55](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/index.ts#L55)
+[pontx-spec/src/type.ts:230](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L230)
 
 ___
 
 ### interfaces
 
-• **interfaces**: [`PontAPI`](PontAPI.md)[] = `[]`
+• **interfaces**: [`PontAPI`](PontAPI.md) & \{ `name`: `string`  }[] = `[]`
 
 #### Defined in
 
-[src/index.ts:54](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/index.ts#L54)
+[pontx-spec/src/type.ts:229](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L229)
 
 ___
 
@@ -48,4 +48,4 @@ ___
 
 #### Defined in
 
-[src/index.ts:53](https://github.com/pontjs/pontx/blob/647ce3c/packages/pontx-spec/src/index.ts#L53)
+[pontx-spec/src/type.ts:228](https://github.com/pontjs/pontx/tree/main/packages/pontx-spec/src/type.ts#L228)

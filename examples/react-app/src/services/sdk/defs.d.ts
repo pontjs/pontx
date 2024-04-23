@@ -1,1 +1,1 @@
-export type { defs as petstore } from './petstore/type';
+export { defs as petstore } from './petstore/type';

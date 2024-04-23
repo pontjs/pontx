@@ -1,0 +1,46 @@
+{
+  "name": "pontx-semix-form",
+  "version": "0.4.12",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "vite",
+    "watch": "tsc -w",
+    "build": "tsc && npm run build:css",
+    "build:css": "webpack --config ./webpack.css.js",
+    "release": "npm run build && npm publish --registry //registry.npmjs.org"
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.0",
+    "fix-esm-import-path": "^1.5.0",
+    "intl-format": "^1.2.0",
+    "lodash": "^4.17.21",
+    "node-cpio": "*",
+    "re-resizable": "^6.9.9",
+    "semix-core": "^0.0.9",
+    "semix-validate": "^0.1.10",
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5"
+  },
+  "peerDependencies": {
+    "lodash": "^4.17.21",
+    "semix-core": "^0.0.9"
+  },
+  "dependencies": {
+    "@heroicons/react": "*",
+    "flowbite-react": "0.6.4",
+    "pontx-spec": "^0.4.12",
+    "semix-validate": "^0.1.10",
+    "unstated-next": "^1.1.0",
+    "use-deep-compare": "^1.1.0"
+  },
+  "keywords": [
+    "jsonschema"
+  ],
+  "author": "jasonHzq",
+  "license": "MIT"
+}

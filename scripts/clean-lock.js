@@ -28,3 +28,10 @@ try {
     stdio: [0, 1, 2],
   });
 } catch (e) {}
+
+try {
+  child_process.execSync("rm semix/**/package-lock.json", {
+    cwd: path.join(__dirname + "../../"),
+    stdio: [0, 1, 2],
+  });
+} catch (e) {}

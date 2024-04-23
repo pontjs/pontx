@@ -12,7 +12,7 @@ export type FileStructure = {
 
 export async function _generateFiles(fileStructure: FileStructure, basePath: string) {
   const promises = _.map(fileStructure, async (value: string | {}, name) => {
-    const currPath = `${basePath}/${name}`;
+    const currPath = path.join(basePath, name);
 
     if (typeof value === "string") {
       return fs.writeFile(currPath, value, "utf8");
@@ -75,10 +75,21 @@ export type GetFilesBySpecs = (
   }>,
   options?: any,
 ) => Promise<FileStructure>;
-export type GetFilesBySingleSpec = (spec: PontSpec.PontSpec, conf: PontInnerManagerConfig) => Promise<FileStructure>;
+export type GetFilesBySingleSpec = (
+  spec: PontSpec.PontSpec,
+  conf: PontInnerManagerConfig,
+  options?: any,
+) => Promise<FileStructure>;
 
 export type SnippetsProvider = (info: {
   api: PontAPI;
+  controllerName: string;
+  originName: string;
+  options?: any;
+}) => Snippet[];
+
+export type ControllerSnippetsProvider = (info: {
+  controller: PontSpec.Mod;
   controllerName: string;
   originName: string;
   options?: any;
@@ -91,13 +102,44 @@ export const createPontxGeneratePlugin = (
     getFilesBySpecs?: GetFilesBySpecs;
     getFilesBySginleSpec?: GetFilesBySingleSpec;
     snippetsProvider?: SnippetsProvider;
+    controllerSnippetsProvider?: ControllerSnippetsProvider;
   } = { snippetsProvider: () => [] },
 ) => {
-  const { getFilesBySginleSpec, getFilesBySpecs, snippetsProvider } = provider;
+  const { getFilesBySginleSpec, getFilesBySpecs, snippetsProvider, controllerSnippetsProvider } = provider;
   return class StandardPontxGeneratePlugin extends PontxGeneratorPlugin {
+    origins = [] as Array<{
+      spec: PontSpec.PontSpec;
+      name: string;
+    }>;
+
     providerSnippets(api: PontSpec.PontAPI, controllerName: string, originName: string, options?: any): Snippet[] {
       return snippetsProvider({
         api,
+        controllerName,
+        originName,
+        options,
+      });
+    }
+
+    providerControllerSnippets(controllerName: string, originName: string, options?: any): Snippet[] {
+      const spec = options?.spec;
+
+      if (!spec) {
+        return [];
+      }
+
+      const mods = PontSpec.PontSpec.getMods(spec);
+      const mod = mods?.find((mod) => mod?.name === controllerName);
+      if (!mod) {
+        return [];
+      }
+
+      if (!controllerSnippetsProvider) {
+        return [];
+      }
+
+      return controllerSnippetsProvider({
+        controller: mod,
         controllerName,
         originName,
         options,
@@ -115,16 +157,25 @@ export const createPontxGeneratePlugin = (
           };
         })
         .filter((origin) => origin.spec && origin.name);
+      this.origins = origins;
 
       try {
-        if (manager.localPontSpecs?.length >= 1 && manager.localPontSpecs.every((spec) => spec.name)) {
+        if (
+          manager.innerManagerConfig.multiple &&
+          manager.localPontSpecs?.length >= 1 &&
+          manager.localPontSpecs.every((spec) => spec.name)
+        ) {
           manager.logger.info("开始生成代码");
 
-          const fileStructure = await getFilesBySpecs(origins);
+          const fileStructure = await getFilesBySpecs(origins, options);
           return generateSdk(fileStructure, baseDir);
         }
 
-        const fileStructure = await getFilesBySginleSpec(manager.localPontSpecs[0], manager.innerManagerConfig);
+        const fileStructure = await getFilesBySginleSpec(
+          manager.localPontSpecs[0],
+          manager.innerManagerConfig,
+          options,
+        );
         return generateSdk(fileStructure, baseDir);
       } catch (e) {
         manager.logger.error({

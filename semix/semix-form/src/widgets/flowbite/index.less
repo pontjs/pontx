@@ -1,0 +1,43 @@
+@import "./enum.less";
+@import "./list.less";
+@import "./string.less";
+@import "./radio.less";
+@import "./Title.less";
+
+.semix-complex-type-item {
+  .item-treenode-style {
+    margin-left: -23px;
+  }
+  .array-delete-icon {
+    margin: 0 5px;
+  }
+  .op {
+    margin-right: 8px;
+  }
+}
+
+.semix-form {
+  .semix-form-field {
+    display: flex;
+    margin-bottom: 12px;
+    text-align: right;
+  }
+
+  .semix-form-title {
+    flex: 0 0 150px;
+    margin-right: 10px;
+
+    &::after {
+      content: ":";
+      position: relative;
+      top: -0.5px;
+      margin: 0 8px 0 2px;
+    }
+  }
+  .semix-form-widget {
+    text-align: left;
+    min-height: 30px;
+    display: inline-flex;
+    align-items: center;
+  }
+}

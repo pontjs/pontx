@@ -13,6 +13,11 @@ class PublicOriginConfig {
   env: string;
   envs: any;
   plugins?: PontxPlugins;
+  ai?: {
+    projectName: string;
+    token: string;
+    prompts?: any[];
+  };
 }
 
 type SimplePluginConfig = {
@@ -52,6 +57,12 @@ export class PontxTransformPlugin extends PontxPlugin {
   }
 }
 
+export class PontxTransformAfterFetchPlugin extends PontxPlugin {
+  async apply(metaStr: string, specName: string, options?: any): Promise<string> {
+    return null;
+  }
+}
+
 export class Snippet {
   code = "";
   name = "";
@@ -62,6 +73,10 @@ export class PontxGeneratorPlugin extends PontxPlugin {
   apply(manager: PontManager, options?: any): void {}
 
   providerSnippets(api: PontAPI, modName: string, originName: string, options?: any): Snippet[] {
+    return [];
+  }
+
+  providerControllerSnippets(modName: string, originName: string, options?: any): Snippet[] {
     return [];
   }
 }
@@ -98,6 +113,7 @@ type PluginItem<T extends PontxPlugin> = { instance: Promise<T>; options: any };
 export class PontxPlugins {
   fetch?: PluginItem<PontxFetchPlugin>;
   transform?: PluginItem<PontxTransformPlugin>;
+  transformAfterFetch?: PluginItem<PontxTransformAfterFetchPlugin>;
   parser?: PluginItem<PontxParserPlugin>;
   config?: PluginItem<PontxConfigPlugin>;
   mocks?: PluginItem<PontxMocksPlugin>;
@@ -113,7 +129,7 @@ export class PontxPlugins {
     return {
       fetch: { use: "pontx-meta-fetch-plugin", options },
       parser: { use: "pontx-oas2-parser-plugin", options },
-      generate: { use: "pontx-async-sdk-plugin", options },
+      generate: { use: "pontx-generate/plugin", options },
       mocks: { use: "pontx-mocks-plugin", options },
     };
   }
@@ -127,8 +143,6 @@ export function requireModule(pluginPath: string, configDir: string, rootDir: st
 
   if (pluginPath === "pontx-meta-fetch-plugin") {
     return require("pontx-meta-fetch-plugin");
-  } else if (pluginPath === "pontx-react-hooks-generate-plugin") {
-    return require("pontx-react-hooks-generate-plugin");
   } else if (pluginPath === "pontx-oas2-parser-plugin") {
     return require("pontx-oas2-parser-plugin");
   } else if (pluginPath === "pontx-mocks-plugin") {
@@ -137,10 +151,12 @@ export function requireModule(pluginPath: string, configDir: string, rootDir: st
     return require("pontx-async-sdk-plugin");
   } else if (pluginPath === "pontx-oas3-parser-plugin") {
     return require("pontx-oas3-parser-plugin");
-  } else if (pluginPath === "pontx-react-hooks-sdk-plugin") {
-    return require("pontx-react-hooks-sdk-plugin");
+  } else if (pluginPath === "pontx-simple-react-hooks-sdk-plugin") {
+    return require("pontx-simple-react-hooks-sdk-plugin");
   } else if (pluginPath === "pontx-async-sdk-plugin") {
     return require("pontx-async-sdk-plugin");
+  } else if (pluginPath === "pontx-generate/plugin") {
+    return require("pontx-generate/plugin");
   }
 
   if (!path.extname(requirePath)) {
@@ -169,6 +185,7 @@ export function requireModule(pluginPath: string, configDir: string, rootDir: st
 export class PontPublicManagerConfig {
   rootDir: string;
   origins? = [] as PublicOriginConfig[];
+  multiple = true;
   origin?: PublicOriginConfig = new PublicOriginConfig();
   url: string;
   outDir: string;
@@ -176,6 +193,7 @@ export class PontPublicManagerConfig {
   translate: any;
   plugins: {
     fetch: PluginConfig;
+    transformAfterFetch: PluginConfig;
     transform: PluginConfig;
     parser: PluginConfig;
     mocks: PluginConfig;
@@ -189,6 +207,11 @@ export class InnerOriginConfig {
   url: string;
   name: string;
   plugins: PontxPlugins;
+  ai?: {
+    projectName: string;
+    token: string;
+    prompts?: any[];
+  };
 }
 
 export class PontInnerManagerConfig {
@@ -196,8 +219,13 @@ export class PontInnerManagerConfig {
   origins = [] as InnerOriginConfig[];
   outDir: string;
   configDir: string;
+  multiple = true;
   plugins: PontxPlugins;
   translator: any;
+  ai: {
+    languages: string[];
+    scenes: ("pontx" | "sql" | "frontend" | "backend" | "other")[];
+  };
 
   static parsePurePlugin(plugin: PurePluginConfig, originName?: string): SimplePluginConfig {
     if (typeof plugin === "string") {
@@ -413,24 +441,50 @@ export class PontInnerManagerConfig {
       innerConfig.translator = new Translate(logger, translate, innerConfig);
     }
 
-    innerConfig.origins = origins.map((origin) => {
-      if (origin.envs && origin.env) {
-        const { envs, env, ...rest } = origin;
-        const envConfig = origin.envs[origin.env];
-        if (typeof envConfig === "string") {
-          return {
-            ...rest,
-            url: envConfig,
-          };
-        }
-        return { ...rest, ...envConfig };
-      }
+    if (!Object.prototype.hasOwnProperty.call(config, "multiple")) {
+      innerConfig.multiple = true;
+    }
 
-      if (typeof origin === "string") {
-        return { url: origin };
-      }
-      return origin;
-    });
+    innerConfig.origins = origins
+      .map((origin) => {
+        if (origin.envs && origin.env) {
+          const { envs, env, ...rest } = origin;
+          const envConfig = origin.envs[origin.env];
+          if (typeof envConfig === "string") {
+            return {
+              ...rest,
+              url: envConfig,
+            };
+          }
+          return { ...rest, ...envConfig };
+        }
+
+        if (typeof origin === "string") {
+          return { url: origin };
+        }
+        return origin;
+      })
+      .map((origin) => {
+        if (origin.url && typeof origin.url === "string") {
+          const url = new URL(origin.url);
+
+          if (url?.searchParams?.get("token") && url.pathname?.match(/^\/openapi\/projects\/[a-zA-Z0-9-_]+\/spec$/)) {
+            let token = url?.searchParams?.get("token");
+            let projectName = url.pathname?.match(/^\/openapi\/projects\/([a-zA-Z0-9-_]+)\/spec$/)?.[1];
+
+            if (projectName && token) {
+              return {
+                ...origin,
+                ai: {
+                  projectName,
+                  token,
+                },
+              };
+            }
+          }
+        }
+        return origin;
+      });
 
     return innerConfig;
   }

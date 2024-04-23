@@ -1,5 +1,9 @@
 import { JsonSchema } from "../JsonSchema";
 
+type Map<T1, T2> = {
+  [x: string]: T2;
+};
+
 /**
  * This is the root document object of the <a href="https://swagger.io/specification/#oas-document">OpenAPI document</a>.
  */
@@ -194,7 +198,9 @@ export class ComponentsObject {
   /**
    * An object to hold reusable <a href="https://swagger.io/specification/#security-scheme-object">Security Scheme Objects</a>.
    */
-  securitySchemes?: string;
+  securitySchemes?: {
+    [x: string]: SecuritySchemeObject;
+  };
 
   /**
    * An object to hold reusable <a href="https://swagger.io/specification/#link-object">Link Objects</a>.
@@ -347,7 +353,7 @@ export class OperationObject {
   /**
    * A declaration of which security mechanisms can be used for this operation. The list of values includes alternative security requirement objects that can be used. Only one of the security requirement objects need to be satisfied to authorize a request. To make security optional, an empty security requirement (<code>{}</code>) can be included in the array. This definition overrides any declared top-level <a href="https://swagger.io/specification/#oas-security"><code>security</code></a>. To remove a top-level security declaration, an empty array can be used.
    */
-  security?: SecurityRequirementObject;
+  security?: SecurityRequirementObject[];
 
   /**
    * An alternative <code>server</code> array to service this operation. If an alternative <code>server</code> object is specified at the Path Item Object or Root level, it will be overridden by this value.
@@ -419,7 +425,7 @@ export class RequestBodyObject {
   /**
    * <strong>REQUIRED</strong>. The content of the request body. The key is a media type or <a href="https://tools.ietf.org/html/rfc7231#appendix--d">media type range</a> and the value describes it.  For requests that match multiple keys, only the most specific key is applicable. e.g. text/plain overrides text/*
    */
-  content?: string;
+  content?: Map<string, MediaTypeObject>;
 
   /**
    * Determines if the request body is required in the request. Defaults to <code>false</code>.
@@ -507,12 +513,14 @@ export class ResponseObject {
   /**
    * Maps a header name to its definition. <a href="https://tools.ietf.org/html/rfc7230#page-22">RFC7230</a> states header names are case insensitive. If a response header is defined with the name <code>"Content-Type"</code>, it SHALL be ignored.
    */
-  headers?: Map<string, HeaderObject>;
+  headers?: {
+    [x: string]: HeaderObject;
+  };
 
   /**
    * A map containing descriptions of potential response payloads. The key is a media type or <a href="https://tools.ietf.org/html/rfc7231#appendix--d">media type range</a> and the value describes it.  For responses that match multiple keys, only the most specific key is applicable. e.g. text/plain overrides text/*
    */
-  content?: string;
+  content?: MediaTypeObject;
 
   /**
    * A map of operations links that can be followed from the response. The key of the map is a short name for the link, following the naming constraints of the names for <a href="https://swagger.io/specification/#components-object">Component Objects</a>.
@@ -829,7 +837,9 @@ export class OAuthFlowObject {
   /**
    * <code>oauth2</code>
    */
-  scopes?: string;
+  scopes?: {
+    [x: string]: string;
+  };
 }
 
 /**
@@ -840,5 +850,5 @@ export class SecurityRequirementObject {
   /**
    * Each name MUST correspond to a security scheme which is declared in the <a href="https://swagger.io/specification/#components-security-schemes">Security Schemes</a> under the <a href="https://swagger.io/specification/#components-object">Components Object</a>. If the security scheme is of type <code>"oauth2"</code> or <code>"openIdConnect"</code>, then the value is a list of scope names required for the execution, and the list MAY be empty if authorization does not require a specified scope. For other security scheme types, the array MUST be empty.
    */
-  [key: string]: string;
+  [key: string]: string[];
 }

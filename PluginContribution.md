@@ -1,20 +1,13 @@
 # Pontx 插件开发指南
 
-## Pontx 插件类别介绍
+## Pontx 插件示例
+
+* [pontx-meta-fetch-plugin](./plugins/fetch/pontx-meta-fetch-plugin)
+* [pontx-eggjs-sdk-plugin](./plugins/generate/pontx-eggjs-sdk-plugin),
+* [pontx-mocks-plugin](./plugins/mocks/pontx-mocks-plugin)
+* [pontx-oas2-parser-plugin](./plugins/parser/pontx-oas2-parser-plugin)
 
 ## Pontx 插件开发
-
-### 使用 Javascript 开发
-
-```js
-class MyTransformPlugin {
-  async apply(pontxSpec) {
-    this.logger.info("开发转换中...");
-    return pontxSpec;
-  }
-}
-exports.default = MyTransformPlugin;
-```
 
 ### 使用 Typescript 开发
 
@@ -43,4 +36,18 @@ export class PontOAS2ParserPlugin extends PontxParserPlugin {
   }
 }
 export default PontOAS2ParserPlugin;
+```
+
+
+
+### 使用 Javascript 开发
+
+```js
+class MyTransformPlugin {
+  async apply(pontxSpec) {
+    this.logger.info("开发转换中...");
+    return pontxSpec;
+  }
+}
+exports.default = MyTransformPlugin;
 ```

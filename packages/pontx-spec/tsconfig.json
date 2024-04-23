@@ -7,12 +7,15 @@
     "preserveConstEnums": true,
     "outDir": "es6",
     "moduleResolution": "node",
+    "declaration": true,
     "baseUrl": ".",
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
     "paths": {},
     "rootDir": "./src",
     "composite": true
   },
   "include": ["./src/**/*"],
-  "exclude": ["node_modules", "build"],
+  "exclude": ["node_modules", "build", "es6"],
   "references": [{ "path": "../oas-spec-ts" }]
 }

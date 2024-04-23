@@ -3,9 +3,10 @@ import * as _ from "lodash";
 
 /** 生成单个接口元数据 */
 export const apiSpecJSON = (api: PontSpec.PontAPI, controllerName: string, specName: string) => {
-  return {
+  const apiMeta = {
     method: api.method,
     hasBody: !!api.parameters?.find((param) => param?.in === "body"),
+    hasParams: !!api.parameters?.find((param) => param?.in !== "body"),
     consumes: api?.consumes,
     produces: api?.produces,
     apiName: api.name,
@@ -13,9 +14,16 @@ export const apiSpecJSON = (api: PontSpec.PontAPI, controllerName: string, specN
     specName,
     controllerName,
   };
+  if (api?.security) {
+    return {
+      ...apiMeta,
+      security: api.security,
+    };
+  }
+  return apiMeta;
 };
 
-export const specJSON = (spec: PontSpec.PontSpec) => {
+export const pontxSpecJSON = (spec: PontSpec.PontSpec) => {
   const hasController = PontSpec.PontSpec.checkHasMods(spec);
   const apis = {};
 
@@ -34,18 +42,29 @@ export const specJSON = (spec: PontSpec.PontSpec) => {
     });
   }
 
-  const code = JSON.stringify(
-    {
-      apis,
-      hasController,
-      specName: spec.name,
-      description: spec.description,
-      basePath: spec.basePath,
-      host: spec.host,
-    },
-    null,
-    2,
-  );
+  const securityInfo = {};
+  if (spec.securitySchemes) {
+    securityInfo["securitySchemes"] = spec.securitySchemes;
+  }
+  if (spec.security) {
+    securityInfo["security"] = spec.security;
+  }
 
-  return code;
+  return {
+    apis,
+    hasController,
+    specName: spec.name,
+    description: spec.description,
+    basePath: spec.basePath,
+    host: spec.host,
+    ...securityInfo,
+  };
+};
+
+export const specJSON = (spec: PontSpec.PontSpec) => {
+  const sourceSpec = pontxSpecJSON(spec);
+
+  const code = JSON.stringify(sourceSpec, null, 2);
+
+  return `const specMeta = ${code};\nexport default specMeta;`;
 };

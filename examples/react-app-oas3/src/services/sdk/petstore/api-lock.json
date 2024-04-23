@@ -751,7 +751,7 @@
           "name": "username",
           "required": true,
           "schema": {
-            "description": "name that need to be deleted",
+            "description": "name that needs to be updated",
             "in": "path",
             "required": true,
             "type": "string"
@@ -1054,46 +1054,12 @@
     }
   },
   "description": "This is a sample Pet Store Server based on the OpenAPI 3.0 specification.  You can find out more about\nSwagger at [http://swagger.io](http://swagger.io). In the third iteration of the pet store, we've switched to the design first approach!\nYou can now help us improve the API whether it's by making changes to the definition itself or to the code.\nThat way, with time, we can improve the API in general, and expose some of the new features in OAS3.\n\nSome useful links:\n- [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)\n- [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)",
-  "directories": [
-    {
-      "children": [
-        "pet/updatePet",
-        "pet/addPet",
-        "pet/findPetsByStatus",
-        "pet/findPetsByTags",
-        "pet/getPetById",
-        "pet/deletePet",
-        "pet/updatePetWithForm",
-        "pet/uploadFile"
-      ],
-      "namespace": "pet",
-      "title": "Everything about your Pets"
-    },
-    {
-      "children": [
-        "store/getInventory",
-        "store/placeOrder",
-        "store/getOrderById",
-        "store/deleteOrder"
-      ],
-      "namespace": "store",
-      "title": "Access to Petstore orders"
-    },
-    {
-      "children": [
-        "user/createUser",
-        "user/createUsersWithListInput",
-        "user/loginUser",
-        "user/logoutUser",
-        "user/getUserByName",
-        "user/deleteUser",
-        "user/updateUser"
-      ],
-      "namespace": "user",
-      "title": "Operations about user"
-    }
-  ],
   "ext": {},
   "host": "petstore3.swagger.io",
-  "name": "petstore"
+  "name": "petstore",
+  "namespaces": {
+    "pet": "Everything about your Pets",
+    "store": "Access to Petstore orders",
+    "user": "Operations about user"
+  }
 }

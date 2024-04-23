@@ -1,6 +1,6 @@
 {
   "name": "pontx-generate",
-  "version": "0.3.88",
+  "version": "0.4.12",
   "description": "OpenAPI pont spec",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,7 +13,7 @@
   "dependencies": {
     "fs-extra": "*",
     "lodash": "*",
-    "pontx-spec": "^0.3.88"
+    "pontx-spec": "^0.4.12"
   },
   "peerDependencies": {
     "pontx-manager": "*"
@@ -24,6 +24,9 @@
   ],
   "keywords": [],
   "author": "jasonHzq",
+  "engines": {
+    "typescript": ">=5.0.0"
+  },
   "license": "MIT",
   "devDependencies": {
     "@types/fs-extra": "*",
