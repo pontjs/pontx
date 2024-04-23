@@ -33,11 +33,45 @@ Pontx 通过提供多种形式的 API 管理服务。
 
 ## 快速开始
 
+Pontx 提供服务的方式包括 Pontx 平台、VSCode 插件和 CLI。
+
+### Pontx 平台使用指南
+
+1、快速登录（关联 Github 账号即可完成登录）
+
+2、新建项目（项目名、描述）
+
+3、描述你的需要，让 AI 为您设计规范、高质量的 API 设计。您可以在预览后，让 AI 为您不断调优 API 设计。
+
+4、您可以在单个数据结构和API 的粒度上，继续通过 AI 或手动调整 API 设计。Pontx 平台提供了丰富的 API 生命管理工具。
+
+5、让 AI 生成数据库设计。Pontx 内置 MySQL DDL（数据表设计）生成。
+
+6、通过 Pontx SDK 插件，分别生成前端 SDK、后端 SDK。
+
+前端 SDK 可以开启 Mocks 能力，类型定义齐全，支持 React Hooks 声明式请求、异步请求、流式请求等。
+
+传统 API 设计生成后端代码是一次性的。当你的 API 设计发生改变后，重新生成后端 SDK，你自己的代码就会被覆盖。
+Pontx 后端 SDK 遵循 API 定义和实现分离原则，仅提供路由表注册能力、Controller 和数据结构定义。你只需要实现 Service 中，定义好出入参类型的方法。
+当你的 API 设计变更后，你可以重新生成后端 SDK，这个时候你的 Service 实现层会有类型报错，提示你修改实现层逻辑或新增 API 定义。
+
+7、通过 AI 为您生成前端代码，后端接口实现代码。
+
+Pontx 内置了丰富的提示词模板，你可以配置好技术栈、组件库、语言。Pontx AI 会结合你的数据结构、API 设计、Pontx SDK 为您生成典型场景的前后端代码。
+
+尤其是最典型的 CRUD 代码。Pontx AI 生成的代码规范且基本可以直接使用。
+
+你可以在平台或者 VSCode Pontx 上使用这个能力。同时 Pontx 也提供了专属的 Endpoint 和 Token，让你可以使用其它 Agent 客户端来使用 Pontx AI Agent。让你拥有一个对你的 API 设计、技术栈、框架了如指掌的 AI Agent，为你的团队辅助开发。
+
+8、发布 API 文档、前后端 API 调用的 SDK。您可以通过源码或 Iframe 嵌入的方式，集成 Pontx API 文档到您的平台。
+
+9、想要让你的 AI Agent 能够调用你的 OpenAPI 吗？通过 Pontx 发布 AI API 插件、AI API Agent。
+
+### Pontx 配置示例
+
 如果您使用的是 VSCode 插件或 CLI。只需配置合法的 pontx-config.json 文件，Pontx 的 VSCode 插件和 CLI 就会自动启动。
 
 > 注意，IDE 的 AI 能力，需要将您的 API 元数据管理在 [Pontx 平台](https://www.pontxapi.com/)中。
-
-### Pontx 配置示例
 
   ```json
   {
@@ -81,9 +115,7 @@ Pontx 内置插件如下：
 
 了解更多 Pontx 配置细节，请参阅 [Pontx 配置指南](./docs/Configuration.md)。
 
-### Pontx 使用指南
-
-Pontx 提供服务的方式包括 Pontx 平台、VSCode 插件和 CLI。
+### Pontx 工具链使用指南
 
 #### VSCode Pontx 插件使用指南
 
