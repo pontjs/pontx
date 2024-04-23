@@ -67,11 +67,13 @@ Pontx 内置了丰富的提示词模板，你可以配置好技术栈、组件�
 
 9、想要让你的 AI Agent 能够调用你的 OpenAPI 吗？通过 Pontx 发布 AI API 插件、AI API Agent。
 
-### Pontx 配置示例
+### Pontx 配置指南
 
 如果您使用的是 VSCode 插件或 CLI。只需配置合法的 pontx-config.json 文件，Pontx 的 VSCode 插件和 CLI 就会自动启动。
 
 > 注意，IDE 的 AI 能力，需要将您的 API 元数据管理在 [Pontx 平台](https://www.pontxapi.com/)中。
+
+#### 配置示例
 
   ```json
   {
