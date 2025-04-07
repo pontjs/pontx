@@ -78,9 +78,24 @@ program.description("powerful api code generator");
 
     program
       .command("generate")
+      .option("--force", "是否比较本地远端元数据变更", false)
       .description("拉取远程数据源并生成代码")
-      .action(async () => {
+      .action(async (options) => {
+        const checkResult = PontManager.conflictDetect(manager);
+        const forceOptions = options?.force;
+        if (checkResult?.length && forceOptions) {
+          logger.error(`存在非兼容性变更，已终止`);
+          console.table(checkResult);
+          process.exit(1);
+          return;
+        }
+        if (checkResult?.length) {
+          logger.warn(`存在非兼容性变更，已忽略`);
+          console.table(checkResult);
+        }
+
         manager.localPontSpecs = manager.remotePontSpecs;
+
         logger.success("Pontx 已切换使用最新远程数据");
         await PontManager.generateCode(manager);
         logger.success("Pontx SDK 生成完毕!");
