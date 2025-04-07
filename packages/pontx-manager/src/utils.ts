@@ -2,6 +2,8 @@ import * as ts from "typescript";
 import * as path from "path";
 import * as fs from "fs-extra";
 import { PontLogger } from "./logger";
+import { conflictDetectItem } from "./manager";
+import { PontSpec } from "pontx-spec";
 
 export const createTsProgram = (includePaths: string[], options = {} as ts.CompilerOptions) => {
   const { outDir, rootDir } = options;
@@ -129,4 +131,44 @@ export function requireTsFile(rootDir: string, tsfile: TsFileInfo) {
   program.emit();
 
   return requireUncached(outFile);
+}
+/**
+ * @name 检查本地元数据和远程元数据是否有修改
+ * @params localPontSpecs 本地元数据
+ * @params remotePontSpecs 远程元数据
+ * @return PontSpec[]
+ * */
+export function checkLocalRemote(localPontSpecs: PontSpec[], remotePontSpecs: PontSpec[]): conflictDetectItem[] {
+  let conflict: { [key: string]: string[] } = {};
+  let result: conflictDetectItem[] = [];
+  [...(localPontSpecs || []), ...(remotePontSpecs || [])]?.forEach((spec) => {
+    const originName = spec.name;
+    const specApis = spec.apis || {};
+    Object.entries(specApis).forEach(([apiName, api]) => {
+      const conflictKey = `${originName}:::${api.path}:::${api.method}`;
+      if (conflict[conflictKey]?.length) {
+        if (!conflict[conflictKey]?.includes(apiName)) {
+          conflict[conflictKey].push(apiName);
+        }
+      } else {
+        conflict[conflictKey] = [apiName];
+      }
+    });
+  });
+  Object.entries(conflict)?.forEach(([key, value]) => {
+    if (value.length > 1) {
+      const [originName, path, method] = key.split(":::");
+      const [localName, remoteName] = value;
+      result.push({
+        originName,
+        path,
+        method,
+        namespace: {
+          localName,
+          remoteName,
+        },
+      });
+    }
+  });
+  return result;
 }

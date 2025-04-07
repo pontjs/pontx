@@ -7,7 +7,7 @@ import { lookForFiles } from "./scan";
 import immutableSet from "lodash/fp/set";
 import * as _ from "lodash";
 import { FileGenerator } from "pontx-generate-core";
-import { fetchRemoteCacheSpec } from "./utils";
+import { checkLocalRemote, fetchRemoteCacheSpec } from "./utils";
 import stringify from "fast-json-stable-stringify";
 import { URL } from "url";
 import {
@@ -30,6 +30,20 @@ const enhancedImmutableUpdate = (path: any[], updator, value) => {
     return enhancedImmutableUpdate(restPaths, updator, _.get(value, truePath));
   }
 };
+
+export class conflictDetectItem {
+  /** 接口路径 */
+  path: string;
+  /** 接口方法 */
+  method: string;
+  /** 接口来源 */
+  originName: string;
+  /** 接口命名空间 */
+  namespace: {
+    localName?: string | undefined;
+    remoteName?: string | undefined;
+  };
+}
 
 export const getSpecByName = (specs: PontSpec[], specName: string) => {
   return specs?.find((spec) => spec.name === specName) || specs?.[0];
@@ -285,6 +299,15 @@ export class PontManager {
           return JSON.parse(stringifiedSpec);
         }),
     };
+  }
+
+  /** 冲突检测: remotePontSpecs vs localPontSpecs */
+  static conflictDetect(manager: PontManager): conflictDetectItem[] {
+    const { remotePontSpecs, localPontSpecs } = manager;
+    if (!localPontSpecs.length) {
+      return [];
+    }
+    return checkLocalRemote(localPontSpecs, remotePontSpecs);
   }
 
   static async generateCode(manager: PontManager) {
