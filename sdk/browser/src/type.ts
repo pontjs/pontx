@@ -1,0 +1,22 @@
+export type PontxSpecMeta = {
+  name: string;
+  hasTags: boolean;
+  apis: Record<string, PontxAPI>;
+};
+
+type PontxAPI = {
+  path: string;
+  method:
+    | "GET"
+    | "POST"
+    | "PUT"
+    | "DELETE"
+    | "PATCH"
+    | "HEAD"
+    | "OPTIONS"
+    | string;
+  hasBody: boolean;
+  hasParams: boolean;
+  consumes?: string[];
+  produces?: string[];
+};

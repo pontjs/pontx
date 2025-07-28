@@ -1,0 +1,37 @@
+{
+  "name": "@pontx/sdk-browser-client",
+  "version": "0.0.2",
+  "type": "module",
+  "main": "./cjs/index.cjs",
+  "module": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js",
+      "require": "./cjs/index.cjs"
+    }
+  },
+  "files": [
+    "cjs",
+    "lib"
+  ],
+  "scripts": {
+    "clean": "rm -rf cjs lib",
+    "watch": "rollup -c -w",
+    "build": "npm run clean && rollup -c"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "react": "*"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@types/react": "^18.2.0",
+    "glob": "^11.0.2",
+    "react": "*",
+    "rollup": "^4.41.1"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "@pontx/sdk-plugin-egg-tests",
+  "private": true,
+  "version": "0.0.1",
+  "dependencies": {
+    "@pontx/plugin-eggjs": "workspace:*",
+    "js-yaml": "^4.1.0",
+    "oas-spec-ts": "workspace:*",
+    "pontx": "workspace:*"
+  }
+}

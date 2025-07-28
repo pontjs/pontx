@@ -1,0 +1,43 @@
+packages:
+  - packages/*
+  - sdk/*
+  - examples/*
+  - plugins/*
+catalog:
+  autoprefixer: ^10.4.16
+  prettier: ^3.2.4
+  css-loader: ^6.7.1
+  postcss: ^8.4.32
+  postcss-nested: ^6.0.1
+  postcss-loader: ^7.3.3
+  sass: ^1.69.5
+  sass-loader: ^13.3.3
+  less: ^4.2.0
+  less-loader: ^11.1.0
+  style-loader: ^3.3.1
+  tailwindcss: ^3.4.0
+  copyfiles: ^2.4.1
+  file-loader: ^6.2.0
+  mini-css-extract-plugin: ^2.7.6
+  webpack: ^5.74.0
+  webpack-cli: ^4.10
+  intl-format: ^1.2.0
+  re-resizable: ^6.9.9
+  typescript: ^5.5.0
+  vite: ^4.4.5
+  eslint: ^8
+  eslint-config-next: 14.2.2
+  eslint-config-egg: ^13
+  '@types/react-window': ^1.8.8
+  fix-esm-import-path: ^1.5.0
+  '@types/node': 22.5.4
+  '@types/react': ^18.2.43
+  node-cpio: ^0.0.3
+  '@types/react-dom': ^18.2.17
+  '@types/lodash': ^4.17
+  semix-core: ^0.0.9
+  lodash: ^4.17.21
+overrides:
+  pontx: link:packages/pontx
+  '@pontx/spec': link:packages/spec
+registry: https://registry.npmmirror.com

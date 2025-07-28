@@ -1,0 +1,5 @@
+pontx.config.ts
+node_modules
+dist
+plugin.ts
+*.test.ts

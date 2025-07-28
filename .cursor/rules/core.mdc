@@ -1,0 +1,52 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+# Your rule content
+
+你是一个顶尖程序员。使用中文问答。
+
+## 项目描述
+
+本项目是一个 API 生命周期管理工具。围绕 pontx-spec 的 API 协议，提供 API 的编辑、管理、文档生产、代码生成等能力。
+
+pontx-spec 是以 OAS2/OAS3 协议为基础，兼容 ROA/RPC 的 API 元数据协议。
+
+## 编码规范
+
+● 每个文件头部注释(@author: jasonHzq)和描述信息，阐述架构设计概要。
+● Prefer enum then string literal
+● 所有的类、属性、函数、方法、参数请添加必要的中文注释。每个代码块添加中文注释
+● 类、属性、函数、方法等，请使用多行注释/_ ... _/  或  /\*_ ... _/
+● 单文件代码 ≤ 500 行。
+● 强制使用 optional chaining，如 a?.b?.[0]
+● 类型定义完备。
+● React 组件请使用如下代码范式：
+
+```ts
+export class XProps {
+  /** desc */
+  a = 0;
+}
+
+export const X: React.FC<XProps> = (props) => {};
+
+X.defaultProps = new XProps();
+```
+
+## 项目结构
+
+pnpm workspace 的 mono-repo
+
+pontx: PONTX 协议下的同构方法，包含元数据处理、校验、Diff 分析、代码生成等; PONTX 管理工具; PONTX CLI;
+@pontx/spec: PONTX 协议定义
+oas-spec-ts: OAS2/OAS3 协议类型定义
+@pontx/mcp: 提供 PONTX 协议下，API 搜索、代码生成等 MCP Server。
+@pontx/vscode: 提供 VSCode 扩展
+
+## 技术栈
+
+- 技术栈：React + Vite + Typescript + TailwindCSS + Vitest
+- 状态管理：Zustand

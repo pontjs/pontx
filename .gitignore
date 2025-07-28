@@ -1,0 +1,16 @@
+*.tsbuildinfo
+node_modules
+lib/
+build/
+dist/
+module/
+cjs/
+cjs-types/
+ui/
+table/
+schema-table/
+.rollup.cache
+es6
+packages/spec/tests/oas3/openapi.yaml
+packages/plugin-egg/tests/openapi.yaml
+.specstory/

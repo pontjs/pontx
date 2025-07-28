@@ -1,0 +1,989 @@
+[
+	{
+		"name": "OpenAPIObject",
+		"description": "This is the root document object of the <a href=\"https://swagger.io/specification/#oas-document\">OpenAPI document</a>.",
+		"properties": [
+			{
+				"name": "openapi",
+				"type": "string",
+				"required": false,
+				"desc": "<strong>REQUIRED</strong>. This string MUST be the <a href=\"https://semver.org/spec/v2.0.0.html\">semantic version number</a> of the <a href=\"https://swagger.io/specification/#versions\">OpenAPI Specification version</a> that the OpenAPI document uses. The <code>openapi</code> field SHOULD be used by tooling specifications and clients to interpret the OpenAPI document. This is <em>not</em> related to the API <a href=\"https://swagger.io/specification/#info-version\"><code>info.version</code></a> string."
+			},
+			{
+				"name": "info",
+				"type": "InfoObject",
+				"required": false,
+				"desc": "<strong>REQUIRED</strong>. Provides metadata about the API. The metadata MAY be used by tooling as required."
+			},
+			{
+				"name": "servers",
+				"type": "ServerObject",
+				"required": false,
+				"desc": "An array of Server Objects, which provide connectivity information to a target server. If the <code>servers</code> property is not provided, or is an empty array, the default value would be a <a href=\"https://swagger.io/specification/#server-object\">Server Object</a> with a <a href=\"https://swagger.io/specification/#server-url\">url</a> value of <code>/</code>."
+			},
+			{
+				"name": "paths",
+				"type": "PathsObject",
+				"required": false,
+				"desc": "<strong>REQUIRED</strong>. The available paths and operations for the API."
+			},
+			{
+				"name": "components",
+				"type": "ComponentsObject",
+				"required": false,
+				"desc": "An element to hold various schemas for the specification."
+			},
+			{
+				"name": "security",
+				"type": "SecurityRequirementObject",
+				"required": false,
+				"desc": "A declaration of which security mechanisms can be used across the API. The list of values includes alternative security requirement objects that can be used. Only one of the security requirement objects need to be satisfied to authorize a request. Individual operations can override this definition. To make security optional, an empty security requirement (<code>{}</code>) can be included in the array."
+			},
+			{
+				"name": "tags",
+				"type": "TagObject",
+				"required": false,
+				"desc": "A list of tags used by the specification with additional metadata. The order of the tags can be used to reflect on their order by the parsing tools. Not all tags that are used by the <a href=\"https://swagger.io/specification/#operation-object\">Operation Object</a> must be declared. The tags that are not declared MAY be organized randomly or based on the tools' logic. Each tag name in the list MUST be unique."
+			},
+			{
+				"name": "externalDocs",
+				"type": "ExternalDocumentationObject",
+				"required": false,
+				"desc": "Additional external documentation."
+			}
+		]
+	},
+	{
+		"name": "InfoObject",
+		"description": "The object provides metadata about the API.\nThe metadata MAY be used by the clients if needed, and MAY be presented in editing or documentation generation tools for convenience.",
+		"properties": [
+			{
+				"name": "title",
+				"type": "string",
+				"required": false,
+				"desc": "<strong>REQUIRED</strong>. The title of the API."
+			},
+			{
+				"name": "description",
+				"type": "string",
+				"required": false,
+				"desc": "A short description of the API. <a href=\"https://spec.commonmark.org/\">CommonMark syntax</a> MAY be used for rich text representation."
+			},
+			{
+				"name": "termsOfService",
+				"type": "string",
+				"required": false,
+				"desc": "A URL to the Terms of Service for the API. MUST be in the format of a URL."
+			},
+			{
+				"name": "contact",
+				"type": "ContactObject",
+				"required": false,
+				"desc": "The contact information for the exposed API."
+			},
+			{
+				"name": "license",
+				"type": "LicenseObject",
+				"required": false,
+				"desc": "The license information for the exposed API."
+			},
+			{
+				"name": "version",
+				"type": "string",
+				"required": false,
+				"desc": "<strong>REQUIRED</strong>. The version of the OpenAPI document (which is distinct from the <a href=\"https://swagger.io/specification/#oas-version\">OpenAPI Specification version</a> or the API implementation version)."
+			}
+		]
+	},
+	{
+		"name": "ContactObject",
+		"description": "Contact information for the exposed API.",
+		"properties": [
+			{
+				"name": "name",
+				"type": "string",
+				"required": false,
+				"desc": "The identifying name of the contact person/organization."
+			},
+			{
+				"name": "url",
+				"type": "string",
+				"required": false,
+				"desc": "The URL pointing to the contact information. MUST be in the format of a URL."
+			},
+			{
+				"name": "email",
+				"type": "string",
+				"required": false,
+				"desc": "The email address of the contact person/organization. MUST be in the format of an email address."
+			}
+		]
+	},
+	{
+		"name": "LicenseObject",
+		"description": "License information for the exposed API.",
+		"properties": [
+			{
+				"name": "name",
+				"type": "string",
+				"required": false,
+				"desc": "<strong>REQUIRED</strong>. The license name used for the API."
+			},
+			{
+				"name": "url",
+				"type": "string",
+				"required": false,
+				"desc": "A URL to the license used for the API. MUST be in the format of a URL."
+			}
+		]
+	},
+	{
+		"name": "ServerObject",
+		"description": "An object representing a Server.",
+		"properties": [
+			{
+				"name": "url",
+				"type": "string",
+				"required": false,
+				"desc": "<strong>REQUIRED</strong>. A URL to the target host.  This URL supports Server Variables and MAY be relative, to indicate that the host location is relative to the location where the OpenAPI document is being served. Variable substitutions will be made when a variable is named in <code>{</code>brackets<code>}</code>."
+			},
+			{
+				"name": "description",
+				"type": "string",
+				"required": false,
+				"desc": "An optional string describing the host designated by the URL. <a href=\"https://spec.commonmark.org/\">CommonMark syntax</a> MAY be used for rich text representation."
+			},
+			{
+				"name": "variables",
+				"type": "string",
+				"required": false,
+				"desc": "A map between a variable name and its value.  The value is used for substitution in the server's URL template."
+			}
+		]
+	},
+	{
+		"name": "ServerVariableObject",
+		"description": "An object representing a Server Variable for server URL template substitution.",
+		"properties": [
+			{
+				"name": "enum",
+				"type": "string",
+				"required": false,
+				"desc": "An enumeration of string values to be used if the substitution options are from a limited set. The array SHOULD NOT be empty."
+			},
+			{
+				"name": "default",
+				"type": "string",
+				"required": false,
+				"desc": "<strong>REQUIRED</strong>. The default value to use for substitution, which SHALL be sent if an alternate value is <em>not</em> supplied. Note this behavior is different than the <a href=\"https://swagger.io/specification/#schema-object\">Schema Object's</a> treatment of default values, because in those cases parameter values are optional. If the <a href=\"https://swagger.io/specification/#server-variable-enum\"><code>enum</code></a> is defined, the value SHOULD exist in the enum's values."
+			},
+			{
+				"name": "description",
+				"type": "string",
+				"required": false,
+				"desc": "An optional description for the server variable. <a href=\"https://spec.commonmark.org/\">CommonMark syntax</a> MAY be used for rich text representation."
+			}
+		]
+	},
+	{
+		"name": "ComponentsObject",
+		"description": "Holds a set of reusable objects for different aspects of the OAS.\nAll objects defined within the components object will have no effect on the API unless they are explicitly referenced from properties outside the components object.",
+		"properties": [
+			{
+				"name": " schemas",
+				"type": "string",
+				"required": false,
+				"desc": "An object to hold reusable <a href=\"https://swagger.io/specification/#schema-object\">Schema Objects</a>."
+			},
+			{
+				"name": " responses",
+				"type": "string",
+				"required": false,
+				"desc": "An object to hold reusable <a href=\"https://swagger.io/specification/#response-object\">Response Objects</a>."
+			},
+			{
+				"name": " parameters",
+				"type": "string",
+				"required": false,
+				"desc": "An object to hold reusable <a href=\"https://swagger.io/specification/#parameter-object\">Parameter Objects</a>."
+			},
+			{
+				"name": " examples",
+				"type": "string",
+				"required": false,
+				"desc": "An object to hold reusable <a href=\"https://swagger.io/specification/#example-object\">Example Objects</a>."
+			},
+			{
+				"name": " requestBodies",
+				"type": "string",
+				"required": false,
+				"desc": "An object to hold reusable <a href=\"https://swagger.io/specification/#request-body-object\">Request Body Objects</a>."
+			},
+			{
+				"name": " headers",
+				"type": "string",
+				"required": false,
+				"desc": "An object to hold reusable <a href=\"https://swagger.io/specification/#header-object\">Header Objects</a>."
+			},
+			{
+				"name": " securitySchemes",
+				"type": "string",
+				"required": false,
+				"desc": "An object to hold reusable <a href=\"https://swagger.io/specification/#security-scheme-object\">Security Scheme Objects</a>."
+			},
+			{
+				"name": " links",
+				"type": "string",
+				"required": false,
+				"desc": "An object to hold reusable <a href=\"https://swagger.io/specification/#link-object\">Link Objects</a>."
+			},
+			{
+				"name": " callbacks",
+				"type": "string",
+				"required": false,
+				"desc": "An object to hold reusable <a href=\"https://swagger.io/specification/#callback-object\">Callback Objects</a>."
+			}
+		]
+	},
+	{
+		"name": "PathsObject",
+		"description": "Holds the relative paths to the individual endpoints and their operations.\nThe path is appended to the URL from the <a href=\"https://swagger.io/specification/#server-object\"><code>Server Object</code></a> in order to construct the full URL.  The Paths MAY be empty, due to <a href=\"https://swagger.io/specification/#security-filtering\">ACL constraints</a>.",
+		"properties": [
+			{
+				"name": "[key: string]",
+				"type": "PathItemObject",
+				"required": true,
+				"desc": "A relative path to an individual endpoint. The field name MUST begin with a forward slash (<code>/</code>). The path is <strong>appended</strong> (no relative URL resolution) to the expanded URL from the <a href=\"https://swagger.io/specification/#server-object\"><code>Server Object</code></a>'s <code>url</code> field in order to construct the full URL. <a href=\"https://swagger.io/specification/#path-templating\">Path templating</a> is allowed. When matching URLs, concrete (non-templated) paths would be matched before their templated counterparts. Templated paths with the same hierarchy but different templated names MUST NOT exist as they are identical. In case of ambiguous matching, it's up to the tooling to decide which one to use."
+			}
+		]
+	},
+	{
+		"name": "PathItemObject",
+		"description": "Describes the operations available on a single path.\nA Path Item MAY be empty, due to <a href=\"https://swagger.io/specification/#security-filtering\">ACL constraints</a>.\nThe path itself is still exposed to the documentation viewer but they will not know which operations and parameters are available.",
+		"properties": [
+			{
+				"name": "$ref",
+				"type": "string",
+				"required": false,
+				"desc": "Allows for an external definition of this path item. The referenced structure MUST be in the format of a <a href=\"https://swagger.io/specification/#path-item-object\">Path Item Object</a>.  In case a Path Item Object field appears both in the defined object and the referenced object, the behavior is undefined."
+			},
+			{
+				"name": "summary",
+				"type": "string",
+				"required": false,
+				"desc": "An optional, string summary, intended to apply to all operations in this path."
+			},
+			{
+				"name": "description",
+				"type": "string",
+				"required": false,
+				"desc": "An optional, string description, intended to apply to all operations in this path. <a href=\"https://spec.commonmark.org/\">CommonMark syntax</a> MAY be used for rich text representation."
+			},
+			{
+				"name": "get",
+				"type": "OperationObject",
+				"required": false,
+				"desc": "A definition of a GET operation on this path."
+			},
+			{
+				"name": "put",
+				"type": "OperationObject",
+				"required": false,
+				"desc": "A definition of a PUT operation on this path."
+			},
+			{
+				"name": "post",
+				"type": "OperationObject",
+				"required": false,
+				"desc": "A definition of a POST operation on this path."
+			},
+			{
+				"name": "delete",
+				"type": "OperationObject",
+				"required": false,
+				"desc": "A definition of a DELETE operation on this path."
+			},
+			{
+				"name": "options",
+				"type": "OperationObject",
+				"required": false,
+				"desc": "A definition of a OPTIONS operation on this path."
+			},
+			{
+				"name": "head",
+				"type": "OperationObject",
+				"required": false,
+				"desc": "A definition of a HEAD operation on this path."
+			},
+			{
+				"name": "patch",
+				"type": "OperationObject",
+				"required": false,
+				"desc": "A definition of a PATCH operation on this path."
+			},
+			{
+				"name": "trace",
+				"type": "OperationObject",
+				"required": false,
+				"desc": "A definition of a TRACE operation on this path."
+			},
+			{
+				"name": "servers",
+				"type": "ServerObject",
+				"required": false,
+				"desc": "An alternative <code>server</code> array to service all operations in this path."
+			},
+			{
+				"name": "parameters",
+				"type": "ParameterObject",
+				"required": false,
+				"desc": "A list of parameters that are applicable for all the operations described under this path. These parameters can be overridden at the operation level, but cannot be removed there. The list MUST NOT include duplicated parameters. A unique parameter is defined by a combination of a <a href=\"https://swagger.io/specification/#parameter-name\">name</a> and <a href=\"https://swagger.io/specification/#parameter-in\">location</a>. The list can use the <a href=\"https://swagger.io/specification/#reference-object\">Reference Object</a> to link to parameters that are defined at the <a href=\"https://swagger.io/specification/#components-parameters\">OpenAPI Object's components/parameters</a>."
+			}
+		]
+	},
+	{
+		"name": "OperationObject",
+		"description": "Describes a single API operation on a path.",
+		"properties": [
+			{
+				"name": "tags",
+				"type": "string",
+				"required": false,
+				"desc": "A list of tags for API documentation control. Tags can be used for logical grouping of operations by resources or any other qualifier."
+			},
+			{
+				"name": "summary",
+				"type": "string",
+				"required": false,
+				"desc": "A short summary of what the operation does."
+			},
+			{
+				"name": "description",
+				"type": "string",
+				"required": false,
+				"desc": "A verbose explanation of the operation behavior. <a href=\"https://spec.commonmark.org/\">CommonMark syntax</a> MAY be used for rich text representation."
+			},
+			{
+				"name": "externalDocs",
+				"type": "ExternalDocumentationObject",
+				"required": false,
+				"desc": "Additional external documentation for this operation."
+			},
+			{
+				"name": "operationId",
+				"type": "string",
+				"required": false,
+				"desc": "Unique string used to identify the operation. The id MUST be unique among all operations described in the API. The operationId value is <strong>case-sensitive</strong>. Tools and libraries MAY use the operationId to uniquely identify an operation, therefore, it is RECOMMENDED to follow common programming naming conventions."
+			},
+			{
+				"name": "parameters",
+				"type": "ParameterObject",
+				"required": false,
+				"desc": "A list of parameters that are applicable for this operation. If a parameter is already defined at the <a href=\"https://swagger.io/specification/#path-item-parameters\">Path Item</a>, the new definition will override it but can never remove it. The list MUST NOT include duplicated parameters. A unique parameter is defined by a combination of a <a href=\"https://swagger.io/specification/#parameter-name\">name</a> and <a href=\"https://swagger.io/specification/#parameter-in\">location</a>. The list can use the <a href=\"https://swagger.io/specification/#reference-object\">Reference Object</a> to link to parameters that are defined at the <a href=\"https://swagger.io/specification/#components-parameters\">OpenAPI Object's components/parameters</a>."
+			},
+			{
+				"name": "requestBody",
+				"type": "RequestBodyObject",
+				"required": false,
+				"desc": "The request body applicable for this operation.  The <code>requestBody</code> is only supported in HTTP methods where the HTTP 1.1 specification <a href=\"https://tools.ietf.org/html/rfc7231#section-4.3.1\">RFC7231</a> has explicitly defined semantics for request bodies.  In other cases where the HTTP spec is vague, <code>requestBody</code> SHALL be ignored by consumers."
+			},
+			{
+				"name": "responses",
+				"type": "ResponsesObject",
+				"required": false,
+				"desc": "<strong>REQUIRED</strong>. The list of possible responses as they are returned from executing this operation."
+			},
+			{
+				"name": "callbacks",
+				"type": "string",
+				"required": false,
+				"desc": "A map of possible out-of band callbacks related to the parent operation. The key is a unique identifier for the Callback Object. Each value in the map is a <a href=\"https://swagger.io/specification/#callback-object\">Callback Object</a> that describes a request that may be initiated by the API provider and the expected responses."
+			},
+			{
+				"name": "deprecated",
+				"type": "boolean",
+				"required": false,
+				"desc": "Declares this operation to be deprecated. Consumers SHOULD refrain from usage of the declared operation. Default value is <code>false</code>."
+			},
+			{
+				"name": "security",
+				"type": "SecurityRequirementObject",
+				"required": false,
+				"desc": "A declaration of which security mechanisms can be used for this operation. The list of values includes alternative security requirement objects that can be used. Only one of the security requirement objects need to be satisfied to authorize a request. To make security optional, an empty security requirement (<code>{}</code>) can be included in the array. This definition overrides any declared top-level <a href=\"https://swagger.io/specification/#oas-security\"><code>security</code></a>. To remove a top-level security declaration, an empty array can be used."
+			},
+			{
+				"name": "servers",
+				"type": "ServerObject",
+				"required": false,
+				"desc": "An alternative <code>server</code> array to service this operation. If an alternative <code>server</code> object is specified at the Path Item Object or Root level, it will be overridden by this value."
+			}
+		]
+	},
+	{
+		"name": "ExternalDocumentationObject",
+		"description": "Allows referencing an external resource for extended documentation.",
+		"properties": [
+			{
+				"name": "description",
+				"type": "string",
+				"required": false,
+				"desc": "A short description of the target documentation. <a href=\"https://spec.commonmark.org/\">CommonMark syntax</a> MAY be used for rich text representation."
+			},
+			{
+				"name": "url",
+				"type": "string",
+				"required": false,
+				"desc": "<strong>REQUIRED</strong>. The URL for the target documentation. Value MUST be in the format of a URL."
+			}
+		]
+	},
+	{
+		"name": "ParameterObject",
+		"description": "Describes a single operation parameter.",
+		"properties": [
+			{
+				"name": "name",
+				"type": "string",
+				"required": false,
+				"desc": "<strong>REQUIRED</strong>. The name of the parameter. Parameter names are <em>case sensitive</em>. <ul><li>If <a href=\"https://swagger.io/specification/#parameter-in\"><code>in</code></a> is <code>\"path\"</code>, the <code>name</code> field MUST correspond to a template expression occurring within the <a href=\"https://swagger.io/specification/#paths-path\">path</a> field in the <a href=\"https://swagger.io/specification/#paths-object\">Paths Object</a>. See <a href=\"https://swagger.io/specification/#path-templating\">Path Templating</a> for further information.</li><li>If <a href=\"https://swagger.io/specification/#parameter-in\"><code>in</code></a> is <code>\"header\"</code> and the <code>name</code> field is <code>\"Accept\"</code>, <code>\"Content-Type\"</code> or <code>\"Authorization\"</code>, the parameter definition SHALL be ignored.</li><li>For all other cases, the <code>name</code> corresponds to the parameter name used by the <a href=\"https://swagger.io/specification/#parameter-in\"><code>in</code></a> property.</li></ul>"
+			},
+			{
+				"name": "in",
+				"type": "string",
+				"required": false,
+				"desc": "<strong>REQUIRED</strong>. The location of the parameter. Possible values are <code>\"query\"</code>, <code>\"header\"</code>, <code>\"path\"</code> or <code>\"cookie\"</code>."
+			},
+			{
+				"name": "description",
+				"type": "string",
+				"required": false,
+				"desc": "A brief description of the parameter. This could contain examples of use. <a href=\"https://spec.commonmark.org/\">CommonMark syntax</a> MAY be used for rich text representation."
+			},
+			{
+				"name": "required",
+				"type": "boolean",
+				"required": false,
+				"desc": "Determines whether this parameter is mandatory. If the <a href=\"https://swagger.io/specification/#parameter-in\">parameter location</a> is <code>\"path\"</code>, this property is <strong>REQUIRED</strong> and its value MUST be <code>true</code>. Otherwise, the property MAY be included and its default value is <code>false</code>."
+			},
+			{
+				"name": " deprecated",
+				"type": "boolean",
+				"required": false,
+				"desc": "Specifies that a parameter is deprecated and SHOULD be transitioned out of usage. Default value is <code>false</code>."
+			},
+			{
+				"name": " allowEmptyValue",
+				"type": "boolean",
+				"required": false,
+				"desc": "Sets the ability to pass empty-valued parameters. This is valid only for <code>query</code> parameters and allows sending a parameter with an empty value. Default value is <code>false</code>. If <a href=\"https://swagger.io/specification/#parameter-style\"><code>style</code></a> is used, and if behavior is <code>n/a</code> (cannot be serialized), the value of <code>allowEmptyValue</code> SHALL be ignored. Use of this property is NOT RECOMMENDED, as it is likely to be removed in a later revision."
+			}
+		]
+	},
+	{
+		"name": "RequestBodyObject",
+		"description": "Describes a single request body.",
+		"properties": [
+			{
+				"name": "description",
+				"type": "string",
+				"required": false,
+				"desc": "A brief description of the request body. This could contain examples of use.  <a href=\"https://spec.commonmark.org/\">CommonMark syntax</a> MAY be used for rich text representation."
+			},
+			{
+				"name": "content",
+				"type": "string",
+				"required": false,
+				"desc": "<strong>REQUIRED</strong>. The content of the request body. The key is a media type or <a href=\"https://tools.ietf.org/html/rfc7231#appendix--d\">media type range</a> and the value describes it.  For requests that match multiple keys, only the most specific key is applicable. e.g. text/plain overrides text/*"
+			},
+			{
+				"name": "required",
+				"type": "boolean",
+				"required": false,
+				"desc": "Determines if the request body is required in the request. Defaults to <code>false</code>."
+			}
+		]
+	},
+	{
+		"name": "MediaTypeObject",
+		"description": "Each Media Type Object provides schema and examples for the media type identified by its key.",
+		"properties": [
+			{
+				"name": "schema",
+				"type": "SchemaObject",
+				"required": false,
+				"desc": "The schema defining the content of the request, response, or parameter."
+			},
+			{
+				"name": "example",
+				"required": false,
+				"desc": "Example of the media type.  The example object SHOULD be in the correct format as specified by the media type.  The <code>example</code> field is mutually exclusive of the <code>examples</code> field.  Furthermore, if referencing a <code>schema</code> which contains an example, the <code>example</code> value SHALL <em>override</em> the example provided by the schema."
+			},
+			{
+				"name": "examples",
+				"type": "string",
+				"required": false,
+				"desc": "Examples of the media type.  Each example object SHOULD  match the media type and specified schema if present.  The <code>examples</code> field is mutually exclusive of the <code>example</code> field.  Furthermore, if referencing a <code>schema</code> which contains an example, the <code>examples</code> value SHALL <em>override</em> the example provided by the schema."
+			},
+			{
+				"name": "encoding",
+				"type": "string",
+				"required": false,
+				"desc": "A map between a property name and its encoding information. The key, being the property name, MUST exist in the schema as a property. The encoding object SHALL only apply to <code>requestBody</code> objects when the media type is <code>multipart</code> or <code>application/x-www-form-urlencoded</code>."
+			}
+		]
+	},
+	{
+		"name": "EncodingObject",
+		"description": "A single encoding definition applied to a single schema property.",
+		"properties": [
+			{
+				"name": "contentType",
+				"type": "string",
+				"required": false,
+				"desc": "The Content-Type for encoding a specific property. Default value depends on the property type: for <code>string</code> with <code>format</code> being <code>binary</code> – <code>application/octet-stream</code>; for other primitive types – <code>text/plain</code>; for <code>object</code> - <code>application/json</code>; for <code>array</code> – the default is defined based on the inner type. The value can be a specific media type (e.g. <code>application/json</code>), a wildcard media type (e.g. <code>image/*</code>), or a comma-separated list of the two types."
+			},
+			{
+				"name": "headers",
+				"type": "string",
+				"required": false,
+				"desc": "A map allowing additional information to be provided as headers, for example <code>Content-Disposition</code>.  <code>Content-Type</code> is described separately and SHALL be ignored in this section. This property SHALL be ignored if the request body media type is not a <code>multipart</code>."
+			},
+			{
+				"name": "style",
+				"type": "string",
+				"required": false,
+				"desc": "Describes how a specific property value will be serialized depending on its type.  See <a href=\"https://swagger.io/specification/#parameter-object\">Parameter Object</a> for details on the <a href=\"https://swagger.io/specification/#parameter-style\"><code>style</code></a> property. The behavior follows the same values as <code>query</code> parameters, including default values. This property SHALL be ignored if the request body media type is not <code>application/x-www-form-urlencoded</code>."
+			},
+			{
+				"name": "explode",
+				"type": "boolean",
+				"required": false,
+				"desc": "When this is true, property values of type <code>array</code> or <code>object</code> generate separate parameters for each value of the array, or key-value-pair of the map.  For other types of properties this property has no effect. When <a href=\"https://swagger.io/specification/#encoding-style\"><code>style</code></a> is <code>form</code>, the default value is <code>true</code>. For all other styles, the default value is <code>false</code>. This property SHALL be ignored if the request body media type is not <code>application/x-www-form-urlencoded</code>."
+			},
+			{
+				"name": "allowReserved",
+				"type": "boolean",
+				"required": false,
+				"desc": "Determines whether the parameter value SHOULD allow reserved characters, as defined by <a href=\"https://tools.ietf.org/html/rfc3986#section-2.2\">RFC3986</a> <code>:/?#[]@!$&amp;'()*+,;=</code> to be included without percent-encoding. The default value is <code>false</code>. This property SHALL be ignored if the request body media type is not <code>application/x-www-form-urlencoded</code>."
+			}
+		]
+	},
+	{
+		"name": "ResponsesObject",
+		"description": "A container for the expected responses of an operation.\nThe container maps a HTTP response code to the expected response.",
+		"properties": [
+			{
+				"name": "default",
+				"type": "ResponseObject",
+				"required": false,
+				"desc": "The documentation of responses other than the ones declared for specific HTTP response codes. Use this field to cover undeclared responses. A <a href=\"https://swagger.io/specification/#reference-object\">Reference Object</a> can link to a response that the <a href=\"https://swagger.io/specification/#components-responses\">OpenAPI Object's components/responses</a> section defines."
+			}
+		]
+	},
+	{
+		"name": "ResponseObject",
+		"description": "Describes a single response from an API Operation, including design-time, static\n<code>links</code> to operations based on the response.",
+		"properties": [
+			{
+				"name": "description",
+				"type": "string",
+				"required": false,
+				"desc": "<strong>REQUIRED</strong>. A short description of the response. <a href=\"https://spec.commonmark.org/\">CommonMark syntax</a> MAY be used for rich text representation."
+			},
+			{
+				"name": "headers",
+				"type": "string",
+				"required": false,
+				"desc": "Maps a header name to its definition. <a href=\"https://tools.ietf.org/html/rfc7230#page-22\">RFC7230</a> states header names are case insensitive. If a response header is defined with the name <code>\"Content-Type\"</code>, it SHALL be ignored."
+			},
+			{
+				"name": "content",
+				"type": "string",
+				"required": false,
+				"desc": "A map containing descriptions of potential response payloads. The key is a media type or <a href=\"https://tools.ietf.org/html/rfc7231#appendix--d\">media type range</a> and the value describes it.  For responses that match multiple keys, only the most specific key is applicable. e.g. text/plain overrides text/*"
+			},
+			{
+				"name": "links",
+				"type": "string",
+				"required": false,
+				"desc": "A map of operations links that can be followed from the response. The key of the map is a short name for the link, following the naming constraints of the names for <a href=\"https://swagger.io/specification/#components-object\">Component Objects</a>."
+			}
+		]
+	},
+	{
+		"name": "CallbackObject",
+		"description": "A map of possible out-of band callbacks related to the parent operation.\nEach value in the map is a <a href=\"https://swagger.io/specification/#path-item-object\">Path Item Object</a> that describes a set of requests that may be initiated by the API provider and the expected responses.\nThe key value used to identify the path item object is an expression, evaluated at runtime, that identifies a URL to use for the callback operation.",
+		"properties": [
+			{
+				"name": "[key: string]",
+				"type": "PathItemObject",
+				"required": true,
+				"desc": "A Path Item Object used to define a callback request and expected responses.  A <a href=\"examples/v3.0/callback-example.yaml\">complete example</a> is available."
+			}
+		]
+	},
+	{
+		"name": "ExampleObject",
+		"description": "This object MAY be extended with <a href=\"https://swagger.io/specification/#specification-extensions\">Specification Extensions</a>.",
+		"properties": [
+			{
+				"name": "summary",
+				"type": "string",
+				"required": false,
+				"desc": "Short description for the example."
+			},
+			{
+				"name": "description",
+				"type": "string",
+				"required": false,
+				"desc": "Long description for the example. <a href=\"https://spec.commonmark.org/\">CommonMark syntax</a> MAY be used for rich text representation."
+			},
+			{
+				"name": "value",
+				"required": false,
+				"desc": "Embedded literal example. The <code>value</code> field and <code>externalValue</code> field are mutually exclusive. To represent examples of media types that cannot naturally represented in JSON or YAML, use a string value to contain the example, escaping where necessary."
+			},
+			{
+				"name": "externalValue",
+				"type": "string",
+				"required": false,
+				"desc": "A URL that points to the literal example. This provides the capability to reference examples that cannot easily be included in JSON or YAML documents.  The <code>value</code> field and <code>externalValue</code> field are mutually exclusive."
+			}
+		]
+	},
+	{
+		"name": "LinkObject",
+		"description": "The <code>Link object</code> represents a possible design-time link for a response.\nThe presence of a link does not guarantee the caller's ability to successfully invoke it, rather it provides a known relationship and traversal mechanism between responses and other operations.",
+		"properties": [
+			{
+				"name": "operationRef",
+				"type": "string",
+				"required": false,
+				"desc": "A relative or absolute URI reference to an OAS operation. This field is mutually exclusive of the <code>operationId</code> field, and MUST point to an <a href=\"https://swagger.io/specification/#operation-object\">Operation Object</a>. Relative <code>operationRef</code> values MAY be used to locate an existing <a href=\"https://swagger.io/specification/#operation-object\">Operation Object</a> in the OpenAPI definition."
+			},
+			{
+				"name": "operationId",
+				"type": "string",
+				"required": false,
+				"desc": "The name of an <em>existing</em>, resolvable OAS operation, as defined with a unique <code>operationId</code>.  This field is mutually exclusive of the <code>operationRef</code> field."
+			},
+			{
+				"name": "parameters",
+				"type": "string",
+				"required": false,
+				"desc": "A map representing parameters to pass to an operation as specified with <code>operationId</code> or identified via <code>operationRef</code>. The key is the parameter name to be used, whereas the value can be a constant or an expression to be evaluated and passed to the linked operation.  The parameter name can be qualified using the <a href=\"https://swagger.io/specification/#parameter-in\">parameter location</a> <code>[{in}.]{name}</code> for operations that use the same parameter name in different locations (e.g. path.id)."
+			},
+			{
+				"name": "requestBody",
+				"type": "{expression}",
+				"required": false,
+				"desc": "A literal value or <a href=\"https://swagger.io/specification/#runtime-expression\">{expression}</a> to use as a request body when calling the target operation."
+			},
+			{
+				"name": "description",
+				"type": "string",
+				"required": false,
+				"desc": "A description of the link. <a href=\"https://spec.commonmark.org/\">CommonMark syntax</a> MAY be used for rich text representation."
+			},
+			{
+				"name": "server",
+				"type": "ServerObject",
+				"required": false,
+				"desc": "A server object to be used by the target operation."
+			}
+		]
+	},
+	{
+		"name": "HeaderObject",
+		"description": "The Header Object follows the structure of the <a href=\"https://swagger.io/specification/#parameter-object\">Parameter Object</a> with the following changes:",
+		"properties": [
+			{
+				"name": "name",
+				"type": "string",
+				"required": false,
+				"desc": "<strong>REQUIRED</strong>. The name of the tag."
+			},
+			{
+				"name": "description",
+				"type": "string",
+				"required": false,
+				"desc": "A short description for the tag. <a href=\"https://spec.commonmark.org/\">CommonMark syntax</a> MAY be used for rich text representation."
+			},
+			{
+				"name": "externalDocs",
+				"type": "ExternalDocumentationObject",
+				"required": false,
+				"desc": "Additional external documentation for this tag."
+			}
+		]
+	},
+	{
+		"name": "TagObject",
+		"description": "Adds metadata to a single tag that is used by the <a href=\"https://swagger.io/specification/#operation-object\">Operation Object</a>.\nIt is not mandatory to have a Tag Object per tag defined in the Operation Object instances.",
+		"properties": [
+			{
+				"name": "name",
+				"type": "string",
+				"required": false,
+				"desc": "<strong>REQUIRED</strong>. The name of the tag."
+			},
+			{
+				"name": "description",
+				"type": "string",
+				"required": false,
+				"desc": "A short description for the tag. <a href=\"https://spec.commonmark.org/\">CommonMark syntax</a> MAY be used for rich text representation."
+			},
+			{
+				"name": "externalDocs",
+				"type": "ExternalDocumentationObject",
+				"required": false,
+				"desc": "Additional external documentation for this tag."
+			}
+		]
+	},
+	{
+		"name": "ReferenceObject",
+		"description": "A simple object to allow referencing other components in the specification, internally and externally.",
+		"properties": [
+			{
+				"name": "$ref",
+				"type": "string",
+				"required": false,
+				"desc": "<strong>REQUIRED</strong>. The reference string."
+			}
+		]
+	},
+	{
+		"name": "SchemaObject",
+		"description": "The Schema Object allows the definition of input and output data types.\nThese types can be objects, but also primitives and arrays.\nThis object is an extended subset of the <a href=\"https://json-schema.org/\">JSON Schema Specification Wright Draft 00</a>.",
+		"properties": [
+			{
+				"name": "nullable",
+				"type": "boolean",
+				"required": false,
+				"desc": "A <code>true</code> value adds <code>\"null\"</code> to the allowed type specified by the <code>type</code> keyword, only if <code>type</code> is explicitly defined within the same Schema Object. Other Schema Object constraints retain their defined behavior, and therefore may disallow the use of <code>null</code> as a value. A <code>false</code> value leaves the specified or default <code>type</code> unmodified. The default value is <code>false</code>."
+			},
+			{
+				"name": "discriminator",
+				"type": "DiscriminatorObject",
+				"required": false,
+				"desc": "Adds support for polymorphism. The discriminator is an object name that is used to differentiate between other schemas which may satisfy the payload description. See <a href=\"https://swagger.io/specification/#schema-composition\">Composition and Inheritance</a> for more details."
+			},
+			{
+				"name": "readOnly",
+				"type": "boolean",
+				"required": false,
+				"desc": "Relevant only for Schema <code>\"properties\"</code> definitions. Declares the property as \"read only\". This means that it MAY be sent as part of a response but SHOULD NOT be sent as part of the request. If the property is marked as <code>readOnly</code> being <code>true</code> and is in the <code>required</code> list, the <code>required</code> will take effect on the response only. A property MUST NOT be marked as both <code>readOnly</code> and <code>writeOnly</code> being <code>true</code>. Default value is <code>false</code>."
+			},
+			{
+				"name": "writeOnly",
+				"type": "boolean",
+				"required": false,
+				"desc": "Relevant only for Schema <code>\"properties\"</code> definitions. Declares the property as \"write only\". Therefore, it MAY be sent as part of a request but SHOULD NOT be sent as part of the response. If the property is marked as <code>writeOnly</code> being <code>true</code> and is in the <code>required</code> list, the <code>required</code> will take effect on the request only. A property MUST NOT be marked as both <code>readOnly</code> and <code>writeOnly</code> being <code>true</code>. Default value is <code>false</code>."
+			},
+			{
+				"name": "xml",
+				"type": "XMLObject",
+				"required": false,
+				"desc": "This MAY be used only on properties schemas. It has no effect on root schemas. Adds additional metadata to describe the XML representation of this property."
+			},
+			{
+				"name": "externalDocs",
+				"type": "ExternalDocumentationObject",
+				"required": false,
+				"desc": "Additional external documentation for this schema."
+			},
+			{
+				"name": "example",
+				"required": false,
+				"desc": "A free-form property to include an example of an instance for this schema. To represent examples that cannot be naturally represented in JSON or YAML, a string value can be used to contain the example with escaping where necessary."
+			},
+			{
+				"name": " deprecated",
+				"type": "boolean",
+				"required": false,
+				"desc": "Specifies that a schema is deprecated and SHOULD be transitioned out of usage. Default value is <code>false</code>."
+			}
+		]
+	},
+	{
+		"name": "DiscriminatorObject",
+		"description": "When request bodies or response payloads may be one of a number of different schemas, a <code>discriminator</code> object can be used to aid in serialization, deserialization, and validation.  The discriminator is a specific object in a schema which is used to inform the consumer of the specification of an alternative schema based on the value associated with it.",
+		"properties": [
+			{
+				"name": "propertyName",
+				"type": "string",
+				"required": false,
+				"desc": "<strong>REQUIRED</strong>. The name of the property in the payload that will hold the discriminator value."
+			},
+			{
+				"name": " mapping",
+				"type": "string",
+				"required": false,
+				"desc": "An object to hold mappings between payload values and schema names or references."
+			}
+		]
+	},
+	{
+		"name": "XMLObject",
+		"description": "A metadata object that allows for more fine-tuned XML model definitions.",
+		"properties": [
+			{
+				"name": "name",
+				"type": "string",
+				"required": false,
+				"desc": "Replaces the name of the element/attribute used for the described schema property. When defined within <code>items</code>, it will affect the name of the individual XML elements within the list. When defined alongside <code>type</code> being <code>array</code> (outside the <code>items</code>), it will affect the wrapping element and only if <code>wrapped</code> is <code>true</code>. If <code>wrapped</code> is <code>false</code>, it will be ignored."
+			},
+			{
+				"name": "namespace",
+				"type": "string",
+				"required": false,
+				"desc": "The URI of the namespace definition. Value MUST be in the form of an absolute URI."
+			},
+			{
+				"name": "prefix",
+				"type": "string",
+				"required": false,
+				"desc": "The prefix to be used for the <a href=\"https://swagger.io/specification/#xml-name\">name</a>."
+			},
+			{
+				"name": "attribute",
+				"type": "boolean",
+				"required": false,
+				"desc": "Declares whether the property definition translates to an attribute instead of an element. Default value is <code>false</code>."
+			},
+			{
+				"name": "wrapped",
+				"type": "boolean",
+				"required": false,
+				"desc": "MAY be used only for an array definition. Signifies whether the array is wrapped (for example, <code>&lt;books&gt;&lt;book/&gt;&lt;book/&gt;&lt;/books&gt;</code>) or unwrapped (<code>&lt;book/&gt;&lt;book/&gt;</code>). Default value is <code>false</code>. The definition takes effect only when defined alongside <code>type</code> being <code>array</code> (outside the <code>items</code>)."
+			}
+		]
+	},
+	{
+		"name": "SecuritySchemeObject",
+		"description": "Defines a security scheme that can be used by the operations.\nSupported schemes are HTTP authentication, an API key (either as a header, a cookie parameter or as a query parameter), OAuth2's common flows (implicit, password, client credentials and authorization code) as defined in <a href=\"https://tools.ietf.org/html/rfc6749\">RFC6749</a>, and <a href=\"https://tools.ietf.org/html/draft-ietf-oauth-discovery-06\">OpenID Connect Discovery</a>.",
+		"properties": [
+			{
+				"name": "type",
+				"type": "string",
+				"required": false,
+				"desc": "Any"
+			},
+			{
+				"name": "description",
+				"type": "string",
+				"required": false,
+				"desc": "Any"
+			},
+			{
+				"name": "name",
+				"type": "string",
+				"required": false,
+				"desc": "<code>apiKey</code>"
+			},
+			{
+				"name": "in",
+				"type": "string",
+				"required": false,
+				"desc": "<code>apiKey</code>"
+			},
+			{
+				"name": "scheme",
+				"type": "string",
+				"required": false,
+				"desc": "<code>http</code>"
+			},
+			{
+				"name": "bearerFormat",
+				"type": "string",
+				"required": false,
+				"desc": "<code>http</code> (<code>\"bearer\"</code>)"
+			},
+			{
+				"name": "flows",
+				"type": "OAuthFlowsObject",
+				"required": false,
+				"desc": "<code>oauth2</code>"
+			},
+			{
+				"name": "openIdConnectUrl",
+				"type": "string",
+				"required": false,
+				"desc": "<code>openIdConnect</code>"
+			}
+		]
+	},
+	{
+		"name": "OAuthFlowsObject",
+		"description": "Allows configuration of the supported OAuth Flows.",
+		"properties": [
+			{
+				"name": "implicit",
+				"type": "OAuthFlowObject",
+				"required": false,
+				"desc": "Configuration for the OAuth Implicit flow"
+			},
+			{
+				"name": "password",
+				"type": "OAuthFlowObject",
+				"required": false,
+				"desc": "Configuration for the OAuth Resource Owner Password flow"
+			},
+			{
+				"name": "clientCredentials",
+				"type": "OAuthFlowObject",
+				"required": false,
+				"desc": "Configuration for the OAuth Client Credentials flow.  Previously called <code>application</code> in OpenAPI 2.0."
+			},
+			{
+				"name": "authorizationCode",
+				"type": "OAuthFlowObject",
+				"required": false,
+				"desc": "Configuration for the OAuth Authorization Code flow.  Previously called <code>accessCode</code> in OpenAPI 2.0."
+			}
+		]
+	},
+	{
+		"name": "OAuthFlowObject",
+		"description": "Configuration details for a supported OAuth Flow",
+		"properties": [
+			{
+				"name": "authorizationUrl",
+				"type": "string",
+				"required": false,
+				"desc": "<code>oauth2</code> (<code>\"implicit\"</code>, <code>\"authorizationCode\"</code>)"
+			},
+			{
+				"name": "tokenUrl",
+				"type": "string",
+				"required": false,
+				"desc": "<code>oauth2</code> (<code>\"password\"</code>, <code>\"clientCredentials\"</code>, <code>\"authorizationCode\"</code>)"
+			},
+			{
+				"name": "refreshUrl",
+				"type": "string",
+				"required": false,
+				"desc": "<code>oauth2</code>"
+			},
+			{
+				"name": "scopes",
+				"type": "string",
+				"required": false,
+				"desc": "<code>oauth2</code>"
+			}
+		]
+	},
+	{
+		"name": "SecurityRequirementObject",
+		"description": "Lists the required security schemes to execute this operation.\nThe name used for each property MUST correspond to a security scheme declared in the <a href=\"https://swagger.io/specification/#components-security-schemes\">Security Schemes</a> under the <a href=\"https://swagger.io/specification/#components-object\">Components Object</a>.",
+		"properties": [
+			{
+				"name": "[key: string]",
+				"type": "string",
+				"required": true,
+				"desc": "Each name MUST correspond to a security scheme which is declared in the <a href=\"https://swagger.io/specification/#components-security-schemes\">Security Schemes</a> under the <a href=\"https://swagger.io/specification/#components-object\">Components Object</a>. If the security scheme is of type <code>\"oauth2\"</code> or <code>\"openIdConnect\"</code>, then the value is a list of scope names required for the execution, and the list MAY be empty if authorization does not require a specified scope. For other security scheme types, the array MUST be empty."
+			}
+		]
+	}
+]

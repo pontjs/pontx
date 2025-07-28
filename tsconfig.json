@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "strict": false,
+    "module": "ES6",
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "Node",
+    "skipDefaultLibCheck": true,
+    "noImplicitAny": false,
+    "target": "ESNext",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "removeComments": true,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "strictPropertyInitialization": false,
+    "strictBindCallApply": false,
+    "outDir": "./lib",
+    "rootDir": "./",
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["packages/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

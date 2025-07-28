@@ -1,0 +1,9 @@
+{
+  "json.schemas": [
+    {
+      "fileMatch": ["api-lock.json"],
+      "url": "../packages/pontx-spec/schemas/pontx-schema.json"
+    }
+  ],
+  "editor.formatOnSave": true
+}

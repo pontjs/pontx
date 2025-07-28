@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "module": "ESNext",
+    "target": "ES2020",
+    "outDir": "lib",
+    "noEmit": false,
+    "baseUrl": "./src",
+    "sourceMap": true,
+    "declaration": true,
+    "esModuleInterop": true,
+    "rootDir": "./src"
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules", "lib"]
+}

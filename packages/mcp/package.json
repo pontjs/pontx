@@ -1,0 +1,24 @@
+{
+  "name": "@pontx/mcp",
+  "version": "0.1.1",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "pontx-server": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc && chmod +x dist/*.js",
+    "watch": "tsc --watch",
+    "dev": "node dist/index.js /Users/hzongquan/workspace/open/pontx/examples/react-app"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@pontx/sdk-browser-client": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "fuse.js": "^7.1.0",
+    "pontx": "workspace:*",
+    "zod": "^3.24.1"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "module": "es6",
+    "target": "es5",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {},
+    "rootDir": "./src",
+    "outDir": "./lib"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "lib"]
+}

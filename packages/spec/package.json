@@ -1,0 +1,52 @@
+{
+  "name": "@pontx/spec",
+  "version": "0.1.1",
+  "type": "module",
+  "description": "pontx spec",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./lib/index.d.ts",
+        "default": "./lib/index.js"
+      },
+      "require": {
+        "types": "./cjs-types/index.d.cts",
+        "default": "./cjs/index.cjs"
+      }
+    }
+  },
+  "main": "cjs/index.cjs",
+  "module": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -c --watch",
+    "build:doc": "typedoc --plugin typedoc-plugin-markdown --out docs src/index.ts"
+  },
+  "dependencies": {
+    "immer": "^10.1.1",
+    "lodash": "catalog:",
+    "oas-spec-ts": "^0.6.4"
+  },
+  "files": [
+    "schemas",
+    "lib/",
+    "cjs/",
+    "cjs-types/",
+    "*.json",
+    "*.json",
+    "docs",
+    "package.json",
+    "*.md"
+  ],
+  "keywords": [],
+  "author": "jasonHzq",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/lodash": "catalog:",
+    "js-yaml": "^4.1.0",
+    "typedoc": "^0.24.0",
+    "typedoc-plugin-markdown": "^3.13.3"
+  },
+  "repository": "git@github.com:pontjs/pontx-pro.git"
+}

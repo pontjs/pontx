@@ -1,0 +1,22 @@
+{
+  "name": "@pontx/plugin-eggjs",
+  "version": "0.0.1",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "main": "./lib/index.js",
+  "files": [
+    "lib"
+  ],
+  "dependencies": {
+    "@pontx/spec": "workspace:*",
+    "lodash": "catalog:",
+    "oas-spec-ts": "workspace:*",
+    "pontx": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/lodash": "catalog:",
+    "js-yaml": "^4.1.0"
+  }
+}
