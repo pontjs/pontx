@@ -1,6 +1,6 @@
 {
   "name": "@pontx/sdk-browser-client",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "main": "./cjs/index.cjs",
   "module": "./lib/index.js",

@@ -1,4 +1,4 @@
-import { PontxSpecMeta } from "./type";
+import { PontxAPI, PontxSpecMeta } from "./type";
 
 type ContentType =
   | "text/html"
@@ -52,23 +52,20 @@ type RequestFn<Params, BodyParams, Response> = (
   requestOptions?: RequestOptions<BodyParams>
 ) => Promise<Response>;
 
-export type Controller<T extends Record<string, APIMethod>> = {
-  [K in keyof T]: {
-    getFetchKey: (params: T[K]["params"]) => string;
-    request: RequestFn<T[K]["params"], T[K]["bodyParams"], T[K]["Response"]>;
-    queryOptions: (
-      params: T[K]["params"],
-      requestConfig?: RequestOptions<T[K]["bodyParams"]>
-    ) => {
-      fetchKey: string;
-      fetchFn: () => Promise<T[K]["Response"]>;
-    };
+export type SdkUsage<ApiTypes extends APIMethod> = {
+  getFetchKey: (params: ApiTypes["params"]) => string;
+  request: RequestFn<
+    ApiTypes["params"],
+    ApiTypes["bodyParams"],
+    ApiTypes["Response"]
+  >;
+  queryOptions: (
+    params: ApiTypes["params"],
+    requestConfig?: RequestOptions<ApiTypes["bodyParams"]>
+  ) => {
+    fetchKey: string;
+    fetchFn: () => Promise<ApiTypes["Response"]>;
   };
-};
-
-/** 客户端类型 */
-export type Client<T extends Record<string, Record<string, APIMethod>>> = {
-  [K in keyof T]: Controller<T[K]>;
 };
 
 export function buildUrl(
@@ -112,6 +109,15 @@ export function buildUrl(
   return queryString ? `${url}?${queryString}` : url;
 }
 
+export type Controller<T extends Record<string, APIMethod>> = {
+  [K in keyof T]: SdkUsage<T[K]>;
+};
+
+/** 客户端类型 */
+export type Client<T extends Record<string, Record<string, APIMethod>>> = {
+  [K in keyof T]: Controller<T[K]>;
+};
+
 /** 创建 API 客户端 */
 export function createClient<
   T extends Record<string, Record<string, APIMethod>>
@@ -120,7 +126,8 @@ export function createClient<
   pontxSpecMeta: PontxSpecMeta;
   pathMark?: string;
   getFetchUrl?: (path: string, params: Record<string, any>) => string;
-}): Client<T> {
+  makeCustomUsages?: (usages: SdkUsage<any>, apiMeta?: PontxAPI) => any;
+}) {
   const { fetchFn, pontxSpecMeta: apiMetaConfig } = config;
 
   return new Proxy({} as Client<T>, {
@@ -138,7 +145,7 @@ export function createClient<
               return buildUrl(apiMeta.path!, params, config.pathMark);
             };
 
-            const request = async (params: any, requestOptions?: any) => {
+            const request = async (params: any, requestOptions = {} as any) => {
               try {
                 const headers: RequestHeaders = {};
 
@@ -182,11 +189,23 @@ export function createClient<
               };
             };
 
-            return {
+            const usages = {
               getFetchKey,
               request,
               queryOptions,
             };
+
+            if (config.makeCustomUsages) {
+              const customUsages =
+                config.makeCustomUsages(usages, apiMeta) || {};
+
+              return {
+                ...usages,
+                ...customUsages,
+              };
+            }
+
+            return usages;
           },
         });
       }

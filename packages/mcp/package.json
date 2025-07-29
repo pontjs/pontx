@@ -1,8 +1,7 @@
 {
   "name": "@pontx/mcp",
-  "version": "0.1.1",
+  "version": "0.1.4",
   "type": "module",
-  "private": true,
   "bin": {
     "pontx-server": "./dist/index.js"
   },

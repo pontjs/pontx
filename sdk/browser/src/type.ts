@@ -4,7 +4,7 @@ export type PontxSpecMeta = {
   apis: Record<string, PontxAPI>;
 };
 
-type PontxAPI = {
+export type PontxAPI = {
   path: string;
   method:
     | "GET"
