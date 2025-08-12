@@ -1,5 +1,11 @@
 # @pontx/mcp
 
+## 0.1.6
+
+### Patch Changes
+
+- remote prompts in mcp capability
+
 ## 0.1.4
 
 ### Patch Changes

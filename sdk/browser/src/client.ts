@@ -73,6 +73,10 @@ export function buildUrl(
   params: Record<string, any>,
   pathMark = ""
 ) {
+  if (!params) {
+    return null;
+  }
+
   // 创建 params 的副本，避免修改原对象
   const paramsCopy = { ...params };
 

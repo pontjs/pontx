@@ -5,6 +5,8 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  ListPromptsRequestSchema,
+  GetPromptRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import {
   buildFuse,
@@ -42,7 +44,7 @@ const server = new Server(
   {
     capabilities: {
       tools: {},
-      prompts: {},
+      // prompts: {},
     },
     instructions: `搜索当前工程可以调用的后端接口、 OpenAPI 接口，并获取该接口的元数据（包括出入参等），并生成符合项目风格的不同场景的 API 调用代码。`,
   }
@@ -262,6 +264,28 @@ async function main() {
         throw new Error("Unknown tool");
     }
   });
+
+  // server.setRequestHandler(ListPromptsRequestSchema, async () => {
+  //   return {
+  //     prompts: [
+  //       {
+  //         name: "searchApis",
+  //         description: "搜索当前项目可以调用的 API 接口",
+  //         inputSchema: {
+  //           type: "object",
+  //         },
+  //       },
+  //     ],
+  //   };
+  // });
+
+  // server.setRequestHandler(GetPromptRequestSchema, async (request) => {
+  //   return {
+  //     prompt: {
+  //       name: "searchApis",
+  //     },
+  //   };
+  // });
 
   await server.connect(transport);
 }
