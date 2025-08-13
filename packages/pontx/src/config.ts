@@ -198,7 +198,7 @@ export async function resolveConfig(
       : path.join(configDir, config.outDir),
     origins: resolvedOrigins,
     translateConfig: config.translateConfig,
-    resolvedPlugin: resolvePlugin(config.plugins),
+    resolvedPlugin: resolvePlugin(config.plugins ?? []),
   } as ResolvedConfig;
 
   return resolvedConfigContent;
