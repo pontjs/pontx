@@ -1,5 +1,14 @@
 # @pontx/mcp
 
+## 0.1.7
+
+### Patch Changes
+
+- fix comment generate
+- Updated dependencies
+  - pontx@0.1.3
+  - @pontx/sdk-browser-client@0.0.4
+
 ## 0.1.6
 
 ### Patch Changes

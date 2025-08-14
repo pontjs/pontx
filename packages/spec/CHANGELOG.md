@@ -1,5 +1,11 @@
 # @pontx/spec
 
+## 0.1.2
+
+### Patch Changes
+
+- fix comment generate
+
 ## 0.1.1
 
 ### Patch Changes
