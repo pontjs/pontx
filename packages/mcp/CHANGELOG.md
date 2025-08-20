@@ -1,5 +1,11 @@
 # @pontx/mcp
 
+## 0.1.8
+
+### Patch Changes
+
+- @pontx/mcp: update fuse before search apis
+
 ## 0.1.7
 
 ### Patch Changes

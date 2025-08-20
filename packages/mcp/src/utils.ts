@@ -209,6 +209,15 @@ export const buildPontxManager = async (projectRootPath: string) => {
   );
 };
 
-export const getProductResources = async (pontxManager: PontxManager) => {
-  const resources = [];
+export const updatePontxManager = async (pontxManager: PontxManager) => {
+  await PontxManager.readLocalSpecs(pontxManager);
+  await PontxManager.fetchRemotePontMeta(pontxManager);
+
+  pontxManager.resolvedConfig.origins.forEach((origin) => {
+    origin.spec = origin.remoteSpec;
+  });
+
+  // await PontxManager.generateCode(pontxManager);
+
+  return pontxManager;
 };

@@ -15,6 +15,7 @@ import {
   getApiMeta,
   makeCode,
   searchApis,
+  updatePontxManager,
 } from "./utils.js";
 import fs from "fs";
 import path from "path";
@@ -52,7 +53,12 @@ const server = new Server(
 
 async function main() {
   const transport = new StdioServerTransport();
-  const { pontxManager, fuse } = await prepare();
+  let { pontxManager, fuse } = await prepare();
+
+  const updateFuse = async () => {
+    pontxManager = await updatePontxManager(pontxManager);
+    fuse = buildFuse(pontxManager);
+  };
 
   const samples = await PontxManager.listSamples(pontxManager);
   const sampleEnums = samples.map((sample) => sample.case);
@@ -157,6 +163,7 @@ async function main() {
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     switch (request.params.name) {
       case "searchApis": {
+        await updateFuse();
         const result = await searchApis(
           request.params.arguments?.query as any,
           fuse
@@ -174,6 +181,7 @@ async function main() {
 
       case "getApiMeta": {
         try {
+          await updateFuse();
           const apiMeta = await getApiMeta(
             pontxManager,
             request.params.arguments?.specName as string,
