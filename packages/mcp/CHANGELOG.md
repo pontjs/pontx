@@ -1,5 +1,11 @@
 # @pontx/mcp
 
+## 0.1.9
+
+### Patch Changes
+
+- pontx mcp support get schema meta
+
 ## 0.1.8
 
 ### Patch Changes
