@@ -13,6 +13,7 @@ import {
   buildPontxManager,
   callTool,
   getApiMeta,
+  getSchemaMeta,
   makeCode,
   searchApis,
   updatePontxManager,
@@ -79,6 +80,10 @@ async function main() {
             type: "object",
             properties: {
               query: { type: "string", description: "搜索关键字" },
+              maxCount: {
+                type: "number",
+                description: "最大返回数量，默认值为 6",
+              },
             },
           },
         },
@@ -97,6 +102,25 @@ async function main() {
               },
               apiName: {
                 type: "string",
+              },
+            },
+          },
+        },
+        {
+          name: "getSchemaMeta",
+          description:
+            "通过 getApiMeta 返回元数据中引用的 Schema，查询 Schema 元数据",
+          inputSchema: {
+            type: "object",
+            properties: {
+              schemaName: {
+                type: "string",
+                description:
+                  "例如 ResultDTO，可以从 $res 字段提取，例如 '#/components/schemas/ResultDTO'",
+              },
+              specName: {
+                type: "string",
+                description: "searchApi 搜索结果中的 specName",
               },
             },
           },
@@ -166,7 +190,8 @@ async function main() {
         await updateFuse();
         const result = await searchApis(
           request.params.arguments?.query as any,
-          fuse
+          fuse,
+          request.params.arguments?.maxCount as number
         );
 
         return {
@@ -203,6 +228,35 @@ async function main() {
               {
                 type: "text",
                 text: "获取元数据失败 " + e.message,
+              },
+            ],
+          };
+        }
+      }
+
+      case "getSchemaMeta": {
+        try {
+          await updateFuse();
+          const schemaMeta = await getSchemaMeta(
+            pontxManager,
+            request.params.arguments?.specName as string,
+            request.params.arguments?.schemaName as string
+          );
+
+          return {
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify(schemaMeta),
+              },
+            ],
+          };
+        } catch (e: any) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: "获取 Schema 元数据失败 " + e.message,
               },
             ],
           };

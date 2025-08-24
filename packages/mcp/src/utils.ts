@@ -4,17 +4,38 @@ import { PontxManager } from "pontx";
 import _ from "lodash";
 const { map } = _;
 import { serializeRequestBody } from "@pontx/sdk-browser-client";
+import fs from "fs";
+import path from "path";
+
+const fsLog = (info: string) => {
+  fs.writeFileSync(path.join(process.cwd(), "debug.log"), info);
+};
 
 export function buildFuse(pontxManager: PontxManager) {
-  const localPontSpecs = (pontxManager?.resolvedConfig?.origins || []).map(
-    (origin) => {
-      return origin.spec;
-    }
-  );
-  const storage = [];
+  const localOrigins = pontxManager?.resolvedConfig?.origins || [];
+  const storages = [];
+  const storageKeys = new Set();
 
-  localPontSpecs.forEach((spec) => {
-    Object.keys(spec.apis).forEach((apiName) => {
+  localOrigins.forEach((origin) => {
+    if (!origin) {
+      return;
+    }
+
+    const {
+      name,
+      url,
+      localPath,
+      remoteSpec,
+      fetchedMeta,
+      spec,
+      envs,
+      ...rest
+    } = origin;
+    if (!spec) {
+      return;
+    }
+
+    Object.keys(spec.apis || {}).forEach((apiName) => {
       const api = spec.apis[apiName];
       let tagName = "";
       let pureApiName = apiName;
@@ -24,7 +45,8 @@ export function buildFuse(pontxManager: PontxManager) {
         pureApiName = apiName.split("/")[1];
       }
 
-      storage.push({
+      const storageValue = {
+        ...rest,
         name: pureApiName,
         tagName,
         specName: spec.name,
@@ -42,35 +64,53 @@ export function buildFuse(pontxManager: PontxManager) {
             }`;
           })
           .join("\n"),
+      };
+      const keys = Object.keys(storageValue);
+      keys.forEach((key) => {
+        storageKeys.add(key);
       });
+
+      storages.push(storageValue);
     });
   });
+  const weightedKeys = [
+    {
+      name: "name",
+      weight: 3,
+    },
+  ];
 
-  return new Fuse(storage, {
-    keys: [
-      "name",
-      "tagName",
-      "specName",
-      "title",
-      "description",
-      "summary",
-      "consumes",
-      "produces",
-      "method",
-      "path",
-      "params",
-    ],
+  const otherKeys = Array.from(storageKeys).filter(
+    (key) => !weightedKeys.some((item) => item.name === key)
+  );
+
+  return new Fuse(storages, {
+    keys: [...weightedKeys, ...otherKeys] as any,
+    shouldSort: true,
+    includeScore: true,
+    includeMatches: true,
+    ignoreLocation: true,
+    threshold: 0.7,
+    location: 10,
+    distance: 1000,
   });
 }
 
-export function searchApis(keyword: string, fuse: Fuse<any>) {
-  return fuse.search(keyword).map((item) => {
-    return {
-      tagName: item?.item?.tagName,
-      specName: item?.item?.specName,
-      apiName: item?.item?.name,
-    };
-  });
+export function searchApis(
+  keyword: string,
+  fuse: Fuse<any>,
+  maxCount: number = 6
+) {
+  return fuse
+    .search(keyword)
+    .slice(0, maxCount || 6)
+    .map((item) => {
+      return {
+        tagName: item?.item?.tagName,
+        specName: item?.item?.specName,
+        apiName: item?.item?.name,
+      };
+    });
 }
 
 export function getApiMeta(
@@ -94,6 +134,23 @@ export function getApiMeta(
     throw new Error(`找不到 API: ${apiKey}`);
   }
   return apiMeta;
+}
+
+export function getSchemaMeta(
+  pontxManager: PontxManager,
+  specName: string,
+  schemaName: string
+): any {
+  const origin = (pontxManager?.resolvedConfig?.origins || []).find(
+    (origin) => {
+      return origin.name === specName;
+    }
+  );
+  const pontSpec = origin?.spec;
+  if (!pontSpec) {
+    throw new Error(`找不到 schemaName: ${schemaName}`);
+  }
+  return pontSpec.components?.schemas?.[schemaName];
 }
 
 export async function makeCode(
