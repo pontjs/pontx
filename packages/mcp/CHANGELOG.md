@@ -1,5 +1,13 @@
 # @pontx/mcp
 
+## 0.1.11
+
+### Patch Changes
+
+- fix spec parse with tags not defined in root but defined in api
+- Updated dependencies
+  - pontx@0.1.5
+
 ## 0.1.10
 
 ### Patch Changes

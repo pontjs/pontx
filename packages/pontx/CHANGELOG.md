@@ -1,5 +1,13 @@
 # pontx
 
+## 0.1.5
+
+### Patch Changes
+
+- fix spec parse with tags not defined in root but defined in api
+- Updated dependencies
+  - @pontx/spec@0.1.3
+
 ## 0.1.4
 
 ### Patch Changes
