@@ -1,5 +1,13 @@
 # @pontx/mcp
 
+## 0.1.10
+
+### Patch Changes
+
+- FIX ts import in pontx
+- Updated dependencies
+  - pontx@0.1.4
+
 ## 0.1.9
 
 ### Patch Changes

@@ -1,8 +1,6 @@
 import * as pontx from "pontx";
 import Fuse from "fuse.js";
 import { PontxManager } from "pontx";
-import _ from "lodash";
-const { map } = _;
 import { serializeRequestBody } from "@pontx/sdk-browser-client";
 import fs from "fs";
 import path from "path";

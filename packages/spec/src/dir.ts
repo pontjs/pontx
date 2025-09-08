@@ -84,7 +84,7 @@ export class PontxDirectoryNode {
 
         return {
           type: PontxDirectoryNodeType.Struct,
-          title: schema.title || schema.description,
+          title: schema?.title || schema?.description,
           children: [],
           name: structName,
         };

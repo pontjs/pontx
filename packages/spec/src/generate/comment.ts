@@ -36,7 +36,7 @@ export const generateApiComment = (api: PontxAPI) => {
     ? `\n * ${escapeCommentText(api.description).split("\n").join("\n * ")}`
     : "";
   const title =
-    api.title && api.title !== desc
+    api?.title && api.title !== desc
       ? `\n * @title: ${escapeCommentText(api.title)}`
       : "";
   const summary =

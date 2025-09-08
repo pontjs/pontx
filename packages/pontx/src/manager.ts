@@ -70,7 +70,11 @@ export class PontxManager {
     resolvedConfig.resolvedPlugin.configResolved(resolvedConfig);
 
     await PontxManager.readLocalSpecs(manager);
-    await PontxManager.fetchRemotePontMeta(manager);
+    try {
+      await PontxManager.fetchRemotePontMeta(manager);
+    } catch (error) {
+      manager.logger.error("获取远程 Pontx 元数据失败：" + error.message);
+    }
     return manager;
   }
 

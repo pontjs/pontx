@@ -1,5 +1,5 @@
 import * as path from "path";
-import * as ts from "typescript";
+import ts from "typescript";
 import {
   asyncNoOp,
   findNearestNodeModules,
@@ -54,7 +54,7 @@ async function resolveConfigFile(rootDir: string, fileName: string) {
 
   // 创建自定义的编译上下文
   const configFileHost: ts.ParseConfigFileHost = {
-    useCaseSensitiveFileNames: ts.sys.useCaseSensitiveFileNames,
+    useCaseSensitiveFileNames: ts.sys.useCaseSensitiveFileNames || true,
     readDirectory: ts.sys.readDirectory,
     fileExists: ts.sys.fileExists,
     readFile: ts.sys.readFile,
@@ -197,9 +197,17 @@ export async function resolveConfig(
       ? config.outDir
       : path.join(configDir, config.outDir),
     origins: resolvedOrigins,
-    translateConfig: config.translateConfig,
     resolvedPlugin: resolvePlugin(config.plugins ?? []),
   } as ResolvedConfig;
+  if (config.translateConfig) {
+    resolvedConfigContent.translateConfig = {
+      ...config.translateConfig,
+      // 如果是相对目录，则拼接成绝对目录。
+      cachePath: path.isAbsolute(config.translateConfig.cachePath)
+        ? config.translateConfig.cachePath
+        : path.join(configDir, config.translateConfig.cachePath),
+    };
+  }
 
   return resolvedConfigContent;
 }

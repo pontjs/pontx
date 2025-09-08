@@ -93,6 +93,18 @@ export function fixOASTags<
             addApiTagLink(lowerTagItem.uuid, method, path);
             return;
           }
+
+          if (tag) {
+            // 存在 API 的 tag，没有被定义在 tags 中。
+            const newTag = {
+              tagNameLikes: [tag],
+              tagNameDashedLikes: [],
+              tagNameLowerLikes: [],
+              uuid: uniqueId("tag-"),
+            };
+            processedTagItems.push(newTag);
+            addApiTagLink(newTag.uuid, method, path);
+          }
         });
       } else {
         const commonTagItem = processedTagItems.find((item) => {

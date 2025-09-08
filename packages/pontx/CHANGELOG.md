@@ -1,5 +1,11 @@
 # pontx
 
+## 0.1.4
+
+### Patch Changes
+
+- FIX ts import in pontx
+
 ## 0.1.3
 
 ### Patch Changes
