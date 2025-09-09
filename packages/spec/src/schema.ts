@@ -383,7 +383,7 @@ export class PontxJsonSchema {
     const mappedSchema = mapper(schema);
     const newSchema = traverseNewSchema ? mappedSchema : schema;
 
-    if (newSchema.type === "object" && newSchema?.properties) {
+    if (newSchema?.type === "object" && newSchema?.properties) {
       const newProperties = Object.keys(newSchema.properties).reduce(
         (result, key) => {
           // mapper 生成的数据结构可能不一样，也需要进行一次 mapper，进行递归处理。
@@ -410,7 +410,7 @@ export class PontxJsonSchema {
       };
     }
 
-    if (newSchema.type === "array" && newSchema?.items) {
+    if (newSchema?.type === "array" && newSchema?.items) {
       return {
         ...mappedSchema,
         items: PontxJsonSchema.mapPontxSchema(
@@ -421,7 +421,7 @@ export class PontxJsonSchema {
       };
     }
 
-    if (newSchema.type === "object" && newSchema?.additionalProperties) {
+    if (newSchema?.type === "object" && newSchema?.additionalProperties) {
       return {
         ...mappedSchema,
         additionalProperties: PontxJsonSchema.mapPontxSchema(

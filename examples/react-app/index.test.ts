@@ -18,7 +18,11 @@ describe("resolveConfig", () => {
           path.join(__dirname, "dist/petstore/apis.ts"),
           "utf-8"
         );
-        expect(apisCode.includes("export type PetAPI")).toBe(true);
+        expect(
+          apisCode.startsWith(
+            'import type * as schemas from "./schemas";\nexport type APIs = '
+          )
+        ).toBe(true);
       } catch (error) {
         console.error("Error in generate api code test:", error);
         throw error;

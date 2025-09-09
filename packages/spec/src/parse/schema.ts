@@ -24,7 +24,7 @@ export function parseOAS2Ast2PontJsonSchema(
   if (PRIMITIVE_TYPES.includes(name)) {
     schema.type = name as any;
   } else if (context.schemaNames?.includes(name)) {
-    schema.$ref = `#/definitions/${name}`;
+    schema.$ref = `#/components/schemas/${name}`;
   } else if (PrimitiveTypeMap[name]) {
     schema = PrimitiveTypeMap[name];
   }
