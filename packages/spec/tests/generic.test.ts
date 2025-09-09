@@ -77,6 +77,84 @@ describe("GenericHelper.resolveGenericSchema", () => {
       title: "User",
       required: [],
     },
+
+    // 互相嵌套泛型类定义 - Container
+    Container: {
+      type: "object",
+      properties: {
+        value: {
+          type: "generic",
+          genericTypeParameterRef: "T0",
+        },
+        wrapper: {
+          type: "generic",
+          genericRef: {
+            typeArguments: [
+              {
+                type: "generic",
+                genericRef: {
+                  typeArguments: [
+                    {
+                      type: "generic",
+                      genericTypeParameterRef: "T0",
+                    },
+                  ],
+                  $ref: "#/components/schemas/Container",
+                },
+              },
+            ],
+            $ref: "#/components/schemas/Wrapper",
+          },
+        },
+      },
+      title: "Container",
+      genericTypeParameters: [
+        {
+          name: "T0",
+          default: { type: "object" },
+        },
+      ],
+      required: [],
+    },
+
+    // 互相嵌套泛型类定义 - Wrapper
+    Wrapper: {
+      type: "object",
+      properties: {
+        data: {
+          type: "generic",
+          genericTypeParameterRef: "T0",
+        },
+        container: {
+          type: "generic",
+          genericRef: {
+            typeArguments: [
+              {
+                type: "generic",
+                genericRef: {
+                  typeArguments: [
+                    {
+                      type: "generic",
+                      genericTypeParameterRef: "T0",
+                    },
+                  ],
+                  $ref: "#/components/schemas/Wrapper",
+                },
+              },
+            ],
+            $ref: "#/components/schemas/Container",
+          },
+        },
+      },
+      title: "Wrapper",
+      genericTypeParameters: [
+        {
+          name: "T0",
+          default: { type: "object" },
+        },
+      ],
+      required: [],
+    },
   };
 
   it("应该正确解析简单的泛型引用", () => {
@@ -168,28 +246,52 @@ describe("GenericHelper.resolveGenericSchema", () => {
     );
 
     // 验证嵌套泛型被正确解析
-    expect(result.type).toBe("object");
-    expect(result.properties?.data).toEqual({
+    expect(result).toEqual({
       type: "object",
       properties: {
-        items: { type: "string" }, // 嵌套的 T0 被替换为 string
-      },
-      title: "List",
-      genericTypeParameters: [{ name: "T0", default: { type: "object" } }],
-      genericTypeArguments: [{ type: "string" }],
-      required: [],
-    });
-
-    // 验证顶层泛型也有 genericTypeArguments
-    expect(result.genericTypeArguments).toEqual([
-      {
-        type: "generic",
-        genericRef: {
-          typeArguments: [{ type: "string" }],
+        code: {
+          type: "string",
+        },
+        data: {
+          type: "generic",
+          genericRef: {
+            typeArguments: [
+              {
+                type: "string",
+              },
+            ],
+            $ref: "#/components/schemas/List",
+          },
           $ref: "#/components/schemas/List",
         },
+        message: {
+          type: "string",
+        },
       },
-    ]);
+      title: "Result",
+      genericTypeParameters: [
+        {
+          name: "T0",
+          default: {
+            type: "object",
+          },
+        },
+      ],
+      required: [],
+      genericTypeArguments: [
+        {
+          type: "generic",
+          genericRef: {
+            typeArguments: [
+              {
+                type: "string",
+              },
+            ],
+            $ref: "#/components/schemas/List",
+          },
+        },
+      ],
+    });
   });
 
   it("应该正确处理非泛型 schema", () => {
@@ -403,6 +505,68 @@ describe("GenericHelper.resolveGenericSchema", () => {
       ],
       genericTypeArguments: [{ type: "number" }],
       required: [],
+    });
+  });
+
+  it("应该正确处理互相嵌套的泛型引用", () => {
+    /** 测试互相嵌套泛型引用的复杂场景 */
+    const mutualNestedGenericSchema: PontxJsonSchema = {
+      type: "generic",
+      genericRef: {
+        typeArguments: [{ type: "string" }],
+        $ref: "#/components/schemas/Container",
+      },
+    };
+
+    const result = GenericHelper.resolveGenericSchema(
+      mutualNestedGenericSchema,
+      testSchemas
+    );
+
+    // 验证顶层 Container 的泛型参数被正确替换
+    expect(result).toEqual({
+      type: "object",
+      properties: {
+        value: {
+          type: "string",
+        },
+        wrapper: {
+          type: "generic",
+          genericRef: {
+            typeArguments: [
+              {
+                type: "generic",
+                genericRef: {
+                  typeArguments: [
+                    {
+                      type: "generic",
+                      genericTypeParameterRef: "T0",
+                    },
+                  ],
+                  $ref: "#/components/schemas/Container",
+                },
+              },
+            ],
+            $ref: "#/components/schemas/Wrapper",
+          },
+          $ref: "#/components/schemas/Wrapper",
+        },
+      },
+      title: "Container",
+      genericTypeParameters: [
+        {
+          name: "T0",
+          default: {
+            type: "object",
+          },
+        },
+      ],
+      required: [],
+      genericTypeArguments: [
+        {
+          type: "string",
+        },
+      ],
     });
   });
 });

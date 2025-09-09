@@ -1,5 +1,11 @@
 # @pontx/spec
 
+## 0.1.4
+
+### Patch Changes
+
+- add generic schema resolver
+
 ## 0.1.3
 
 ### Patch Changes

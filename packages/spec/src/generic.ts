@@ -28,6 +28,22 @@ export class GenericHelper {
     });
   }
 
+  static lazyResolveGenericSchema(genericSchema: PontxJsonSchema) {
+    return PontxJsonSchema.mapPontxSchema(
+      genericSchema,
+      (struct) => {
+        if (struct?.type === "generic" && struct?.genericRef?.$ref) {
+          return {
+            ...struct,
+            $ref: struct.genericRef.$ref,
+          };
+        }
+        return struct;
+      },
+      false
+    );
+  }
+
   /** 解析泛型类型 */
   static _resolveTargetGenericSchema(
     genericSchema: PontxJsonSchema,
@@ -51,6 +67,10 @@ export class GenericHelper {
         resultSchema.genericTypeArguments = genericTypeArguments;
       }
 
+      if (resultSchema) {
+        return GenericHelper.lazyResolveGenericSchema(resultSchema);
+      }
+
       return resultSchema || genericSchema;
     }
 
@@ -61,8 +81,12 @@ export class GenericHelper {
     genericSchema: PontxJsonSchema,
     schemas: Record<string, PontxJsonSchema>
   ) {
-    return PontxJsonSchema.mapPontxSchema(genericSchema, (struct) => {
-      return GenericHelper._resolveTargetGenericSchema(struct, schemas);
-    });
+    return PontxJsonSchema.mapPontxSchema(
+      genericSchema,
+      (struct) => {
+        return GenericHelper._resolveTargetGenericSchema(struct, schemas);
+      },
+      false
+    );
   }
 }
