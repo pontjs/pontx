@@ -1,5 +1,11 @@
 # @pontx/spec
 
+## 0.1.5
+
+### Patch Changes
+
+- fix generic schema resolver to skip maximum stack
+
 ## 0.1.4
 
 ### Patch Changes
