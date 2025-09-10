@@ -1,5 +1,11 @@
 # @pontx/spec
 
+## 0.1.7
+
+### Patch Changes
+
+- add originalRef in generic resolver
+
 ## 0.1.6
 
 ### Patch Changes
