@@ -1,5 +1,12 @@
 # Change Log
 
+## 0.0.5
+
+### Patch Changes
+
+- Updated dependencies
+  - @pontx/spec@0.1.8
+
 ## 0.0.4
 
 ### Patch Changes

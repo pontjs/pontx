@@ -1,5 +1,11 @@
 # @pontx/spec
 
+## 0.1.8
+
+### Patch Changes
+
+- fix generic resolver
+
 ## 0.1.7
 
 ### Patch Changes
