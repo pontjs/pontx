@@ -65,6 +65,7 @@ export class GenericHelper {
           );
         });
         resultSchema.genericTypeArguments = genericTypeArguments;
+        (resultSchema as any).originalRef = genericSchema.genericRef.$ref;
       }
 
       if (resultSchema) {

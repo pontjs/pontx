@@ -11,3 +11,4 @@ export { PontxDirectoryNode, PontxDirectoryNodeType } from "./dir";
 export * from "./generate/index";
 export * from "./parse/index";
 export * from "./parse/parseOASTags";
+export * from "./generic";

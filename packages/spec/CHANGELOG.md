@@ -1,5 +1,11 @@
 # @pontx/spec
 
+## 0.1.6
+
+### Patch Changes
+
+- export generic
+
 ## 0.1.5
 
 ### Patch Changes
