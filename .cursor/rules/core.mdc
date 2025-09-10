@@ -61,11 +61,18 @@ oas-spec-ts: OAS2/OAS3 协议类型定义
 
 3、npm run changeset:version
 
-4、git checkout -- packages/xx ，去掉不想发的包。比如 vscode 这种 private 的包。
+4、在已经选择的包名中进行构建。
 
-5、npm run changeset:publish
+例如
+cd packages/xx
+npm run build
+
+5、检查是否需要去掉不想发的包。比如 vscode 这种 private 的包。
+git checkout -- packages/xx
+
+6、npm run changeset:publish
 
 开始发布包
 
-6、git commit -m ''
+7、git commit -m ''
 commit 版本修改的代码
