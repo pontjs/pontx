@@ -50,3 +50,22 @@ oas-spec-ts: OAS2/OAS3 协议类型定义
 
 - 技术栈：React + Vite + Typescript + TailwindCSS + Vitest
 - 状态管理：Zustand
+
+## 发布流程
+
+1、git add . && git commit -m ''
+
+2、npm run changeset
+
+选择有修改的包名。
+
+3、npm run changeset:version
+
+4、git checkout -- packages/xx ，去掉不想发的包。比如 vscode 这种 private 的包。
+
+5、npm run changeset:publish
+
+开始发布包
+
+6、git commit -m ''
+commit 版本修改的代码
