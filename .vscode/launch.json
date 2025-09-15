@@ -9,8 +9,12 @@
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
+      "cwd": "${workspaceFolder}/packages/vscode",
       "args": ["--extensionDevelopmentPath=${workspaceFolder}/packages/vscode"],
       "sourceMaps": true,
+      "env": {
+        "NODE_ENV": "development"
+      },
       "outFiles": ["${workspaceFolder}/packages/vscode/dist/**/*.js"]
     },
     {

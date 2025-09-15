@@ -1,0 +1,64 @@
+/**
+ * @author: jasonHzq
+ * @description: 调试环境 WebView 样式文件，包含调试面板相关样式
+ */
+
+/* 调试面板样式 */
+.debug-panel-container {
+  background: var(--vscode-panel-background);
+  border-bottom: 1px solid var(--vscode-panel-border);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.debug-panel {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.debug-panel h3 {
+  margin: 0 0 12px 0;
+  color: var(--vscode-editor-foreground);
+  font-size: 16px;
+}
+
+.debug-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.debug-btn {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.debug-btn:hover {
+  background: var(--vscode-button-hoverBackground);
+}
+
+.debug-info {
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+  line-height: 1.4;
+}
+
+.debug-info p {
+  margin: 4px 0;
+}
+
+.debug-badge {
+  background: var(--vscode-badge-background);
+  color: var(--vscode-badge-foreground);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}

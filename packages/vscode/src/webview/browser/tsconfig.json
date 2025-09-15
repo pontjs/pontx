@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "jsx": "react-jsx",
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": false,
+    "declaration": false,
+    "sourceMap": true,
+    "rootDir": ".",
+    "outDir": "../../../dist/webview",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@pontx/shadcn-ui": ["../../../node_modules/@pontx/shadcn-ui"]
+    }
+  },
+  "include": ["**/*", "../types.ts"],
+  "exclude": ["node_modules", "dist", "../../node/**/*"]
+}

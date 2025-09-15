@@ -1,34 +1,60 @@
 {
-  "name": "@pontx/vscode",
-  "displayName": "pontx",
-  "description": "",
-  "version": "0.0.5",
+  "name": "vscode-pontx",
+  "displayName": "Pontx API Manager",
+  "description": "基于 Pontx 协议的 API 生命周期管理扩展，提供 API 搜索、文档查阅、代码生成等强大功能",
+  "version": "2.0.6",
+  "publisher": "jasonHzq",
   "engines": {
-    "vscode": "^1.101.0"
+    "vscode": "^1.101.0",
+    "node": ">=20.0.0"
   },
   "categories": [
-    "Other"
+    "Other",
+    "Snippets"
   ],
-  "private": true,
+  "keywords": [
+    "api",
+    "swagger",
+    "openapi",
+    "pontx",
+    "code generation",
+    "api management",
+    "documentation"
+  ],
+  "icon": "resources/pontx.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jasonHzq/pontx.git",
+    "directory": "packages/vscode"
+  },
+  "license": "MIT",
   "activationEvents": [
     "workspaceContains:**/pontx.config.ts",
     "onWebviewPanel:pontx-ui"
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "views": {
+    "viewsContainers": {
       "activitybar": [
         {
-          "icon": "resources/pontx.svg",
+          "id": "pontx",
           "title": "Pontx",
-          "id": "pontxApiExplorer"
+          "icon": "resources/pontx.svg"
+        }
+      ]
+    },
+    "views": {
+      "pontx": [
+        {
+          "id": "pontxApiExplorer",
+          "name": "API Explorer"
         }
       ]
     },
     "commands": [
       {
-        "command": "pontx.findInterface",
-        "title": "查找 API",
+        "command": "pontx.findMeta",
+        "title": "查找元数据",
         "icon": "$(search)"
       },
       {
@@ -59,9 +85,43 @@
         "command": "pontx.revealMeta",
         "icon": "$(go-to-file)",
         "title": "查看元数据"
+      },
+      {
+        "command": "pontx.openDoc",
+        "icon": "$(book)",
+        "title": "查看文档"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "pontx.findMeta",
+        "key": "cmd+ctrl+f",
+        "mac": "cmd+ctrl+f"
       }
     ],
     "menus": {
+      "view/title": [
+        {
+          "command": "pontx.fetchRemote",
+          "when": "view == pontxApiExplorer",
+          "group": "navigation@1"
+        },
+        {
+          "command": "pontx.regenerate",
+          "when": "view == pontxApiExplorer",
+          "group": "navigation@2"
+        },
+        {
+          "command": "pontx.findMeta",
+          "when": "view == pontxApiExplorer",
+          "group": "navigation@3"
+        },
+        {
+          "command": "pontx.config",
+          "when": "view == pontxApiExplorer",
+          "group": "navigation@4"
+        }
+      ],
       "view/item/context": [
         {
           "command": "pontx.revealMeta",
@@ -73,29 +133,48 @@
   },
   "scripts": {
     "vscode:prepublish": "pnpm run package",
-    "compile": "webpack",
-    "watch": "webpack --watch",
-    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile": "node esbuild.config.js",
+    "watch": "esbuild src/extension.ts --bundle --platform=node --target=node16 --format=cjs --outfile=dist/extension.js --sourcemap --external:vscode --watch",
+    "compile:webview": "webpack --config webpack.webview.config.js",
+    "watch:webview": "webpack --config webpack.webview.config.js --watch",
+    "dev:webview": "vite",
+    "package": "node esbuild.config.js && pnpm run compile:webview",
+    "package:vsix": "vsce package --no-dependencies --out vscode-pontx-2.0.6.vsix",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
+    "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run compile:webview && pnpm run lint",
     "lint": "eslint src",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "publish": "vsce publish"
   },
   "dependencies": {
+    "@pontx/shadcn-ui": "^1.0.6",
     "@pontx/spec": "workspace:*",
+    "@stoplight/json": "^3.21.7",
+    "@stoplight/types": "^14.1.1",
+    "lodash": "catalog:",
     "pontx": "workspace:*"
   },
   "devDependencies": {
+    "@types/lodash": "catalog:",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
     "@types/vscode": "^1.101.0",
+    "@vitejs/plugin-react": "^5.0.2",
     "@vscode/test-cli": "^0.0.11",
     "@vscode/test-electron": "^2.5.2",
+    "css-loader": "catalog:",
+    "esbuild": "^0.25.9",
     "path-browserify": "^1.0.1",
-    "ts-loader": "^9.5.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "style-loader": "catalog:",
+    "ts-loader": "^9.5.4",
     "typescript": "^5.8.3",
-    "webpack": "^5.99.7",
-    "webpack-cli": "^6.0.1"
+    "vite": "catalog:",
+    "webpack": "catalog:",
+    "webpack-cli": "catalog:"
   }
 }

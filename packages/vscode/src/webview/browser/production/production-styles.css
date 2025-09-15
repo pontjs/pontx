@@ -1,0 +1,151 @@
+/**
+ * @author: jasonHzq
+ * @description: 生产环境 WebView 样式文件，提供简洁的文档展示样式
+ */
+
+/* 基础样式重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+  line-height: 1.6;
+}
+
+/* WebView 应用容器 */
+.webview-app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* 头部样式 */
+.webview-header {
+  border-bottom: 1px solid var(--vscode-panel-border);
+  padding-bottom: 20px;
+  margin-bottom: 30px;
+}
+
+.webview-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: var(--vscode-editor-foreground);
+}
+
+.webview-meta {
+  display: flex;
+  gap: 20px;
+  font-size: 14px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.spec-name {
+  font-weight: 500;
+}
+
+.content-type {
+  background-color: var(--vscode-badge-background);
+  color: var(--vscode-badge-foreground);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* 内容区域 */
+.webview-content {
+  line-height: 1.8;
+}
+
+/* 加载状态 */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.loading-spinner {
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--vscode-progressBar-background);
+  border-top: 4px solid var(--vscode-progressBar-foreground);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 10px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 错误状态 */
+.error-container {
+  text-align: center;
+  padding: 40px;
+  color: var(--vscode-errorForeground);
+}
+
+.error-container h2 {
+  margin-bottom: 10px;
+}
+
+/* 回退内容样式 */
+.fallback-content {
+  padding: 20px;
+  background-color: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 8px;
+}
+
+.fallback-content h2 {
+  margin-bottom: 15px;
+  color: var(--vscode-editor-foreground);
+}
+
+.fallback-content pre {
+  background-color: var(--vscode-textCodeBlock-background);
+  color: var(--vscode-editor-foreground);
+  padding: 15px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .webview-app {
+    padding: 10px;
+  }
+
+  .webview-header h1 {
+    font-size: 20px;
+  }
+
+  .webview-meta {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
