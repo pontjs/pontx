@@ -76,3 +76,42 @@ git checkout -- packages/xx
 
 7、git commit -m ''
 commit 版本修改的代码
+
+## 打包流程
+
+### pontx 包打包流程
+
+#### 包信息
+
+- **包名**: `pontx`
+- **位置**: `/packages/pontx/`
+
+#### 构建命令
+
+```bash
+cd packages/pontx
+npm run build
+```
+
+### vscode 包打包流程
+
+#### 包信息
+
+- **包名**: `vscode-pontx`
+- **位置**: `/packages/vscode/`
+
+#### 打包命令
+
+**基础打包**
+
+```bash
+cd packages/vscode
+npm run package
+```
+
+**VSIX 打包**
+
+```bash
+cd packages/vscode
+npm run package:vsix
+```

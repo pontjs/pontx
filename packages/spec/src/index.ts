@@ -1,7 +1,7 @@
-import { PontxJsonSchema } from "./schema";
+import { PontxJsonSchema, PontxJsonSchemaMap } from "./schema";
 import { Parameter, PontxAPI } from "./api";
 
-export { PontxJsonSchema, Parameter, PontxAPI };
+export { PontxJsonSchema, PontxJsonSchemaMap, Parameter, PontxAPI };
 export { PontxSpec, PontxSpecs, TagGroup } from "./spec";
 export {
   parsePontxSpec2OAS2 as parsePontSpec2OAS2,

@@ -123,12 +123,23 @@ export function parseSwagger2APIs(
         })
     );
 
-    const tagApiNames = tagApis.map((inter) => {
+    const tagApiNames = [];
+
+    tagApis.forEach((inter) => {
+      let apiName = "";
       if (inter.operationId) {
-        return getIdentifierFromOperatorId(inter.operationId);
+        apiName = getIdentifierFromOperatorId(inter.operationId);
       }
 
-      return getIdentifierFromUrl(inter.path, inter.method, samePath);
+      if (!apiName || tagApiNames.includes(apiName)) {
+        apiName = getIdentifierFromUrl(
+          inter.path,
+          (inter.method || "").toLowerCase(),
+          samePath
+        );
+      }
+
+      tagApiNames.push(apiName);
     });
 
     const uniqueApiNames = makeNamesUnique(tagApiNames);

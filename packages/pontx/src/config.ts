@@ -106,7 +106,7 @@ async function resolveConfigFile(rootDir: string, fileName: string) {
     await fsp.rm(tempDir, { recursive: true, force: true });
     return configExport;
   } catch (e) {
-    await fsp.rm(tempDir, { recursive: true, force: true });
+    // await fsp.rm(tempDir, { recursive: true, force: true });
     throw e;
   }
 }

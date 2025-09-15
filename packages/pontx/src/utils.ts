@@ -107,17 +107,22 @@ export const loadPresetPluginPath = (
     : findRealPath(presetPath, pluginPath);
 };
 
-export const requireUncached = async (module: string) => {
+/**
+ * 动态加载模块，支持 CommonJS 和 ESM 格式
+ * 清除模块缓存以确保获取最新版本
+ * @param modulePath 模块路径
+ * @returns 加载的模块内容
+ */
+export const requireUncached = async (modulePath: string) => {
   // ESM 环境下没有 require
   const isRequireDefined = typeof require !== "undefined";
 
   try {
     if (isRequireDefined) {
       // Try to import as ESM first
-      const modulePath = require.resolve(module);
       if (modulePath.endsWith(".cjs") || modulePath.endsWith(".js")) {
         delete require.cache[modulePath];
-        const pkg = require(module);
+        const pkg = require(modulePath);
         return pkg?.default || pkg;
       } else if (modulePath.endsWith(".mjs")) {
         const pkg = await import(modulePath);
@@ -126,20 +131,17 @@ export const requireUncached = async (module: string) => {
 
       // Fallback to CommonJS
       delete require.cache[modulePath];
-      return require(module);
+      const pkg = require(modulePath);
+      return pkg;
     } else {
       // 仅 ESM 环境
-      const pkg = await import(module);
+      const pkg = await import(modulePath);
       return pkg.default?.default || pkg.default || pkg;
     }
   } catch (e) {
     // If require.resolve fails, try direct import
-    try {
-      const pkg = await import(module);
-      return pkg.default || pkg;
-    } catch (e) {
-      throw new Error(`Failed to load module: ${module}`);
-    }
+    const pkg = await import(modulePath);
+    return pkg.default || pkg;
   }
 };
 
@@ -148,6 +150,7 @@ type TsFileInfo = {
   fileName: string;
 };
 
+/** @deprecated */
 export function requireTsFile(rootDir: string, tsfile: TsFileInfo) {
   const templateFileName = `${tsfile.filePath}`;
 
