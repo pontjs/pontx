@@ -9,12 +9,15 @@ export type APIs = {
      */
     uploadFile: {
       params: {
-        petId: any;
+        /**
+         * @description ID of pet to update
+         */
+        petId: number;
       };
-      method: "POST";
+      method: 'POST';
       bodyParams: undefined;
       Response: schemas.ApiResponse;
-    };
+    }
 
     /**
      * PUT /pet
@@ -22,10 +25,10 @@ export type APIs = {
      */
     updatePet: {
       params: {};
-      method: "PUT";
+      method: 'PUT';
       bodyParams: schemas.Pet;
       Response: any;
-    };
+    }
 
     /**
      * POST /pet
@@ -33,10 +36,10 @@ export type APIs = {
      */
     addPet: {
       params: {};
-      method: "POST";
+      method: 'POST';
       bodyParams: schemas.Pet;
       Response: any;
-    };
+    }
 
     /**
      * GET /pet/findByStatus
@@ -45,12 +48,15 @@ export type APIs = {
      */
     findPetsByStatus: {
       params: {
-        status: any;
+        /**
+         * @description Status values that need to be considered for filter
+         */
+        status: Array<'available' | 'pending' | 'sold'>;
       };
-      method: "GET";
+      method: 'GET';
       bodyParams: undefined;
       Response: Array<schemas.Pet>;
-    };
+    }
 
     /**
      * GET /pet/findByTags
@@ -60,12 +66,15 @@ export type APIs = {
      */
     findPetsByTags: {
       params: {
-        tags: any;
+        /**
+         * @description Tags to filter by
+         */
+        tags: Array<string>;
       };
-      method: "GET";
+      method: 'GET';
       bodyParams: undefined;
       Response: Array<schemas.Pet>;
-    };
+    }
 
     /**
      * GET /pet/{petId}
@@ -74,12 +83,15 @@ export type APIs = {
      */
     getPetById: {
       params: {
-        petId: any;
+        /**
+         * @description ID of pet to return
+         */
+        petId: number;
       };
-      method: "GET";
+      method: 'GET';
       bodyParams: undefined;
       Response: schemas.Pet;
-    };
+    }
 
     /**
      * DELETE /pet/{petId}
@@ -87,12 +99,15 @@ export type APIs = {
      */
     deletePet: {
       params: {
-        petId: any;
+        /**
+         * @description Pet id to delete
+         */
+        petId: number;
       };
-      method: "DELETE";
+      method: 'DELETE';
       bodyParams: undefined;
       Response: any;
-    };
+    }
 
     /**
      * POST /pet/{petId}
@@ -100,13 +115,16 @@ export type APIs = {
      */
     updatePetWithForm: {
       params: {
-        petId: any;
+        /**
+         * @description ID of pet that needs to be updated
+         */
+        petId: number;
       };
-      method: "POST";
+      method: 'POST';
       bodyParams: undefined;
       Response: any;
-    };
-  };
+    }
+  }
 
   /** Access to Petstore orders */
   store: {
@@ -117,10 +135,10 @@ export type APIs = {
      */
     getInventory: {
       params: {};
-      method: "GET";
+      method: 'GET';
       bodyParams: undefined;
       Response: Record<any, number>;
-    };
+    }
 
     /**
      * POST /store/order
@@ -128,10 +146,10 @@ export type APIs = {
      */
     placeOrder: {
       params: {};
-      method: "POST";
+      method: 'POST';
       bodyParams: schemas.Order;
       Response: schemas.Order;
-    };
+    }
 
     /**
      * GET /store/order/{orderId}
@@ -140,12 +158,15 @@ export type APIs = {
      */
     getOrderById: {
       params: {
-        orderId: any;
+        /**
+         * @description ID of pet that needs to be fetched
+         */
+        orderId: number;
       };
-      method: "GET";
+      method: 'GET';
       bodyParams: undefined;
       Response: schemas.Order;
-    };
+    }
 
     /**
      * DELETE /store/order/{orderId}
@@ -154,13 +175,16 @@ export type APIs = {
      */
     deleteOrder: {
       params: {
-        orderId: any;
+        /**
+         * @description ID of the order that needs to be deleted
+         */
+        orderId: number;
       };
-      method: "DELETE";
+      method: 'DELETE';
       bodyParams: undefined;
       Response: any;
-    };
-  };
+    }
+  }
 
   /** Operations about user */
   user: {
@@ -170,10 +194,10 @@ export type APIs = {
      */
     createUsersWithListInput: {
       params: {};
-      method: "POST";
+      method: 'POST';
       bodyParams: Array<schemas.User>;
       Response: any;
-    };
+    }
 
     /**
      * GET /user/{username}
@@ -181,12 +205,15 @@ export type APIs = {
      */
     getUserByName: {
       params: {
-        username: any;
+        /**
+         * @description The name that needs to be fetched. Use user1 for testing. 
+         */
+        username: string;
       };
-      method: "GET";
+      method: 'GET';
       bodyParams: undefined;
       Response: schemas.User;
-    };
+    }
 
     /**
      * DELETE /user/{username}
@@ -195,12 +222,15 @@ export type APIs = {
      */
     deleteUser: {
       params: {
-        username: any;
+        /**
+         * @description The name that needs to be deleted
+         */
+        username: string;
       };
-      method: "DELETE";
+      method: 'DELETE';
       bodyParams: undefined;
       Response: any;
-    };
+    }
 
     /**
      * PUT /user/{username}
@@ -209,12 +239,15 @@ export type APIs = {
      */
     updateUser: {
       params: {
-        username: any;
+        /**
+         * @description name that need to be updated
+         */
+        username: string;
       };
-      method: "PUT";
+      method: 'PUT';
       bodyParams: schemas.User;
       Response: any;
-    };
+    }
 
     /**
      * GET /user/login
@@ -222,13 +255,19 @@ export type APIs = {
      */
     loginUser: {
       params: {
-        username: any;
-        password: any;
+        /**
+         * @description The user name for login
+         */
+        username: string;
+        /**
+         * @description The password for login in clear text
+         */
+        password: string;
       };
-      method: "GET";
+      method: 'GET';
       bodyParams: undefined;
       Response: string;
-    };
+    }
 
     /**
      * GET /user/logout
@@ -236,10 +275,10 @@ export type APIs = {
      */
     logoutUser: {
       params: {};
-      method: "GET";
+      method: 'GET';
       bodyParams: undefined;
       Response: any;
-    };
+    }
 
     /**
      * POST /user/createWithArray
@@ -247,10 +286,10 @@ export type APIs = {
      */
     createUsersWithArrayInput: {
       params: {};
-      method: "POST";
+      method: 'POST';
       bodyParams: Array<schemas.User>;
       Response: any;
-    };
+    }
 
     /**
      * POST /user
@@ -259,9 +298,9 @@ export type APIs = {
      */
     createUser: {
       params: {};
-      method: "POST";
+      method: 'POST';
       bodyParams: schemas.User;
       Response: any;
-    };
-  };
+    }
+  }
 };

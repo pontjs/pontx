@@ -15,7 +15,9 @@ export type Pet = {
   name: string;
   photoUrls: Array<string>;
   tags?: Array<Tag>;
-  /** pet status in the store */
+  /**
+   * @description pet status in the store
+   */
   status?: 'available' | 'pending' | 'sold';
 }
 
@@ -29,7 +31,9 @@ export type Order = {
   petId?: number;
   quantity?: number;
   shipDate?: string;
-  /** Order Status */
+  /**
+   * @description Order Status
+   */
   status?: 'placed' | 'approved' | 'delivered';
   complete?: boolean;
 }
@@ -42,6 +46,8 @@ export type User = {
   email?: string;
   password?: string;
   phone?: string;
-  /** User Status */
+  /**
+   * @description User Status
+   */
   userStatus?: number;
 }

@@ -1,5 +1,10 @@
 export const specMeta = {
   "name": "petstore",
+  "url": [
+    {
+      "url": "petstore.swagger.io/v2"
+    }
+  ],
   "apis": {
     "pet/uploadFile": {
       "method": "POST",
@@ -11,11 +16,7 @@ export const specMeta = {
       "produces": [
         "application/json"
       ],
-      "path": "/pet/{petId}/uploadImage",
-      "tag": {
-        "name": "pet",
-        "description": "Everything about your Pets"
-      }
+      "path": "/pet/{petId}/uploadImage"
     },
     "pet/updatePet": {
       "method": "PUT",
@@ -29,11 +30,7 @@ export const specMeta = {
         "application/json",
         "application/xml"
       ],
-      "path": "/pet",
-      "tag": {
-        "name": "pet",
-        "description": "Everything about your Pets"
-      }
+      "path": "/pet"
     },
     "pet/addPet": {
       "method": "POST",
@@ -47,11 +44,7 @@ export const specMeta = {
         "application/json",
         "application/xml"
       ],
-      "path": "/pet",
-      "tag": {
-        "name": "pet",
-        "description": "Everything about your Pets"
-      }
+      "path": "/pet"
     },
     "pet/findPetsByStatus": {
       "method": "GET",
@@ -61,11 +54,7 @@ export const specMeta = {
         "application/json",
         "application/xml"
       ],
-      "path": "/pet/findByStatus",
-      "tag": {
-        "name": "pet",
-        "description": "Everything about your Pets"
-      }
+      "path": "/pet/findByStatus"
     },
     "pet/findPetsByTags": {
       "method": "GET",
@@ -75,11 +64,7 @@ export const specMeta = {
         "application/json",
         "application/xml"
       ],
-      "path": "/pet/findByTags",
-      "tag": {
-        "name": "pet",
-        "description": "Everything about your Pets"
-      }
+      "path": "/pet/findByTags"
     },
     "pet/getPetById": {
       "method": "GET",
@@ -89,11 +74,7 @@ export const specMeta = {
         "application/json",
         "application/xml"
       ],
-      "path": "/pet/{petId}",
-      "tag": {
-        "name": "pet",
-        "description": "Everything about your Pets"
-      }
+      "path": "/pet/{petId}"
     },
     "pet/deletePet": {
       "method": "DELETE",
@@ -103,11 +84,7 @@ export const specMeta = {
         "application/json",
         "application/xml"
       ],
-      "path": "/pet/{petId}",
-      "tag": {
-        "name": "pet",
-        "description": "Everything about your Pets"
-      }
+      "path": "/pet/{petId}"
     },
     "pet/updatePetWithForm": {
       "method": "POST",
@@ -120,11 +97,7 @@ export const specMeta = {
         "application/json",
         "application/xml"
       ],
-      "path": "/pet/{petId}",
-      "tag": {
-        "name": "pet",
-        "description": "Everything about your Pets"
-      }
+      "path": "/pet/{petId}"
     },
     "store/getInventory": {
       "method": "GET",
@@ -133,11 +106,7 @@ export const specMeta = {
       "produces": [
         "application/json"
       ],
-      "path": "/store/inventory",
-      "tag": {
-        "name": "store",
-        "description": "Access to Petstore orders"
-      }
+      "path": "/store/inventory"
     },
     "store/placeOrder": {
       "method": "POST",
@@ -150,11 +119,7 @@ export const specMeta = {
         "application/json",
         "application/xml"
       ],
-      "path": "/store/order",
-      "tag": {
-        "name": "store",
-        "description": "Access to Petstore orders"
-      }
+      "path": "/store/order"
     },
     "store/getOrderById": {
       "method": "GET",
@@ -164,11 +129,7 @@ export const specMeta = {
         "application/json",
         "application/xml"
       ],
-      "path": "/store/order/{orderId}",
-      "tag": {
-        "name": "store",
-        "description": "Access to Petstore orders"
-      }
+      "path": "/store/order/{orderId}"
     },
     "store/deleteOrder": {
       "method": "DELETE",
@@ -178,11 +139,7 @@ export const specMeta = {
         "application/json",
         "application/xml"
       ],
-      "path": "/store/order/{orderId}",
-      "tag": {
-        "name": "store",
-        "description": "Access to Petstore orders"
-      }
+      "path": "/store/order/{orderId}"
     },
     "user/createUsersWithListInput": {
       "method": "POST",
@@ -195,11 +152,7 @@ export const specMeta = {
         "application/json",
         "application/xml"
       ],
-      "path": "/user/createWithList",
-      "tag": {
-        "name": "user",
-        "description": "Operations about user"
-      }
+      "path": "/user/createWithList"
     },
     "user/getUserByName": {
       "method": "GET",
@@ -209,11 +162,7 @@ export const specMeta = {
         "application/json",
         "application/xml"
       ],
-      "path": "/user/{username}",
-      "tag": {
-        "name": "user",
-        "description": "Operations about user"
-      }
+      "path": "/user/{username}"
     },
     "user/deleteUser": {
       "method": "DELETE",
@@ -223,11 +172,7 @@ export const specMeta = {
         "application/json",
         "application/xml"
       ],
-      "path": "/user/{username}",
-      "tag": {
-        "name": "user",
-        "description": "Operations about user"
-      }
+      "path": "/user/{username}"
     },
     "user/updateUser": {
       "method": "PUT",
@@ -240,11 +185,7 @@ export const specMeta = {
         "application/json",
         "application/xml"
       ],
-      "path": "/user/{username}",
-      "tag": {
-        "name": "user",
-        "description": "Operations about user"
-      }
+      "path": "/user/{username}"
     },
     "user/loginUser": {
       "method": "GET",
@@ -254,11 +195,7 @@ export const specMeta = {
         "application/json",
         "application/xml"
       ],
-      "path": "/user/login",
-      "tag": {
-        "name": "user",
-        "description": "Operations about user"
-      }
+      "path": "/user/login"
     },
     "user/logoutUser": {
       "method": "GET",
@@ -268,11 +205,7 @@ export const specMeta = {
         "application/json",
         "application/xml"
       ],
-      "path": "/user/logout",
-      "tag": {
-        "name": "user",
-        "description": "Operations about user"
-      }
+      "path": "/user/logout"
     },
     "user/createUsersWithArrayInput": {
       "method": "POST",
@@ -285,11 +218,7 @@ export const specMeta = {
         "application/json",
         "application/xml"
       ],
-      "path": "/user/createWithArray",
-      "tag": {
-        "name": "user",
-        "description": "Operations about user"
-      }
+      "path": "/user/createWithArray"
     },
     "user/createUser": {
       "method": "POST",
@@ -302,11 +231,7 @@ export const specMeta = {
         "application/json",
         "application/xml"
       ],
-      "path": "/user",
-      "tag": {
-        "name": "user",
-        "description": "Operations about user"
-      }
+      "path": "/user"
     }
   },
   "hasTags": true
