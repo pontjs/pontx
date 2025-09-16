@@ -1,5 +1,13 @@
 # pontx
 
+## 0.1.7
+
+### Patch Changes
+
+- upgrade spec
+- Updated dependencies
+  - @pontx/spec@0.1.10
+
 ## 0.1.6
 
 ### Patch Changes
