@@ -1,9 +1,9 @@
 {
-  "name": "vscode-pontx",
+  "name": "vscode-pontx-v2",
   "displayName": "Pontx API Manager",
   "description": "基于 Pontx 协议的 API 生命周期管理扩展，提供 API 搜索、文档查阅、代码生成等强大功能",
   "version": "2.0.6",
-  "publisher": "jasonHzq",
+  "publisher": "hzongquan",
   "engines": {
     "vscode": "^1.101.0",
     "node": ">=20.0.0"

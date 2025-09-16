@@ -85,7 +85,7 @@ const webviewConfig = {
       },
     ],
   },
-  devtool: "source-map",
+  devtool: false,
   optimization: {
     // 禁用代码分割，确保所有代码打包到一个文件中
     splitChunks: false,

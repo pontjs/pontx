@@ -12,7 +12,7 @@ const buildConfig = {
   target: "node16",
   format: "cjs",
   outfile: "dist/extension.js",
-  sourcemap: true,
+  sourcemap: false,
   external: ["vscode"],
   // 处理 JSON 模块
   loader: {
