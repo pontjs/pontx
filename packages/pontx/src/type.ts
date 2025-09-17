@@ -131,6 +131,7 @@ export interface PontxConfig {
   plugins?: Plugin[];
   /** 服务配置 */
   service?: ServiceConfig;
+  [x: string]: any;
 }
 
 /** 数据源配置 */
@@ -145,4 +146,5 @@ export interface OriginConfig {
   env?: string;
   /** 环境变量配置 */
   envs?: any;
+  [x: string]: any;
 }

@@ -198,6 +198,7 @@ export async function resolveConfig(
       : path.join(configDir, config.outDir),
     origins: resolvedOrigins,
     resolvedPlugin: resolvePlugin(config.plugins ?? []),
+    service: config.service,
   } as ResolvedConfig;
   if (config.translateConfig) {
     resolvedConfigContent.translateConfig = {

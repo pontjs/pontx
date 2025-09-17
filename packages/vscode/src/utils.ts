@@ -110,7 +110,7 @@ export const convertPickItemToTreeItem = (
   manager: PontxManager
 ): PontxTreeItem | null => {
   const detailParts = pickItem.detail?.split(".") || [];
-  const [specName, tagName, apiName] = detailParts;
+  const [specName] = detailParts;
 
   // 找到对应的 origin 和 API
   const origin = manager?.resolvedConfig?.origins?.find(
@@ -120,15 +120,22 @@ export const convertPickItemToTreeItem = (
     return null;
   }
 
+  let tagName: string;
+  let apiName: string;
+
   // 构建 jsonPath 和获取 API 数据
   let jsonPath: (string | number)[];
   let api;
   if (detailParts.length === 3) {
+    tagName = detailParts[1];
+    apiName = detailParts[2];
+
     // 有 mods 的情况：${spec.name}.${tag.name}.${pureApiName}
     const apiKey = `${tagName}/${apiName}`;
     jsonPath = ["apis", apiKey];
     api = origin.spec?.apis?.[apiKey];
   } else {
+    apiName = detailParts[1];
     // 无 mods 的情况：${spec.name}.${apiName}
     jsonPath = ["apis", apiName];
     api = origin.spec?.apis?.[apiName];
@@ -171,13 +178,22 @@ export const generateSampleCode = async (
   manager: PontxManager
 ): Promise<string | null> => {
   const detailParts = pickItem.detail?.split(".") || [];
-  const [specName, tagName, apiName] = detailParts;
+  const [specName] = detailParts;
+  let tagName: string;
+  let apiName: string;
 
   const origin = manager?.resolvedConfig?.origins?.find(
     (o) => o.spec?.name === specName
   );
   if (!origin) {
     return null;
+  }
+
+  if (detailParts.length === 3) {
+    tagName = detailParts[1];
+    apiName = detailParts[2];
+  } else {
+    apiName = detailParts[1];
   }
 
   // 获取 API 信息

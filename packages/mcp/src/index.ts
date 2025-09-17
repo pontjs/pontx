@@ -21,21 +21,60 @@ import {
 import fs from "fs";
 import path from "path";
 import { PontxManager } from "pontx";
+import Fuse from "fuse.js";
 
-const projectRootPath = process.argv?.[2] || process.cwd();
+// 特殊标记，表示 MCP 是全局配置的
+const GLOBAL_MCP_MARKER = "GLOBAL_MCP";
+
+// 检测是否是全局配置模式
+const isGlobalMode = process.argv?.[2] === GLOBAL_MCP_MARKER;
+
+// 默认项目路径（仅在非全局模式下有效）
+const defaultProjectPath = isGlobalMode
+  ? undefined
+  : (process.argv?.[2] || process.env.PONTX_PROJECT_PATH || process.cwd());
 
 const debug = (info: string) => {
   fs.writeFileSync(path.join(process.cwd(), "debug.log"), info);
 };
 
-async function prepare() {
-  const pontxManager = await buildPontxManager(projectRootPath);
+// 缓存管理器，避免重复构建
+const managerCache = new Map<string, { pontxManager: PontxManager; fuse: Fuse<any>; timestamp: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5分钟缓存过期时间
+
+// 获取或创建 PontxManager 和 Fuse 实例
+async function getOrCreateManager(projectPath: string) {
+  const normalizedPath = path.resolve(projectPath);
+  const cached = managerCache.get(normalizedPath);
+
+  // 检查缓存是否有效
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    // 更新缓存的 PontxManager
+    const updatedManager = await updatePontxManager(cached.pontxManager);
+    const updatedFuse = buildFuse(updatedManager);
+
+    // 更新缓存
+    managerCache.set(normalizedPath, {
+      pontxManager: updatedManager,
+      fuse: updatedFuse,
+      timestamp: Date.now()
+    });
+
+    return { pontxManager: updatedManager, fuse: updatedFuse };
+  }
+
+  // 创建新的实例
+  const pontxManager = await buildPontxManager(normalizedPath);
   const fuse = buildFuse(pontxManager);
 
-  return {
+  // 存入缓存
+  managerCache.set(normalizedPath, {
     pontxManager,
     fuse,
-  };
+    timestamp: Date.now()
+  });
+
+  return { pontxManager, fuse };
 }
 
 const server = new Server(
@@ -54,20 +93,31 @@ const server = new Server(
 
 async function main() {
   const transport = new StdioServerTransport();
-  let { pontxManager, fuse } = await prepare();
 
-  const updateFuse = async () => {
-    pontxManager = await updatePontxManager(pontxManager);
-    fuse = buildFuse(pontxManager);
-  };
+  // 打印模式信息到 stderr（MCP 协议要求 stdout 只用于 JSON-RPC 通信）
+  // 注意：这里使用 console.error 不是因为这是错误，而是因为需要输出到 stderr
+  if (isGlobalMode) {
+    console.error("[PontX MCP] Running in GLOBAL mode - projectPath is required for all tools");
+  } else {
+    console.error(`[PontX MCP] Running in PROJECT mode - default path: ${defaultProjectPath}`);
+  }
 
-  const samples = await PontxManager.listSamples(pontxManager);
-  const sampleEnums = samples.map((sample) => sample.case);
-  const sampleDescriptions = samples
-    .map((sample) => {
-      return `  * ${sample.case}: ${sample.description}`;
-    })
-    .join("\n");
+  // 初始化时尝试加载默认项目的配置（仅在非全局模式下）
+  let defaultManager: PontxManager | null = null;
+  let defaultSamples: any[] = [];
+
+  if (!isGlobalMode && defaultProjectPath) {
+    try {
+      const { pontxManager } = await getOrCreateManager(defaultProjectPath);
+      defaultManager = pontxManager;
+      defaultSamples = await PontxManager.listSamples(defaultManager);
+    } catch (e) {
+      // 默认项目路径可能没有 pontx 配置，这是正常的
+      console.error("No default Pontx config found at default path");
+    }
+  }
+
+  // 移除固定的 sampleEnums 和 sampleDescriptions，改为动态获取
 
   // tools
   server.setRequestHandler(ListToolsRequestSchema, async () => {
@@ -79,12 +129,19 @@ async function main() {
           inputSchema: {
             type: "object",
             properties: {
+              projectPath: {
+                type: "string",
+                description: isGlobalMode
+                  ? "项目根路径（必填）"
+                  : "项目根路径，如果不提供则使用默认路径",
+              },
               query: { type: "string", description: "搜索关键字" },
               maxCount: {
                 type: "number",
                 description: "最大返回数量，默认值为 6",
               },
             },
+            required: isGlobalMode ? ["query", "projectPath"] : ["query"],
           },
         },
         {
@@ -94,6 +151,12 @@ async function main() {
           inputSchema: {
             type: "object",
             properties: {
+              projectPath: {
+                type: "string",
+                description: isGlobalMode
+                  ? "项目根路径（必填）"
+                  : "项目根路径，如果不提供则使用默认路径",
+              },
               specName: {
                 type: "string",
               },
@@ -104,6 +167,7 @@ async function main() {
                 type: "string",
               },
             },
+            required: isGlobalMode ? ["specName", "apiName", "projectPath"] : ["specName", "apiName"],
           },
         },
         {
@@ -113,6 +177,12 @@ async function main() {
           inputSchema: {
             type: "object",
             properties: {
+              projectPath: {
+                type: "string",
+                description: isGlobalMode
+                  ? "项目根路径（必填）"
+                  : "项目根路径，如果不提供则使用默认路径",
+              },
               schemaName: {
                 type: "string",
                 description:
@@ -123,6 +193,7 @@ async function main() {
                 description: "searchApi 搜索结果中的 specName",
               },
             },
+            required: isGlobalMode ? ["schemaName", "specName", "projectPath"] : ["schemaName", "specName"],
           },
         },
         {
@@ -131,6 +202,12 @@ async function main() {
           inputSchema: {
             type: "object",
             properties: {
+              projectPath: {
+                type: "string",
+                description: isGlobalMode
+                  ? "项目根路径（必填）"
+                  : "项目根路径，如果不提供则使用默认路径",
+              },
               requestParams: {
                 type: "string",
                 description:
@@ -138,8 +215,7 @@ async function main() {
               },
               case: {
                 type: "string",
-                enum: sampleEnums,
-                description: `请求方式, 可选值为:\n ${sampleDescriptions}`,
+                description: "代码生成模板名称，常见值: request (基础请求), reactHooks (React Hooks)。不同项目可能有自定义模板，请先使用 listSampleCases 查询可用模板",
               },
               specName: {
                 type: "string",
@@ -152,6 +228,22 @@ async function main() {
               apiName: {
                 type: "string",
                 description: "apiName",
+              },
+            },
+            required: isGlobalMode ? ["case", "specName", "apiName", "projectPath"] : ["case", "specName", "apiName"],
+          },
+        },
+        {
+          name: "listSampleCases",
+          description: "获取指定项目可用的代码生成模板列表",
+          inputSchema: {
+            type: "object",
+            properties: {
+              projectPath: {
+                type: "string",
+                description: isGlobalMode
+                  ? "项目根路径（必填）"
+                  : "项目根路径，如果不提供则使用默认路径",
               },
             },
           },
@@ -187,26 +279,65 @@ async function main() {
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     switch (request.params.name) {
       case "searchApis": {
-        await updateFuse();
-        const result = await searchApis(
-          request.params.arguments?.query as any,
-          fuse,
-          request.params.arguments?.maxCount as number
-        );
+        try {
+          const projectPath = (request.params.arguments?.projectPath as string) || defaultProjectPath;
 
-        return {
-          content: result.map((item) => {
+          // 全局模式下检查 projectPath 是否提供
+          if (isGlobalMode && !projectPath) {
             return {
-              type: "text",
-              text: JSON.stringify(item),
+              content: [
+                {
+                  type: "text",
+                  text: `错误：在全局模式下，projectPath 参数是必填的。\n请提供项目路径，例如：{ "projectPath": "/path/to/your/project" }`,
+                },
+              ],
             };
-          }),
-        };
+          }
+
+          const { fuse } = await getOrCreateManager(projectPath);
+          const result = await searchApis(
+            request.params.arguments?.query as any,
+            fuse,
+            request.params.arguments?.maxCount as number
+          );
+
+          return {
+            content: result.map((item) => {
+              return {
+                type: "text",
+                text: JSON.stringify(item),
+              };
+            }),
+          };
+        } catch (e: any) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: `搜索 API 失败: ${e.message}`,
+              },
+            ],
+          };
+        }
       }
 
       case "getApiMeta": {
         try {
-          await updateFuse();
+          const projectPath = (request.params.arguments?.projectPath as string) || defaultProjectPath;
+
+          // 全局模式下检查 projectPath 是否提供
+          if (isGlobalMode && !projectPath) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `错误：在全局模式下，projectPath 参数是必填的。\n请提供项目路径，例如：{ "projectPath": "/path/to/your/project" }`,
+                },
+              ],
+            };
+          }
+
+          const { pontxManager } = await getOrCreateManager(projectPath);
           const apiMeta = await getApiMeta(
             pontxManager,
             request.params.arguments?.specName as string,
@@ -236,7 +367,21 @@ async function main() {
 
       case "getSchemaMeta": {
         try {
-          await updateFuse();
+          const projectPath = (request.params.arguments?.projectPath as string) || defaultProjectPath;
+
+          // 全局模式下检查 projectPath 是否提供
+          if (isGlobalMode && !projectPath) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `错误：在全局模式下，projectPath 参数是必填的。\n请提供项目路径，例如：{ "projectPath": "/path/to/your/project" }`,
+                },
+              ],
+            };
+          }
+
+          const { pontxManager } = await getOrCreateManager(projectPath);
           const schemaMeta = await getSchemaMeta(
             pontxManager,
             request.params.arguments?.specName as string,
@@ -263,10 +408,99 @@ async function main() {
         }
       }
 
+      case "listSampleCases": {
+        try {
+          const projectPath = (request.params.arguments?.projectPath as string) || defaultProjectPath;
+
+          // 全局模式下检查 projectPath 是否提供
+          if (isGlobalMode && !projectPath) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `错误：在全局模式下，projectPath 参数是必填的。\n请提供项目路径，例如：{ "projectPath": "/path/to/your/project" }`,
+                },
+              ],
+            };
+          }
+
+          const { pontxManager } = await getOrCreateManager(projectPath);
+          const samples = await PontxManager.listSamples(pontxManager);
+
+          const sampleList = samples.map(sample => ({
+            case: sample.case,
+            description: sample.description
+          }));
+
+          // 检测 pontx 库是否支持内置生成器（但不作为默认值）
+          const builtinSupport = [];
+          // 注：这些只是 pontx 库可能支持的内置生成器，不是所有项目都会使用
+          if (!samples.find(s => s.case === 'request')) {
+            builtinSupport.push({
+              case: "request",
+              description: "pontx 内置基础请求生成器（如果可用）",
+              type: "builtin"
+            });
+          }
+          if (!samples.find(s => s.case === 'reactHooks')) {
+            builtinSupport.push({
+              case: "reactHooks",
+              description: "pontx 内置 React Hooks 生成器（如果可用）",
+              type: "builtin"
+            });
+          }
+
+          return {
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify({
+                  projectPath,
+                  projectSamples: sampleList,
+                  pontxBuiltinGenerators: builtinSupport,
+                  note: "项目配置的模板优先级高于 pontx 内置生成器"
+                }, null, 2),
+              },
+            ],
+          };
+        } catch (e: any) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: `获取代码模板列表失败: ${e.message}`,
+              },
+            ],
+          };
+        }
+      }
+
       case "makeRequestCode": {
         try {
+          const projectPath = (request.params.arguments?.projectPath as string) || defaultProjectPath;
+
+          // 全局模式下检查 projectPath 是否提供
+          if (isGlobalMode && !projectPath) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `错误：在全局模式下，projectPath 参数是必填的。\n请提供项目路径，例如：{ "projectPath": "/path/to/your/project" }`,
+                },
+              ],
+            };
+          }
+
+          const { pontxManager } = await getOrCreateManager(projectPath);
+          const requestedCase = request.params.arguments?.case as string;
+
+          // 直接尝试生成代码，让 makeCode 函数处理回退逻辑
+          // makeCode 会：
+          // 1. 先尝试项目的 samples
+          // 2. 如果没找到，尝试 pontx 内置的生成器（request/reactHooks）
+          // 3. 都没有才报错
           const code = await makeCode(pontxManager, {
-            case: request.params.arguments?.case as any,
+            case: requestedCase,
             specName: request.params.arguments?.specName as string,
             tagName: request.params.arguments?.tagName as string,
             apiName: request.params.arguments?.apiName as string,
@@ -287,14 +521,48 @@ async function main() {
             ],
           };
         } catch (e: any) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: "代码生成失败: " + e.message,
-              },
-            ],
-          };
+          // 获取项目实际支持的 samples 以提供更准确的错误信息
+          try {
+            const projectPath = (request.params.arguments?.projectPath as string) || defaultProjectPath;
+            const { pontxManager } = await getOrCreateManager(projectPath);
+            const samples = await PontxManager.listSamples(pontxManager);
+            const projectCases = samples.map(s => s.case);
+
+            let errorMessage = `代码生成失败: ${e.message}\n\n`;
+
+            if (e.message.includes("找不到 case")) {
+              errorMessage += `该项目配置的代码模板：\n`;
+              if (projectCases.length > 0) {
+                errorMessage += projectCases.map(c => `  - ${c}`).join("\n");
+              } else {
+                errorMessage += `  (无项目自定义模板)`;
+              }
+
+              errorMessage += `\n\npontx 可能支持的内置生成器：\n`;
+              errorMessage += `  - request (如果 pontx.generateApiRequestCode 可用)\n`;
+              errorMessage += `  - reactHooks (如果 pontx.generateApiUseRequestCode 可用)\n`;
+              errorMessage += `\n请使用 listSampleCases 查询详细信息`;
+            }
+
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: errorMessage,
+                },
+              ],
+            };
+          } catch {
+            // 如果获取 samples 失败，返回原始错误
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `代码生成失败: ${e.message}\n\n请使用 listSampleCases 查询可用的代码模板`,
+                },
+              ],
+            };
+          }
         }
       }
 

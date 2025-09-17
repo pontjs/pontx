@@ -255,7 +255,7 @@ export const buildPontxManager = async (projectRootPath: string) => {
     "pontx.config.ts"
   );
   if (!pontxConfigPath) {
-    throw new Error("找不到 pontx.config.ts");
+    throw new Error(`在路径 ${projectRootPath} 下找不到 pontx.config.ts`);
   }
 
   return pontx.PontxManager.constructorFromPontxConfigPath(

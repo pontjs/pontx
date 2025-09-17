@@ -1,5 +1,11 @@
 # pontx
 
+## 0.1.8
+
+### Patch Changes
+
+- fix config types
+
 ## 0.1.7
 
 ### Patch Changes
