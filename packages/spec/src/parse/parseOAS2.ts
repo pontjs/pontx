@@ -104,7 +104,7 @@ export function parseSwagger2APIs(
     });
   });
 
-  const apiGroups = swagger.tags.map((tag) => {
+  const apiGroups = (swagger.tags || []).map((tag) => {
     const tagApis = allSwaggerInterfaces.filter((inter) => {
       return (
         inter.tags.includes(tag.name) || inter.tags.includes(tag.description)

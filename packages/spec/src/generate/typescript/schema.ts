@@ -27,7 +27,7 @@ export const generateSchemaCode = (
               let key = checkNeedQuotationMark(propName)
                 ? `'${propName}'`
                 : propName;
-              const struct = schema.properties?.[key];
+              const struct = schema.properties?.[propName];
               const comment = generateSchemaComment(struct);
               if (!PontxJsonSchema.checkRequired(schema, propName)) {
                 key = key + "?";

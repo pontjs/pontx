@@ -12,3 +12,4 @@ export * from "./generate/index";
 export * from "./parse/index";
 export * from "./parse/parseOASTags";
 export * from "./generic";
+export { validateFlatApiKey, ValidationResult } from "./validation";

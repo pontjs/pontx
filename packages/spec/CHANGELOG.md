@@ -1,5 +1,11 @@
 # @pontx/spec
 
+## 0.1.11
+
+### Patch Changes
+
+- fix: fix spec genenrate bug
+
 ## 0.1.10
 
 ### Patch Changes

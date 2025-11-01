@@ -136,7 +136,7 @@ export function parseSwagger2APIs(originSwagger: OAS3.OpenAPIObject) {
     });
   });
 
-  const apiGroups = swagger.tags.map((tag) => {
+  const apiGroups = (swagger.tags || []).map((tag) => {
     const tagApis = allSwaggerInterfaces.filter((inter) => {
       return inter.tags.includes(tag.name);
     });

@@ -67,6 +67,22 @@ export class PontxAPI {
   security?: Array<OAS3.SecurityRequirementObject>;
   /** 外部文档 */
   externalDocs?: ExternalDocumentationObject;
+  /** Path 参数名数组 (用于 graceful client 参数分类) */
+  pathParams?: string[];
+  /** Query 参数名数组 (用于 graceful client 参数分类) */
+  queryParams?: string[];
+  /**
+   * Body 类型 (用于 graceful client 签名选择)
+   * - object: JSON 对象，使用二参数模式 (params 合并)
+   * - map: Map 类型，使用三参数模式
+   * - array: JSON 数组，使用三参数模式
+   * - string: 字符串，使用三参数模式
+   * - number: 数字，使用三参数模式
+   * - boolean: 布尔值，使用三参数模式
+   * - integer: 整数，使用三参数模式
+   * - none: 无 body (GET/DELETE 等)
+   */
+  bodyType?: 'object' | 'map' | 'array' | 'string' | 'number' | 'boolean' | 'integer' | 'none';
 
   static getUsedStructNames(api: PontxAPI) {
     const structs = [] as string[];

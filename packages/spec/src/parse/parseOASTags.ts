@@ -13,9 +13,13 @@ const { uniqueId } = _;
 export function fixOASTags<
   Swagger extends OAS2.SwaggerObject | OAS3.OpenAPIObject
 >(swagger: Swagger): Swagger {
-  if (!swagger?.tags?.length) {
-    return swagger;
-  }
+  // 有些 Spec，虽然 swagger.tags 为空，但是存在 API 里的 tags 字段
+  // if (!swagger?.tags?.length) {
+  //   if (swagger) {
+  //     return { ...swagger, tags: [{ name: "common" }] };
+  //   }
+  //   return swagger;
+  // }
 
   const tagItems = (swagger.tags || [])
     .map((tag) => {
@@ -63,6 +67,25 @@ export function fixOASTags<
       const inter = methodInters[method] as
         | OAS2.OperationObject
         | OAS3.OperationObject;
+
+      if (!inter) {
+        return;
+      }
+
+      if (
+        ![
+          "get",
+          "post",
+          "put",
+          "delete",
+          "patch",
+          "options",
+          "head",
+          "trace",
+        ].includes(method?.toLowerCase())
+      ) {
+        return;
+      }
 
       if (inter.tags) {
         inter.tags.forEach((tag) => {
