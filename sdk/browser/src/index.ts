@@ -5,5 +5,6 @@ export type {
   Controller,
   Client,
   SdkUsage,
+  RequestOptions,
 } from "./client";
 export type { PontxSpecMeta } from "./type";

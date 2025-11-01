@@ -20,3 +20,15 @@ export type PontxAPI = {
   consumes?: string[];
   produces?: string[];
 };
+
+export type FetchFn = (
+  url: string,
+  options: RequestInit & {
+    getMetadata: () => {
+      specName: string;
+      controllerName: string;
+      apiName: string;
+      apiMeta: PontxAPI;
+    };
+  }
+) => Promise<any>;

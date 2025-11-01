@@ -1,4 +1,4 @@
-import { PontxAPI, PontxSpecMeta } from "./type";
+import { FetchFn, PontxAPI, PontxSpecMeta } from "./type";
 
 type ContentType =
   | "text/html"
@@ -43,7 +43,7 @@ export type APIMethod = {
   deprecated?: boolean;
 };
 
-type RequestOptions<BodyParams> = BodyParams extends undefined
+export type RequestOptions<BodyParams> = BodyParams extends undefined
   ? Omit<RequestInit, "body" | "method">
   : Omit<RequestInit, "body" | "method"> & { body: BodyParams };
 
@@ -126,7 +126,7 @@ export type Client<T extends Record<string, Record<string, APIMethod>>> = {
 export function createClient<
   T extends Record<string, Record<string, APIMethod>>
 >(config: {
-  fetchFn: any;
+  fetchFn: FetchFn;
   pontxSpecMeta: PontxSpecMeta;
   pathMark?: string;
   getFetchUrl?: (path: string, params: Record<string, any>) => string;
@@ -166,6 +166,14 @@ export function createClient<
                 const requestInit = {
                   method: apiMeta.method?.toUpperCase?.(),
                   headers: headers,
+                  getMetadata: () => {
+                    return {
+                      specName: apiMetaConfig.name,
+                      controllerName: controllerName,
+                      apiName: methodName,
+                      apiMeta: apiMeta,
+                    };
+                  },
                   ...requestOptions,
                 };
 
@@ -188,6 +196,7 @@ export function createClient<
               return {
                 fetchKey: getFetchKey(params),
                 fetchFn: () => {
+                  // use query 使用，只有 GET 方法，因此不需要传入 requestInit
                   return request(params);
                 },
               };
