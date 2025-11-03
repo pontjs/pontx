@@ -1,5 +1,21 @@
 # pontx
 
+## 0.1.11
+
+### Patch Changes
+
+- fix build dir
+- Updated dependencies
+  - @pontx/spec@0.1.13
+
+## 0.1.10
+
+### Patch Changes
+
+- fix: fix oas parser
+- Updated dependencies
+  - @pontx/spec@0.1.12
+
 ## 0.1.8
 
 ### Patch Changes

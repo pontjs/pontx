@@ -15,3 +15,6 @@ packages/spec/tests/oas3/openapi.yaml
 packages/plugin-egg/tests/openapi.yaml
 .specstory/
 .DS_Store/
+.claude
+.kiro
+*.tmp

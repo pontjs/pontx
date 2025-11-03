@@ -1,6 +1,6 @@
 {
   "name": "@pontx/sdk-browser-client",
-  "version": "0.0.6",
+  "version": "0.0.8",
   "type": "module",
   "main": "./cjs/index.cjs",
   "module": "./lib/index.js",
@@ -24,6 +24,9 @@
   "dependencies": {},
   "peerDependencies": {
     "react": "*"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.3",

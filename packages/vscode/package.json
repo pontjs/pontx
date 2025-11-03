@@ -4,6 +4,7 @@
   "description": "基于 Pontx 协议的 API 生命周期管理扩展，提供 API 搜索、文档查阅、代码生成等强大功能",
   "version": "2.0.8",
   "publisher": "hzongquan",
+  "private": true,
   "engines": {
     "vscode": "^1.95.0",
     "node": ">=20.0.0"

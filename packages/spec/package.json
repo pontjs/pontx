@@ -1,6 +1,6 @@
 {
   "name": "@pontx/spec",
-  "version": "0.1.11",
+  "version": "0.1.13",
   "type": "module",
   "description": "pontx spec",
   "exports": {
@@ -39,6 +39,9 @@
     "package.json",
     "*.md"
   ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
   "keywords": [],
   "author": "jasonHzq",
   "license": "MIT",

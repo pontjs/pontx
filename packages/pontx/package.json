@@ -1,6 +1,6 @@
 {
   "name": "pontx",
-  "version": "0.1.9",
+  "version": "0.1.11",
   "description": "pontx spec manager",
   "main": "./cjs/index.cjs",
   "module": "./lib/index.js",
@@ -27,7 +27,7 @@
     "clean": "rimraf cjs && rimraf tsconfig.tsbuildinfo && rimraf lib"
   },
   "dependencies": {
-    "@pontx/spec": "^0.1.10",
+    "@pontx/spec": "^0.1.13",
     "baidu-translate-service": "^2.2.4",
     "commander": "^13.1.0",
     "lodash": "^4.17.21",
@@ -45,6 +45,9 @@
   "keywords": [],
   "author": "jasonHzq",
   "license": "MIT",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
   "devDependencies": {
     "@rollup/plugin-json": "^6.1.0",
     "@types/fs-extra": "*",
