@@ -113,7 +113,8 @@ export function parseSwagger2APIs(
 
     const samePath = getMaxSamePath(
       tagApis
-        .filter((inter) => !inter.operationId)
+        // 所有 tagApi 都有 operationId，如果过滤，则 samePath 就是空的。
+        // .filter((inter) => !inter.operationId)
         .map((inter) => {
           if (inter.path?.startsWith?.("/")) {
             return inter.path.slice(1);

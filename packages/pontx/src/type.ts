@@ -1,4 +1,4 @@
-import { PontxSpec } from "@pontx/spec";
+import { PontxSpec, Parameter, PontxAPI } from "@pontx/spec";
 import { TranslateConfig } from "./builtin/translate";
 import { LogLevel } from "./logger";
 
@@ -7,11 +7,44 @@ type PluginHookOptions = {
   resolvedConfig: ResolvedConfig;
 };
 
+/**
+ * API Executor Context
+ * Provides complete context for plugin apiExecutor hook to execute API calls
+ */
+export interface ApiExecutorContext {
+  /** API selector identifying the API */
+  apiSelector: {
+    specName: string;
+    tagName: string;
+    apiName: string;
+  };
+
+  /** API metadata from PontxSpec (based on PontxAPI) */
+  apiMeta: {
+    path: string;
+    method: string;
+    description?: string;
+    parameters?: Parameter[];
+    requestBody?: {
+      required?: boolean;
+      content?: Record<string, { schema: any }>;
+    };
+    responses?: PontxAPI["responses"];
+  };
+
+  /** Runtime parameters from MCP tool invocation */
+  toolParams: Record<string, unknown>;
+
+  /** Plugin hook options with resolved configuration */
+  options: PluginHookOptions;
+}
+
 export type Plugin = {
   name: string;
   configResolved?: (resolvedConfig: ResolvedConfig) => any;
   /** 拉取 origin 配置中的元数据，返回元数据字符串 */
   fetch?: (url: string, options: PluginHookOptions) => Promise<string>;
+  /** 在 parseMeta 之前调用，事先处理元数据字符串。每个插件都会调用。 */
   transformMeta?: (
     metaString: string,
     options: PluginHookOptions
@@ -55,6 +88,13 @@ export type Plugin = {
       ): Promise<string>;
     }>
   >;
+  /**
+   * Execute API call with runtime parameters
+   * Used by MCP Studio to execute API tools at runtime
+   * @param context - Complete execution context including API metadata and runtime parameters
+   * @returns Raw API response data (unwrapped)
+   */
+  apiExecutor?: (context: ApiExecutorContext) => Promise<unknown>;
 };
 
 export type Lifecycle =
@@ -65,7 +105,8 @@ export type Lifecycle =
   | "transform"
   | "generate"
   | "generateEntry"
-  | "mocks";
+  | "mocks"
+  | "apiExecutor";
 
 export interface ResolvedOriginConfig {
   /** 远程数据源地址 */
@@ -80,6 +121,8 @@ export interface ResolvedOriginConfig {
   remoteSpec?: PontxSpec;
   /** 拉取元数据 */
   fetchedMeta?: string;
+  /** 是否在 Spec 中包含 Tag 或 namespace。默认是 true */
+  includeTags?: boolean;
 
   [x: string]: any;
 }

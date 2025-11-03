@@ -16,6 +16,7 @@ import {
   PontxSpec,
   fixOASTagsByTranslate,
 } from "@pontx/spec";
+import { createLogger } from "../logger";
 
 export function getBuiltinPlugin(): Plugin {
   return {
@@ -95,13 +96,55 @@ export function getBuiltinPlugin(): Plugin {
     parseMeta: async (metaString: string, options) => {
       const json = JSON.parse(metaString);
 
+      let spec: PontxSpec;
+
       if (checkIsOas2(json)) {
-        return parseOAS2(json, options.originConfig.name);
+        spec = parseOAS2(json, options.originConfig.name);
       } else if (checkIsOas3(json)) {
-        return parseOAS3(json, options.originConfig.name);
+        spec = parseOAS3(json, options.originConfig.name);
+      } else {
+        // 已经是 PontxSpec 或其他对象，直接返回
+        return json as PontxSpec;
+      }
+      // 当 includeTags === false 时，移除 tags，并将 apis 从 "tag/api" 扁平化为 "api"
+      if (options?.originConfig?.includeTags === false) {
+        const logger = createLogger(
+          options?.resolvedConfig?.service?.logLevel || "info"
+        );
+
+        const flatApis: Record<string, any> = {};
+        const duplicated: string[] = [];
+
+        Object.keys(spec?.apis || {}).forEach((fullName) => {
+          const name = fullName?.includes?.("/")
+            ? fullName.split("/").pop()
+            : fullName;
+          if (!name) return;
+          if (flatApis[name]) {
+            duplicated.push(name);
+          } else {
+            flatApis[name] = spec.apis[fullName];
+          }
+        });
+
+        if (duplicated.length) {
+          logger.warn(
+            `Spec "${
+              spec?.name || ""
+            }" 因配置 includeTags: false。pontx 在移除命名空间后，存在重复 API 名称: ${duplicated.join(
+              ", "
+            )}`
+          );
+        }
+
+        spec = {
+          ...spec,
+          apis: flatApis,
+        } as PontxSpec;
+        delete spec.tags;
       }
 
-      return json;
+      return spec;
     },
     transform: async (spec: PontxSpec, options) => {
       return spec;
