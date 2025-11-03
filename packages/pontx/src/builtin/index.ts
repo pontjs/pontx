@@ -106,8 +106,16 @@ export function getBuiltinPlugin(): Plugin {
         // 已经是 PontxSpec 或其他对象，直接返回
         return json as PontxSpec;
       }
-      // 当 includeTags === false 时，移除 tags，并将 apis 从 "tag/api" 扁平化为 "api"
-      if (options?.originConfig?.includeTags === false) {
+
+      // 当 includeTags === false 时，移除 oas 中无效的 tags，并将 apis 从 "tag/api" 扁平化为 "api"
+      if (
+        options?.originConfig &&
+        Object.prototype.hasOwnProperty.call(
+          options.originConfig,
+          "includeTags"
+        ) &&
+        options.originConfig.includeTags === false
+      ) {
         const logger = createLogger(
           options?.resolvedConfig?.service?.logLevel || "info"
         );
