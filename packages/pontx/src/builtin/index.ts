@@ -17,6 +17,7 @@ import {
   fixOASTagsByTranslate,
 } from "@pontx/spec";
 import { createLogger } from "../logger";
+import { builtinCheck } from "./check";
 
 export function getBuiltinPlugin(): Plugin {
   return {
@@ -194,6 +195,7 @@ export function getBuiltinPlugin(): Plugin {
 
       return fileStructure;
     },
+    check: builtinCheck,
   };
 }
 

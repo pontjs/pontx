@@ -2,7 +2,7 @@ import { PontxSpec, Parameter, PontxAPI } from "@pontx/spec";
 import { TranslateConfig } from "./builtin/translate";
 import { LogLevel } from "./logger";
 
-type PluginHookOptions = {
+export type PluginHookOptions = {
   originConfig?: ResolvedOriginConfig;
   resolvedConfig: ResolvedConfig;
 };
@@ -95,6 +95,18 @@ export type Plugin = {
    * @returns Raw API response data (unwrapped)
    */
   apiExecutor?: (context: ApiExecutorContext) => Promise<unknown>;
+  /**
+   * Check for breaking changes and issues between local and remote metadata
+   * @param localSpec - Local metadata (pontx-lock.json), null if not exists
+   * @param remoteSpec - Remote latest metadata
+   * @param options - Plugin hook options
+   * @returns Array of check results, empty array if no issues found
+   */
+  check?: (
+    localSpec: PontxSpec | null,
+    remoteSpec: PontxSpec,
+    options: PluginHookOptions
+  ) => Promise<CheckResult[]>;
 };
 
 export type Lifecycle =
@@ -106,7 +118,29 @@ export type Lifecycle =
   | "generate"
   | "generateEntry"
   | "mocks"
-  | "apiExecutor";
+  | "apiExecutor"
+  | "check";
+
+/**
+ * Check result for metadata validation
+ */
+export interface CheckResult {
+  /** Issue severity level */
+  level: "error" | "warning" | "info";
+  /** Issue type identifier */
+  type: string;
+  /** Human-readable issue description */
+  message: string;
+  /** Related API information */
+  api?: {
+    tagName: string;
+    apiName: string;
+    method?: string;
+    path?: string;
+  };
+  /** Additional details about the issue */
+  details?: any;
+}
 
 export interface ResolvedOriginConfig {
   /** 远程数据源地址 */

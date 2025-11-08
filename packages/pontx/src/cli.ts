@@ -28,11 +28,10 @@ const logger = createLogger("info", {
 
     program
       .command("check")
-      .description("检测 api-lock.json 文件")
+      .description("检测本地和远程元数据的兼容性")
       .action(async () => {
-        // todo
-        logger.info("暂不支持");
-        process.exit(0);
+        const { checkCommand } = await import("./commands/check");
+        await checkCommand(manager);
       });
 
     program
