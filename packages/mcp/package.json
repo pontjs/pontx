@@ -8,7 +8,9 @@
   "scripts": {
     "build": "tsc && chmod +x dist/*.js",
     "watch": "tsc --watch",
-    "dev": "node dist/index.js /Users/hzongquan/workspace/open/pontx/examples/react-app"
+    "dev": "node dist/index.js /Users/hzongquan/workspace/open/pontx/examples/react-app",
+    "debug": "npx @modelcontextprotocol/inspector node dist/index.js",
+    "debug:project": "npx @modelcontextprotocol/inspector node dist/index.js /Users/hzongquan/workspace/open/pontx/examples/react-app"
   },
   "files": [
     "dist"

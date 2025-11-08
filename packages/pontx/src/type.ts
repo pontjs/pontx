@@ -35,8 +35,10 @@ export interface ApiExecutorContext {
   /** Runtime parameters from MCP tool invocation */
   toolParams: Record<string, unknown>;
 
+  baseUrl?: string;
+
   /** Plugin hook options with resolved configuration */
-  options: PluginHookOptions;
+  options?: PluginHookOptions;
 }
 
 export type Plugin = {

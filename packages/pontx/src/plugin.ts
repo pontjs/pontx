@@ -6,6 +6,7 @@ import type {
   ResolvedConfig,
   ResolvedOriginConfig,
   CheckResult,
+  ApiExecutorContext,
 } from "./type";
 import _ from "lodash";
 import { createLogger } from "./logger";
@@ -131,7 +132,9 @@ export function resolvePlugin(plugins: Plugin[]): Plugin {
 
             if (!Array.isArray(results)) {
               logger.warn(
-                `Plugin "${plugin.name}" check method returned invalid type (expected array, got ${typeof results}). Skipping.`
+                `Plugin "${
+                  plugin.name
+                }" check method returned invalid type (expected array, got ${typeof results}). Skipping.`
               );
               continue;
             }
@@ -177,6 +180,13 @@ export function resolvePlugin(plugins: Plugin[]): Plugin {
       }
 
       return allResults;
+    },
+    apiExecutor: async (context: ApiExecutorContext) => {
+      for (const plugin of orderedPlugins) {
+        if (plugin.apiExecutor) {
+          return await plugin.apiExecutor(context);
+        }
+      }
     },
   } as Plugin;
 }

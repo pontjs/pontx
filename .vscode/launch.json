@@ -18,13 +18,100 @@
       "outFiles": ["${workspaceFolder}/packages/vscode/dist/**/*.js"]
     },
     {
-      "name": "MCP DEV",
+      "name": "Debug MCP Server (Inspector - Global Mode)",
+      "type": "node",
       "request": "launch",
-      "runtimeArgs": ["run-script", "dev"],
-      "cwd": "${workspaceFolder}/packages/mcp",
-      "runtimeExecutable": "npm",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "@modelcontextprotocol/inspector",
+        "node",
+        "--inspect-brk",
+        "${workspaceFolder}/packages/mcp/dist/index.js"
+      ],
+      "console": "integratedTerminal",
       "skipFiles": ["<node_internals>/**"],
-      "type": "node"
+      "env": {
+        "DEBUG": "pontx:*"
+      },
+      "preLaunchTask": null,
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Debug MCP Server (Inspector - Project Mode)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "@modelcontextprotocol/inspector",
+        "node",
+        "--inspect-brk",
+        "${workspaceFolder}/packages/mcp/dist/index.js",
+        "${workspaceFolder}/examples/react-app"
+      ],
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "env": {
+        "DEBUG": "pontx:*"
+      },
+      "preLaunchTask": null,
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Debug MCP Server (Inspector - Custom Path)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "@modelcontextprotocol/inspector",
+        "node",
+        "--inspect-brk",
+        "${workspaceFolder}/packages/mcp/dist/index.js",
+        "${input:projectPath}"
+      ],
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "env": {
+        "DEBUG": "pontx:*"
+      },
+      "preLaunchTask": null,
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Debug MCP Server (Node Only - Global Mode)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/packages/mcp/dist/index.js",
+      "args": [],
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "env": {
+        "DEBUG": "pontx:*",
+        "PONTX_DEBUG_FILE": "${workspaceFolder}/debug.log"
+      },
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Debug MCP Server (Node Only - Project Mode)",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/packages/mcp",
+      "program": "${workspaceFolder}/packages/mcp/dist/index.js",
+      "args": ["${workspaceFolder}/examples/react-app"],
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "env": {
+        "DEBUG": "pontx:*",
+        "PONTX_DEBUG_FILE": "${workspaceFolder}/debug.log"
+      },
+      "internalConsoleOptions": "neverOpen"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "projectPath",
+      "type": "promptString",
+      "description": "请输入项目路径（绝对路径）",
+      "default": "/Users/hzongquan/workspace/open/pontx/examples/react-app"
     }
   ]
 }

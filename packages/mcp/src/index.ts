@@ -11,7 +11,7 @@ import {
 import {
   buildFuse,
   buildPontxManager,
-  callTool,
+  callApiExecutor,
   getApiMeta,
   getSchemaMeta,
   makeCode,
@@ -32,14 +32,36 @@ const isGlobalMode = process.argv?.[2] === GLOBAL_MCP_MARKER;
 // 默认项目路径（仅在非全局模式下有效）
 const defaultProjectPath = isGlobalMode
   ? undefined
-  : (process.argv?.[2] || process.env.PONTX_PROJECT_PATH || process.cwd());
+  : process.argv?.[2] || process.env.PONTX_PROJECT_PATH || process.cwd();
 
-const debug = (info: string) => {
-  fs.writeFileSync(path.join(process.cwd(), "debug.log"), info);
+// 增强的调试日志功能
+const DEBUG_FILE =
+  process.env.PONTX_DEBUG_FILE || path.join(process.cwd(), "mcp-debug.log");
+const isDebugMode =
+  process.env.DEBUG?.includes("pontx") || process.env.PONTX_DEBUG === "true";
+
+const debug = (info: string, level: "info" | "error" | "warn" = "info") => {
+  if (!isDebugMode) return;
+
+  const timestamp = new Date().toISOString();
+  const logMessage = `[${timestamp}] [${level.toUpperCase()}] ${info}\n`;
+
+  try {
+    // 写入文件（追加模式）
+    fs.appendFileSync(DEBUG_FILE, logMessage);
+
+    // 同时输出到 stderr（不会污染 stdio 的 JSON-RPC 通信）
+    console.error(`[PontX Debug] ${info}`);
+  } catch (e) {
+    console.error(`[PontX Debug] Failed to write debug log: ${e}`);
+  }
 };
 
 // 缓存管理器，避免重复构建
-const managerCache = new Map<string, { pontxManager: PontxManager; fuse: Fuse<any>; timestamp: number }>();
+const managerCache = new Map<
+  string,
+  { pontxManager: PontxManager; fuse: Fuse<any>; timestamp: number }
+>();
 const CACHE_TTL = 5 * 60 * 1000; // 5分钟缓存过期时间
 
 // 获取或创建 PontxManager 和 Fuse 实例
@@ -57,7 +79,7 @@ async function getOrCreateManager(projectPath: string) {
     managerCache.set(normalizedPath, {
       pontxManager: updatedManager,
       fuse: updatedFuse,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     return { pontxManager: updatedManager, fuse: updatedFuse };
@@ -71,7 +93,7 @@ async function getOrCreateManager(projectPath: string) {
   managerCache.set(normalizedPath, {
     pontxManager,
     fuse,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   });
 
   return { pontxManager, fuse };
@@ -97,9 +119,23 @@ async function main() {
   // 打印模式信息到 stderr（MCP 协议要求 stdout 只用于 JSON-RPC 通信）
   // 注意：这里使用 console.error 不是因为这是错误，而是因为需要输出到 stderr
   if (isGlobalMode) {
-    console.error("[PontX MCP] Running in GLOBAL mode - projectPath is required for all tools");
+    console.error(
+      "[PontX MCP] Running in GLOBAL mode - projectPath is required for all tools"
+    );
+    debug("MCP Server started in GLOBAL mode");
   } else {
-    console.error(`[PontX MCP] Running in PROJECT mode - default path: ${defaultProjectPath}`);
+    console.error(
+      `[PontX MCP] Running in PROJECT mode - default path: ${defaultProjectPath}`
+    );
+    debug(
+      `MCP Server started in PROJECT mode with path: ${defaultProjectPath}`
+    );
+  }
+
+  if (isDebugMode) {
+    console.error(
+      `[PontX MCP] Debug mode enabled, logs will be written to: ${DEBUG_FILE}`
+    );
   }
 
   // 初始化时尝试加载默认项目的配置（仅在非全局模式下）
@@ -167,7 +203,9 @@ async function main() {
                 type: "string",
               },
             },
-            required: isGlobalMode ? ["specName", "apiName", "projectPath"] : ["specName", "apiName"],
+            required: isGlobalMode
+              ? ["specName", "apiName", "projectPath"]
+              : ["specName", "apiName"],
           },
         },
         {
@@ -193,7 +231,9 @@ async function main() {
                 description: "searchApi 搜索结果中的 specName",
               },
             },
-            required: isGlobalMode ? ["schemaName", "specName", "projectPath"] : ["schemaName", "specName"],
+            required: isGlobalMode
+              ? ["schemaName", "specName", "projectPath"]
+              : ["schemaName", "specName"],
           },
         },
         {
@@ -215,7 +255,8 @@ async function main() {
               },
               case: {
                 type: "string",
-                description: "代码生成模板名称，常见值: request (基础请求), reactHooks (React Hooks)。不同项目可能有自定义模板，请先使用 listSampleCases 查询可用模板",
+                description:
+                  "代码生成模板名称，常见值: request (基础请求), reactHooks (React Hooks)。不同项目可能有自定义模板，请先使用 listSampleCases 查询可用模板",
               },
               specName: {
                 type: "string",
@@ -230,7 +271,9 @@ async function main() {
                 description: "apiName",
               },
             },
-            required: isGlobalMode ? ["case", "specName", "apiName", "projectPath"] : ["case", "specName", "apiName"],
+            required: isGlobalMode
+              ? ["case", "specName", "apiName", "projectPath"]
+              : ["case", "specName", "apiName"],
           },
         },
         {
@@ -248,39 +291,65 @@ async function main() {
             },
           },
         },
-        // {
-        //   name: "callTool",
-        //   description: "调用 API 工具",
-        //   inputSchema: {
-        //     type: "object",
-        //     properties: {
-        //       specName: {
-        //         type: "string",
-        //       },
-        //       tagName: {
-        //         type: "string",
-        //       },
-        //       apiName: {
-        //         type: "string",
-        //       },
-        //       params: {
-        //         type: "string",
-        //       },
-        //       bodyParams: {
-        //         type: "string",
-        //       },
-        //     },
-        //   },
-        // },
+        {
+          name: "callApi",
+          description: "调用 API，并获取返回结果",
+          inputSchema: {
+            type: "object",
+            properties: {
+              projectPath: {
+                type: "string",
+                description: isGlobalMode
+                  ? "项目根路径（必填）"
+                  : "项目根路径，如果不提供则使用默认路径",
+              },
+              specName: {
+                type: "string",
+              },
+              tagName: {
+                type: "string",
+              },
+              apiName: {
+                type: "string",
+              },
+              params: {
+                type: "string",
+                description:
+                  'API 请求参数，包括 path 和 query 参数。是一个 JSON 字符串。如 {"name": "abc"}',
+              },
+              bodyParams: {
+                type: "string",
+                description: "API 请求体参数",
+              },
+              baseUrl: {
+                type: "string",
+                description:
+                  "API 请求基础 URL，如果不提供则使用项目 spec 中默认的 baseUrl",
+              },
+            },
+          },
+        },
       ],
     };
   });
 
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    debug(
+      `Tool called: ${request.params.name} with args: ${JSON.stringify(
+        request.params.arguments
+      )}`
+    );
+
     switch (request.params.name) {
       case "searchApis": {
         try {
-          const projectPath = (request.params.arguments?.projectPath as string) || defaultProjectPath;
+          const projectPath =
+            (request.params.arguments?.projectPath as string) ||
+            defaultProjectPath;
+
+          debug(
+            `searchApis: projectPath=${projectPath}, query=${request.params.arguments?.query}`
+          );
 
           // 全局模式下检查 projectPath 是否提供
           if (isGlobalMode && !projectPath) {
@@ -323,7 +392,9 @@ async function main() {
 
       case "getApiMeta": {
         try {
-          const projectPath = (request.params.arguments?.projectPath as string) || defaultProjectPath;
+          const projectPath =
+            (request.params.arguments?.projectPath as string) ||
+            defaultProjectPath;
 
           // 全局模式下检查 projectPath 是否提供
           if (isGlobalMode && !projectPath) {
@@ -367,7 +438,9 @@ async function main() {
 
       case "getSchemaMeta": {
         try {
-          const projectPath = (request.params.arguments?.projectPath as string) || defaultProjectPath;
+          const projectPath =
+            (request.params.arguments?.projectPath as string) ||
+            defaultProjectPath;
 
           // 全局模式下检查 projectPath 是否提供
           if (isGlobalMode && !projectPath) {
@@ -410,7 +483,9 @@ async function main() {
 
       case "listSampleCases": {
         try {
-          const projectPath = (request.params.arguments?.projectPath as string) || defaultProjectPath;
+          const projectPath =
+            (request.params.arguments?.projectPath as string) ||
+            defaultProjectPath;
 
           // 全局模式下检查 projectPath 是否提供
           if (isGlobalMode && !projectPath) {
@@ -427,26 +502,26 @@ async function main() {
           const { pontxManager } = await getOrCreateManager(projectPath);
           const samples = await PontxManager.listSamples(pontxManager);
 
-          const sampleList = samples.map(sample => ({
+          const sampleList = samples.map((sample) => ({
             case: sample.case,
-            description: sample.description
+            description: sample.description,
           }));
 
           // 检测 pontx 库是否支持内置生成器（但不作为默认值）
           const builtinSupport = [];
           // 注：这些只是 pontx 库可能支持的内置生成器，不是所有项目都会使用
-          if (!samples.find(s => s.case === 'request')) {
+          if (!samples.find((s) => s.case === "request")) {
             builtinSupport.push({
               case: "request",
               description: "pontx 内置基础请求生成器（如果可用）",
-              type: "builtin"
+              type: "builtin",
             });
           }
-          if (!samples.find(s => s.case === 'reactHooks')) {
+          if (!samples.find((s) => s.case === "reactHooks")) {
             builtinSupport.push({
               case: "reactHooks",
               description: "pontx 内置 React Hooks 生成器（如果可用）",
-              type: "builtin"
+              type: "builtin",
             });
           }
 
@@ -454,12 +529,16 @@ async function main() {
             content: [
               {
                 type: "text",
-                text: JSON.stringify({
-                  projectPath,
-                  projectSamples: sampleList,
-                  pontxBuiltinGenerators: builtinSupport,
-                  note: "项目配置的模板优先级高于 pontx 内置生成器"
-                }, null, 2),
+                text: JSON.stringify(
+                  {
+                    projectPath,
+                    projectSamples: sampleList,
+                    pontxBuiltinGenerators: builtinSupport,
+                    note: "项目配置的模板优先级高于 pontx 内置生成器",
+                  },
+                  null,
+                  2
+                ),
               },
             ],
           };
@@ -477,7 +556,9 @@ async function main() {
 
       case "makeRequestCode": {
         try {
-          const projectPath = (request.params.arguments?.projectPath as string) || defaultProjectPath;
+          const projectPath =
+            (request.params.arguments?.projectPath as string) ||
+            defaultProjectPath;
 
           // 全局模式下检查 projectPath 是否提供
           if (isGlobalMode && !projectPath) {
@@ -523,17 +604,19 @@ async function main() {
         } catch (e: any) {
           // 获取项目实际支持的 samples 以提供更准确的错误信息
           try {
-            const projectPath = (request.params.arguments?.projectPath as string) || defaultProjectPath;
+            const projectPath =
+              (request.params.arguments?.projectPath as string) ||
+              defaultProjectPath;
             const { pontxManager } = await getOrCreateManager(projectPath);
             const samples = await PontxManager.listSamples(pontxManager);
-            const projectCases = samples.map(s => s.case);
+            const projectCases = samples.map((s) => s.case);
 
             let errorMessage = `代码生成失败: ${e.message}\n\n`;
 
             if (e.message.includes("找不到 case")) {
               errorMessage += `该项目配置的代码模板：\n`;
               if (projectCases.length > 0) {
-                errorMessage += projectCases.map(c => `  - ${c}`).join("\n");
+                errorMessage += projectCases.map((c) => `  - ${c}`).join("\n");
               } else {
                 errorMessage += `  (无项目自定义模板)`;
               }
@@ -566,29 +649,47 @@ async function main() {
         }
       }
 
-      // case "callTool": {
-      //   const result = await callTool(
-      //     pontxManager,
-      //     request.params.arguments?.specName as string,
-      //     request.params.arguments?.tagName as string,
-      //     request.params.arguments?.apiName as string,
-      //     request.params.arguments?.params
-      //       ? JSON.parse(request.params.arguments?.params as any)
-      //       : undefined,
-      //     request.params.arguments?.bodyParams
-      //       ? JSON.parse(request.params.arguments?.bodyParams as any)
-      //       : undefined
-      //   );
+      case "callApi": {
+        const projectPath =
+          (request.params.arguments?.projectPath as string) ||
+          defaultProjectPath;
 
-      //   return {
-      //     content: [
-      //       {
-      //         type: "text",
-      //         text: JSON.stringify(result),
-      //       },
-      //     ],
-      //   };
-      // }
+        // 全局模式下检查 projectPath 是否提供
+        if (isGlobalMode && !projectPath) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: `错误：在全局模式下，projectPath 参数是必填的。\n请提供项目路径，例如：{ "projectPath": "/path/to/your/project" }`,
+              },
+            ],
+          };
+        }
+
+        const { pontxManager } = await getOrCreateManager(projectPath);
+        const result = await callApiExecutor(
+          pontxManager,
+          request.params.arguments?.specName as string,
+          request.params.arguments?.tagName as string,
+          request.params.arguments?.apiName as string,
+          request.params.arguments?.params
+            ? JSON.parse(request.params.arguments?.params as any)
+            : undefined,
+          request.params.arguments?.bodyParams
+            ? JSON.parse(request.params.arguments?.bodyParams as any)
+            : undefined,
+          request.params.arguments?.baseUrl as string
+        );
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result),
+            },
+          ],
+        };
+      }
 
       default:
         throw new Error("Unknown tool");

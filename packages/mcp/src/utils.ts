@@ -203,50 +203,35 @@ export async function makeCode(
   );
 }
 
-export function callTool(
+export async function callApiExecutor(
   pontxManager: PontxManager,
   specName: string,
   tagName: string,
   apiName: string,
   params: any,
-  bodyParams: any
+  bodyParams: any,
+  baseUrl?: string
 ) {
+  const apiExecutor = pontxManager.resolvedConfig.resolvedPlugin.apiExecutor;
+  if (!apiExecutor) {
+    throw new Error("找不到 apiExecutor 插件");
+  }
   const apiMeta = getApiMeta(pontxManager, specName, tagName, apiName);
-  const produce = apiMeta.produces[0];
-  const consume = apiMeta.consumes[0];
-
-  return fetch(apiMeta.url, {
-    method: apiMeta.method,
-    body: bodyParams ? serializeRequestBody(bodyParams, consume) : undefined,
-    headers: {
-      "Content-Type": consume,
+  const result = await apiExecutor({
+    apiSelector: {
+      specName,
+      tagName,
+      apiName,
     },
-  }).then((res) => {
-    if (produce === "application/json") {
-      return res.json();
-    }
-    if (produce === "text/plain") {
-      return res.text();
-    }
-
-    if (produce === "application/octet-stream") {
-      return res.blob();
-    }
-
-    if (produce === "multipart/form-data") {
-      return res.formData();
-    }
-
-    if (produce === "text/html") {
-      return res.text();
-    }
-
-    if (produce === "application/x-www-form-urlencoded") {
-      return res.formData();
-    }
-
-    return res.text();
+    apiMeta,
+    toolParams: {
+      ...(params || {}),
+      body: bodyParams,
+    },
+    baseUrl,
   });
+
+  return result;
 }
 
 export const buildPontxManager = async (projectRootPath: string) => {

@@ -18,6 +18,7 @@ import {
 } from "@pontx/spec";
 import { createLogger } from "../logger";
 import { builtinCheck } from "./check";
+import { builtinApiExecutor } from "./apiExecutor";
 
 export function getBuiltinPlugin(): Plugin {
   return {
@@ -196,6 +197,7 @@ export function getBuiltinPlugin(): Plugin {
       return fileStructure;
     },
     check: builtinCheck,
+    apiExecutor: builtinApiExecutor,
   };
 }
 
