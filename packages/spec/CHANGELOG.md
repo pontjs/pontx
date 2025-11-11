@@ -1,5 +1,11 @@
 # @pontx/spec
 
+## 0.1.14
+
+### Patch Changes
+
+- support pontx check
+
 ## 0.1.13
 
 ### Patch Changes

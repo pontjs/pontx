@@ -1,5 +1,14 @@
 # @pontx/mcp
 
+## 0.1.14
+
+### Patch Changes
+
+- support pontx check
+- Updated dependencies
+  - pontx@0.1.12
+  - @pontx/sdk-browser-client@0.0.9
+
 ## 0.1.11
 
 ### Patch Changes

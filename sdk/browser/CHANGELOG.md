@@ -1,5 +1,11 @@
 # @pontx/sdk-browser-client
 
+## 0.0.9
+
+### Patch Changes
+
+- support pontx check
+
 ## 0.0.8
 
 ### Patch Changes

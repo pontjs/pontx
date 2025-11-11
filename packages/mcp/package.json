@@ -1,6 +1,6 @@
 {
   "name": "@pontx/mcp",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "type": "module",
   "bin": {
     "pontx-server": "./dist/index.js"
@@ -15,11 +15,14 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
   "dependencies": {
-    "@pontx/sdk-browser-client": "^0.0.4",
+    "@pontx/sdk-browser-client": "^0.0.9",
     "@modelcontextprotocol/sdk": "^1.18.0",
     "fuse.js": "^7.1.0",
-    "pontx": "^0.1.7",
+    "pontx": "^0.1.12",
     "zod": "^3.24.1"
   }
 }
