@@ -1,4 +1,5 @@
 import { FetchFn, PontxAPI, PontxSpecMeta } from "./type";
+import { normalizeURIComponent } from "./utils";
 
 type ContentType =
   | "text/html"
@@ -86,7 +87,7 @@ export function buildUrl(
     if (paramsCopy[key] !== undefined) {
       const value = paramsCopy[key];
       delete paramsCopy[key];
-      return encodeURIComponent(String(value));
+      return normalizeURIComponent(String(value));
     }
     // 如果参数不存在，使用 pathMark
     return pathMark;
