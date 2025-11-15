@@ -1,5 +1,17 @@
 # @pontx/sdk-browser-client
 
+## 0.0.11
+
+### Patch Changes
+
+- chore: release
+
+## 0.0.10
+
+### Patch Changes
+
+- fix: fix encodeURI
+
 ## 0.0.9
 
 ### Patch Changes
