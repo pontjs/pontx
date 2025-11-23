@@ -1,0 +1,81 @@
+{
+  "name": "@pontx/nodejs-sdk",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Pontx Node.js SDK - Type-safe API client for Node.js >= 18",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./lib/index.d.ts",
+        "default": "./lib/index.js"
+      },
+      "require": {
+        "types": "./cjs-types/index.d.cts",
+        "default": "./cjs/index.cjs"
+      }
+    },
+    "./plugin": {
+      "import": {
+        "types": "./lib/plugin/index.d.ts",
+        "default": "./lib/plugin/index.js"
+      },
+      "require": {
+        "types": "./cjs-types/plugin/index.d.ts",
+        "default": "./cjs/plugin/index.cjs"
+      }
+    }
+  },
+  "main": "cjs/index.cjs",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -c --watch",
+    "clean": "rimraf lib cjs cjs-types",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage",
+    "test:unit": "vitest --run test/unit",
+    "test:integration": "vitest --run test/integration",
+    "test:e2e": "vitest --run test/e2e",
+    "test:types": "tsd --files \"test/types/*.test-d.ts\""
+  },
+  "dependencies": {
+    "@pontx/spec": "workspace:*"
+  },
+  "peerDependencies": {
+    "zod": "^3.20.0"
+  },
+  "peerDependenciesMeta": {
+    "zod": {
+      "optional": true
+    }
+  },
+  "files": [
+    "lib/",
+    "cjs/",
+    "cjs-types/",
+    "*.json",
+    "package.json",
+    "*.md"
+  ],
+  "keywords": [
+    "pontx",
+    "nodejs",
+    "sdk",
+    "api-client",
+    "typescript",
+    "rest-api",
+    "openapi"
+  ],
+  "author": "jasonHzq",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": "git@github.com:pontjs/pontx-pro.git",
+  "devDependencies": {
+    "tsd": "^0.33.0",
+    "pontx": "workspace:*"
+  }
+}

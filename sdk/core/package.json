@@ -1,0 +1,92 @@
+{
+  "name": "@pontx/sdk-core",
+  "version": "0.1.0",
+  "description": "Shared core utilities for Pontx SDK (Browser & Node.js)",
+  "keywords": [
+    "pontx",
+    "sdk",
+    "api",
+    "client",
+    "shared",
+    "url-builder",
+    "serialization"
+  ],
+  "author": "Pontx Team",
+  "license": "MIT",
+  "type": "module",
+  "main": "./lib/index.cjs",
+  "module": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js",
+      "require": "./lib/index.cjs"
+    },
+    "./url": {
+      "types": "./lib/url/index.d.ts",
+      "import": "./lib/url/index.js",
+      "require": "./lib/url/index.cjs"
+    },
+    "./body": {
+      "types": "./lib/body/index.d.ts",
+      "import": "./lib/body/index.js",
+      "require": "./lib/body/index.cjs"
+    },
+    "./types": {
+      "types": "./lib/types/index.d.ts",
+      "import": "./lib/types/index.js",
+      "require": "./lib/types/index.cjs"
+    },
+    "./features": {
+      "types": "./lib/features/index.d.ts",
+      "import": "./lib/features/index.js",
+      "require": "./lib/features/index.cjs"
+    },
+    "./builders": {
+      "types": "./lib/builders/index.d.ts",
+      "import": "./lib/builders/index.js",
+      "require": "./lib/builders/index.cjs"
+    }
+  },
+  "files": [
+    "lib",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "clean": "rm -rf lib"
+  },
+  "dependencies": {
+    "@pontx/spec": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsup": "^8.0.0",
+    "typescript": "catalog:",
+    "vitest": "^1.0.0"
+  },
+  "peerDependencies": {
+    "typescript": ">=5.0.0",
+    "zod": "^3.20.0"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    },
+    "zod": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

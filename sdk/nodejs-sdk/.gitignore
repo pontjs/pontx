@@ -1,0 +1,12 @@
+node_modules/
+lib/
+cjs/
+cjs-types/
+*.log
+.DS_Store
+dist/
+build/
+coverage/
+.vscode/
+.idea/
+*.tsbuildinfo
