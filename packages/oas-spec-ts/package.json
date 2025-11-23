@@ -19,6 +19,9 @@
       "require": "./cjs/index.cjs"
     }
   },
+  "devDependencies": {
+    "tslib": "^2.8.1"
+  },
   "files": [
     "lib",
     "cjs",

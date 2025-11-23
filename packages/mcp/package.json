@@ -18,6 +18,9 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
   },
+  "devDependencies": {
+    "pontx": "workspace:*"
+  },
   "dependencies": {
     "@pontx/sdk-browser-client": "^0.0.9",
     "@modelcontextprotocol/sdk": "^1.18.0",
