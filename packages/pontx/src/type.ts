@@ -202,8 +202,10 @@ export interface ServiceConfig {
 export interface PontxConfig {
   /** 生成SDK代码的相对路径 */
   outDir: string;
-  /** 数据源 */
-  origins: OriginConfig[];
+  /** API 规范配置（推荐使用） */
+  specs?: OriginConfig[];
+  /** 数据源（兼容旧版，建议使用 specs） */
+  origins?: OriginConfig[];
   /** 翻译配置 */
   translateConfig?: TranslateConfig;
   /** 插件配置 */

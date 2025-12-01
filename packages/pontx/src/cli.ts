@@ -20,7 +20,10 @@ let managerInstance: PontxManager | null = null;
 
 async function getManager(): Promise<PontxManager> {
   if (!managerInstance) {
-    managerInstance = await PontxManager.constructorFromRootDir(rootDir, logger);
+    managerInstance = await PontxManager.constructorFromRootDir(
+      rootDir,
+      logger
+    );
   }
   return managerInstance;
 }
@@ -64,7 +67,7 @@ program
 program
   .command("show-api <apiPath>")
   .description(
-    "查看 API 元数据，包括入参、出参等。apiPath 格式: specName/tagName/apiName"
+    '查看 API 元数据，包括入参、出参等。apiPath 格式: specName.tagName.apiName，特殊字符用引号包裹'
   )
   .option("--use-remote", "使用远程元数据")
   .action(async (apiPath, options) => {
@@ -92,7 +95,7 @@ program
 program
   .command("gen <apiPath>")
   .description(
-    "生成项目中精准的 API 调用示例代码。apiPath 格式: specName/tagName/apiName"
+    '生成项目中精准的 API 调用示例代码。apiPath 格式: specName.tagName.apiName，特殊字符用引号包裹'
   )
   .option(
     "--case <case>",
@@ -118,6 +121,36 @@ program
     const manager = await getManager();
     const { listTemplatesCommand } = await import("./commands/list-templates");
     await listTemplatesCommand(manager);
+  });
+
+program
+  .command("call <apiPath>")
+  .description(
+    '调用 API 接口。apiPath 格式: specName.tagName.apiName，特殊字符用引号包裹。参数: --paramName=value，body: --body=\'{"key":"value"}\' 或 --body=@file.json'
+  )
+  .option(
+    "-H, --header <header>",
+    "添加请求头 (可多次使用)",
+    (val, acc: string[]) => {
+      acc.push(val);
+      return acc;
+    },
+    []
+  )
+  .option("-o, --output <path>", "输出结果到文件 (支持相对/绝对路径)")
+  .option("--debug", "显示详细请求/响应信息")
+  .option("--dry-run", "只显示请求，不实际执行")
+  .option("--use-remote", "使用远程元数据")
+  .option("-e, --env <env>", "指定环境/baseUrl")
+  .allowUnknownOption(true)
+  .allowExcessArguments(true)
+  .action(async (apiPath, options, command) => {
+    const manager = await getManager();
+    const { callCommand } = await import("./commands/call");
+    // Get raw args: all args after 'call' command
+    const callIndex = process.argv.indexOf("call");
+    const rawArgs = callIndex !== -1 ? process.argv.slice(callIndex + 2) : [];
+    await callCommand(manager, apiPath, rawArgs, options);
   });
 
 program
@@ -183,7 +216,9 @@ program
       console.log("PontxService 启动成功");
       console.log("Web 服务地址: http://localhost:" + options.port);
       console.log("状态接口: http://localhost:" + options.port + "/api/status");
-      console.log("Specs 接口: http://localhost:" + options.port + "/api/specs");
+      console.log(
+        "Specs 接口: http://localhost:" + options.port + "/api/specs"
+      );
     });
 
     service.on("stopped", () => {

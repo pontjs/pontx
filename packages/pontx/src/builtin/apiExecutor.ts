@@ -59,6 +59,16 @@ function parseParams(
 }
 
 /**
+ * 规范化 baseUrl，确保包含协议前缀
+ */
+function normalizeBaseUrl(baseUrl: string): string {
+  if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
+    return `https://${baseUrl}`;
+  }
+  return baseUrl;
+}
+
+/**
  * 构建完整 URL
  */
 function buildUrl(
@@ -67,6 +77,9 @@ function buildUrl(
   pathParams: Record<string, unknown>,
   queryParams: Record<string, unknown>
 ): string {
+  // 规范化 baseUrl
+  const normalizedBaseUrl = normalizeBaseUrl(baseUrl);
+
   // 替换路径参数: /users/{userId} -> /users/123
   let finalPath = path.replace(/\{([^}]+)\}/g, (_, key) => {
     return String(pathParams[key] ?? `{${key}}`);
@@ -77,7 +90,7 @@ function buildUrl(
     Object.entries(queryParams).map(([k, v]) => [k, String(v)])
   ).toString();
 
-  return `${baseUrl.replace(/\/$/, "")}${finalPath}${
+  return `${normalizedBaseUrl.replace(/\/$/, "")}${finalPath}${
     queryString ? `?${queryString}` : ""
   }`;
 }
