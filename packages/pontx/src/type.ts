@@ -32,7 +32,7 @@ export interface ApiExecutorContext {
     responses?: PontxAPI["responses"];
   };
 
-  /** Runtime parameters from MCP tool invocation */
+  /** key: param name, value: param value */
   toolParams: Record<string, unknown>;
 
   baseUrl?: string;

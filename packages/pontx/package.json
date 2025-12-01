@@ -30,6 +30,7 @@
     "@pontx/spec": "^0.1.14",
     "baidu-translate-service": "^2.2.4",
     "commander": "^13.1.0",
+    "fuse.js": "^7.1.0",
     "lodash": "^4.17.21",
     "picocolors": "^1.1.1",
     "tslib": "^2.6.2",
