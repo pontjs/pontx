@@ -1,6 +1,16 @@
 import Fuse from "fuse.js";
 import type { PontxManager } from "../manager";
 
+/**
+ * 如果名称包含特殊字符（如 .），则用引号括起来
+ */
+export function quoteIfNeeded(name: string): string {
+  if (name.includes(".")) {
+    return `"${name}"`;
+  }
+  return name;
+}
+
 export function buildFuse(pontxManager: PontxManager, useRemote?: boolean) {
   const origins = pontxManager?.resolvedConfig?.origins || [];
   const storages = [];
@@ -93,6 +103,8 @@ export function searchApis(
         method: item?.item?.method,
         path: item?.item?.path,
         title: item?.item?.title,
+        summary: item?.item?.summary,
+        description: item?.item?.description,
       };
     });
 }
@@ -116,15 +128,17 @@ export async function searchCommand(
   console.log(`Found ${results.length} API(s):\n`);
 
   results.forEach((result, index) => {
-    const apiPath = result.tagName
-      ? `${result.specName}/${result.tagName}/${result.apiName}`
-      : `${result.specName}/${result.apiName}`;
+    const specPart = quoteIfNeeded(result.specName);
+    const tagPart = result.tagName ? quoteIfNeeded(result.tagName) : "";
+    const apiPart = quoteIfNeeded(result.apiName);
+    const apiPath = tagPart
+      ? `${specPart}.${tagPart}.${apiPart}`
+      : `${specPart}.${apiPart}`;
 
-    console.log(`${index + 1}. ${apiPath}`);
+    const desc = result.title || result.summary || result.description || "";
+    const firstLine = desc ? `${apiPath} - ${desc}` : apiPath;
+    console.log(`${index + 1}. ${firstLine}`);
     console.log(`   ${result.method?.toUpperCase() || "GET"} ${result.path}`);
-    if (result.title) {
-      console.log(`   ${result.title}`);
-    }
     console.log();
   });
 }

@@ -8,6 +8,14 @@ export type PluginHookOptions = {
 };
 
 /**
+ * Request configuration for beforeRequest hook
+ */
+export interface ApiRequestConfig {
+  url: string;
+  requestInit: RequestInit;
+}
+
+/**
  * API Executor Context
  * Provides complete context for plugin apiExecutor hook to execute API calls
  */
@@ -24,12 +32,13 @@ export interface ApiExecutorContext {
     path: string;
     method: string;
     description?: string;
+    /** Parameters including body params (in: "body") */
     parameters?: Parameter[];
-    requestBody?: {
-      required?: boolean;
-      content?: Record<string, { schema: any }>;
-    };
     responses?: PontxAPI["responses"];
+    /** MIME types the API can consume (for Content-Type header) */
+    consumes?: string[];
+    /** MIME types the API can produce (for Accept header) */
+    produces?: string[];
   };
 
   /** key: param name, value: param value */
@@ -39,6 +48,16 @@ export interface ApiExecutorContext {
 
   /** Plugin hook options with resolved configuration */
   options?: PluginHookOptions;
+
+  /**
+   * Hook called before sending the request
+   * Allows modifying url, headers, body, etc.
+   * @param config - The request configuration (url and RequestInit)
+   * @returns Modified request configuration
+   */
+  beforeRequest?: (
+    config: ApiRequestConfig
+  ) => ApiRequestConfig | Promise<ApiRequestConfig>;
 }
 
 export type Plugin = {

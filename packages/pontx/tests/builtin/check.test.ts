@@ -3,9 +3,9 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { builtinCheck, parseApiKey } from "./check";
+import { builtinCheck, parseApiKey } from "../../src/builtin/check";
 import { PontxSpec } from "@pontx/spec";
-import type { PluginHookOptions } from "../type";
+import type { PluginHookOptions } from "../../src/type";
 
 describe("builtin check", () => {
   const mockOptions: PluginHookOptions = {

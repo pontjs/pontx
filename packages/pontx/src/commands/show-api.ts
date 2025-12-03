@@ -1,4 +1,6 @@
 import type { PontxManager } from "../manager";
+import type { CliContext } from "../cli-context";
+import { resolveManagerForSpec } from "../global";
 
 export function getApiMeta(
   pontxManager: PontxManager,
@@ -131,11 +133,28 @@ function parseDotSeparatedPath(path: string): string[] {
  * Show API command: display API metadata
  */
 export async function showApiCommand(
-  manager: PontxManager,
+  managerOrContext: PontxManager | CliContext,
   apiPath: string,
-  options: { useRemote?: boolean } = {}
+  options: { useRemote?: boolean; global?: boolean } = {}
 ) {
   const { specName, tagName, apiName } = parseApiPath(apiPath);
+
+  // Determine if called from CLI or directly
+  const isCliContext = "tryGetLocalManager" in managerOrContext;
+
+  let manager: PontxManager;
+
+  if (isCliContext) {
+    // CLI call: support auto-discovery
+    const resolved = await resolveManagerForSpec(specName, managerOrContext, {
+      forceGlobal: options.global,
+    });
+    manager = resolved.manager;
+  } else {
+    // Direct call: maintain backward compatibility
+    manager = managerOrContext;
+  }
+
   const apiMeta = getApiMeta(
     manager,
     specName,

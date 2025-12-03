@@ -1,7 +1,9 @@
 import type { PontxManager } from "../manager";
+import type { CliContext } from "../cli-context";
 import { PontxManager as PM } from "../manager";
 import { generateApiRequestCode, generateApiUseRequestCode } from "../generate";
 import { parseApiPath, getApiMeta } from "./show-api";
+import { resolveManagerForSpec } from "../global";
 
 export async function makeCode(
   pontxManager: PontxManager,
@@ -61,16 +63,33 @@ export async function makeCode(
  * Gen command: generate API request code
  */
 export async function genCommand(
-  manager: PontxManager,
+  managerOrContext: PontxManager | CliContext,
   apiPath: string,
   options: {
     case?: string;
     params?: string;
     body?: string;
     useRemote?: boolean;
+    global?: boolean;
   }
 ) {
   const { specName, tagName, apiName } = parseApiPath(apiPath);
+
+  // Determine if called from CLI or directly
+  const isCliContext = "tryGetLocalManager" in managerOrContext;
+
+  let manager: PontxManager;
+
+  if (isCliContext) {
+    // CLI call: support auto-discovery
+    const resolved = await resolveManagerForSpec(specName, managerOrContext, {
+      forceGlobal: options.global,
+    });
+    manager = resolved.manager;
+  } else {
+    // Direct call: maintain backward compatibility
+    manager = managerOrContext;
+  }
 
   // Validate API exists
   getApiMeta(manager, specName, tagName, apiName, options.useRemote);

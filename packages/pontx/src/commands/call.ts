@@ -1,8 +1,11 @@
 import * as fs from "fs";
 import * as path from "path";
+import * as jmespath from "jmespath";
 import type { PontxManager } from "../manager";
+import type { CliContext } from "../cli-context";
 import type { ApiExecutorContext } from "../type";
 import { parseApiPath, getApiMeta } from "./show-api";
+import { resolveManagerForSpec } from "../global";
 
 export interface CallCommandOptions {
   env?: string;
@@ -11,10 +14,12 @@ export interface CallCommandOptions {
   debug?: boolean;
   dryRun?: boolean;
   useRemote?: boolean;
+  global?: boolean;
+  query?: string;
 }
 
 // Known CLI options that should not be treated as API parameters
-const CLI_OPTIONS = new Set([
+export const CLI_OPTIONS = new Set([
   "env",
   "e",
   "header",
@@ -24,22 +29,52 @@ const CLI_OPTIONS = new Set([
   "debug",
   "dry-run",
   "use-remote",
+  "global",
+  "query",
+  "q",
   "help",
   "h",
 ]);
 
 /**
+ * Check if a string looks like a CLI flag (--flag or -f)
+ * but NOT a negative number like -123 or -3.14
+ */
+function looksLikeFlag(str: string): boolean {
+  if (str.startsWith("--")) {
+    return true;
+  }
+  if (str.startsWith("-")) {
+    // Check if it's a negative number
+    const rest = str.slice(1);
+    if (rest && /^\d/.test(rest)) {
+      return false; // It's a negative number like -123
+    }
+    return true; // It's a short flag like -e
+  }
+  return false;
+}
+
+/**
  * Parse command line arguments to extract API parameters
  * Supports:
- *   --paramName=value
- *   --body='{"key":"value"}'
- *   --body=@./file.json
+ *   --paramName value
+ *   --body '{"key":"value"}'
+ *   --body @./file.json
  *   @./file.json (shorthand for body)
+ *
+ * Note: Values starting with dash are treated as values (not flags) when they
+ * are negative numbers (e.g., -123) or follow a known parameter.
+ *
+ * @param args - Array of command line arguments
+ * @returns Record of parameter name to value
  */
-function parseToolParams(args: string[]): Record<string, unknown> {
+export function parseToolParams(args: string[]): Record<string, unknown> {
   const params: Record<string, unknown> = {};
 
-  for (const arg of args) {
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+
     // Handle @file shorthand for body
     if (arg.startsWith("@") && !arg.startsWith("--")) {
       const filePath = arg.slice(1);
@@ -48,49 +83,44 @@ function parseToolParams(args: string[]): Record<string, unknown> {
     }
 
     // Skip non-parameter arguments
-    if (!arg.startsWith("--") && !arg.startsWith("-")) {
+    if (!arg.startsWith("--")) {
       continue;
     }
 
-    // Skip short options like -e, -H, -o
-    if (arg.startsWith("-") && !arg.startsWith("--")) {
-      continue;
-    }
-
-    // Parse --key=value format
-    const eqIndex = arg.indexOf("=");
-    let key: string;
-    let value: unknown;
-
-    if (eqIndex === -1) {
-      // Boolean flag like --flag
-      key = arg.slice(2);
-      value = true;
-    } else {
-      key = arg.slice(2, eqIndex);
-      value = arg.slice(eqIndex + 1);
-    }
+    const key = arg.slice(2);
 
     // Skip known CLI options
     if (CLI_OPTIONS.has(key)) {
+      // Skip the next argument if it's a value for this CLI option
+      const nextArg = args[i + 1];
+      if (nextArg && !looksLikeFlag(nextArg)) {
+        i++;
+      }
       continue;
     }
 
-    // Handle @file syntax for body parameter
-    if (typeof value === "string" && value.startsWith("@")) {
-      const filePath = value.slice(1);
-      value = readBodyFromFile(filePath);
-    } else if (typeof value === "string") {
-      // Try to parse JSON values
-      value = tryParseJson(value);
+    // Get the next argument as value
+    const nextArg = args[i + 1];
+    let value: unknown;
+
+    if (!nextArg || looksLikeFlag(nextArg)) {
+      // Boolean flag like --flag, or next arg is another flag
+      value = true;
+    } else {
+      // Consume the next argument as value
+      i++;
+
+      // Handle @file syntax for body parameter
+      if (nextArg.startsWith("@")) {
+        const filePath = nextArg.slice(1);
+        value = readBodyFromFile(filePath);
+      } else {
+        // Try to parse JSON values
+        value = tryParseJson(nextArg);
+      }
     }
 
-    // Handle body parameter specially - merge into params
-    if (key === "body" && typeof value === "object" && value !== null) {
-      Object.assign(params, value);
-    } else {
-      params[key] = value;
-    }
+    params[key] = value;
   }
 
   return params;
@@ -119,7 +149,7 @@ function readBodyFromFile(filePath: string): Record<string, unknown> {
 /**
  * Try to parse a string as JSON, return original string if failed
  */
-function tryParseJson(value: string): unknown {
+export function tryParseJson(value: string): unknown {
   try {
     return JSON.parse(value);
   } catch {
@@ -138,7 +168,9 @@ function formatRequestInfo(
   const lines: string[] = [];
 
   lines.push("=".repeat(60));
-  lines.push(`API: ${apiSelector.specName}/${apiSelector.tagName}/${apiSelector.apiName}`);
+  lines.push(
+    `API: ${apiSelector.specName}/${apiSelector.tagName}/${apiSelector.apiName}`
+  );
   lines.push(`Method: ${apiMeta.method.toUpperCase()}`);
   lines.push(`Path: ${apiMeta.path}`);
   lines.push(`Base URL: ${baseUrl || "(not set)"}`);
@@ -172,41 +204,27 @@ interface ParamInfo {
 
 /**
  * Extract parameter info from API metadata
+ * Body parameters are identified by in: "body" in the parameters array
  */
 function extractParamInfo(apiMeta: ApiExecutorContext["apiMeta"]): ParamInfo[] {
   const params: ParamInfo[] = [];
-  let hasBodyParam = false;
 
-  // Extract from parameters
   if (apiMeta.parameters) {
     for (const param of apiMeta.parameters) {
-      if (param.in === "body") {
-        hasBodyParam = true;
-      }
       params.push({
         name: param.name,
         in: param.in,
-        required: param.required ?? false,
-        type: param.schema?.type || (param.in === "body" ? "object" : undefined),
+        required: param.required || false,
+        type:
+          param.schema?.type || (param.in === "body" ? "object" : undefined),
         description:
           param.schema?.description ||
           (param as any).description ||
           (param.in === "body"
-            ? "Request body (use --body='{...}' or --body=@file.json)"
+            ? "Request body (use --body '{...}' or --body @file.json)"
             : undefined),
       });
     }
-  }
-
-  // Extract from requestBody (OpenAPI 3.0 style) only if no body param exists
-  if (apiMeta.requestBody && !hasBodyParam) {
-    params.push({
-      name: "body",
-      in: "body",
-      required: apiMeta.requestBody.required ?? false,
-      type: "object",
-      description: "Request body (use --body='{...}' or --body=@file.json)",
-    });
   }
 
   return params;
@@ -279,7 +297,9 @@ function formatMissingParamsError(
 
   for (const param of missing) {
     const desc = param.description ? ` - ${param.description}` : "";
-    lines.push(`  --${param.name} (${param.in}, ${param.type || "any"})${desc}`);
+    lines.push(
+      `  --${param.name} (${param.in}, ${param.type || "any"})${desc}`
+    );
   }
 
   lines.push("");
@@ -311,7 +331,9 @@ function parseExtraHeaders(headerArgs?: string[]): Record<string, string> {
   for (const h of headerArgs) {
     const colonIndex = h.indexOf(":");
     if (colonIndex === -1) {
-      throw new Error(`Invalid header format: ${h}. Expected: "Header-Name: value"`);
+      throw new Error(
+        `Invalid header format: ${h}. Expected: "Header-Name: value"`
+      );
     }
     const key = h.slice(0, colonIndex).trim();
     const value = h.slice(colonIndex + 1).trim();
@@ -325,12 +347,29 @@ function parseExtraHeaders(headerArgs?: string[]): Record<string, string> {
  * Call command: execute an API call
  */
 export async function callCommand(
-  manager: PontxManager,
+  managerOrContext: PontxManager | CliContext,
   apiPath: string,
   rawArgs: string[],
   options: CallCommandOptions = {}
 ) {
   const { specName, tagName, apiName } = parseApiPath(apiPath);
+
+  // Determine if called from CLI or directly
+  const isCliContext = "tryGetLocalManager" in managerOrContext;
+
+  let manager: PontxManager;
+
+  if (isCliContext) {
+    // CLI call: support auto-discovery
+    const resolved = await resolveManagerForSpec(specName, managerOrContext, {
+      forceGlobal: options.global,
+    });
+    manager = resolved.manager;
+  } else {
+    // Direct call: maintain backward compatibility
+    manager = managerOrContext;
+  }
+
   const config = manager.resolvedConfig;
   const plugin = config.resolvedPlugin;
 
@@ -368,27 +407,28 @@ export async function callCommand(
   // Parse extra headers
   const extraHeaders = parseExtraHeaders(options.header);
 
-  // Build apiMeta for context
-  const apiMetaContext: ApiExecutorContext["apiMeta"] = {
+  // Build apiMeta for context (directly from apiMeta)
+  const apiMetaForContext: ApiExecutorContext["apiMeta"] = {
     path: apiMeta.path,
     method: apiMeta.method,
     description: apiMeta.description || apiMeta.summary,
     parameters: apiMeta.parameters,
-    requestBody: apiMeta.requestBody,
     responses: apiMeta.responses,
+    consumes: apiMeta.consumes,
+    produces: apiMeta.produces,
   };
 
   // Validate required parameters
-  const { missing } = validateParams(apiMetaContext, toolParams);
+  const { missing } = validateParams(apiMetaForContext, toolParams);
   if (missing.length > 0) {
-    console.error(formatMissingParamsError(apiPath, apiMetaContext, missing));
+    console.error(formatMissingParamsError(apiPath, apiMetaForContext, missing));
     process.exit(1);
   }
 
   // Build executor context
   const context: ApiExecutorContext = {
     apiSelector: { specName, tagName, apiName },
-    apiMeta: apiMetaContext,
+    apiMeta: apiMetaForContext,
     toolParams: { ...toolParams, ...extraHeaders },
     baseUrl,
     options: {
@@ -414,7 +454,20 @@ export async function callCommand(
   }
 
   try {
-    const result = await plugin.apiExecutor(context);
+    let result = await plugin.apiExecutor(context);
+
+    // Apply JMESPath query if specified
+    if (options.query) {
+      try {
+        // Ensure result is an object for JMESPath query
+        const data = typeof result === "string" ? JSON.parse(result) : result;
+        result = jmespath.search(data, options.query);
+      } catch (queryError: any) {
+        throw new Error(
+          `JMESPath query error: ${queryError.message}\nQuery: ${options.query}`
+        );
+      }
+    }
 
     // Format output
     const output =

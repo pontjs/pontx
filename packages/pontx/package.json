@@ -31,6 +31,7 @@
     "baidu-translate-service": "^2.2.4",
     "commander": "^13.1.0",
     "fuse.js": "^7.1.0",
+    "jmespath": "^0.16.0",
     "lodash": "^4.17.21",
     "picocolors": "^1.1.1",
     "tslib": "^2.6.2",
@@ -52,6 +53,7 @@
   "devDependencies": {
     "@rollup/plugin-json": "^6.1.0",
     "@types/fs-extra": "*",
+    "@types/jmespath": "^0.15.2",
     "@types/lodash": "catalog:"
   },
   "repository": {

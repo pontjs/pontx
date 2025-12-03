@@ -1,4 +1,6 @@
 import type { PontxManager } from "../manager";
+import type { CliContext } from "../cli-context";
+import { resolveManagerForSpec } from "../global";
 
 export function getSchemaMeta(
   pontxManager: PontxManager,
@@ -43,11 +45,28 @@ export function parseSchemaPath(schemaPath: string): {
  * Show Schema command: display schema metadata
  */
 export async function showSchemaCommand(
-  manager: PontxManager,
+  managerOrContext: PontxManager | CliContext,
   schemaPath: string,
-  options: { useRemote?: boolean } = {}
+  options: { useRemote?: boolean; global?: boolean } = {}
 ) {
   const { specName, schemaName } = parseSchemaPath(schemaPath);
+
+  // Determine if called from CLI or directly
+  const isCliContext = "tryGetLocalManager" in managerOrContext;
+
+  let manager: PontxManager;
+
+  if (isCliContext) {
+    // CLI call: support auto-discovery
+    const resolved = await resolveManagerForSpec(specName, managerOrContext, {
+      forceGlobal: options.global,
+    });
+    manager = resolved.manager;
+  } else {
+    // Direct call: maintain backward compatibility
+    manager = managerOrContext;
+  }
+
   const schema = getSchemaMeta(manager, specName, schemaName, options.useRemote);
 
   console.log(JSON.stringify(schema, null, 2));

@@ -14,9 +14,15 @@ interface ParsedParams {
 }
 
 /**
- * 解析和分类参数
+ * Parse and classify parameters based on their location in the API definition.
+ * Parameters are classified into path, query, header, and body params.
+ * Unmatched parameters are treated as body parameters.
+ *
+ * @param parameters - Array of parameter definitions from the API spec
+ * @param toolParams - Runtime parameter values provided by the caller
+ * @returns Parsed parameters classified by location
  */
-function parseParams(
+export function parseParams(
   parameters: Parameter[] | undefined,
   toolParams: Record<string, unknown>
 ): ParsedParams {
@@ -45,6 +51,11 @@ function parseParams(
       case "header":
         result.headerParams[param.name] = value;
         break;
+      case "body":
+        if (value) {
+          result.bodyParams = value as any;
+          break;
+        }
     }
   });
 
@@ -59,9 +70,13 @@ function parseParams(
 }
 
 /**
- * 规范化 baseUrl，确保包含协议前缀
+ * Normalize base URL to ensure it has a protocol prefix.
+ * If no protocol is specified, defaults to https://.
+ *
+ * @param baseUrl - The base URL to normalize
+ * @returns Normalized URL with protocol
  */
-function normalizeBaseUrl(baseUrl: string): string {
+export function normalizeBaseUrl(baseUrl: string): string {
   if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
     return `https://${baseUrl}`;
   }
@@ -69,9 +84,16 @@ function normalizeBaseUrl(baseUrl: string): string {
 }
 
 /**
- * 构建完整 URL
+ * Build complete URL from base URL, path, and parameters.
+ * Handles path parameter substitution and query string construction.
+ *
+ * @param baseUrl - The base URL (will be normalized)
+ * @param path - The API path with optional {param} placeholders
+ * @param pathParams - Values for path parameters
+ * @param queryParams - Values for query string parameters
+ * @returns Complete URL with substituted path params and query string
  */
-function buildUrl(
+export function buildUrl(
   baseUrl: string,
   path: string,
   pathParams: Record<string, unknown>,
@@ -82,7 +104,11 @@ function buildUrl(
 
   // 替换路径参数: /users/{userId} -> /users/123
   let finalPath = path.replace(/\{([^}]+)\}/g, (_, key) => {
-    return String(pathParams[key] ?? `{${key}}`);
+    const value = pathParams[key];
+    if (value === undefined || value === null) {
+      return `{${key}}`;
+    }
+    return encodeURIComponent(String(value));
   });
 
   // 构建查询字符串
@@ -96,15 +122,30 @@ function buildUrl(
 }
 
 /**
- * 构建请求配置
+ * Build fetch RequestInit configuration from method, headers, and body.
+ * Handles content type detection and body serialization for different formats
+ * (JSON, form-urlencoded, multipart, text).
+ *
+ * @param method - HTTP method (GET, POST, PUT, etc.)
+ * @param headerParams - Custom header parameters
+ * @param bodyParams - Body parameters to serialize
+ * @param consumes - Content types the API accepts (used to determine Content-Type)
+ * @param produces - Content types the API produces (used to set Accept header)
+ * @returns RequestInit object for fetch()
  */
-function buildRequestConfig(
+export function buildRequestConfig(
   method: string,
   headerParams: Record<string, unknown>,
   bodyParams: Record<string, unknown>,
-  requestBodyDef?: ApiExecutorContext["apiMeta"]["requestBody"]
+  consumes?: string[],
+  produces?: string[]
 ): RequestInit {
   const headers: Record<string, string> = {};
+
+  // 添加 Accept 头（基于 produces）
+  if (produces?.length && !headerParams["Accept"]) {
+    headers["Accept"] = produces[0];
+  }
 
   // 添加自定义 header 参数
   Object.entries(headerParams).forEach(([key, value]) => {
@@ -119,18 +160,53 @@ function buildRequestConfig(
     return { method: method.toUpperCase(), headers };
   }
 
-  // 确定 Content-Type 和构建请求体
-  const contentType = requestBodyDef?.content
-    ? Object.keys(requestBodyDef.content)[0]
-    : "application/json";
+  // 确定 Content-Type：优先使用 headerParams 中的，其次使用 consumes，最后默认 application/json
+  const contentType =
+    (headerParams["Content-Type"] as string) ||
+    (consumes?.length ? consumes[0] : "application/json");
 
   headers["Content-Type"] = contentType;
 
-  let body: string | undefined;
+  let body: BodyInit | undefined;
   if (contentType === "application/json") {
     body = JSON.stringify(bodyParams);
   } else if (contentType === "application/x-www-form-urlencoded") {
-    body = new URLSearchParams(bodyParams as Record<string, string>).toString();
+    // 对非原始类型值进行 JSON.stringify
+    const flatParams: Record<string, string> = {};
+    Object.entries(bodyParams).forEach(([key, value]) => {
+      if (value === null || value === undefined) {
+        return;
+      } else if (typeof value === "object") {
+        flatParams[key] = JSON.stringify(value);
+      } else {
+        flatParams[key] = String(value);
+      }
+    });
+    body = new URLSearchParams(flatParams).toString();
+  } else if (contentType === "multipart/form-data") {
+    // FormData 不需要手动设置 Content-Type，浏览器/Node 会自动添加 boundary
+    delete headers["Content-Type"];
+    const formData = new FormData();
+    Object.entries(bodyParams).forEach(([key, value]) => {
+      if (value === null || value === undefined) {
+        return;
+      } else if (value instanceof Blob || value instanceof File) {
+        formData.append(key, value);
+      } else if (typeof value === "object") {
+        formData.append(key, JSON.stringify(value));
+      } else {
+        formData.append(key, String(value));
+      }
+    });
+    body = formData;
+  } else if (contentType === "text/plain" || contentType.startsWith("text/")) {
+    // 纯文本：如果只有一个参数，直接取值；否则 JSON 序列化
+    const values = Object.values(bodyParams);
+    if (values.length === 1 && typeof values[0] !== "object") {
+      body = String(values[0]);
+    } else {
+      body = JSON.stringify(bodyParams);
+    }
   } else {
     // 默认使用 JSON
     headers["Content-Type"] = "application/json";
@@ -189,12 +265,26 @@ export async function builtinApiExecutor(
     apiMeta.method,
     headerParams,
     bodyParams,
-    apiMeta.requestBody
+    apiMeta.consumes,
+    apiMeta.produces
   );
 
-  // 5. 发送请求并处理响应
+  // 5. 调用 beforeRequest 钩子（如果提供）
+  let finalUrl = url;
+  let finalRequestConfig = requestConfig;
+
+  if (context.beforeRequest) {
+    const modified = await context.beforeRequest({
+      url,
+      requestInit: requestConfig,
+    });
+    finalUrl = modified.url;
+    finalRequestConfig = modified.requestInit;
+  }
+
+  // 6. 发送请求并处理响应
   try {
-    const response = await fetch(url, requestConfig);
+    const response = await fetch(finalUrl, finalRequestConfig);
     return await handleResponse(response);
   } catch (error) {
     throw new Error(
