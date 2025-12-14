@@ -15,13 +15,13 @@ export type PontxSpecMeta = {
 export type PontxAPIMeta = {
   path: string;
   method:
-    | 'GET'
-    | 'POST'
-    | 'PUT'
-    | 'DELETE'
-    | 'PATCH'
-    | 'HEAD'
-    | 'OPTIONS'
+    | "GET"
+    | "POST"
+    | "PUT"
+    | "DELETE"
+    | "PATCH"
+    | "HEAD"
+    | "OPTIONS"
     | string;
   hasBody: boolean;
   hasParams: boolean;
@@ -38,10 +38,10 @@ export type RequestHeaders = Record<string, string>;
  * 请求序列化支持的 Content-Type 值
  */
 export type ContentType =
-  | 'application/json'
-  | 'application/x-www-form-urlencoded'
-  | 'multipart/form-data'
-  | 'text/plain'
+  | "application/json"
+  | "application/x-www-form-urlencoded"
+  | "multipart/form-data"
+  | "text/plain"
   | string;
 
 type RequestInit = {
@@ -79,16 +79,16 @@ export type PontxAPITypes = {
 
 export type BaseRequestFn = (
   url: string,
-  init: EnhancedRequestInit,
+  init: EnhancedRequestInit
 ) => Promise<any>;
 export type PontxRequestFn = <APITypes extends PontxAPITypes>(
-  params: APITypes['params'],
-  init: EnhancedRequestInit & { body?: APITypes['bodyParams'] },
-) => Promise<APITypes['Response']>;
+  params: APITypes["params"],
+  init: EnhancedRequestInit & { body?: APITypes["bodyParams"] }
+) => Promise<APITypes["Response"]>;
 export type GracefulRequestFn = any;
 export type RpcRequestFn = <RequestParams, RpcResponse>(
   requestParams: RequestParams,
-  init: EnhancedRequestInit,
+  init: EnhancedRequestInit
 ) => Promise<RpcResponse>;
 
 /**
@@ -97,7 +97,7 @@ export type RpcRequestFn = <RequestParams, RpcResponse>(
  */
 export type FetchFunction = (
   url: string,
-  init?: FetchInit,
+  init?: FetchInit
 ) => Promise<Response>;
 
 export type ApiCallerContext = {
@@ -124,7 +124,7 @@ export type ApiCallerContext = {
 
   beforeRequest?: (
     url: string,
-    init: FetchInit,
+    init: FetchInit
   ) => Promise<{ url: string; init: FetchInit }>;
 
   /**
@@ -132,6 +132,6 @@ export type ApiCallerContext = {
    */
   makeCustomUsages?: (
     usages: Record<string, any>,
-    apiMeta?: PontxAPIMeta,
+    apiMeta?: PontxAPIMeta
   ) => Record<string, any>;
 };

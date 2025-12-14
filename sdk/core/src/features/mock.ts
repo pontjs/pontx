@@ -12,8 +12,8 @@
  * - Standard Response object format
  */
 
-import type { FetchFunction } from '../types';
-import { BaseRequestFn, EnhancedRequestInit } from '../types/base';
+import type { FetchFunction } from "../types";
+import { BaseRequestFn, EnhancedRequestInit } from "../types/base";
 
 /**
  * Configuration for mock feature
@@ -43,7 +43,7 @@ export interface MockConfig {
  * Error codes for mock-related errors
  */
 export const MOCK_ERROR_CODES = {
-  MOCK_NOT_FOUND: 'MOCK_NOT_FOUND',
+  MOCK_NOT_FOUND: "MOCK_NOT_FOUND",
 } as const;
 
 /**
@@ -67,10 +67,10 @@ function createMockResponse(data: unknown): Response {
   // Create Response with standard headers
   return new Response(body, {
     status: 200,
-    statusText: 'OK',
+    statusText: "OK",
     headers: {
-      'content-type': 'application/json',
-      'x-mock': 'true', // Marker to indicate this is a mock response
+      "content-type": "application/json",
+      "x-mock": "true", // Marker to indicate this is a mock response
     },
   });
 }
@@ -114,7 +114,7 @@ export function withMock(requestFn: BaseRequestFn, config?: MockConfig) {
     // If no API key provided, throw error
     if (!apiKey) {
       const error = new Error(
-        'Mock requires _apiKey in RequestInit to identify the API.',
+        "Mock requires _apiKey in RequestInit to identify the API."
       );
       error.name = MOCK_ERROR_CODES.MOCK_NOT_FOUND;
       (error as any).code = MOCK_ERROR_CODES.MOCK_NOT_FOUND;
@@ -127,7 +127,7 @@ export function withMock(requestFn: BaseRequestFn, config?: MockConfig) {
     if (!hasMockData) {
       const error = new Error(
         `Mock data not found for API "${apiKey}". ` +
-          `Please configure mock data for this API.`,
+          `Please configure mock data for this API.`
       );
       error.name = MOCK_ERROR_CODES.MOCK_NOT_FOUND;
       (error as any).code = MOCK_ERROR_CODES.MOCK_NOT_FOUND;
@@ -163,5 +163,5 @@ export function withMock(requestFn: BaseRequestFn, config?: MockConfig) {
  * ```
  */
 export function isMockResponse(response: Response): boolean {
-  return response.headers.get('x-mock') === 'true';
+  return response.headers.get("x-mock") === "true";
 }

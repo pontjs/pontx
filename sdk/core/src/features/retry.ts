@@ -12,8 +12,8 @@
  * - Detailed error information on exhaustion
  */
 
-import type { FetchFunction } from '../types';
-import { FetchInit } from '../types/base';
+import type { FetchFunction } from "../types";
+import { FetchInit } from "../types/base";
 
 /**
  * Configuration for retry feature
@@ -31,7 +31,7 @@ export interface RetryConfig {
    * - 'linear': 1s, 2s, 3s, 4s, ...
    * @default 'exponential'
    */
-  backoff?: 'exponential' | 'linear';
+  backoff?: "exponential" | "linear";
 
   /**
    * Custom retryable error codes or HTTP status codes
@@ -45,26 +45,26 @@ export interface RetryConfig {
  * Error codes for retry-related errors
  */
 export const RETRY_ERROR_CODES = {
-  RETRY_EXHAUSTED: 'RETRY_EXHAUSTED',
+  RETRY_EXHAUSTED: "RETRY_EXHAUSTED",
 } as const;
 
 /**
  * Default retry configuration
  */
-const DEFAULT_CONFIG: Required<Omit<RetryConfig, 'retryableErrors'>> = {
+const DEFAULT_CONFIG: Required<Omit<RetryConfig, "retryableErrors">> = {
   maxAttempts: 3,
-  backoff: 'exponential',
+  backoff: "exponential",
 };
 
 /**
  * Default retryable network error codes
  */
 const DEFAULT_NETWORK_ERRORS = [
-  'ECONNREFUSED',
-  'ECONNRESET',
-  'ETIMEDOUT',
-  'ENOTFOUND',
-  'ENETUNREACH',
+  "ECONNREFUSED",
+  "ECONNRESET",
+  "ETIMEDOUT",
+  "ENOTFOUND",
+  "ENETUNREACH",
 ];
 
 /**
@@ -86,11 +86,11 @@ const BASE_DELAY_MS = 1000;
  */
 function calculateDelay(
   attempt: number,
-  strategy: 'exponential' | 'linear',
+  strategy: "exponential" | "linear"
 ): number {
   let delay: number;
 
-  if (strategy === 'exponential') {
+  if (strategy === "exponential") {
     // Exponential: 1s, 2s, 4s, 8s, 16s...
     // Formula: BASE_DELAY * 2^(attempt - 1)
     delay = BASE_DELAY_MS * Math.pow(2, attempt - 1);
@@ -131,7 +131,7 @@ function delay(ms: number): Promise<void> {
  */
 function isRetryableError(
   error: any,
-  customRetryableErrors?: Array<string | number>,
+  customRetryableErrors?: Array<string | number>
 ): boolean {
   // If custom retryable errors are specified, check against them first
   if (customRetryableErrors && customRetryableErrors.length > 0) {
@@ -189,7 +189,7 @@ function isRetryableError(
  */
 export function withRetry(
   requestFn: FetchFunction,
-  config?: RetryConfig,
+  config?: RetryConfig
 ): FetchFunction {
   // If no config provided, return original function
   if (!config) {
@@ -230,7 +230,7 @@ export function withRetry(
           // If this was the last attempt, wrap in RETRY_EXHAUSTED error
           if (isLastAttempt && shouldRetry) {
             const exhaustedError = new Error(
-              `Request failed after ${maxAttempts} attempts. Last error: ${error.message}`,
+              `Request failed after ${maxAttempts} attempts. Last error: ${error.message}`
             );
             exhaustedError.name = RETRY_ERROR_CODES.RETRY_EXHAUSTED;
             (exhaustedError as any).code = RETRY_ERROR_CODES.RETRY_EXHAUSTED;
@@ -255,6 +255,6 @@ export function withRetry(
 
     // This should never be reached due to the loop logic above,
     // but TypeScript needs it for exhaustiveness
-    throw lastError || new Error('Retry exhausted');
+    throw lastError || new Error("Retry exhausted");
   };
 }

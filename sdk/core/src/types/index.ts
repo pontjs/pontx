@@ -9,6 +9,4 @@ export type {
   RequestHeaders,
   ContentType,
   FetchFunction,
-} from './base';
-
-export type { PontxSDKClientConfig } from './client';
+} from "./base";

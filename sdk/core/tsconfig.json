@@ -27,14 +27,6 @@
     // 其他
     "isolatedModules": true
   },
-  "include": [
-    "src/**/*"
-, "plugin/tests/petstore", "generator"  ],
-  "exclude": [
-    "node_modules",
-    "lib",
-    "test",
-    "**/*.test.ts",
-    "**/*.spec.ts"
-  ]
+  "include": ["src/**/*", "plugin/tests/petstore", "generator"],
+  "exclude": ["node_modules", "lib", "test", "**/*.test.ts", "**/*.spec.ts"]
 }
