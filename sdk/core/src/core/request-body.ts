@@ -22,42 +22,23 @@ function isNullOrUndefined(value: unknown): value is null | undefined {
  * @param body - Request body to serialize
  * @param contentType - Content-Type header value
  * @returns Serialized body (string, URLSearchParams, or FormData)
- *
- * @example
- * // JSON serialization
- * const json = serializeRequestBody({ name: 'John' }, 'application/json');
- * // Returns: '{"name":"John"}'
- *
- * @example
- * // URLSearchParams serialization
- * const params = serializeRequestBody({ name: 'John' }, 'application/x-www-form-urlencoded');
- * // Returns: URLSearchParams instance
- *
- * @example
- * // FormData serialization
- * const formData = serializeRequestBody({ name: 'John', file }, 'multipart/form-data');
- * // Returns: FormData instance
  */
 export function serializeRequestBody(
   body: unknown,
-  contentType: ContentType
+  contentType: ContentType,
 ): string | URLSearchParams | FormData {
-  // Task 4.1: JSON serialization
   if (contentType === 'application/json') {
     return JSON.stringify(body);
   }
 
-  // Task 4.2: URLSearchParams serialization
   if (contentType === 'application/x-www-form-urlencoded') {
     return serializeToUrlSearchParams(body);
   }
 
-  // Task 4.3: FormData serialization
   if (contentType === 'multipart/form-data') {
     return serializeToFormData(body);
   }
 
-  // Handle text/plain
   if (contentType === 'text/plain') {
     if (typeof body === 'string') {
       return body;
@@ -65,10 +46,9 @@ export function serializeRequestBody(
     return String(body);
   }
 
-  // Unknown content type
   throw new Error(
     `Unsupported Content-Type: ${contentType}. ` +
-      `Supported types: application/json, application/x-www-form-urlencoded, multipart/form-data, text/plain`
+      `Supported types: application/json, application/x-www-form-urlencoded, multipart/form-data, text/plain`,
   );
 }
 
@@ -167,7 +147,11 @@ function serializeToFormData(body: unknown): FormData {
  *
  * @internal
  */
-function appendToFormData(formData: FormData, key: string, value: unknown): void {
+function appendToFormData(
+  formData: FormData,
+  key: string,
+  value: unknown,
+): void {
   // Handle File objects
   if (value instanceof File) {
     formData.append(key, value);

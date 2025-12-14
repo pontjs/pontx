@@ -1,5 +1,5 @@
 {
-  "name": "@pontx/sdk-core",
+  "name": "@pontx/sdk",
   "version": "0.1.0",
   "description": "Shared core utilities for Pontx SDK (Browser & Node.js)",
   "keywords": [
@@ -68,6 +68,7 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "tsup": "^8.0.0",
+    "pontx": "workspace:*",
     "typescript": "catalog:",
     "vitest": "^1.0.0"
   },

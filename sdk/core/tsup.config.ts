@@ -3,11 +3,11 @@ import { defineConfig } from 'tsup';
 export default defineConfig({
   entry: {
     index: 'src/index.ts',
-    'url/index': 'src/url/index.ts',
-    'body/index': 'src/request-body/index.ts',
+    'core/index': 'src/core/index.ts',
     'types/index': 'src/types/index.ts',
     'features/index': 'src/features/index.ts',
-    'builders/index': 'src/builders/index.ts',
+    'client/fetch-client': 'src/client/fetch-client/index.ts',
+    'client/graceful-client': 'src/client/graceful-client/index.ts',
   },
   format: ['esm', 'cjs'],
   dts: true,

@@ -6,11 +6,9 @@
 export type {
   PontxSpecMeta,
   PontxAPIMeta,
-  APIMethod,
-  Controller,
-  Client,
   RequestHeaders,
   ContentType,
   FetchFunction,
-  SdkUsage,
-} from "./base";
+} from './base';
+
+export type { PontxSDKClientConfig } from './client';

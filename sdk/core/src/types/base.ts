@@ -9,51 +9,25 @@ export type PontxSpecMeta = {
   name: string;
   hasTags: boolean;
   apis: Record<string, PontxAPIMeta>;
+  baseUrl?: string;
 };
 
 export type PontxAPIMeta = {
   path: string;
   method:
-    | "GET"
-    | "POST"
-    | "PUT"
-    | "DELETE"
-    | "PATCH"
-    | "HEAD"
-    | "OPTIONS"
+    | 'GET'
+    | 'POST'
+    | 'PUT'
+    | 'DELETE'
+    | 'PATCH'
+    | 'HEAD'
+    | 'OPTIONS'
     | string;
   hasBody: boolean;
   hasParams: boolean;
   consumes?: string[];
   produces?: string[];
 };
-
-/**
- * 表示具有类型化参数、请求体和响应的 API 方法
- *
- * @template TParams - 查询/路径参数类型
- * @template TBody - 请求体类型
- * @template TResponse - 响应数据类型
- */
-export type APIMethod<TParams = any, TBody = any, TResponse = any> = {
-  params: TParams;
-  body: TBody;
-  response: TResponse;
-};
-
-/**
- * 表示控制器(相关 API 方法的集合)
- *
- * @template T - 方法名到 APIMethod 类型的映射记录
- */
-export type Controller<T extends Record<string, APIMethod>> = T;
-
-/**
- * 表示完整的 API 客户端
- *
- * @template T - 控制器名到 Controller 类型的映射记录
- */
-export type Client<T extends Record<string, Record<string, APIMethod>>> = T;
 
 /**
  * HTTP 请求头作为键值对记录
@@ -64,11 +38,58 @@ export type RequestHeaders = Record<string, string>;
  * 请求序列化支持的 Content-Type 值
  */
 export type ContentType =
-  | "application/json"
-  | "application/x-www-form-urlencoded"
-  | "multipart/form-data"
-  | "text/plain"
+  | 'application/json'
+  | 'application/x-www-form-urlencoded'
+  | 'multipart/form-data'
+  | 'text/plain'
   | string;
+
+type RequestInit = {
+  method?: string;
+  keepalive?: boolean;
+  headers?: any;
+  body?: any;
+  integrity?: string;
+  signal?: AbortSignal | null;
+  credentials?: any;
+  mode?: any;
+  referrer?: string;
+};
+
+export type FetchInit = RequestInit & {
+  getMetadata: () => {
+    specName: string;
+    controllerName: string;
+    apiName: string;
+    apiMeta: PontxAPIMeta;
+  };
+  _apiKey: string;
+};
+
+export type EnhancedRequestInit = RequestInit & {
+  beforeRequest?: any;
+};
+
+export type PontxAPITypes = {
+  params: any;
+  bodyParams: any;
+  Response: any;
+  method: string;
+};
+
+export type BaseRequestFn = (
+  url: string,
+  init: EnhancedRequestInit,
+) => Promise<any>;
+export type PontxRequestFn = <APITypes extends PontxAPITypes>(
+  params: APITypes['params'],
+  init: EnhancedRequestInit & { body?: APITypes['bodyParams'] },
+) => Promise<APITypes['Response']>;
+export type GracefulRequestFn = any;
+export type RpcRequestFn = <RequestParams, RpcResponse>(
+  requestParams: RequestParams,
+  init: EnhancedRequestInit,
+) => Promise<RpcResponse>;
 
 /**
  * 标准 fetch 函数签名
@@ -76,35 +97,41 @@ export type ContentType =
  */
 export type FetchFunction = (
   url: string,
-  init?: RequestInit
+  init?: FetchInit,
 ) => Promise<Response>;
 
-/**
- * SDK 使用方法接口
- * 每个 API 方法都会返回这些方法
- */
-export type SdkUsage<ApiTypes extends APIMethod> = {
-  /**
-   * 获取用于缓存的键
-   */
-  getFetchKey: (params: ApiTypes["params"]) => string;
-
-  /**
-   * 执行 API 请求
-   */
-  request: (
-    params: ApiTypes["params"],
-    requestOptions?: RequestInit & { body?: ApiTypes["body"] }
-  ) => Promise<ApiTypes["response"]>;
-
-  /**
-   * 获取查询配置(用于集成 React Query 等数据获取库)
-   */
-  queryOptions: (
-    params: ApiTypes["params"],
-    requestConfig?: RequestInit & { body?: ApiTypes["body"] }
-  ) => {
-    fetchKey: string;
-    fetchFn: () => Promise<ApiTypes["response"]>;
+export type ApiCallerContext = {
+  apiSelector: {
+    specName: string;
+    controllerName: string;
+    apiName: string;
   };
+
+  apiMeta: PontxAPIMeta;
+
+  requestFn: FetchFunction;
+
+  baseUrl?: string;
+  /**
+   * Custom URL builder function
+   */
+  getFetchUrl?: (path: string, params: Record<string, unknown>) => string;
+
+  /**
+   * Placeholder for missing path parameters
+   */
+  pathMark?: string;
+
+  beforeRequest?: (
+    url: string,
+    init: FetchInit,
+  ) => Promise<{ url: string; init: FetchInit }>;
+
+  /**
+   * Function to add custom methods to each API method object
+   */
+  makeCustomUsages?: (
+    usages: Record<string, any>,
+    apiMeta?: PontxAPIMeta,
+  ) => Record<string, any>;
 };

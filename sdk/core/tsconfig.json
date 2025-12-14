@@ -29,7 +29,7 @@
   },
   "include": [
     "src/**/*"
-  ],
+, "plugin/tests/petstore", "generator"  ],
   "exclude": [
     "node_modules",
     "lib",

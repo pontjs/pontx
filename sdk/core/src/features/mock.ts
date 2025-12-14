@@ -13,6 +13,7 @@
  */
 
 import type { FetchFunction } from '../types';
+import { BaseRequestFn, EnhancedRequestInit } from '../types/base';
 
 /**
  * Configuration for mock feature
@@ -96,10 +97,7 @@ function createMockResponse(data: unknown): Response {
  * });
  * ```
  */
-export function withMock(
-  requestFn: FetchFunction,
-  config?: MockConfig
-): FetchFunction {
+export function withMock(requestFn: BaseRequestFn, config?: MockConfig) {
   // If mock is not configured or explicitly disabled, return original function
   if (!config || config.enabled === false) {
     return requestFn;
@@ -109,14 +107,14 @@ export function withMock(
   const { data, delay: delayMs = 0 } = config;
 
   // Return wrapped function
-  return async (url: string, init?: RequestInit): Promise<Response> => {
+  return async (url: string, init?: EnhancedRequestInit) => {
     // Extract API key from init._apiKey
     const apiKey = (init as any)?._apiKey;
 
     // If no API key provided, throw error
     if (!apiKey) {
       const error = new Error(
-        'Mock requires _apiKey in RequestInit to identify the API.'
+        'Mock requires _apiKey in RequestInit to identify the API.',
       );
       error.name = MOCK_ERROR_CODES.MOCK_NOT_FOUND;
       (error as any).code = MOCK_ERROR_CODES.MOCK_NOT_FOUND;
@@ -129,7 +127,7 @@ export function withMock(
     if (!hasMockData) {
       const error = new Error(
         `Mock data not found for API "${apiKey}". ` +
-        `Please configure mock data for this API.`
+          `Please configure mock data for this API.`,
       );
       error.name = MOCK_ERROR_CODES.MOCK_NOT_FOUND;
       (error as any).code = MOCK_ERROR_CODES.MOCK_NOT_FOUND;

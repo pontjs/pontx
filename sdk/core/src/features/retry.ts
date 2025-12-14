@@ -13,6 +13,7 @@
  */
 
 import type { FetchFunction } from '../types';
+import { FetchInit } from '../types/base';
 
 /**
  * Configuration for retry feature
@@ -85,7 +86,7 @@ const BASE_DELAY_MS = 1000;
  */
 function calculateDelay(
   attempt: number,
-  strategy: 'exponential' | 'linear'
+  strategy: 'exponential' | 'linear',
 ): number {
   let delay: number;
 
@@ -130,7 +131,7 @@ function delay(ms: number): Promise<void> {
  */
 function isRetryableError(
   error: any,
-  customRetryableErrors?: Array<string | number>
+  customRetryableErrors?: Array<string | number>,
 ): boolean {
   // If custom retryable errors are specified, check against them first
   if (customRetryableErrors && customRetryableErrors.length > 0) {
@@ -188,7 +189,7 @@ function isRetryableError(
  */
 export function withRetry(
   requestFn: FetchFunction,
-  config?: RetryConfig
+  config?: RetryConfig,
 ): FetchFunction {
   // If no config provided, return original function
   if (!config) {
@@ -203,7 +204,7 @@ export function withRetry(
   } = config;
 
   // Return wrapped function that maintains the same signature
-  return async (url: string, init?: RequestInit): Promise<Response> => {
+  return async (url: string, init?: FetchInit): Promise<Response> => {
     let lastError: Error | undefined;
     let attempt = 0;
 
@@ -229,7 +230,7 @@ export function withRetry(
           // If this was the last attempt, wrap in RETRY_EXHAUSTED error
           if (isLastAttempt && shouldRetry) {
             const exhaustedError = new Error(
-              `Request failed after ${maxAttempts} attempts. Last error: ${error.message}`
+              `Request failed after ${maxAttempts} attempts. Last error: ${error.message}`,
             );
             exhaustedError.name = RETRY_ERROR_CODES.RETRY_EXHAUSTED;
             (exhaustedError as any).code = RETRY_ERROR_CODES.RETRY_EXHAUSTED;
