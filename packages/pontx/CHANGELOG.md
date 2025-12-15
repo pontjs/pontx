@@ -1,5 +1,24 @@
 # pontx
 
+## 0.1.14
+
+### Patch Changes
+
+- feat(search): add --spec option to search by spec name
+  - Support searching APIs in a specific spec (local or global) using `--spec <specName>`
+  - Auto-resolve spec from local project or global registry
+  - Deprecate `--global <package>` in favor of `--spec <specName>` for better UX
+- Updated dependencies
+  - @pontx/spec@0.1.15
+
+## 0.1.13
+
+### Patch Changes
+
+- support pontx call command
+- Updated dependencies
+  - @pontx/spec@0.1.15
+
 ## 0.1.12
 
 ### Patch Changes
