@@ -4,6 +4,7 @@ import * as fs from "fs";
 import { PontxManager } from "./manager";
 import { PontxService, ServiceConfig } from "./service/service";
 import { createCliContext } from "./cli-context";
+import { createLogger } from "./logger";
 
 const packageFilePath = path.join(__dirname, "..", "package.json");
 const packageInfo = JSON.parse(fs.readFileSync(packageFilePath, "utf8"));
@@ -11,12 +12,21 @@ const packageInfo = JSON.parse(fs.readFileSync(packageFilePath, "utf8"));
 const currentVersion = packageInfo.version;
 const rootDir = process.cwd();
 
-// 创建 CLI 上下文
-const ctx = createCliContext(rootDir);
+// Check for --debug flag in argv
+const hasDebugFlag = process.argv.includes('--debug');
+const logLevel = hasDebugFlag ? 'info' : 'error';
+
+// 创建 CLI 上下文（使用根据 --debug 决定的日志级别）
+const ctx = createCliContext(rootDir, createLogger(logLevel));
 const { getManager, getGlobalManager, tryGetLocalManager, logger } = ctx;
 
 program.version(currentVersion).usage("[命令] [配置项]");
 program.description("pontx cli");
+
+// Global options
+program.option("--debug", "启用调试日志");
+program.option("--get-completions <line>", "(internal) Get shell completions");
+program.option("--format <format>", "Output format for completions", "plain");
 
 program
   .command("check")
@@ -26,7 +36,7 @@ program
     let manager: PontxManager;
 
     if (options.global) {
-      console.error(`[info] Using global spec from ${options.global}`);
+      logger.info(`Using global spec from ${options.global}`);
       manager = await getGlobalManager(options.global);
     } else {
       manager = await getManager();
@@ -44,12 +54,13 @@ program
     let manager: PontxManager;
 
     if (options.global) {
-      console.error(`[info] Using global spec from ${options.global}`);
+      logger.info(`Using global spec from ${options.global}`);
       manager = await getGlobalManager(options.global);
     } else {
       manager = await getManager();
     }
 
+    // Output data to stdout (for piping)
     console.log(
       manager.resolvedConfig.origins.map((origin) => origin.name).join("\n")
     );
@@ -60,22 +71,11 @@ program
   .description("搜索当前项目可调用的 API 接口")
   .option("--max <count>", "最大返回数量，默认 6", "6")
   .option("--use-remote", "使用远程元数据")
-  .option("--global <package>", "使用全局 spec 包")
+  .option("--spec <specName>", "指定 spec 名称搜索(自动查找本地或 global spec)")
+  .option("--global <package>", "使用全局 spec 包(已废弃，请使用 --spec)")
   .action(async (keyword, options) => {
-    let manager: PontxManager;
-
-    if (options.global) {
-      console.error(`[info] Using global spec from ${options.global}`);
-      manager = await getGlobalManager(options.global);
-    } else {
-      manager = await getManager();
-    }
-
     const { searchCommand } = await import("./commands/search");
-    await searchCommand(manager, keyword, {
-      max: parseInt(options.max),
-      useRemote: options.useRemote,
-    });
+    await searchCommand(ctx, keyword, options);
   });
 
 program
@@ -181,7 +181,7 @@ program
     let manager: PontxManager;
 
     if (options.global) {
-      console.error(`[info] Using global spec from ${options.global}`);
+      logger.info(`Using global spec from ${options.global}`);
       manager = await getGlobalManager(options.global);
     } else {
       manager = await getManager();
@@ -236,6 +236,17 @@ globalCmd
   });
 
 program
+  .command("completion")
+  .description("管理 shell 自动补全")
+  .argument("[action]", "install | generate | uninstall", "install")
+  .option("--shell <shell>", "Shell 类型: bash | zsh | fish")
+  .option("--output <path>", "输出脚本到文件")
+  .action(async (action, options) => {
+    const { completionCommand } = await import("./commands/completion");
+    await completionCommand(action, options);
+  });
+
+program
   .command("service")
   .description("启动 Pontx 服务")
   .option("-p, --port <port>", "Web 服务端口", "3000")
@@ -251,7 +262,7 @@ program
     // 确定 service 使用的 rootDir
     let serviceRootDir = rootDir;
     if (options.global) {
-      console.error(`[info] Using global spec from ${options.global}`);
+      logger.info(`Using global spec from ${options.global}`);
       const { getGlobalSpecRootDir } = await import('./global');
       serviceRootDir = await getGlobalSpecRootDir(options.global);
     }
@@ -282,16 +293,14 @@ program
 
     // 监听服务事件
     service.on("started", () => {
-      console.log("PontxService 启动成功");
-      console.log("Web 服务地址: http://localhost:" + options.port);
-      console.log("状态接口: http://localhost:" + options.port + "/api/status");
-      console.log(
-        "Specs 接口: http://localhost:" + options.port + "/api/specs"
-      );
+      logger.info("PontxService 启动成功");
+      logger.info("Web 服务地址: http://localhost:" + options.port);
+      logger.info("状态接口: http://localhost:" + options.port + "/api/status");
+      logger.info("Specs 接口: http://localhost:" + options.port + "/api/specs");
     });
 
     service.on("stopped", () => {
-      console.log("PontxService 已停止");
+      logger.info("PontxService 已停止");
     });
 
     service.on("error", (error) => {
@@ -301,12 +310,12 @@ program
 
     // 处理进程信号
     process.on("SIGINT", async () => {
-      console.log("\n正在停止服务...");
+      logger.info("\n正在停止服务...");
       await service.stop();
     });
 
     process.on("SIGTERM", async () => {
-      console.log("\n正在停止服务...");
+      logger.info("\n正在停止服务...");
       await service.stop();
       process.exit(0);
     });
@@ -319,7 +328,26 @@ program
     }
   });
 
-program.parseAsync(process.argv).catch((e) => {
+// Handle --get-completions before normal parsing
+async function main() {
+  const args = process.argv;
+  const completionIndex = args.indexOf("--get-completions");
+
+  if (completionIndex !== -1) {
+    const line = args[completionIndex + 1];
+    const wordIndex = parseInt(args[completionIndex + 2], 10) || 0;
+    const formatIndex = args.indexOf("--format");
+    const format = formatIndex !== -1 ? args[formatIndex + 1] : "plain";
+
+    const { handleCompletionRequest } = await import("./commands/completion");
+    await handleCompletionRequest(line, wordIndex, format);
+    process.exit(0);
+  }
+
+  await program.parseAsync(process.argv);
+}
+
+main().catch((e) => {
   if (process.env.NODE_ENV === "development") {
     logger.error(e.message);
     logger.error(e.stack);

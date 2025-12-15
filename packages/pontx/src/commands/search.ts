@@ -1,5 +1,7 @@
 import Fuse from "fuse.js";
 import type { PontxManager } from "../manager";
+import type { CliContext } from "../cli-context";
+import { resolveManagerForSpec } from "../global";
 
 /**
  * 如果名称包含特殊字符（如 .），则用引号括起来
@@ -11,7 +13,11 @@ export function quoteIfNeeded(name: string): string {
   return name;
 }
 
-export function buildFuse(pontxManager: PontxManager, useRemote?: boolean) {
+export function buildFuse(
+  pontxManager: PontxManager,
+  useRemote?: boolean,
+  filterSpecName?: string
+) {
   const origins = pontxManager?.resolvedConfig?.origins || [];
   const storages = [];
   const storageKeys = new Set<string>();
@@ -23,6 +29,11 @@ export function buildFuse(pontxManager: PontxManager, useRemote?: boolean) {
 
     const spec = useRemote ? origin.remoteSpec : origin.spec;
     if (!spec) {
+      return;
+    }
+
+    // 如果指定了 specName，只处理匹配的 spec
+    if (filterSpecName && spec.name !== filterSpecName) {
       return;
     }
 
@@ -113,19 +124,57 @@ export function searchApis(
  * Search command: search APIs by keyword
  */
 export async function searchCommand(
-  manager: PontxManager,
+  managerOrContext: PontxManager | CliContext,
   keyword: string,
-  options: { max?: number; useRemote?: boolean }
+  options: {
+    max?: number;
+    useRemote?: boolean;
+    spec?: string;
+    global?: string;
+  } = {}
 ) {
-  const fuse = buildFuse(manager, options.useRemote);
+  // Determine if called from CLI or directly
+  const isCliContext = "tryGetLocalManager" in managerOrContext;
+
+  let manager: PontxManager;
+  let filterSpecName: string | undefined = options.spec;
+
+  if (isCliContext) {
+    // CLI call: support spec resolution
+    if (options.spec) {
+      // 使用 --spec 指定 specName，自动查找本地或 global
+      const resolved = await resolveManagerForSpec(
+        options.spec,
+        managerOrContext
+      );
+      manager = resolved.manager;
+      filterSpecName = options.spec;
+    } else if (options.global) {
+      // 兼容旧的 --global 选项
+      console.error(
+        `[warn] --global is deprecated, use --spec instead`
+      );
+      manager = await managerOrContext.getGlobalManager(options.global);
+    } else {
+      // 默认使用本地 manager
+      manager = await managerOrContext.getManager();
+    }
+  } else {
+    // Direct call: maintain backward compatibility
+    manager = managerOrContext;
+  }
+
+  const fuse = buildFuse(manager, options.useRemote, filterSpecName);
   const results = searchApis(keyword, fuse, options.max || 6);
 
   if (results.length === 0) {
-    console.log(`No APIs found for keyword: "${keyword}"`);
+    const specHint = filterSpecName ? ` in spec "${filterSpecName}"` : "";
+    console.log(`No APIs found for keyword: "${keyword}"${specHint}`);
     return;
   }
 
-  console.log(`Found ${results.length} API(s):\n`);
+  const specHint = filterSpecName ? ` in spec "${filterSpecName}"` : "";
+  console.log(`Found ${results.length} API(s)${specHint}:\n`);
 
   results.forEach((result, index) => {
     const specPart = quoteIfNeeded(result.specName);

@@ -60,8 +60,8 @@ export async function resolveManagerForSpec(
 
     // Output hint
     const hint = options?.forceGlobal && localManager ? " (overriding local)" : "";
-    console.error(
-      `[info] Using global spec "${specName}" from ${result.globalPackage}${hint}`
+    ctx.logger.info(
+      `Using global spec "${specName}" from ${result.globalPackage}${hint}`
     );
 
     return {

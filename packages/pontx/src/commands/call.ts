@@ -352,6 +352,8 @@ export async function callCommand(
   rawArgs: string[],
   options: CallCommandOptions = {}
 ) {
+  // Get logger from context if available
+  const logger = ('logger' in managerOrContext) ? managerOrContext.logger : undefined;
   const { specName, tagName, apiName } = parseApiPath(apiPath);
 
   // Determine if called from CLI or directly
@@ -439,12 +441,22 @@ export async function callCommand(
 
   // Debug/dry-run: show request info
   if (options.debug || options.dryRun) {
-    console.log(formatRequestInfo(context, extraHeaders));
+    const requestInfo = formatRequestInfo(context, extraHeaders);
+    if (logger) {
+      logger.info(requestInfo);
+    } else {
+      process.stderr.write(requestInfo + '\n');
+    }
   }
 
   // Dry-run: exit without executing
   if (options.dryRun) {
-    console.log("(Dry run - request not sent)");
+    const dryRunMsg = "(Dry run - request not sent)";
+    if (logger) {
+      logger.info(dryRunMsg);
+    } else {
+      process.stderr.write(dryRunMsg + '\n');
+    }
     return;
   }
 
@@ -479,19 +491,34 @@ export async function callCommand(
         ? options.output
         : path.resolve(process.cwd(), options.output);
       fs.writeFileSync(outputPath, output, "utf-8");
-      console.log(`Response saved to: ${outputPath}`);
+      // Log to stderr
+      const savedMsg = `Response saved to: ${outputPath}`;
+      if (logger) {
+        logger.info(savedMsg);
+      } else {
+        process.stderr.write(savedMsg + '\n');
+      }
     } else {
+      // Output JSON to stdout (clean output for piping)
       console.log(output);
     }
 
     if (options.debug) {
-      console.log("-".repeat(60));
-      console.log("Request completed successfully");
+      const debugMsgs = ["-".repeat(60), "Request completed successfully"].join('\n');
+      if (logger) {
+        logger.info(debugMsgs);
+      } else {
+        process.stderr.write(debugMsgs + '\n');
+      }
     }
   } catch (error) {
     if (options.debug) {
-      console.error("-".repeat(60));
-      console.error("Request failed:");
+      const errorMsgs = ["-".repeat(60), "Request failed:"].join('\n');
+      if (logger) {
+        logger.error(errorMsgs);
+      } else {
+        process.stderr.write(errorMsgs + '\n');
+      }
     }
     throw error;
   }

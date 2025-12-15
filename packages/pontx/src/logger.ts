@@ -77,12 +77,11 @@ export function createLogger(
 
   function output(type: LogType, msg: string, options: LogErrorOptions = {}) {
     if (thresh >= LogLevels[type]) {
-      const method = type === "info" ? "log" : type;
-
       if (options.error) {
         loggedErrors.add(options.error);
       }
-      console[method](format(type, msg, options));
+      // Always output to stderr for logging
+      process.stderr.write(format(type, msg, options) + '\n');
     }
   }
 
