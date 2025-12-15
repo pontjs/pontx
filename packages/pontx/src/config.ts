@@ -160,7 +160,9 @@ export async function resolveConfig(
   );
   const configDir = path.dirname(configPath);
 
-  const resolvedOrigins = (config.origins || []).map((origin) => {
+  // 优先使用 specs，兼容旧版 origins
+  const originConfigs = config.specs || config.origins || [];
+  const resolvedOrigins = originConfigs.map((origin) => {
     let { envs, env, url, name, localPath, ...rest } = origin;
 
     const result = {

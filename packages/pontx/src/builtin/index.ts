@@ -201,6 +201,8 @@ export function getBuiltinPlugin(): Plugin {
   };
 }
 
+export { builtinApiExecutor };
+
 async function translateCnMeta(
   metaStr: string,
   translateConfig: TranslateConfig

@@ -8,6 +8,14 @@ export type PluginHookOptions = {
 };
 
 /**
+ * Request configuration for beforeRequest hook
+ */
+export interface ApiRequestConfig {
+  url: string;
+  requestInit: RequestInit;
+}
+
+/**
  * API Executor Context
  * Provides complete context for plugin apiExecutor hook to execute API calls
  */
@@ -24,21 +32,32 @@ export interface ApiExecutorContext {
     path: string;
     method: string;
     description?: string;
+    /** Parameters including body params (in: "body") */
     parameters?: Parameter[];
-    requestBody?: {
-      required?: boolean;
-      content?: Record<string, { schema: any }>;
-    };
     responses?: PontxAPI["responses"];
+    /** MIME types the API can consume (for Content-Type header) */
+    consumes?: string[];
+    /** MIME types the API can produce (for Accept header) */
+    produces?: string[];
   };
 
-  /** Runtime parameters from MCP tool invocation */
+  /** key: param name, value: param value */
   toolParams: Record<string, unknown>;
 
   baseUrl?: string;
 
   /** Plugin hook options with resolved configuration */
   options?: PluginHookOptions;
+
+  /**
+   * Hook called before sending the request
+   * Allows modifying url, headers, body, etc.
+   * @param config - The request configuration (url and RequestInit)
+   * @returns Modified request configuration
+   */
+  beforeRequest?: (
+    config: ApiRequestConfig
+  ) => ApiRequestConfig | Promise<ApiRequestConfig>;
 }
 
 export type Plugin = {
@@ -202,8 +221,10 @@ export interface ServiceConfig {
 export interface PontxConfig {
   /** 生成SDK代码的相对路径 */
   outDir: string;
-  /** 数据源 */
-  origins: OriginConfig[];
+  /** API 规范配置（推荐使用） */
+  specs?: OriginConfig[];
+  /** 数据源（兼容旧版，建议使用 specs） */
+  origins?: OriginConfig[];
   /** 翻译配置 */
   translateConfig?: TranslateConfig;
   /** 插件配置 */
