@@ -1,32 +1,33 @@
 /**
- * Retry Module - Automatic retry with exponential/linear backoff
+ * @author jasonHzq
+ * @description Retry 模块 - 自动重试，支持指数/线性退避
  *
- * This module provides retry functionality for failed requests with
- * configurable backoff strategies and retry conditions.
+ * 本模块为失败的请求提供重试功能，支持可配置的
+ * 退避策略和重试条件。
  *
- * Features:
- * - Configurable max retry attempts
- * - Exponential and linear backoff strategies
- * - Smart retry logic (5xx and network errors only)
- * - Custom retryable error configuration
- * - Detailed error information on exhaustion
+ * 功能特性：
+ * - 可配置最大重试次数
+ * - 支持指数和线性退避策略
+ * - 智能重试逻辑 (仅重试 5xx 和网络错误)
+ * - 可自定义可重试错误配置
+ * - 重试耗尽时提供详细错误信息
  */
 
 import type { FetchFunction } from "../types";
 import { FetchInit } from "../types/base";
 
 /**
- * Configuration for retry feature
+ * Retry 功能配置
  */
 export interface RetryConfig {
   /**
-   * Maximum number of retry attempts
+   * 最大重试次数
    * @default 3
    */
   maxAttempts?: number;
 
   /**
-   * Backoff strategy for retry delays
+   * 重试延迟的退避策略
    * - 'exponential': 1s, 2s, 4s, 8s, ...
    * - 'linear': 1s, 2s, 3s, 4s, ...
    * @default 'exponential'
@@ -34,22 +35,22 @@ export interface RetryConfig {
   backoff?: "exponential" | "linear";
 
   /**
-   * Custom retryable error codes or HTTP status codes
-   * If provided, only these errors will be retried
-   * If not provided, defaults to 5xx and network errors
+   * 自定义可重试的错误代码或 HTTP 状态码
+   * 如果提供，仅重试这些错误
+   * 如果未提供，默认重试 5xx 和网络错误
    */
   retryableErrors?: Array<string | number>;
 }
 
 /**
- * Error codes for retry-related errors
+ * Retry 相关错误代码
  */
 export const RETRY_ERROR_CODES = {
   RETRY_EXHAUSTED: "RETRY_EXHAUSTED",
 } as const;
 
 /**
- * Default retry configuration
+ * 默认重试配置
  */
 const DEFAULT_CONFIG: Required<Omit<RetryConfig, "retryableErrors">> = {
   maxAttempts: 3,
@@ -57,7 +58,7 @@ const DEFAULT_CONFIG: Required<Omit<RetryConfig, "retryableErrors">> = {
 };
 
 /**
- * Default retryable network error codes
+ * 默认可重试的网络错误代码
  */
 const DEFAULT_NETWORK_ERRORS = [
   "ECONNREFUSED",
@@ -68,21 +69,21 @@ const DEFAULT_NETWORK_ERRORS = [
 ];
 
 /**
- * Maximum delay cap in milliseconds (10 seconds)
+ * 最大延迟上限（毫秒）- 10 秒
  */
 const MAX_DELAY_MS = 10000;
 
 /**
- * Base delay in milliseconds (1 second)
+ * 基础延迟（毫秒）- 1 秒
  */
 const BASE_DELAY_MS = 1000;
 
 /**
- * Calculate delay for retry attempt using specified backoff strategy
+ * 使用指定的退避策略计算重试延迟时间
  *
- * @param attempt - Current attempt number (1-indexed)
- * @param strategy - Backoff strategy ('exponential' or 'linear')
- * @returns Delay in milliseconds
+ * @param attempt - 当前尝试次数 (从 1 开始)
+ * @param strategy - 退避策略 ('exponential' 或 'linear')
+ * @returns 延迟的毫秒数
  */
 function calculateDelay(
   attempt: number,
@@ -91,93 +92,93 @@ function calculateDelay(
   let delay: number;
 
   if (strategy === "exponential") {
-    // Exponential: 1s, 2s, 4s, 8s, 16s...
-    // Formula: BASE_DELAY * 2^(attempt - 1)
+    // 指数退避: 1s, 2s, 4s, 8s, 16s...
+    // 公式: BASE_DELAY * 2^(attempt - 1)
     delay = BASE_DELAY_MS * Math.pow(2, attempt - 1);
   } else {
-    // Linear: 1s, 2s, 3s, 4s, 5s...
-    // Formula: BASE_DELAY * attempt
+    // 线性退避: 1s, 2s, 3s, 4s, 5s...
+    // 公式: BASE_DELAY * attempt
     delay = BASE_DELAY_MS * attempt;
   }
 
-  // Cap at maximum delay
+  // 限制最大延迟
   return Math.min(delay, MAX_DELAY_MS);
 }
 
 /**
- * Create a delay promise
+ * 创建延迟 Promise
  *
- * @param ms - Milliseconds to delay
- * @returns Promise that resolves after the delay
+ * @param ms - 延迟的毫秒数
+ * @returns 在指定时间后 resolve 的 Promise
  */
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
- * Check if an error is retryable
+ * 检查错误是否可重试
  *
- * Default retryable conditions:
- * - 5xx status codes (server errors)
- * - Network errors (ECONNREFUSED, ETIMEDOUT, etc.)
- * - Errors without status code (treated as network errors)
+ * 默认可重试条件：
+ * - 5xx 状态码 (服务器错误)
+ * - 网络错误 (ECONNREFUSED, ETIMEDOUT 等)
+ * - 没有状态码的错误 (视为网络错误)
  *
- * Non-retryable conditions:
- * - 4xx status codes (client errors - bad request, auth, etc.)
+ * 不可重试条件：
+ * - 4xx 状态码 (客户端错误 - 错误请求、认证等)
  *
- * @param error - Error to check
- * @param customRetryableErrors - Custom retryable error codes/statuses
- * @returns true if error is retryable
+ * @param error - 要检查的错误
+ * @param customRetryableErrors - 自定义可重试的错误代码/状态码
+ * @returns 如果错误可重试则返回 true
  */
 function isRetryableError(
   error: any,
   customRetryableErrors?: Array<string | number>
 ): boolean {
-  // If custom retryable errors are specified, check against them first
+  // 如果指定了自定义可重试错误，优先检查它们
   if (customRetryableErrors && customRetryableErrors.length > 0) {
-    // Check if error code matches
+    // 检查错误代码是否匹配
     if (error.code && customRetryableErrors.includes(error.code)) {
       return true;
     }
-    // Check if status code matches
+    // 检查状态码是否匹配
     if (error.status && customRetryableErrors.includes(error.status)) {
       return true;
     }
-    // If custom list exists but no match, not retryable
+    // 如果存在自定义列表但不匹配，则不可重试
     return false;
   }
 
-  // Check for HTTP status codes
+  // 检查 HTTP 状态码
   if (error.status !== undefined) {
-    // 5xx errors are retryable (server errors)
+    // 5xx 错误可重试 (服务器错误)
     if (error.status >= 500 && error.status < 600) {
       return true;
     }
-    // 4xx errors are NOT retryable (client errors)
+    // 4xx 错误不可重试 (客户端错误)
     if (error.status >= 400 && error.status < 500) {
       return false;
     }
   }
 
-  // Check for network error codes
+  // 检查网络错误代码
   if (error.code && DEFAULT_NETWORK_ERRORS.includes(error.code)) {
     return true;
   }
 
-  // If no status code, treat as network error (retryable)
-  // This handles generic network failures
+  // 如果没有状态码，视为网络错误 (可重试)
+  // 这会处理通用的网络失败
   return true;
 }
 
 /**
- * Wrapper function that adds retry functionality to a request function
+ * 为请求函数添加重试功能的包装函数
  *
- * This decorator automatically retries failed requests based on the
- * configured strategy and retry conditions.
+ * 这个装饰器会根据配置的策略和重试条件
+ * 自动重试失败的请求。
  *
- * @param requestFn - Original request function to wrap
- * @param config - Retry configuration
- * @returns Wrapped request function with retry capability
+ * @param requestFn - 要包装的原始请求函数
+ * @param config - 重试配置
+ * @returns 带有重试功能的包装后的请求函数
  *
  * @example
  * ```ts
@@ -191,46 +192,46 @@ export function withRetry(
   requestFn: FetchFunction,
   config?: RetryConfig
 ): FetchFunction {
-  // If no config provided, return original function
+  // 如果未提供配置，返回原始函数
   if (!config) {
     return requestFn;
   }
 
-  // Merge with defaults
+  // 与默认值合并
   const {
     maxAttempts = DEFAULT_CONFIG.maxAttempts,
     backoff = DEFAULT_CONFIG.backoff,
     retryableErrors,
   } = config;
 
-  // Return wrapped function that maintains the same signature
+  // 返回保持相同签名的包装函数
   return async (url: string, init?: FetchInit): Promise<Response> => {
     let lastError: Error | undefined;
     let attempt = 0;
 
-    // Retry loop
+    // 重试循环
     while (attempt < maxAttempts) {
       attempt++;
 
       try {
-        // Attempt the request
+        // 尝试请求
         const response = await requestFn(url, init);
-        return response; // Success - return immediately
+        return response; // 成功 - 立即返回
       } catch (error: any) {
         lastError = error;
 
-        // Check if this is the last attempt
+        // 检查是否为最后一次尝试
         const isLastAttempt = attempt >= maxAttempts;
 
-        // Check if error is retryable
+        // 检查错误是否可重试
         const shouldRetry = isRetryableError(error, retryableErrors);
 
-        // If not retryable or last attempt, throw immediately
+        // 如果不可重试或已是最后一次尝试，立即抛出
         if (!shouldRetry || isLastAttempt) {
-          // If this was the last attempt, wrap in RETRY_EXHAUSTED error
+          // 如果是最后一次尝试，包装为 RETRY_EXHAUSTED 错误
           if (isLastAttempt && shouldRetry) {
             const exhaustedError = new Error(
-              `Request failed after ${maxAttempts} attempts. Last error: ${error.message}`
+              `请求在 ${maxAttempts} 次尝试后失败。最后的错误: ${error.message}`
             );
             exhaustedError.name = RETRY_ERROR_CODES.RETRY_EXHAUSTED;
             (exhaustedError as any).code = RETRY_ERROR_CODES.RETRY_EXHAUSTED;
@@ -239,22 +240,22 @@ export function withRetry(
             throw exhaustedError;
           }
 
-          // Non-retryable error - throw immediately
+          // 不可重试的错误 - 立即抛出
           throw error;
         }
 
-        // Calculate delay for next retry
+        // 计算下次重试的延迟
         const delayMs = calculateDelay(attempt, backoff);
 
-        // Wait before retrying
+        // 等待后再重试
         await delay(delayMs);
 
-        // Continue to next iteration (retry)
+        // 继续下一次迭代 (重试)
       }
     }
 
-    // This should never be reached due to the loop logic above,
-    // but TypeScript needs it for exhaustiveness
-    throw lastError || new Error("Retry exhausted");
+    // 由于上面的循环逻辑，这里永远不应该到达
+    // 但 TypeScript 需要它来保证穷尽性
+    throw lastError || new Error("重试已耗尽");
   };
 }

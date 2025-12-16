@@ -45,6 +45,10 @@ export interface FetchAPIMeta extends APIMetaBase {
 /**
  * RPC API metadata
  * Characteristics: all request parameters are merged
+ *
+ * @deprecated RPC support has been removed from createBaseClient.
+ * This type is kept for backwards compatibility and potential future use.
+ * Consider using FetchAPIMeta or BrowserAPIMeta instead.
  */
 export interface RpcAPIMeta extends APIMetaBase {
   /** RPC request parameters */
@@ -80,6 +84,10 @@ export interface BrowserRequesterType<TMeta extends BrowserAPIMeta> {
 /**
  * RPC-style requester
  * Signature: (rpcParams?, init) => Promise<Response>
+ *
+ * @deprecated RPC support has been removed from createBaseClient.
+ * This type is kept for backwards compatibility and potential future use.
+ * Consider using FetchRequesterType or BrowserRequesterType instead.
  */
 export interface RpcRequesterType<TMeta extends RpcAPIMeta> {
   (rpcParams?: TMeta['RequestParams'], init?: RequestInit): Promise<
@@ -201,6 +209,10 @@ export type BrowserClient<T> = BuildClient<
  * ```ts
  * apiName(rpcParams?: RequestParams, init?: RequestInit): Promise<Response>
  * ```
+ *
+ * @deprecated RPC support has been removed from createBaseClient.
+ * This type is kept for backwards compatibility and potential future use.
+ * Consider using FetchClient or BrowserClient instead.
  *
  * @template T - API definitions
  *

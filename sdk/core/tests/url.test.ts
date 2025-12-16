@@ -1,26 +1,24 @@
 /**
- * URL building functionality tests
- * Testing: buildUrl, getPathParamNames, appendQueryParams, createUrlBuilder
+ * @author jasonHzq
+ * @description URL 构建功能测试
+ * 测试: buildUrl, normalizeURIComponent, decodeIfEncodedURIComponent
  */
 
 import { describe, it, expect } from 'vitest';
 import {
   buildUrl,
-  getPathParamNames,
-  appendQueryParams,
-  createUrlBuilder,
-  type BuildUrlOptions,
-  type UrlBuilder
-} from '../src/url';
+  normalizeURIComponent,
+  decodeIfEncodedURIComponent,
+} from '../src/core/build-url';
 
 describe('buildUrl', () => {
-  describe('basic parameter replacement', () => {
-    it('should replace single path parameter with value', () => {
+  describe('基础参数替换', () => {
+    it('应该替换单个路径参数', () => {
       const result = buildUrl('/users/{userId}', { userId: '123' });
       expect(result).toBe('/users/123');
     });
 
-    it('should replace multiple path parameters', () => {
+    it('应该替换多个路径参数', () => {
       const result = buildUrl('/users/{userId}/posts/{postId}', {
         userId: '123',
         postId: '456'
@@ -28,333 +26,169 @@ describe('buildUrl', () => {
       expect(result).toBe('/users/123/posts/456');
     });
 
-    it('should handle empty params object', () => {
-      const result = buildUrl('/users/{userId}', {});
-      expect(result).toBe('/users/{userId}');
+    it('应该处理数字类型的参数', () => {
+      const result = buildUrl('/users/{userId}', { userId: 123 });
+      expect(result).toBe('/users/123');
     });
 
-    it('should handle path without parameters', () => {
-      const result = buildUrl('/users', { foo: 'bar' });
-      expect(result).toBe('/users');
+    it('应该将剩余参数作为查询参数', () => {
+      const result = buildUrl('/users/{userId}', { userId: '123', page: 1, limit: 10 });
+      expect(result).toBe('/users/123?page=1&limit=10');
     });
   });
 
-  describe('URL encoding', () => {
-    it('should URL-encode parameter values with spaces', () => {
+  describe('pathMark 处理', () => {
+    it('缺失参数时应该使用 pathMark', () => {
+      const result = buildUrl('/users/{userId}', {}, ':id');
+      expect(result).toBe('/users/:id');
+    });
+
+    it('有参数值时应该忽略 pathMark', () => {
+      const result = buildUrl('/users/{userId}', { userId: '123' }, ':id');
+      expect(result).toBe('/users/123');
+    });
+
+    it('默认 pathMark 为空字符串', () => {
+      const result = buildUrl('/users/{userId}', {});
+      expect(result).toBe('/users/');
+    });
+  });
+
+  describe('查询参数处理', () => {
+    it('应该序列化基本类型查询参数', () => {
+      const result = buildUrl('/users', { name: 'John', age: 30 });
+      expect(result).toBe('/users?name=John&age=30');
+    });
+
+    it('应该处理数组参数', () => {
+      const result = buildUrl('/search', { tags: ['a', 'b', 'c'] });
+      expect(result).toBe('/search?tags=a&tags=b&tags=c');
+    });
+
+    it('应该序列化对象参数为 JSON', () => {
+      const result = buildUrl('/search', { filter: { status: 'active' } });
+      const decoded = decodeURIComponent(result.split('=')[1]);
+      expect(decoded).toBe('{"status":"active"}');
+    });
+
+    it('应该跳过 undefined 和 null 值', () => {
+      const result = buildUrl('/users', { name: 'John', age: null, city: undefined });
+      expect(result).toBe('/users?name=John');
+    });
+  });
+
+  describe('URL 编码', () => {
+    it('路径参数应该进行 URL 编码', () => {
       const result = buildUrl('/search/{query}', { query: 'hello world' });
       expect(result).toBe('/search/hello%20world');
     });
 
-    it('should URL-encode special characters', () => {
+    it('应该编码特殊字符', () => {
       const result = buildUrl('/search/{query}', { query: 'a+b&c=d' });
       expect(result).toBe('/search/a%2Bb%26c%3Dd');
     });
 
-    it('should URL-encode unicode characters', () => {
+    it('应该编码中文字符', () => {
       const result = buildUrl('/search/{query}', { query: '你好' });
       expect(result).toBe('/search/%E4%BD%A0%E5%A5%BD');
     });
   });
 
-  describe('pathMark handling', () => {
-    it('should use pathMark when parameter is missing', () => {
-      const result = buildUrl('/users/{userId}', {}, { pathMark: ':id' });
-      expect(result).toBe('/users/:id');
+  describe('边界情况', () => {
+    it('应该处理空参数对象', () => {
+      const result = buildUrl('/users', {});
+      expect(result).toBe('/users');
     });
 
-    it('should use pathMark for multiple missing parameters', () => {
-      const result = buildUrl(
-        '/users/{userId}/posts/{postId}',
-        {},
-        { pathMark: ':id' }
-      );
-      expect(result).toBe('/users/:id/posts/:id');
+    it('应该处理 null 参数', () => {
+      const result = buildUrl('/users', null as any);
+      expect(result).toBeNull();
     });
 
-    it('should use actual value when both value and pathMark exist', () => {
-      const result = buildUrl(
-        '/users/{userId}',
-        { userId: '123' },
-        { pathMark: ':id' }
-      );
-      expect(result).toBe('/users/123');
+    it('应该处理没有路径参数的路径', () => {
+      const result = buildUrl('/users', { page: 1 });
+      expect(result).toBe('/users?page=1');
     });
 
-    it('should keep placeholder when no pathMark and parameter missing', () => {
-      const result = buildUrl('/users/{userId}', {});
-      expect(result).toBe('/users/{userId}');
-    });
-  });
-
-  describe('edge cases', () => {
-    it('should handle null parameter value as missing', () => {
-      const result = buildUrl('/users/{userId}', { userId: null });
-      expect(result).toBe('/users/{userId}');
-    });
-
-    it('should handle undefined parameter value as missing', () => {
-      const result = buildUrl('/users/{userId}', { userId: undefined });
-      expect(result).toBe('/users/{userId}');
-    });
-
-    it('should handle empty string parameter value as missing', () => {
+    it('应该处理空字符串参数值', () => {
       const result = buildUrl('/users/{userId}', { userId: '' });
-      expect(result).toBe('/users/{userId}');
-    });
-
-    it('should handle number parameter values', () => {
-      const result = buildUrl('/users/{userId}', { userId: 123 });
-      expect(result).toBe('/users/123');
-    });
-
-    it('should handle boolean parameter values', () => {
-      const result = buildUrl('/users/{active}', { active: true });
-      expect(result).toBe('/users/true');
-    });
-
-    it('should handle parameter names with underscores', () => {
-      const result = buildUrl('/api/{user_id}', { user_id: '123' });
-      expect(result).toBe('/api/123');
-    });
-
-    it('should handle parameter names with hyphens', () => {
-      const result = buildUrl('/api/{user-id}', { 'user-id': '123' });
-      expect(result).toBe('/api/123');
+      expect(result).toBe('/users/');
     });
   });
 });
 
-describe('getPathParamNames', () => {
-  it('should extract single parameter name', () => {
-    const result = getPathParamNames('/users/{userId}');
-    expect(result).toEqual(new Set(['userId']));
+describe('normalizeURIComponent', () => {
+  it('应该对未编码的字符串进行编码', () => {
+    const result = normalizeURIComponent('hello world');
+    expect(result).toBe('hello%20world');
   });
 
-  it('should extract multiple parameter names', () => {
-    const result = getPathParamNames('/users/{userId}/posts/{postId}');
-    expect(result).toEqual(new Set(['userId', 'postId']));
+  it('应该处理已编码的字符串（先解码再编码）', () => {
+    const result = normalizeURIComponent('hello%20world');
+    expect(result).toBe('hello%20world');
   });
 
-  it('should return empty set for path without parameters', () => {
-    const result = getPathParamNames('/users');
-    expect(result).toEqual(new Set());
+  it('应该处理重复编码的字符串', () => {
+    const result = normalizeURIComponent('hello%2520world');
+    expect(result).toBe('hello%2520world');
   });
 
-  it('should handle parameters with underscores', () => {
-    const result = getPathParamNames('/api/{user_id}');
-    expect(result).toEqual(new Set(['user_id']));
+  it('应该处理特殊字符', () => {
+    const result = normalizeURIComponent('a+b&c=d');
+    expect(result).toBe('a%2Bb%26c%3Dd');
   });
 
-  it('should handle parameters with hyphens', () => {
-    const result = getPathParamNames('/api/{user-id}');
-    expect(result).toEqual(new Set(['user-id']));
+  it('应该处理中文字符', () => {
+    const result = normalizeURIComponent('你好');
+    expect(result).toBe('%E4%BD%A0%E5%A5%BD');
   });
 
-  it('should handle empty path', () => {
-    const result = getPathParamNames('');
-    expect(result).toEqual(new Set());
+  it('应该处理 null 和 undefined', () => {
+    expect(normalizeURIComponent(null as any)).toBe('');
+    expect(normalizeURIComponent(undefined as any)).toBe('');
   });
 
-  it('should handle complex path with multiple segments', () => {
-    const result = getPathParamNames('/api/v1/{org}/{project}/issues/{issueId}');
-    expect(result).toEqual(new Set(['org', 'project', 'issueId']));
-  });
-});
-
-describe('appendQueryParams', () => {
-  describe('basic query parameters', () => {
-    it('should append single query parameter', () => {
-      const result = appendQueryParams('/users', { page: 1 });
-      expect(result).toBe('/users?page=1');
-    });
-
-    it('should append multiple query parameters', () => {
-      const result = appendQueryParams('/users', { page: 1, limit: 10 });
-      expect(result).toBe('/users?page=1&limit=10');
-    });
-
-    it('should handle existing query string with ?', () => {
-      const result = appendQueryParams('/users?sort=name', { page: 1 });
-      expect(result).toBe('/users?sort=name&page=1');
-    });
-
-    it('should return original URL when params is empty', () => {
-      const result = appendQueryParams('/users', {});
-      expect(result).toBe('/users');
-    });
-  });
-
-  describe('array parameters', () => {
-    it('should append array values as repeated parameters', () => {
-      const result = appendQueryParams('/users', { tags: ['frontend', 'backend'] });
-      expect(result).toBe('/users?tags=frontend&tags=backend');
-    });
-
-    it('should handle empty array by skipping it', () => {
-      const result = appendQueryParams('/users', { tags: [] });
-      expect(result).toBe('/users');
-    });
-
-    it('should handle array of numbers', () => {
-      const result = appendQueryParams('/users', { ids: [1, 2, 3] });
-      expect(result).toBe('/users?ids=1&ids=2&ids=3');
-    });
-  });
-
-  describe('object parameters', () => {
-    it('should serialize object to JSON string', () => {
-      const result = appendQueryParams('/users', { filter: { status: 'active' } });
-      const decoded = decodeURIComponent(result.split('=')[1]);
-      expect(decoded).toBe('{"status":"active"}');
-    });
-
-    it('should serialize nested objects', () => {
-      const result = appendQueryParams('/users', {
-        filter: { user: { name: 'John' } }
-      });
-      const decoded = decodeURIComponent(result.split('=')[1]);
-      expect(decoded).toBe('{"user":{"name":"John"}}');
-    });
-
-    it('should serialize array of objects', () => {
-      const result = appendQueryParams('/users', {
-        items: [{ id: 1 }, { id: 2 }]
-      });
-      expect(result).toContain('items=');
-      expect(result.split('&').length).toBe(2);
-    });
-  });
-
-  describe('special characters', () => {
-    it('should URL-encode parameter values', () => {
-      const result = appendQueryParams('/search', { q: 'hello world' });
-      expect(result).toBe('/search?q=hello%20world');
-    });
-
-    it('should URL-encode special characters', () => {
-      const result = appendQueryParams('/search', { q: 'a+b&c=d' });
-      expect(result).toBe('/search?q=a%2Bb%26c%3Dd');
-    });
-
-    it('should URL-encode unicode characters', () => {
-      const result = appendQueryParams('/search', { q: '你好' });
-      expect(result).toBe('/search?q=%E4%BD%A0%E5%A5%BD');
-    });
-  });
-
-  describe('edge cases', () => {
-    it('should skip null values', () => {
-      const result = appendQueryParams('/users', { page: 1, filter: null });
-      expect(result).toBe('/users?page=1');
-    });
-
-    it('should skip undefined values', () => {
-      const result = appendQueryParams('/users', { page: 1, filter: undefined });
-      expect(result).toBe('/users?page=1');
-    });
-
-    it('should handle boolean values', () => {
-      const result = appendQueryParams('/users', { active: true });
-      expect(result).toBe('/users?active=true');
-    });
-
-    it('should handle zero as valid value', () => {
-      const result = appendQueryParams('/users', { page: 0 });
-      expect(result).toBe('/users?page=0');
-    });
-
-    it('should handle empty string as valid value', () => {
-      const result = appendQueryParams('/users', { search: '' });
-      expect(result).toBe('/users?search=');
-    });
+  it('应该处理残缺的编码字符（不解码直接编码）', () => {
+    const result = normalizeURIComponent('hello%2');
+    // 残缺的 %2 会被当作普通字符编码
+    expect(result).toBe('hello%252');
   });
 });
 
-describe('createUrlBuilder', () => {
-  describe('default behavior', () => {
-    it('should create builder that replaces path params and appends query params', () => {
-      const builder = createUrlBuilder();
-      const result = builder('/users/{userId}', { userId: '123', page: 1 });
-      expect(result).toBe('/users/123?page=1');
-    });
-
-    it('should handle pathMark option', () => {
-      const builder = createUrlBuilder({ pathMark: ':id' });
-      const result = builder('/users/{userId}', { page: 1 });
-      expect(result).toBe('/users/:id?page=1');
-    });
-
-    it('should separate path params from query params', () => {
-      const builder = createUrlBuilder();
-      const result = builder('/users/{userId}/posts/{postId}', {
-        userId: '123',
-        postId: '456',
-        sort: 'date',
-        limit: 10
-      });
-      expect(result).toBe('/users/123/posts/456?sort=date&limit=10');
-    });
+describe('decodeIfEncodedURIComponent', () => {
+  it('应该解码已编码的字符串', () => {
+    const result = decodeIfEncodedURIComponent('hello%20world');
+    expect(result).toBe('hello world');
   });
 
-  describe('custom getFetchUrl', () => {
-    it('should use custom getFetchUrl when provided', () => {
-      const builder = createUrlBuilder({
-        getFetchUrl: (path, params) => `https://api.example.com${path}?token=${params.token}`
-      });
-      const result = builder('/users/{id}', { id: 123, token: 'abc' });
-      expect(result).toBe('https://api.example.com/users/{id}?token=abc');
-    });
-
-    it('should pass all params to custom getFetchUrl', () => {
-      let capturedPath: string;
-      let capturedParams: Record<string, unknown>;
-
-      const builder = createUrlBuilder({
-        getFetchUrl: (path, params) => {
-          capturedPath = path;
-          capturedParams = params;
-          return '/custom';
-        }
-      });
-
-      builder('/users/{id}', { id: 123, page: 1 });
-
-      expect(capturedPath!).toBe('/users/{id}');
-      expect(capturedParams!).toEqual({ id: 123, page: 1 });
-    });
-
-    it('should not apply default URL building when custom getFetchUrl is provided', () => {
-      const builder = createUrlBuilder({
-        getFetchUrl: (path) => `https://example.com${path}`
-      });
-      const result = builder('/users/{id}', { id: 123 });
-      expect(result).toBe('https://example.com/users/{id}');
-      expect(result).not.toContain('/users/123');
-    });
+  it('应该保持未编码的字符串不变', () => {
+    const result = decodeIfEncodedURIComponent('hello world');
+    expect(result).toBe('hello world');
   });
 
-  describe('edge cases', () => {
-    it('should handle builder without params', () => {
-      const builder = createUrlBuilder();
-      const result = builder('/users');
-      expect(result).toBe('/users');
-    });
+  it('应该处理中文编码', () => {
+    const result = decodeIfEncodedURIComponent('%E4%BD%A0%E5%A5%BD');
+    expect(result).toBe('你好');
+  });
 
-    it('should handle builder with empty params object', () => {
-      const builder = createUrlBuilder();
-      const result = builder('/users/{id}', {});
-      expect(result).toBe('/users/{id}');
-    });
+  it('应该处理特殊字符编码', () => {
+    const result = decodeIfEncodedURIComponent('a%2Bb%26c%3Dd');
+    expect(result).toBe('a+b&c=d');
+  });
 
-    it('should create multiple independent builders', () => {
-      const builder1 = createUrlBuilder({ pathMark: ':id' });
-      const builder2 = createUrlBuilder({ pathMark: '_' });
+  it('应该处理 null 和 undefined', () => {
+    expect(decodeIfEncodedURIComponent(null as any)).toBe('');
+    expect(decodeIfEncodedURIComponent(undefined as any)).toBe('');
+  });
 
-      const result1 = builder1('/users/{userId}', {});
-      const result2 = builder2('/users/{userId}', {});
+  it('应该处理残缺的编码（返回原字符串）', () => {
+    const result = decodeIfEncodedURIComponent('hello%2');
+    expect(result).toBe('hello%2');
+  });
 
-      expect(result1).toBe('/users/:id');
-      expect(result2).toBe('/users/_');
-    });
+  it('应该处理混合的已编码和未编码字符串', () => {
+    const result = decodeIfEncodedURIComponent('hello%20world test');
+    // 如果重新编码后不等于原字符串，返回原字符串
+    expect(result).toBe('hello%20world test');
   });
 });

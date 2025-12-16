@@ -1,10 +1,11 @@
 /**
- * Request body serialization tests
- * Testing: serializeRequestBody, getContentType
+ * @author jasonHzq
+ * @description Request body 序列化测试
+ * 测试: serializeRequestBody, getContentType
  */
 
 import { describe, it, expect } from 'vitest';
-import { serializeRequestBody, getContentType } from '../src/request-body';
+import { serializeRequestBody, getContentType } from '../src/core/request-body';
 import type { PontxAPI } from '@pontx/spec';
 
 describe('serializeRequestBody', () => {

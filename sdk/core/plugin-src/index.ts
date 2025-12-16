@@ -7,8 +7,7 @@ import { PontxSpec } from '@pontx/spec';
 import { generateSchemas } from '@pontx/spec';
 import { generateApis } from './generate-apis';
 import { generateApiMeta } from './generate-api-meta';
-import type { FileTree, GeneratorConfig } from './types';
-import type { Plugin } from 'pontx';
+import type { FileTree, GeneratorConfig, Plugin } from './types';
 
 /**
  * 生成 Graceful Client 代码

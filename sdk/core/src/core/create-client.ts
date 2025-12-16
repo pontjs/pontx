@@ -1,20 +1,15 @@
-import { PontxSpec } from '@pontx/spec';
-import { withMock, withRetry } from '../features';
-import { PontxSpecMeta } from '../types';
+import { PontxSpec } from "@pontx/spec";
+import { withMock, withRetry } from "../features";
+import { PontxSpecMeta } from "../types";
 import {
   BaseRequestFn,
+  CreateRequester,
   EnhancedRequestInit,
   PontxAPIMeta,
-} from '../types/base';
-import { FetchClient, RpcClient } from '../types/client';
-import {
-  LoggerConfig,
-  MockConfig,
-  RetryConfig,
-  ValidationConfig,
-} from '../types/feature';
-import { buildApiCaller } from './build-api-caller';
-import { createFetchRequester, CreateRpcRequester } from './create-requester';
+} from "../types/base";
+import { FetchClient } from "../types/client";
+import { MockConfig, RetryConfig } from "../types/feature";
+import { BaseRequesterConfig, createFetchRequester } from "./create-requester";
 
 /**
  * Validate pontxSpecMeta format
@@ -27,19 +22,19 @@ import { createFetchRequester, CreateRpcRequester } from './create-requester';
  * @throws Error if metadata is invalid
  */
 function validatePontxSpecMeta(meta: any): asserts meta is PontxSpecMeta {
-  if (!meta || typeof meta !== 'object') {
-    throw new Error('Invalid pontxSpecMeta: must be an object');
+  if (!meta || typeof meta !== "object") {
+    throw new Error("Invalid pontxSpecMeta: must be an object");
   }
 
-  if (!meta.name || typeof meta.name !== 'string') {
+  if (!meta.name || typeof meta.name !== "string") {
     throw new Error(
-      'Invalid pontxSpecMeta: missing or invalid "name" property',
+      'Invalid pontxSpecMeta: missing or invalid "name" property'
     );
   }
 
-  if (!meta.apis || typeof meta.apis !== 'object') {
+  if (!meta.apis || typeof meta.apis !== "object") {
     throw new Error(
-      'Invalid pontxSpecMeta: missing or invalid "apis" property',
+      'Invalid pontxSpecMeta: missing or invalid "apis" property'
     );
   }
 }
@@ -54,7 +49,7 @@ function deepFreeze<T>(obj: T): T {
   // Freeze all nested objects
   Object.getOwnPropertyNames(obj).forEach((prop) => {
     const value = (obj as any)[prop];
-    if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+    if (value && typeof value === "object" && !Object.isFrozen(value)) {
       deepFreeze(value);
     }
   });
@@ -65,10 +60,10 @@ function deepFreeze<T>(obj: T): T {
 /**
  * Configuration for creating a pontx sdk client
  */
-export interface BaseSDKClientConfig {
-  pontxSpecMeta: PontxSpecMeta;
+export interface BaseSDKClientConfig extends BaseRequesterConfig {
+  baseUrl?: string;
 
-  baseRequestFn: BaseRequestFn;
+  createRequester?: CreateRequester;
 
   /**
    * Custom URL builder function
@@ -85,7 +80,7 @@ export interface BaseSDKClientConfig {
    */
   makeCustomUsages?: (
     usages: Record<string, any>,
-    apiMeta?: PontxAPIMeta,
+    apiMeta?: PontxAPIMeta
   ) => Record<string, any>;
 
   /**
@@ -143,7 +138,7 @@ export interface FetchSDKClientConfig extends BaseSDKClientConfig {
    * - Implement custom retry logic at transport level
    * - Use a different HTTP client (axios, got, etc.)
    */
-  baseRequestFn: BaseRequestFn;
+  baseRequestFn?: BaseRequestFn;
 
   baseUrl?: string;
 
@@ -159,12 +154,8 @@ export interface FetchSDKClientConfig extends BaseSDKClientConfig {
 
   beforeRequest?: (
     url: string,
-    init: EnhancedRequestInit,
+    init: EnhancedRequestInit
   ) => Promise<{ url: string; init: EnhancedRequestInit }>;
-}
-
-export interface RpcSDKClientConfig extends BaseSDKClientConfig {
-  createRpcRequester: CreateRpcRequester;
 }
 
 /**
@@ -175,11 +166,8 @@ export interface RpcSDKClientConfig extends BaseSDKClientConfig {
  * @param createRequester - Function to create API requester
  * @returns Proxy object for accessing APIs under this tag
  */
-function createTagProxy(
-  tagName: string,
-  pontxSpecMeta: PontxSpecMeta,
-  createRequester: (apiKey: string, apiMeta: PontxAPIMeta) => any,
-) {
+function createTagProxy(config: BaseSDKClientConfig, tagName: string) {
+  const pontxSpecMeta = config.pontxSpecMeta;
   const tagProxy: Record<string, any> = {};
 
   return new Proxy(tagProxy, {
@@ -193,7 +181,16 @@ function createTagProxy(
           throw new Error(`API "${apiKey}" not found in client`);
         }
 
-        target[apiName] = createRequester(apiKey, apiMeta);
+        target[apiName] = config.createRequester({
+          apiMeta: pontxSpecMeta.apis?.[apiKey],
+          apiKey,
+          apiSelector: {
+            specName: pontxSpecMeta.name,
+            // tagName,
+            controllerName: tagName,
+            apiName,
+          },
+        });
       }
 
       return target[apiName];
@@ -211,7 +208,7 @@ function getTagNames(pontxSpecMeta: PontxSpecMeta): string[] {
   const tagSet = new Set<string>();
 
   Object.keys(pontxSpecMeta.apis).forEach((apiKey) => {
-    const parts = apiKey.split('/');
+    const parts = apiKey.split("/");
     if (parts.length > 1) {
       tagSet.add(parts[0]);
     }
@@ -229,10 +226,8 @@ function getTagNames(pontxSpecMeta: PontxSpecMeta): string[] {
  * @param createRequester - Function to create API requester for given apiKey and apiMeta
  * @returns Proxy client supporting both access patterns
  */
-export function buildBaseProxyClient(
-  pontxSpecMeta: PontxSpecMeta,
-  createRequester: (apiKey: string, apiMeta: PontxAPIMeta) => any,
-) {
+export function buildBaseProxyClient(config: BaseSDKClientConfig) {
+  const pontxSpecMeta = config.pontxSpecMeta;
   // Create target object to hold all API methods and tag proxies
   const target: Record<string, any> = {};
 
@@ -250,20 +245,60 @@ export function buildBaseProxyClient(
         // Check if prop is a tag name
         if (tagNames.includes(prop)) {
           // Create and cache tag proxy
-          target[prop] = createTagProxy(prop, pontxSpecMeta, createRequester);
+          target[prop] = createTagProxy(config, prop);
           return target[prop];
         }
 
         // Also check for APIs without tag prefix
+        // First check exact match
         if (pontxSpecMeta.apis[prop]) {
-          target[prop] = createRequester(prop, pontxSpecMeta.apis[prop]);
+          target[prop] = config.createRequester({
+            apiMeta: pontxSpecMeta.apis?.[prop],
+            apiKey: prop,
+            apiSelector: {
+              specName: pontxSpecMeta.name,
+              controllerName: "",
+              apiName: prop,
+            },
+          });
+          return target[prop];
+        }
+
+        // Then check for API with tag prefix (e.g., "user/getUser" when accessing "getUser")
+        const matchingApiKey = Object.keys(pontxSpecMeta.apis).find(
+          (apiKey) => {
+            const parts = apiKey.split("/");
+            return parts.length > 1 && parts[parts.length - 1] === prop;
+          }
+        );
+
+        if (matchingApiKey) {
+          const parts = matchingApiKey.split("/");
+          const controllerName = parts.slice(0, -1).join("/");
+          target[prop] = config.createRequester({
+            apiMeta: pontxSpecMeta.apis?.[matchingApiKey],
+            apiKey: matchingApiKey,
+            apiSelector: {
+              specName: pontxSpecMeta.name,
+              controllerName,
+              apiName: prop,
+            },
+          });
           return target[prop];
         }
       } else {
         // No tags: direct API access only
         const apiMeta = pontxSpecMeta.apis[prop];
         if (apiMeta) {
-          target[prop] = createRequester(prop, apiMeta);
+          target[prop] = config.createRequester({
+            apiMeta: pontxSpecMeta.apis?.[prop],
+            apiKey: prop,
+            apiSelector: {
+              specName: pontxSpecMeta.name,
+              controllerName: "",
+              apiName: prop,
+            },
+          });
           return target[prop];
         }
       }
@@ -307,21 +342,33 @@ export function buildBaseProxyClient(
     has(target, prop) {
       if (pontxSpecMeta.hasTags) {
         const tagNames = getTagNames(pontxSpecMeta);
-        return (
-          tagNames.includes(prop as string) ||
-          !!pontxSpecMeta.apis[prop as string]
+        // Check if it's a tag name
+        if (tagNames.includes(prop as string)) {
+          return true;
+        }
+
+        // Check exact API key match
+        if (pontxSpecMeta.apis[prop as string]) {
+          return true;
+        }
+
+        // Check for API with tag prefix (e.g., "user/getUser" when checking "getUser")
+        const hasMatchingApi = Object.keys(pontxSpecMeta.apis).some(
+          (apiKey) => {
+            const parts = apiKey.split("/");
+            return parts.length > 1 && parts[parts.length - 1] === prop;
+          }
         );
+
+        return hasMatchingApi;
       }
       // Check if prop is a direct API key
-      if (pontxSpecMeta.apis[prop as string]) {
-        return true;
-      }
       return !!pontxSpecMeta.apis[prop as string];
     },
   });
 }
 
-export function createBaseClient(config: BaseSDKClientConfig, createRequester) {
+export function createBaseClient(config: BaseSDKClientConfig) {
   // Validate pontxSpecMeta
   validatePontxSpecMeta(config.pontxSpecMeta);
 
@@ -357,7 +404,7 @@ export function createBaseClient(config: BaseSDKClientConfig, createRequester) {
   //   }
 
   // Build proxy client
-  const client = buildBaseProxyClient(config.pontxSpecMeta, createRequester);
+  const client = buildBaseProxyClient(config);
 
   // Freeze configuration to prevent modifications
   deepFreeze(config);
@@ -369,32 +416,15 @@ export function createBaseClient(config: BaseSDKClientConfig, createRequester) {
  * Create SDK client from configuration
  */
 export function createFetchClient<T>(
-  config: FetchSDKClientConfig,
+  config: FetchSDKClientConfig
 ): FetchClient<T> {
   // Create requester factory
-  const createRequester = (apiKey: string, apiMeta: PontxAPIMeta) => {
-    const apiSelector = {
-      specName: config.pontxSpecMeta.name,
-    } as any;
 
-    if (apiKey?.includes('/')) {
-      const [tagName, apiName] = apiKey.split('/');
+  const clientConfig = { ...config } as any;
 
-      apiSelector.tagName = tagName;
-      apiSelector.apiName = apiName;
-    }
+  if (!config.createRequester) {
+    clientConfig.createRequester = createFetchRequester(config);
+  }
 
-    return createFetchRequester({
-      ...config,
-      apiKey,
-      apiSelector,
-    });
-  };
-
-  // Build proxy client using buildBaseProxyClient
-  return createBaseClient(config, createRequester) as FetchClient<T>;
-}
-
-export function createRpcClient<T>(config: RpcSDKClientConfig): RpcClient<T> {
-  return createBaseClient(config, config.createRpcRequester) as RpcClient<T>;
+  return createBaseClient(clientConfig) as FetchClient<T>;
 }

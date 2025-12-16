@@ -3,7 +3,7 @@
  * @description Graceful Client Pontx Plugin
  */
 
-import type { Plugin } from '@pontx/spec';
+import type { Plugin } from './types';
 import { generateGracefulClient } from './index';
 
 /**

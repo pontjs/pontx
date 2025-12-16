@@ -8,7 +8,7 @@
  * - 处理参数映射（解决参数冲突）
  */
 
-import type { GracefulApiMeta } from './index';
+import type { GracefulApiMeta } from "./requester";
 
 /**
  * 提取后的参数结构
@@ -34,7 +34,9 @@ type ParamExtractionStrategy = {
  * 分析参数提取策略
  * 根据 API 元数据判断如何提取参数
  */
-function analyzeExtractionStrategy(meta: GracefulApiMeta): ParamExtractionStrategy {
+function analyzeExtractionStrategy(
+  meta: GracefulApiMeta
+): ParamExtractionStrategy {
   return {
     hasPath: Boolean(meta.pathParams && meta.pathParams.length > 0),
     hasQuery: Boolean(meta.queryParams && meta.queryParams.length > 0),
@@ -50,7 +52,7 @@ function analyzeExtractionStrategy(meta: GracefulApiMeta): ParamExtractionStrate
 function extractPathParams(
   args: any[],
   meta: GracefulApiMeta,
-  startIndex: number,
+  startIndex: number
 ): { params: Record<string, any>; nextIndex: number } {
   const params: Record<string, any> = {};
 
@@ -72,7 +74,7 @@ function extractPathParams(
  */
 function separateMergedParams(
   mergedParams: Record<string, any>,
-  meta: GracefulApiMeta,
+  meta: GracefulApiMeta
 ): { queryParams: Record<string, any>; bodyParams: Record<string, any> } {
   const queryParams: Record<string, any> = {};
   const bodyParams: Record<string, any> = {};
@@ -82,7 +84,7 @@ function separateMergedParams(
     Object.entries(mergedParams).forEach(([key, value]) => {
       const mapping = meta.paramMapping![key];
       if (mapping) {
-        if (mapping.source === 'query') {
+        if (mapping.source === "query") {
           queryParams[mapping.field] = value;
         } else {
           bodyParams[mapping.field] = value;
@@ -110,7 +112,7 @@ function assignParamByFieldList(
   value: any,
   meta: GracefulApiMeta,
   queryParams: Record<string, any>,
-  bodyParams: Record<string, any>,
+  bodyParams: Record<string, any>
 ): void {
   if (meta.queryParams?.includes(key)) {
     queryParams[key] = value;
@@ -127,7 +129,7 @@ function extractQueryAndBodyParams(
   args: any[],
   meta: GracefulApiMeta,
   strategy: ParamExtractionStrategy,
-  startIndex: number,
+  startIndex: number
 ): {
   queryParams: Record<string, any>;
   bodyParams: any;
@@ -170,7 +172,7 @@ function extractQueryAndBodyParams(
  */
 function extractRequestInit(
   args: any[],
-  startIndex: number,
+  startIndex: number
 ): RequestInit | undefined {
   if (startIndex < args.length) {
     return args[startIndex];
@@ -208,7 +210,7 @@ function extractRequestInit(
  */
 export function extractParams(
   args: any[],
-  meta: GracefulApiMeta,
+  meta: GracefulApiMeta
 ): ExtractedParams {
   let currentIndex = 0;
 
@@ -224,7 +226,7 @@ export function extractParams(
     args,
     meta,
     strategy,
-    currentIndex,
+    currentIndex
   );
   currentIndex = queryBodyResult.nextIndex;
 

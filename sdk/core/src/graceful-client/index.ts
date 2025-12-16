@@ -8,10 +8,12 @@
  * 3. 通过类型转换适配 GracefulApiMeta 和 PontxAPIMeta
  */
 
-import { GracefulClient } from './type';
-import { PontxSDKClientConfig } from '../types';
-import { createBaseClient } from '../core/create-client';
-import { createGracefulRequester } from './requester';
+import { GracefulClient } from "./type";
+import { FetchSDKClientConfig } from "../core/create-client";
+import { createBaseClient } from "../core/create-client";
+import { createGracefulRequester } from "./requester";
+
+// export type CreateGracefulClientConfig =
 
 /**
  * 创建 Graceful API 客户端
@@ -22,7 +24,14 @@ import { createGracefulRequester } from './requester';
  * 3. 避免重复实现请求逻辑
  */
 export function createGracefulClient<T>(
-  config: PontxSDKClientConfig,
+  config: FetchSDKClientConfig
 ): GracefulClient<T> {
-  return createBaseClient(config, createGracefulRequester) as any;
+  const clientConfig = { ...config };
+  if (!config.createRequester) {
+    clientConfig.createRequester = createGracefulRequester(config);
+  }
+
+  return createBaseClient(clientConfig) as any;
 }
+
+export type { GracefulClient };

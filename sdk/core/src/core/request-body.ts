@@ -1,15 +1,35 @@
 /**
- * Request body serialization module
+ * @author jasonHzq
+ * @description 请求体序列化模块
  *
- * This module provides functionality to serialize request bodies based on Content-Type.
- * Supports JSON, URLSearchParams, FormData, and text/plain serialization.
+ * 本模块提供基于 Content-Type 的请求体序列化功能。
+ * 支持 JSON、URLSearchParams、FormData 和 text/plain 序列化。
  */
 
 import type { ContentType } from '../types/base';
 import type { PontxAPI } from '@pontx/spec';
 
 /**
- * Checks if a value is null or undefined
+ * 请求体序列化函数类型
+ * @param body - 原始请求体
+ * @returns 序列化后的请求体
+ */
+export type BodySerializer = (body: unknown) => string | URLSearchParams | FormData;
+
+/**
+ * 按 Content-Type 注册的序列化器映射
+ * @example
+ * const serializers: BodySerializers = {
+ *   'application/json': (body) => JSON.stringify(body, null, 2),
+ *   'application/x-custom': (body) => customSerialize(body)
+ * };
+ */
+export type BodySerializers = {
+  [contentType: string]: BodySerializer;
+};
+
+/**
+ * 检查值是否为 null 或 undefined
  * @internal
  */
 function isNullOrUndefined(value: unknown): value is null | undefined {
@@ -17,16 +37,38 @@ function isNullOrUndefined(value: unknown): value is null | undefined {
 }
 
 /**
- * Serializes request body based on Content-Type
+ * 根据 Content-Type 序列化请求体
  *
- * @param body - Request body to serialize
- * @param contentType - Content-Type header value
- * @returns Serialized body (string, URLSearchParams, or FormData)
+ * @param body - 要序列化的请求体
+ * @param contentType - Content-Type 请求头的值
+ * @param customSerializers - 自定义序列化器映射，优先级高于默认序列化器
+ * @returns 序列化后的请求体 (string, URLSearchParams 或 FormData)
+ *
+ * @example
+ * // 使用默认序列化器
+ * const serialized = serializeRequestBody({ name: 'test' }, 'application/json');
+ *
+ * @example
+ * // 使用自定义序列化器
+ * const serialized = serializeRequestBody(
+ *   { name: 'test' },
+ *   'application/json',
+ *   {
+ *     'application/json': (body) => JSON.stringify(body, null, 2)
+ *   }
+ * );
  */
 export function serializeRequestBody(
   body: unknown,
   contentType: ContentType,
+  customSerializers?: BodySerializers,
 ): string | URLSearchParams | FormData {
+  // 优先使用自定义序列化器
+  if (customSerializers?.[contentType]) {
+    return customSerializers[contentType](body);
+  }
+
+  // 使用默认序列化器
   if (contentType === 'application/json') {
     return JSON.stringify(body);
   }
@@ -175,13 +217,13 @@ function appendToFormData(
 }
 
 /**
- * Gets Content-Type from API metadata
+ * 从 API 元数据中获取 Content-Type
  *
- * Returns the first Content-Type from the consumes array in API metadata.
- * Returns undefined if consumes is not provided or is empty.
+ * 返回 API 元数据中 consumes 数组的第一个 Content-Type。
+ * 如果未提供 consumes 或为空，则返回 undefined。
  *
- * @param apiMeta - API metadata from PontxSpecMeta
- * @returns Content-Type string or undefined
+ * @param apiMeta - 来自 PontxSpecMeta 的 API 元数据
+ * @returns Content-Type 字符串或 undefined
  *
  * @example
  * const apiMeta = {
@@ -190,7 +232,7 @@ function appendToFormData(
  *   consumes: ['application/json', 'application/xml']
  * };
  * const contentType = getContentType(apiMeta);
- * // Returns: 'application/json'
+ * // 返回: 'application/json'
  */
 export function getContentType(apiMeta: Partial<PontxAPI>): string | undefined {
   if (!apiMeta.consumes || apiMeta.consumes.length === 0) {

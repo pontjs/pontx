@@ -1,4 +1,4 @@
-export const apiMeta = {
+export const specMeta = {
   name: "Swagger Petstore",
   hasTags: true,
   url: [
@@ -10,6 +10,8 @@ export const apiMeta = {
     "pet/uploadFile": {
       method: "POST",
       path: "/pet/{petId}/uploadImage",
+      consumes: ["multipart/form-data"],
+      produces: ["application/json"],
       pathParams: ["petId"],
       queryParams: null,
       bodyParams: {
@@ -21,6 +23,8 @@ export const apiMeta = {
     "pet/updatePet": {
       method: "PUT",
       path: "/pet",
+      consumes: ["application/json","application/xml"],
+      produces: ["application/json","application/xml"],
       pathParams: null,
       queryParams: null,
       bodyParams: {
@@ -32,6 +36,8 @@ export const apiMeta = {
     "pet/addPet": {
       method: "POST",
       path: "/pet",
+      consumes: ["application/json","application/xml"],
+      produces: ["application/json","application/xml"],
       pathParams: null,
       queryParams: null,
       bodyParams: {
@@ -43,6 +49,8 @@ export const apiMeta = {
     "pet/findPetsByStatus": {
       method: "GET",
       path: "/pet/findByStatus",
+      consumes: [],
+      produces: ["application/json","application/xml"],
       pathParams: null,
       queryParams: ["status"],
       bodyParams: null
@@ -51,6 +59,8 @@ export const apiMeta = {
     "pet/findPetsByTags": {
       method: "GET",
       path: "/pet/findByTags",
+      consumes: [],
+      produces: ["application/json","application/xml"],
       pathParams: null,
       queryParams: ["tags"],
       bodyParams: null
@@ -59,6 +69,8 @@ export const apiMeta = {
     "pet/getPetById": {
       method: "GET",
       path: "/pet/{petId}",
+      consumes: [],
+      produces: ["application/json","application/xml"],
       pathParams: ["petId"],
       queryParams: null,
       bodyParams: null
@@ -67,6 +79,8 @@ export const apiMeta = {
     "pet/deletePet": {
       method: "DELETE",
       path: "/pet/{petId}",
+      consumes: [],
+      produces: ["application/json","application/xml"],
       pathParams: ["petId"],
       queryParams: null,
       bodyParams: null
@@ -75,6 +89,8 @@ export const apiMeta = {
     "pet/updatePetWithForm": {
       method: "POST",
       path: "/pet/{petId}",
+      consumes: ["application/x-www-form-urlencoded"],
+      produces: ["application/json","application/xml"],
       pathParams: ["petId"],
       queryParams: null,
       bodyParams: {
@@ -86,6 +102,8 @@ export const apiMeta = {
     "store/getInventory": {
       method: "GET",
       path: "/store/inventory",
+      consumes: [],
+      produces: ["application/json"],
       pathParams: null,
       queryParams: null,
       bodyParams: null
@@ -94,6 +112,8 @@ export const apiMeta = {
     "store/placeOrder": {
       method: "POST",
       path: "/store/order",
+      consumes: ["application/json"],
+      produces: ["application/json","application/xml"],
       pathParams: null,
       queryParams: null,
       bodyParams: {
@@ -105,6 +125,8 @@ export const apiMeta = {
     "store/getOrderById": {
       method: "GET",
       path: "/store/order/{orderId}",
+      consumes: [],
+      produces: ["application/json","application/xml"],
       pathParams: ["orderId"],
       queryParams: null,
       bodyParams: null
@@ -113,6 +135,8 @@ export const apiMeta = {
     "store/deleteOrder": {
       method: "DELETE",
       path: "/store/order/{orderId}",
+      consumes: [],
+      produces: ["application/json","application/xml"],
       pathParams: ["orderId"],
       queryParams: null,
       bodyParams: null
@@ -121,6 +145,8 @@ export const apiMeta = {
     "user/createUsersWithListInput": {
       method: "POST",
       path: "/user/createWithList",
+      consumes: ["application/json"],
+      produces: ["application/json","application/xml"],
       pathParams: null,
       queryParams: null,
       bodyParams: {
@@ -132,6 +158,8 @@ export const apiMeta = {
     "user/getUserByName": {
       method: "GET",
       path: "/user/{username}",
+      consumes: [],
+      produces: ["application/json","application/xml"],
       pathParams: ["username"],
       queryParams: null,
       bodyParams: null
@@ -140,6 +168,8 @@ export const apiMeta = {
     "user/deleteUser": {
       method: "DELETE",
       path: "/user/{username}",
+      consumes: [],
+      produces: ["application/json","application/xml"],
       pathParams: ["username"],
       queryParams: null,
       bodyParams: null
@@ -148,6 +178,8 @@ export const apiMeta = {
     "user/updateUser": {
       method: "PUT",
       path: "/user/{username}",
+      consumes: ["application/json"],
+      produces: ["application/json","application/xml"],
       pathParams: ["username"],
       queryParams: null,
       bodyParams: {
@@ -159,6 +191,8 @@ export const apiMeta = {
     "user/loginUser": {
       method: "GET",
       path: "/user/login",
+      consumes: [],
+      produces: ["application/json","application/xml"],
       pathParams: null,
       queryParams: ["username", "password"],
       bodyParams: null
@@ -167,6 +201,8 @@ export const apiMeta = {
     "user/logoutUser": {
       method: "GET",
       path: "/user/logout",
+      consumes: [],
+      produces: ["application/json","application/xml"],
       pathParams: null,
       queryParams: null,
       bodyParams: null
@@ -175,6 +211,8 @@ export const apiMeta = {
     "user/createUsersWithArrayInput": {
       method: "POST",
       path: "/user/createWithArray",
+      consumes: ["application/json"],
+      produces: ["application/json","application/xml"],
       pathParams: null,
       queryParams: null,
       bodyParams: {
@@ -186,6 +224,8 @@ export const apiMeta = {
     "user/createUser": {
       method: "POST",
       path: "/user",
+      consumes: ["application/json"],
+      produces: ["application/json","application/xml"],
       pathParams: null,
       queryParams: null,
       bodyParams: {
@@ -195,5 +235,3 @@ export const apiMeta = {
     }
   }
 } as const;
-
-export type ApiMeta = typeof apiMeta;

@@ -1,89 +1,90 @@
 /**
- * Mock Module - Static mock data for testing
+ * @author jasonHzq
+ * @description Mock 模块 - 静态 Mock 数据用于测试
  *
- * This module provides mock functionality for testing without making real API calls.
- * It intercepts requests and returns pre-configured static data.
+ * 本模块提供 Mock 功能，在不发起真实 API 请求的情况下进行测试。
+ * 它拦截请求并返回预配置的静态数据。
  *
- * Features:
- * - Static mock data by API key
- * - Configurable response delay
- * - Enabled/disabled toggle
- * - x-mock header for identification
- * - Standard Response object format
+ * 功能特性：
+ * - 通过 API key 配置静态 Mock 数据
+ * - 可配置响应延迟
+ * - 可开启/关闭 Mock 功能
+ * - 在响应头中添加 x-mock 标识
+ * - 返回标准 Response 对象格式
  */
 
 import type { FetchFunction } from "../types";
 import { BaseRequestFn, EnhancedRequestInit } from "../types/base";
 
 /**
- * Configuration for mock feature
+ * Mock 功能配置
  */
 export interface MockConfig {
   /**
-   * Enable or disable mock functionality
+   * 是否启用 Mock 功能
    * @default true
    */
   enabled?: boolean;
 
   /**
-   * Mock data indexed by API key (e.g., 'user/getUser')
-   * Each key represents an API endpoint and its corresponding mock response
+   * Mock 数据，按 API key 索引 (例如: 'user/getUser')
+   * 每个 key 代表一个 API 端点及其对应的 Mock 响应
    */
   data: Record<string, any>;
 
   /**
-   * Delay in milliseconds before returning mock data
-   * Useful for simulating network latency
+   * 返回 Mock 数据前的延迟时间（毫秒）
+   * 用于模拟网络延迟
    * @default 0
    */
   delay?: number;
 }
 
 /**
- * Error codes for mock-related errors
+ * Mock 相关错误代码
  */
 export const MOCK_ERROR_CODES = {
   MOCK_NOT_FOUND: "MOCK_NOT_FOUND",
 } as const;
 
 /**
- * Create a delay promise
- * @param ms - Milliseconds to delay
- * @returns Promise that resolves after the delay
+ * 创建延迟 Promise
+ * @param ms - 延迟的毫秒数
+ * @returns 在指定时间后 resolve 的 Promise
  */
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
- * Create a mock Response object from data
- * @param data - Mock data to return
- * @returns Standard Response object with x-mock header
+ * 从数据创建 Mock Response 对象
+ * @param data - 要返回的 Mock 数据
+ * @returns 带有 x-mock 标识的标准 Response 对象
  */
 function createMockResponse(data: unknown): Response {
-  // Serialize data to JSON string
+  // 将数据序列化为 JSON 字符串
   const body = JSON.stringify(data);
 
-  // Create Response with standard headers
+  // 创建带有标准 headers 的 Response
   return new Response(body, {
     status: 200,
     statusText: "OK",
     headers: {
       "content-type": "application/json",
-      "x-mock": "true", // Marker to indicate this is a mock response
+      "x-mock": "true", // 标记这是一个 Mock 响应
     },
   });
 }
 
 /**
- * Wrapper function that adds mock functionality to a request function
+ * 为请求函数添加 Mock 功能的包装函数
  *
- * This decorator intercepts API requests and returns static mock data
- * when configured, without executing the actual network request.
+ * 这个装饰器在配置后会拦截 API 请求并返回静态 Mock 数据，
+ * 而不会执行实际的网络请求。
  *
- * @param requestFn - Original request function to wrap
- * @param config - Mock configuration
- * @returns Wrapped request function with mock capability
+ * @param requestFn - 要包装的原始请求函数
+ * @param config - Mock 配置
+ * @returns 带有 Mock 功能的包装后的请求函数
  *
  * @example
  * ```ts
@@ -93,41 +94,41 @@ function createMockResponse(data: unknown): Response {
  *     'user/getUser': { id: '123', name: 'Mock User' },
  *     'user/list': [{ id: '1' }, { id: '2' }],
  *   },
- *   delay: 500, // Optional: simulate 500ms network delay
+ *   delay: 500, // 可选：模拟 500ms 网络延迟
  * });
  * ```
  */
 export function withMock(requestFn: BaseRequestFn, config?: MockConfig) {
-  // If mock is not configured or explicitly disabled, return original function
+  // 如果未配置 Mock 或明确禁用，返回原始函数
   if (!config || config.enabled === false) {
     return requestFn;
   }
 
-  // Extract config values with defaults
+  // 提取配置值并设置默认值
   const { data, delay: delayMs = 0 } = config;
 
-  // Return wrapped function
+  // 返回包装后的函数
   return async (url: string, init?: EnhancedRequestInit) => {
-    // Extract API key from init._apiKey
+    // 从 init._apiKey 提取 API key
     const apiKey = (init as any)?._apiKey;
 
-    // If no API key provided, throw error
+    // 如果未提供 API key，抛出错误
     if (!apiKey) {
       const error = new Error(
-        "Mock requires _apiKey in RequestInit to identify the API."
+        "Mock 需要在 RequestInit 中提供 _apiKey 来识别 API。"
       );
       error.name = MOCK_ERROR_CODES.MOCK_NOT_FOUND;
       (error as any).code = MOCK_ERROR_CODES.MOCK_NOT_FOUND;
       throw error;
     }
 
-    // Check if mock data exists for this API
+    // 检查该 API 是否存在 Mock 数据
     const hasMockData = apiKey in data;
 
     if (!hasMockData) {
       const error = new Error(
-        `Mock data not found for API "${apiKey}". ` +
-          `Please configure mock data for this API.`
+        `未找到 API "${apiKey}" 的 Mock 数据。` +
+          `请为该 API 配置 Mock 数据。`
       );
       error.name = MOCK_ERROR_CODES.MOCK_NOT_FOUND;
       (error as any).code = MOCK_ERROR_CODES.MOCK_NOT_FOUND;
@@ -135,30 +136,30 @@ export function withMock(requestFn: BaseRequestFn, config?: MockConfig) {
       throw error;
     }
 
-    // Get mock data for this API
+    // 获取该 API 的 Mock 数据
     const mockData = data[apiKey];
 
-    // Apply delay if configured
+    // 如果配置了延迟，应用延迟
     if (delayMs > 0) {
       await delay(delayMs);
     }
 
-    // Return mock response
+    // 返回 Mock 响应
     return createMockResponse(mockData);
   };
 }
 
 /**
- * Type guard to check if a response is a mock response
+ * 类型守卫函数，检查响应是否为 Mock 响应
  *
- * @param response - Response object to check
- * @returns true if response has the x-mock header set to 'true'
+ * @param response - 要检查的 Response 对象
+ * @returns 如果响应的 x-mock header 设置为 'true' 则返回 true
  *
  * @example
  * ```ts
  * const response = await fetch('/api/users');
  * if (isMockResponse(response)) {
- *   console.log('This is a mock response');
+ *   console.log('这是一个 Mock 响应');
  * }
  * ```
  */

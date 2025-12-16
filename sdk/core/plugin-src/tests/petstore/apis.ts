@@ -8,27 +8,39 @@ import type * as schemas from './schemas';
 // ============ pet 模块 ============
 
 export declare namespace pet {
-  export type PetFindPetsByStatusParams = {
-    /** Status values that need to be considered for filter */
+  export type FindPetsByStatusParams = {
+    /**
+     * @description Status values that need to be considered for filter
+     */
     status: Array<'available' | 'pending' | 'sold'>;
   };
 
-  export type PetFindPetsByTagsParams = {
-    /** Tags to filter by */
+  export type FindPetsByTagsParams = {
+    /**
+     * @description Tags to filter by
+     */
     tags: Array<string>;
   };
 
-  export type PetUploadFileBody = {
-    /** Additional data to pass to server */
+  export type UploadFileBody = {
+    /**
+     * @description Additional data to pass to server
+     */
     additionalMetadata?: string;
-    /** file to upload */
-    file?: File;
+    /**
+     * @description file to upload
+     */
+    file?: any;
   };
 
-  export type PetUpdatePetWithFormBody = {
-    /** Updated name of the pet */
+  export type UpdatePetWithFormBody = {
+    /**
+     * @description Updated name of the pet
+     */
     name?: string;
-    /** Updated status of the pet */
+    /**
+     * @description Updated status of the pet
+     */
     status?: string;
   };
 
@@ -36,120 +48,92 @@ export declare namespace pet {
 
 export type pet = {
   /**
-   * uploads an image
-   *
-   * @example
-   * ```ts
-   * // TODO: Add example
-   * ```
+   * POST /pet/{petId}/uploadImage
+   * @summary: uploads an image
    */
   uploadFile: (
-    /** ID of pet to update */
+    /**
+     * @description ID of pet to update
+     */
     petId: number,
-    body: pet.PetUploadFileBody,
+    body: pet.UploadFileBody,
     requestInit?: RequestInit,
   ) => Promise<schemas.ApiResponse>;
 
   /**
-   * Update an existing pet
-   *
-   * @example
-   * ```ts
-   * // TODO: Add example
-   * ```
+   * PUT /pet
+   * @summary: Update an existing pet
    */
   updatePet: (
-    /** Request body */
     body: schemas.Pet,
     requestInit?: RequestInit,
   ) => Promise<any>;
 
   /**
-   * Add a new pet to the store
-   *
-   * @example
-   * ```ts
-   * // TODO: Add example
-   * ```
+   * POST /pet
+   * @summary: Add a new pet to the store
    */
   addPet: (
-    /** Request body */
     body: schemas.Pet,
     requestInit?: RequestInit,
   ) => Promise<any>;
 
   /**
-   * Finds Pets by status
-   *
+   * GET /pet/findByStatus
    * Multiple status values can be provided with comma separated strings
-   *
-   * @example
-   * ```ts
-   * // TODO: Add example
-   * ```
+   * @summary: Finds Pets by status
    */
   findPetsByStatus: (
-    params: pet.PetFindPetsByStatusParams,
+    params: pet.FindPetsByStatusParams,
     requestInit?: RequestInit,
   ) => Promise<Array<schemas.Pet>>;
 
   /**
-   * Finds Pets by tags
-   *
+   * GET /pet/findByTags
    * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
-   *
-   * @example
-   * ```ts
-   * // TODO: Add example
-   * ```
+   * @summary: Finds Pets by tags
+   * @deprecated
    */
   findPetsByTags: (
-    params: pet.PetFindPetsByTagsParams,
+    params: pet.FindPetsByTagsParams,
     requestInit?: RequestInit,
   ) => Promise<Array<schemas.Pet>>;
 
   /**
-   * Find pet by ID
-   *
+   * GET /pet/{petId}
    * Returns a single pet
-   *
-   * @example
-   * ```ts
-   * // TODO: Add example
-   * ```
+   * @summary: Find pet by ID
    */
   getPetById: (
-    /** ID of pet to return */
+    /**
+     * @description ID of pet to return
+     */
     petId: number,
     requestInit?: RequestInit,
   ) => Promise<schemas.Pet>;
 
   /**
-   * Deletes a pet
-   *
-   * @example
-   * ```ts
-   * // TODO: Add example
-   * ```
+   * DELETE /pet/{petId}
+   * @summary: Deletes a pet
    */
   deletePet: (
-    /** Pet id to delete */
+    /**
+     * @description Pet id to delete
+     */
     petId: number,
     requestInit?: RequestInit,
   ) => Promise<any>;
 
   /**
-   * Updates a pet in the store with form data
-   *
-   * @example
-   * ```ts
-   * // TODO: Add example
-   * ```
+   * POST /pet/{petId}
+   * @summary: Updates a pet in the store with form data
    */
   updatePetWithForm: (
-    /** ID of pet that needs to be updated */
+    /**
+     * @description ID of pet that needs to be updated
+     */
     petId: number,
-    body: pet.PetUpdatePetWithFormBody,
+    body: pet.UpdatePetWithFormBody,
     requestInit?: RequestInit,
   ) => Promise<any>;
 
@@ -159,61 +143,45 @@ export type pet = {
 
 export type store = {
   /**
-   * Returns pet inventories by status
-   *
+   * GET /store/inventory
    * Returns a map of status codes to quantities
-   *
-   * @example
-   * ```ts
-   * // TODO: Add example
-   * ```
+   * @summary: Returns pet inventories by status
    */
   getInventory: (
     requestInit?: RequestInit,
-  ) => Promise<Record<string, any>>;
+  ) => Promise<Record<any, number>>;
 
   /**
-   * Place an order for a pet
-   *
-   * @example
-   * ```ts
-   * // TODO: Add example
-   * ```
+   * POST /store/order
+   * @summary: Place an order for a pet
    */
   placeOrder: (
-    /** Request body */
     body: schemas.Order,
     requestInit?: RequestInit,
   ) => Promise<schemas.Order>;
 
   /**
-   * Find purchase order by ID
-   *
+   * GET /store/order/{orderId}
    * For valid response try integer IDs with value >= 1 and <= 10. Other values will generated exceptions
-   *
-   * @example
-   * ```ts
-   * // TODO: Add example
-   * ```
+   * @summary: Find purchase order by ID
    */
   getOrderById: (
-    /** ID of pet that needs to be fetched */
+    /**
+     * @description ID of pet that needs to be fetched
+     */
     orderId: number,
     requestInit?: RequestInit,
   ) => Promise<schemas.Order>;
 
   /**
-   * Delete purchase order by ID
-   *
+   * DELETE /store/order/{orderId}
    * For valid response try integer IDs with positive integer value. Negative or non-integer values will generate API errors
-   *
-   * @example
-   * ```ts
-   * // TODO: Add example
-   * ```
+   * @summary: Delete purchase order by ID
    */
   deleteOrder: (
-    /** ID of the order that needs to be deleted */
+    /**
+     * @description ID of the order that needs to be deleted
+     */
     orderId: number,
     requestInit?: RequestInit,
   ) => Promise<any>;
@@ -223,10 +191,14 @@ export type store = {
 // ============ user 模块 ============
 
 export declare namespace user {
-  export type UserLoginUserParams = {
-    /** The user name for login */
+  export type LoginUserParams = {
+    /**
+     * @description The user name for login
+     */
     username: string;
-    /** The password for login in clear text */
+    /**
+     * @description The password for login in clear text
+     */
     password: string;
   };
 
@@ -234,118 +206,91 @@ export declare namespace user {
 
 export type user = {
   /**
-   * Creates list of users with given input array
-   *
-   * @example
-   * ```ts
-   * // TODO: Add example
-   * ```
+   * POST /user/createWithList
+   * @summary: Creates list of users with given input array
    */
   createUsersWithListInput: (
-    /** List of user object */
+    /**
+     * @description List of user object
+     */
     body: Array<schemas.User>,
     requestInit?: RequestInit,
   ) => Promise<any>;
 
   /**
-   * Get user by user name
-   *
-   * @example
-   * ```ts
-   * // TODO: Add example
-   * ```
+   * GET /user/{username}
+   * @summary: Get user by user name
    */
   getUserByName: (
-    /** The name that needs to be fetched. Use user1 for testing.  */
+    /**
+     * @description The name that needs to be fetched. Use user1 for testing. 
+     */
     username: string,
     requestInit?: RequestInit,
   ) => Promise<schemas.User>;
 
   /**
-   * Delete user
-   *
+   * DELETE /user/{username}
    * This can only be done by the logged in user.
-   *
-   * @example
-   * ```ts
-   * // TODO: Add example
-   * ```
+   * @summary: Delete user
    */
   deleteUser: (
-    /** The name that needs to be deleted */
+    /**
+     * @description The name that needs to be deleted
+     */
     username: string,
     requestInit?: RequestInit,
   ) => Promise<any>;
 
   /**
-   * Updated user
-   *
+   * PUT /user/{username}
    * This can only be done by the logged in user.
-   *
-   * @example
-   * ```ts
-   * // TODO: Add example
-   * ```
+   * @summary: Updated user
    */
   updateUser: (
-    /** name that need to be updated */
+    /**
+     * @description name that need to be updated
+     */
     username: string,
-    /** Request body */
     body: schemas.User,
     requestInit?: RequestInit,
   ) => Promise<any>;
 
   /**
-   * Logs user into the system
-   *
-   * @example
-   * ```ts
-   * // TODO: Add example
-   * ```
+   * GET /user/login
+   * @summary: Logs user into the system
    */
   loginUser: (
-    params: user.UserLoginUserParams,
+    params: user.LoginUserParams,
     requestInit?: RequestInit,
   ) => Promise<string>;
 
   /**
-   * Logs out current logged in user session
-   *
-   * @example
-   * ```ts
-   * // TODO: Add example
-   * ```
+   * GET /user/logout
+   * @summary: Logs out current logged in user session
    */
   logoutUser: (
     requestInit?: RequestInit,
   ) => Promise<any>;
 
   /**
-   * Creates list of users with given input array
-   *
-   * @example
-   * ```ts
-   * // TODO: Add example
-   * ```
+   * POST /user/createWithArray
+   * @summary: Creates list of users with given input array
    */
   createUsersWithArrayInput: (
-    /** List of user object */
+    /**
+     * @description List of user object
+     */
     body: Array<schemas.User>,
     requestInit?: RequestInit,
   ) => Promise<any>;
 
   /**
-   * Create user
-   *
+   * POST /user
    * This can only be done by the logged in user.
-   *
-   * @example
-   * ```ts
-   * // TODO: Add example
-   * ```
+   * @summary: Create user
    */
   createUser: (
-    /** Request body */
     body: schemas.User,
     requestInit?: RequestInit,
   ) => Promise<any>;

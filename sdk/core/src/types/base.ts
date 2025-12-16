@@ -86,6 +86,12 @@ export type PontxRequestFn = <APITypes extends PontxAPITypes>(
   init: EnhancedRequestInit & { body?: APITypes["bodyParams"] }
 ) => Promise<APITypes["Response"]>;
 export type GracefulRequestFn = any;
+
+/**
+ * @deprecated RPC support has been removed from createBaseClient.
+ * This type is kept for backwards compatibility and potential future use.
+ * Consider using PontxRequestFn or BaseRequestFn instead.
+ */
 export type RpcRequestFn = <RequestParams, RpcResponse>(
   requestParams: RequestParams,
   init: EnhancedRequestInit
@@ -100,7 +106,7 @@ export type FetchFunction = (
   init?: FetchInit
 ) => Promise<Response>;
 
-export type ApiCallerContext = {
+export type ApiRequesterConfig = {
   apiSelector: {
     specName: string;
     controllerName: string;
@@ -109,29 +115,7 @@ export type ApiCallerContext = {
 
   apiMeta: PontxAPIMeta;
 
-  requestFn: FetchFunction;
-
-  baseUrl?: string;
-  /**
-   * Custom URL builder function
-   */
-  getFetchUrl?: (path: string, params: Record<string, unknown>) => string;
-
-  /**
-   * Placeholder for missing path parameters
-   */
-  pathMark?: string;
-
-  beforeRequest?: (
-    url: string,
-    init: FetchInit
-  ) => Promise<{ url: string; init: FetchInit }>;
-
-  /**
-   * Function to add custom methods to each API method object
-   */
-  makeCustomUsages?: (
-    usages: Record<string, any>,
-    apiMeta?: PontxAPIMeta
-  ) => Record<string, any>;
+  apiKey: string;
 };
+
+export type CreateRequester = (config: ApiRequesterConfig) => Function;

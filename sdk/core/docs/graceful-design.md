@@ -23,6 +23,7 @@ methodName(
 ### 2. 参数分类
 
 #### Path 参数
+
 - **位置**：最前面，按照路径中 `{param}` 出现的顺序
 - **必需性**：通常为必需参数
 - **示例**：`/pet/{petId}` → `petId` 参数
@@ -35,6 +36,7 @@ getPetById(
 ```
 
 #### Query 参数
+
 - **位置**：通过 `params` 对象传递
 - **类型**：对象，包含所有查询参数
 - **示例**：`/pet/findByStatus?status=available`
@@ -53,6 +55,7 @@ Body 参数的处理分为三种情况：
 ##### 情况 1：可合并的 JSON Body
 
 当同时满足以下条件时，Query 和 Body 参数会合并到一个 `params` 对象中：
+
 - `Content-Type` 为 `application/json`
 - Body schema 类型为 `object`
 - 有 Query 参数存在
@@ -77,11 +80,13 @@ updateUser(
 ##### 情况 2：不可合并的 Body
 
 以下情况 Body 作为独立参数：
+
 - `Content-Type` 不是 `application/json`（如 `multipart/form-data`, `application/x-www-form-urlencoded`）
 - Body 不是 object 类型（如数组、字符串）
 - 只有 Body 没有 Query 参数
 
 **示例 1：FormData**
+
 ```typescript
 uploadFile(
   petId: number,
@@ -94,6 +99,7 @@ uploadFile(
 ```
 
 **示例 2：Array Body**
+
 ```typescript
 createUsersWithListInput(
   body: Array<User>,
@@ -102,6 +108,7 @@ createUsersWithListInput(
 ```
 
 **示例 3：form-urlencoded**
+
 ```typescript
 updatePetWithForm(
   petId: number,
@@ -158,17 +165,21 @@ export declare namespace pet {
 `extractParams` 函数负责将调用时的参数数组解析为结构化的参数对象：
 
 ```typescript
-function extractParams(args: any[], meta: GracefulApiMeta): {
+function extractParams(
+  args: any[],
+  meta: GracefulApiMeta
+): {
   pathParams: Record<string, any>;
   queryParams: Record<string, any>;
   bodyParams: any;
   requestInit?: RequestInit;
-}
+};
 ```
 
 **处理步骤：**
 
 1. **提取 Path 参数**
+
    ```typescript
    if (meta.pathParams && meta.pathParams.length > 0) {
      meta.pathParams.forEach((paramName) => {
@@ -178,6 +189,7 @@ function extractParams(args: any[], meta: GracefulApiMeta): {
    ```
 
 2. **判断参数合并策略**
+
    ```typescript
    const hasQuery = meta.queryParams && meta.queryParams.length > 0;
    const hasBody = meta.bodyParams !== null;
@@ -185,6 +197,7 @@ function extractParams(args: any[], meta: GracefulApiMeta): {
    ```
 
 3. **根据策略提取参数**
+
    - **Query + Body 合并**：从单个 `params` 对象中分离
    - **仅 Query**：提取 query 参数对象
    - **独立 Body**：提取 body 参数
@@ -202,10 +215,10 @@ function extractParams(args: any[], meta: GracefulApiMeta): {
 
 ```typescript
 function buildRequestUrl(
-  baseURL: string,
+  baseUrl: string,
   path: string,
   pathParams: Record<string, any>,
-  queryParams: Record<string, any>,
+  queryParams: Record<string, any>
 ): string {
   // 1. 合并 path 和 query 参数
   const allParams = { ...pathParams, ...queryParams };
@@ -213,12 +226,13 @@ function buildRequestUrl(
   // 2. 使用 core 的 buildUrl 构建路径（替换 {param} + 添加查询字符串）
   const pathWithQuery = buildUrl(path, allParams);
 
-  // 3. 拼接 baseURL
-  return new URL(pathWithQuery, baseURL).toString();
+  // 3. 拼接 baseUrl
+  return new URL(pathWithQuery, baseUrl).toString();
 }
 ```
 
 **buildUrl 功能**：
+
 - 替换路径中的 `{param}` 为实际值（经过 URL 编码）
 - 将剩余参数作为 query string 添加
 - 处理数组参数（重复 key）
@@ -241,6 +255,7 @@ function serializeBody(body: any, contentType: string): any {
 **支持的 Content-Type**：
 
 #### application/json
+
 ```typescript
 // 自动 JSON.stringify
 { name: "Fluffy", status: "available" }
@@ -248,6 +263,7 @@ function serializeBody(body: any, contentType: string): any {
 ```
 
 #### application/x-www-form-urlencoded
+
 ```typescript
 // 转换为 URLSearchParams
 { name: "Fluffy", status: "available" }
@@ -255,6 +271,7 @@ function serializeBody(body: any, contentType: string): any {
 ```
 
 #### multipart/form-data
+
 ```typescript
 // 转换为 FormData
 {
@@ -268,6 +285,7 @@ function serializeBody(body: any, contentType: string): any {
 ```
 
 **FormData 处理细节**：
+
 - File/Blob 对象直接 append
 - 数组字段：每个元素单独 append（同 key）
 - 对象字段：JSON.stringify 后 append
@@ -287,8 +305,8 @@ function serializeBody(body: any, contentType: string): any {
 
 // 生成时添加前缀
 export type UserUpdateParams = {
-  query_name: string;   // 原 query.name
-  body_name: string;    // 原 body.name
+  query_name: string; // 原 query.name
+  body_name: string; // 原 body.name
   age: number;
 };
 ```
@@ -313,7 +331,7 @@ if (meta.paramMapping) {
   Object.entries(mergedParams).forEach(([key, value]) => {
     const mapping = meta.paramMapping![key];
     if (mapping) {
-      if (mapping.source === 'query') {
+      if (mapping.source === "query") {
         result.queryParams[mapping.field] = value;
       } else {
         result.bodyParams[mapping.field] = value;
@@ -441,17 +459,17 @@ export const apiMeta = {
       queryParams: null,
       bodyParams: {
         contentType: "multipart/form-data",
-        canMerge: false
-      }
+        canMerge: false,
+      },
     },
     "user/loginUser": {
       method: "GET",
       path: "/user/login",
       pathParams: null,
       queryParams: ["username", "password"],
-      bodyParams: null
-    }
-  }
+      bodyParams: null,
+    },
+  },
 } as const;
 ```
 
@@ -471,11 +489,11 @@ export const apiMeta = {
 
 ### 生成的类型定义（apis.ts）
 
-```typescript
+````typescript
 export declare namespace pet {
   export type PetFindPetsByStatusParams = {
     /** Status values that need to be considered for filter */
-    status: Array<'available' | 'pending' | 'sold'>;
+    status: Array<"available" | "pending" | "sold">;
   };
 
   export type PetUploadFileBody = {
@@ -499,7 +517,7 @@ export type pet = {
     /** ID of pet to update */
     petId: number,
     body: pet.PetUploadFileBody,
-    requestInit?: RequestInit,
+    requestInit?: RequestInit
   ) => Promise<schemas.ApiResponse>;
 
   /**
@@ -514,7 +532,7 @@ export type pet = {
    */
   findPetsByStatus: (
     params: pet.PetFindPetsByStatusParams,
-    requestInit?: RequestInit,
+    requestInit?: RequestInit
   ) => Promise<Array<schemas.Pet>>;
 };
 
@@ -532,13 +550,13 @@ export declare namespace APIs {
   export { store };
   export { user };
 }
-```
+````
 
 ### TypeScript 类型推导
 
 ```typescript
 // 创建客户端
-const client = createGracefulClient<APIs>(apiMeta, { baseURL: '...' });
+const client = createGracefulClient<APIs>(apiMeta, { baseUrl: '...' });
 
 // 完整的类型推导和智能提示
 client.pet.uploadFile(
@@ -560,25 +578,30 @@ client.pet.uploadFile(
 ## 设计优势
 
 ### 1. 参数简化
+
 - 自动合并相关参数，减少函数参数数量
 - 智能判断是否合并，避免类型不兼容问题
 
 ### 2. 类型安全
+
 - 完整的 TypeScript 类型定义
 - IDE 智能提示和自动完成
 - 编译时参数验证
 
 ### 3. 灵活性
+
 - 支持多种 Content-Type
 - 处理各种参数组合
 - 可扩展的参数映射机制
 
 ### 4. 代码复用
+
 - 复用 `core/build-url.ts` 的 URL 构建逻辑
 - 复用 `core/request-body.ts` 的序列化逻辑
 - 统一的参数处理流程
 
 ### 5. 符合直觉
+
 - 参数顺序符合自然思维（path → params → body → options）
 - 命名清晰（params 表示参数对象，body 表示请求体）
 - 与 RESTful 规范一致
@@ -590,12 +613,9 @@ client.pet.uploadFile(
 可以通过 RequestInit 传入自定义 body：
 
 ```typescript
-client.pet.updatePet(
-  customSerializedBody,
-  {
-    headers: { 'Content-Type': 'application/xml' }
-  }
-);
+client.pet.updatePet(customSerializedBody, {
+  headers: { "Content-Type": "application/xml" },
+});
 ```
 
 ### 2. 请求拦截
@@ -604,14 +624,14 @@ client.pet.updatePet(
 
 ```typescript
 const client = createGracefulClient<APIs>(apiMeta, {
-  baseURL: '...',
+  baseUrl: "...",
   fetch: async (url, init) => {
     // 请求前处理
-    console.log('Request:', url, init);
+    console.log("Request:", url, init);
     const response = await fetch(url, init);
     // 响应后处理
     return response;
-  }
+  },
 });
 ```
 
@@ -619,11 +639,11 @@ const client = createGracefulClient<APIs>(apiMeta, {
 
 ```typescript
 const client = createGracefulClient<APIs>(apiMeta, {
-  baseURL: '...',
+  baseUrl: "...",
   headers: {
-    'Authorization': 'Bearer token',
-    'X-Custom-Header': 'value'
-  }
+    Authorization: "Bearer token",
+    "X-Custom-Header": "value",
+  },
 });
 ```
 

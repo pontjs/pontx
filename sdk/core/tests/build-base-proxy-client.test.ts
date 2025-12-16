@@ -3,47 +3,47 @@
  * @description Test buildBaseProxyClient - verify dual access pattern support
  */
 
-import { describe, it, expect, vi } from 'vitest';
-import { buildBaseProxyClient } from '../src/core/create-client';
-import { PontxSpecMeta, PontxAPIMeta } from '../src/types/base';
+import { describe, it, expect, vi } from "vitest";
+import { buildBaseProxyClient } from "../src/core/create-client";
+import { PontxSpecMeta, PontxAPIMeta } from "../src/types/base";
 
-describe('buildBaseProxyClient', () => {
-  describe('with tags (hasTags: true)', () => {
+describe("buildBaseProxyClient", () => {
+  describe("with tags (hasTags: true)", () => {
     const mockSpecMeta: PontxSpecMeta = {
-      name: 'test-api',
+      name: "test-api",
       hasTags: true,
       apis: {
-        'user/getUser': {
-          path: '/api/user/{id}',
-          method: 'GET',
+        "user/getUser": {
+          path: "/api/user/{id}",
+          method: "GET",
           hasBody: false,
           hasParams: true,
         },
-        'user/createUser': {
-          path: '/api/user',
-          method: 'POST',
+        "user/createUser": {
+          path: "/api/user",
+          method: "POST",
           hasBody: true,
           hasParams: false,
         },
-        'product/getProduct': {
-          path: '/api/product/{id}',
-          method: 'GET',
+        "product/getProduct": {
+          path: "/api/product/{id}",
+          method: "GET",
           hasBody: false,
           hasParams: true,
         },
       },
     };
 
-    const mockCreateRequester = vi.fn((apiKey: string, apiMeta: PontxAPIMeta) => {
-      return {
-        request: vi.fn(),
-        apiKey,
-        apiMeta,
-      };
+    const mockCreateRequester = vi.fn((config: any) => {
+      const apiMeta = mockSpecMeta.apis[config.apiKey];
+      return vi.fn();
     });
 
-    it('should support client.tagName.apiName access pattern', () => {
-      const client = buildBaseProxyClient(mockSpecMeta, mockCreateRequester);
+    it("should support client.tagName.apiName access pattern", () => {
+      const client = buildBaseProxyClient({
+        pontxSpecMeta: mockSpecMeta,
+        createRequester: mockCreateRequester,
+      });
 
       // Access via tag
       const userClient = client.user;
@@ -51,24 +51,30 @@ describe('buildBaseProxyClient', () => {
 
       const getUserApi = userClient.getUser;
       expect(getUserApi).toBeDefined();
-      expect(getUserApi.apiKey).toBe('user/getUser');
-      expect(getUserApi.apiMeta.path).toBe('/api/user/{id}');
+      expect(getUserApi.apiKey).toBe("user/getUser");
+      expect(getUserApi.apiMeta.path).toBe("/api/user/{id}");
     });
 
-    it('should support client.apiName direct access pattern', () => {
+    it("should support client.apiName direct access pattern", () => {
       mockCreateRequester.mockClear();
-      const client = buildBaseProxyClient(mockSpecMeta, mockCreateRequester);
+      const client = buildBaseProxyClient({
+        pontxSpecMeta: mockSpecMeta,
+        createRequester: mockCreateRequester,
+      });
 
       // Direct access by API name (without tag)
       const getUserApi = client.getUser;
       expect(getUserApi).toBeDefined();
-      expect(getUserApi.apiKey).toBe('user/getUser');
-      expect(getUserApi.apiMeta.path).toBe('/api/user/{id}');
+      expect(getUserApi.apiKey).toBe("user/getUser");
+      expect(getUserApi.apiMeta.path).toBe("/api/user/{id}");
     });
 
-    it('should cache API requesters', () => {
+    it("should cache API requesters", () => {
       mockCreateRequester.mockClear();
-      const client = buildBaseProxyClient(mockSpecMeta, mockCreateRequester);
+      const client = buildBaseProxyClient({
+        pontxSpecMeta: mockSpecMeta,
+        createRequester: mockCreateRequester,
+      });
 
       // Access same API multiple times
       const api1 = client.user.getUser;
@@ -81,9 +87,12 @@ describe('buildBaseProxyClient', () => {
       expect(mockCreateRequester).toHaveBeenCalledTimes(1);
     });
 
-    it('should cache tag proxies', () => {
+    it("should cache tag proxies", () => {
       mockCreateRequester.mockClear();
-      const client = buildBaseProxyClient(mockSpecMeta, mockCreateRequester);
+      const client = buildBaseProxyClient({
+        pontxSpecMeta: mockSpecMeta,
+        createRequester: mockCreateRequester,
+      });
 
       // Access same tag multiple times
       const user1 = client.user;
@@ -93,26 +102,33 @@ describe('buildBaseProxyClient', () => {
       expect(user1).toBe(user2);
     });
 
-    it('should throw error for non-existent API', () => {
-      const client = buildBaseProxyClient(mockSpecMeta, mockCreateRequester);
+    it("should throw error for non-existent API", () => {
+      const client = buildBaseProxyClient({
+        pontxSpecMeta: mockSpecMeta,
+        createRequester: mockCreateRequester,
+      });
 
       expect(() => {
-        // @ts-expect-error - testing runtime error
         client.nonExistent;
       }).toThrow('API "nonExistent" not found in client');
     });
 
-    it('should throw error for non-existent API in tag', () => {
-      const client = buildBaseProxyClient(mockSpecMeta, mockCreateRequester);
+    it("should throw error for non-existent API in tag", () => {
+      const client = buildBaseProxyClient({
+        pontxSpecMeta: mockSpecMeta,
+        createRequester: mockCreateRequester,
+      });
 
       expect(() => {
-        // @ts-expect-error - testing runtime error
         client.user.nonExistent;
       }).toThrow('API "user/nonExistent" not found in client');
     });
 
-    it('should support multiple tags', () => {
-      const client = buildBaseProxyClient(mockSpecMeta, mockCreateRequester);
+    it("should support multiple tags", () => {
+      const client = buildBaseProxyClient({
+        pontxSpecMeta: mockSpecMeta,
+        createRequester: mockCreateRequester,
+      });
 
       const userClient = client.user;
       const productClient = client.product;
@@ -120,51 +136,54 @@ describe('buildBaseProxyClient', () => {
       expect(userClient).toBeDefined();
       expect(productClient).toBeDefined();
 
-      expect(userClient.getUser.apiKey).toBe('user/getUser');
-      expect(productClient.getProduct.apiKey).toBe('product/getProduct');
+      expect(userClient.getUser.apiKey).toBe("user/getUser");
+      expect(productClient.getProduct.apiKey).toBe("product/getProduct");
     });
   });
 
-  describe('without tags (hasTags: false)', () => {
+  describe("without tags (hasTags: false)", () => {
     const mockSpecMeta: PontxSpecMeta = {
-      name: 'test-api',
+      name: "test-api",
       hasTags: false,
       apis: {
         getUser: {
-          path: '/api/user/{id}',
-          method: 'GET',
+          path: "/api/user/{id}",
+          method: "GET",
           hasBody: false,
           hasParams: true,
         },
         createUser: {
-          path: '/api/user',
-          method: 'POST',
+          path: "/api/user",
+          method: "POST",
           hasBody: true,
           hasParams: false,
         },
       },
     };
 
-    const mockCreateRequester = vi.fn((apiKey: string, apiMeta: PontxAPIMeta) => {
-      return {
-        request: vi.fn(),
-        apiKey,
-        apiMeta,
-      };
+    const mockCreateRequester = vi.fn((config: any) => {
+      const apiMeta = mockSpecMeta.apis[config.apiKey];
+      return vi.fn();
     });
 
-    it('should support direct API access only', () => {
-      const client = buildBaseProxyClient(mockSpecMeta, mockCreateRequester);
+    it("should support direct API access only", () => {
+      const client = buildBaseProxyClient({
+        pontxSpecMeta: mockSpecMeta,
+        createRequester: mockCreateRequester,
+      });
 
       const getUserApi = client.getUser;
       expect(getUserApi).toBeDefined();
-      expect(getUserApi.apiKey).toBe('getUser');
-      expect(getUserApi.apiMeta.path).toBe('/api/user/{id}');
+      expect(getUserApi.apiKey).toBe("getUser");
+      expect(getUserApi.apiMeta.path).toBe("/api/user/{id}");
     });
 
-    it('should cache API requesters', () => {
+    it("should cache API requesters", () => {
       mockCreateRequester.mockClear();
-      const client = buildBaseProxyClient(mockSpecMeta, mockCreateRequester);
+      const client = buildBaseProxyClient({
+        pontxSpecMeta: mockSpecMeta,
+        createRequester: mockCreateRequester,
+      });
 
       const api1 = client.getUser;
       const api2 = client.getUser;
@@ -173,59 +192,68 @@ describe('buildBaseProxyClient', () => {
       expect(mockCreateRequester).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw error for non-existent API', () => {
-      const client = buildBaseProxyClient(mockSpecMeta, mockCreateRequester);
+    it("should throw error for non-existent API", () => {
+      const client = buildBaseProxyClient({
+        pontxSpecMeta: mockSpecMeta,
+        createRequester: mockCreateRequester,
+      });
 
       expect(() => {
-        // @ts-expect-error - testing runtime error
         client.nonExistent;
       }).toThrow('API "nonExistent" not found in client');
     });
   });
 
-  describe('Proxy behavior', () => {
+  describe("Proxy behavior", () => {
     const mockSpecMeta: PontxSpecMeta = {
-      name: 'test-api',
+      name: "test-api",
       hasTags: true,
       apis: {
-        'user/getUser': {
-          path: '/api/user/{id}',
-          method: 'GET',
+        "user/getUser": {
+          path: "/api/user/{id}",
+          method: "GET",
           hasBody: false,
           hasParams: true,
         },
       },
     };
 
-    const mockCreateRequester = vi.fn((apiKey: string) => ({
-      apiKey,
-    }));
+    const mockCreateRequester = vi.fn((config: any) => vi.fn());
 
     it('should support "in" operator for tags', () => {
-      const client = buildBaseProxyClient(mockSpecMeta, mockCreateRequester);
+      const client = buildBaseProxyClient({
+        pontxSpecMeta: mockSpecMeta,
+        createRequester: mockCreateRequester,
+      });
 
-      expect('user' in client).toBe(true);
-      expect('nonExistent' in client).toBe(false);
+      expect("user" in client).toBe(true);
+      expect("nonExistent" in client).toBe(false);
     });
 
     it('should support "in" operator for APIs', () => {
-      const client = buildBaseProxyClient(mockSpecMeta, mockCreateRequester);
+      const client = buildBaseProxyClient({
+        pontxSpecMeta: mockSpecMeta,
+        createRequester: mockCreateRequester,
+      });
 
       // Tags are enumerable
-      expect('user' in client).toBe(true);
+      expect("user" in client).toBe(true);
 
       // Direct API access should also work
-      expect('getUser' in client).toBe(true);
+      expect("getUser" in client).toBe(true);
     });
 
-    it('should support Object.keys for enumeration', () => {
-      const client = buildBaseProxyClient(mockSpecMeta, mockCreateRequester);
+    it("should support Object.keys for enumeration", () => {
+      const client = buildBaseProxyClient({
+        pontxSpecMeta: mockSpecMeta,
+        createRequester: mockCreateRequester,
+      });
 
       const keys = Object.keys(client);
 
       // Should include both tags and API keys
-      expect(keys).toContain('user');
-      expect(keys).toContain('user/getUser');
+      expect(keys).toContain("user");
+      expect(keys).toContain("user/getUser");
     });
   });
 });

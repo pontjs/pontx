@@ -17,40 +17,71 @@
   "main": "./lib/index.cjs",
   "module": "./lib/index.js",
   "types": "./lib/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./lib/index.d.ts"
+      ],
+      "core": [
+        "./lib/core/index.d.ts"
+      ],
+      "features": [
+        "./lib/features/index.d.ts"
+      ],
+      "types": [
+        "./lib/types/index.d.ts"
+      ],
+      "graceful-client": [
+        "./lib/graceful-client/index.d.ts"
+      ],
+      "plugin": [
+        "./plugin/index.d.ts"
+      ],
+      "plugin/*": [
+        "./plugin/*.d.ts"
+      ]
+    }
+  },
   "exports": {
     ".": {
       "types": "./lib/index.d.ts",
       "import": "./lib/index.js",
       "require": "./lib/index.cjs"
     },
-    "./url": {
-      "types": "./lib/url/index.d.ts",
-      "import": "./lib/url/index.js",
-      "require": "./lib/url/index.cjs"
-    },
-    "./body": {
-      "types": "./lib/body/index.d.ts",
-      "import": "./lib/body/index.js",
-      "require": "./lib/body/index.cjs"
-    },
-    "./types": {
-      "types": "./lib/types/index.d.ts",
-      "import": "./lib/types/index.js",
-      "require": "./lib/types/index.cjs"
+    "./core": {
+      "types": "./lib/core/index.d.ts",
+      "import": "./lib/core/index.js",
+      "require": "./lib/core/index.cjs"
     },
     "./features": {
       "types": "./lib/features/index.d.ts",
       "import": "./lib/features/index.js",
       "require": "./lib/features/index.cjs"
     },
-    "./builders": {
-      "types": "./lib/builders/index.d.ts",
-      "import": "./lib/builders/index.js",
-      "require": "./lib/builders/index.cjs"
+    "./types": {
+      "types": "./lib/types/index.d.ts",
+      "import": "./lib/types/index.js",
+      "require": "./lib/types/index.cjs"
+    },
+    "./graceful-client": {
+      "types": "./lib/graceful-client/index.d.ts",
+      "import": "./lib/graceful-client/index.js",
+      "require": "./lib/graceful-client/index.cjs"
+    },
+    "./plugin": {
+      "types": "./plugin/index.d.ts",
+      "import": "./plugin/index.js",
+      "require": "./plugin/index.cjs"
+    },
+    "./plugin/*": {
+      "types": "./plugin/*.d.ts",
+      "import": "./plugin/*.js",
+      "require": "./plugin/*.cjs"
     }
   },
   "files": [
     "lib",
+    "plugin",
     "README.md"
   ],
   "scripts": {
@@ -67,8 +98,9 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "tsup": "^8.0.0",
+    "@vitest/coverage-v8": "^1.6.1",
     "pontx": "workspace:*",
+    "tsup": "^8.0.0",
     "typescript": "catalog:",
     "vitest": "^1.0.0"
   },
