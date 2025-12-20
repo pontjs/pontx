@@ -19,6 +19,3 @@ export * from "./service/service";
 export * from "./service/file-watcher";
 export * from "./service/sync-manager";
 export * from "./service/web-server";
-
-// 导出全局 spec 注册相关
-export * from "./global/index";

@@ -21,12 +21,6 @@ export interface CompletionOptions {
   cwd?: string;
 
   /**
-   * Whether to include global specs
-   * @default true
-   */
-  includeGlobal?: boolean;
-
-  /**
    * Commands to expose (for proxy CLI command filtering)
    * @default all commands
    */

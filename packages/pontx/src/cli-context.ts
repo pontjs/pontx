@@ -6,8 +6,6 @@ export interface CliContext {
   tryGetLocalManager: () => Promise<PontxManager | null>;
   /** 获取本地 manager（懒加载单例） */
   getManager: () => Promise<PontxManager>;
-  /** 从全局 spec 包创建 manager */
-  getGlobalManager: (packageName: string) => Promise<PontxManager>;
   /** 日志实例 */
   logger: Logger;
 }
@@ -57,19 +55,9 @@ export function createCliContext(rootDir: string, logger?: Logger): CliContext {
     }
   }
 
-  /**
-   * 从全局 spec 包创建 manager
-   * @param packageName - npm 包名
-   */
-  async function getGlobalManager(packageName: string): Promise<PontxManager> {
-    const { createManagerFromGlobalSpec } = await import('./global');
-    return createManagerFromGlobalSpec(packageName, contextLogger);
-  }
-
   return {
     tryGetLocalManager,
     getManager,
-    getGlobalManager,
     logger: contextLogger,
   };
 }

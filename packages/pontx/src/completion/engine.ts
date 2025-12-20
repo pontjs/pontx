@@ -47,7 +47,6 @@ export class CompletionEngine {
 
   constructor(options: CompletionOptions, dataSource: CompletionDataSource) {
     this.options = {
-      includeGlobal: true,
       cacheTTL: 60000,
       ...options,
     };

@@ -18,7 +18,7 @@ const logLevel = hasDebugFlag ? 'info' : 'error';
 
 // 创建 CLI 上下文（使用根据 --debug 决定的日志级别）
 const ctx = createCliContext(rootDir, createLogger(logLevel));
-const { getManager, getGlobalManager, tryGetLocalManager, logger } = ctx;
+const { getManager, tryGetLocalManager, logger } = ctx;
 
 program.version(currentVersion).usage("[命令] [配置项]");
 program.description("pontx cli");
@@ -31,17 +31,8 @@ program.option("--format <format>", "Output format for completions", "plain");
 program
   .command("check")
   .description("检测本地和远程元数据的兼容性")
-  .option("--global <package>", "使用全局 spec 包")
-  .action(async (options) => {
-    let manager: PontxManager;
-
-    if (options.global) {
-      logger.info(`Using global spec from ${options.global}`);
-      manager = await getGlobalManager(options.global);
-    } else {
-      manager = await getManager();
-    }
-
+  .action(async () => {
+    const manager = await getManager();
     const { checkCommand } = await import("./commands/check");
     await checkCommand(manager);
   });
@@ -49,17 +40,8 @@ program
 program
   .command("ls")
   .description("查看数据源")
-  .option("--global <package>", "使用全局 spec 包")
-  .action(async (options) => {
-    let manager: PontxManager;
-
-    if (options.global) {
-      logger.info(`Using global spec from ${options.global}`);
-      manager = await getGlobalManager(options.global);
-    } else {
-      manager = await getManager();
-    }
-
+  .action(async () => {
+    const manager = await getManager();
     // Output data to stdout (for piping)
     console.log(
       manager.resolvedConfig.origins.map((origin) => origin.name).join("\n")
@@ -71,8 +53,6 @@ program
   .description("搜索当前项目可调用的 API 接口")
   .option("--max <count>", "最大返回数量，默认 6", "6")
   .option("--use-remote", "使用远程元数据")
-  .option("--spec <specName>", "指定 spec 名称搜索(自动查找本地或 global spec)")
-  .option("--global <package>", "使用全局 spec 包(已废弃，请使用 --spec)")
   .action(async (keyword, options) => {
     const { searchCommand } = await import("./commands/search");
     await searchCommand(ctx, keyword, options);
@@ -84,7 +64,6 @@ program
     '查看 API 元数据，包括入参、出参等。apiPath 格式: specName.tagName.apiName，特殊字符用引号包裹'
   )
   .option("--use-remote", "使用远程元数据")
-  .option("--global", "强制使用全局 spec")
   .action(async (apiPath, options) => {
     const { showApiCommand } = await import("./commands/show-api");
     await showApiCommand(ctx, apiPath, options);
@@ -96,7 +75,6 @@ program
     "查看 Schema 元数据。schemaPath 格式: specName/schemaName，schemaName 可从 API 元数据的 $ref 字段提取。例如 '#/components/schemas/ResultDTO' 的 schemaName 是 ResultDTO"
   )
   .option("--use-remote", "使用远程元数据")
-  .option("--global", "强制使用全局 spec")
   .action(async (schemaPath, options) => {
     const { showSchemaCommand } = await import("./commands/show-schema");
     await showSchemaCommand(ctx, schemaPath, options);
@@ -118,7 +96,6 @@ program
   )
   .option("--body <json>", "API 请求体参数，JSON 格式")
   .option("--use-remote", "使用远程元数据")
-  .option("--global", "强制使用全局 spec")
   .action(async (apiPath, options) => {
     const { genCommand } = await import("./commands/gen");
     await genCommand(ctx, apiPath, options);
@@ -156,7 +133,6 @@ program
   .option("--dry-run", "只显示请求，不实际执行")
   .option("--use-remote", "使用远程元数据")
   .option("-e, --env <env>", "指定环境/baseUrl")
-  .option("--global", "强制使用全局 spec")
   .allowUnknownOption(true)
   .allowExcessArguments(true)
   .action(async (apiPath, options, command) => {
@@ -176,16 +152,8 @@ program
   .command("generate")
   .description("拉取远程数据源并生成代码")
   .option("--use-remote", "使用远程元数据生成")
-  .option("--global <package>", "使用全局 spec 包")
   .action(async (options) => {
-    let manager: PontxManager;
-
-    if (options.global) {
-      logger.info(`Using global spec from ${options.global}`);
-      manager = await getGlobalManager(options.global);
-    } else {
-      manager = await getManager();
-    }
+    const manager = await getManager();
 
     if (options.useRemote) {
       manager.resolvedConfig.origins.forEach((origin) => {
@@ -195,44 +163,6 @@ program
 
     await PontxManager.generateCode(manager);
     logger.info("Pontx SDK 生成完毕!");
-  });
-
-// Global spec management commands
-const globalCmd = program.command("global").description("管理全局 spec");
-
-globalCmd
-  .command("add-spec <package>")
-  .description("注册一个全局 spec 包")
-  .option("-f, --force", "强制覆盖已存在的注册")
-  .action(async (pkg, options) => {
-    const { addSpecCommand } = await import("./commands/global/add-spec");
-    await addSpecCommand(pkg, options);
-  });
-
-globalCmd
-  .command("list-specs")
-  .description("列出所有已注册的全局 spec")
-  .action(async () => {
-    const { listSpecsCommand } = await import("./commands/global/list-specs");
-    await listSpecsCommand();
-  });
-
-globalCmd
-  .command("remove-spec <package>")
-  .description("移除全局 spec 注册")
-  .action(async (pkg) => {
-    const { removeSpecCommand } = await import(
-      "./commands/global/remove-spec"
-    );
-    await removeSpecCommand(pkg);
-  });
-
-globalCmd
-  .command("spec-info <package>")
-  .description("查看全局 spec 详细信息")
-  .action(async (pkg) => {
-    const { specInfoCommand } = await import("./commands/global/spec-info");
-    await specInfoCommand(pkg);
   });
 
 program
@@ -255,17 +185,8 @@ program
   .option("--no-sync", "禁用定时同步")
   .option("--no-web", "禁用 Web 服务")
   .option("-l, --log-level <level>", "日志级别", "info")
-  .option("--global <package>", "使用全局 spec 包")
   .action(async (options) => {
     const argvs = process.argv;
-
-    // 确定 service 使用的 rootDir
-    let serviceRootDir = rootDir;
-    if (options.global) {
-      logger.info(`Using global spec from ${options.global}`);
-      const { getGlobalSpecRootDir } = await import('./global');
-      serviceRootDir = await getGlobalSpecRootDir(options.global);
-    }
 
     // 只收集用户显式指定的参数
     const serviceConfig: Partial<ServiceConfig> = {};
@@ -289,7 +210,7 @@ program
       serviceConfig.logLevel = options.logLevel;
     }
 
-    const service = new PontxService(serviceRootDir, serviceConfig as ServiceConfig);
+    const service = new PontxService(rootDir, serviceConfig as ServiceConfig);
 
     // 监听服务事件
     service.on("started", () => {

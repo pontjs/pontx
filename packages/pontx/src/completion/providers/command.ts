@@ -24,7 +24,6 @@ const ALL_COMMANDS: Array<{ name: string; description: string }> = [
   { name: "generate", description: "Generate SDK code" },
   { name: "mocks", description: "Generate mock data" },
   { name: "service", description: "Start Pontx service" },
-  { name: "global", description: "Manage global specs" },
   { name: "completion", description: "Manage shell completion" },
 ];
 

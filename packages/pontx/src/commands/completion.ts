@@ -14,7 +14,6 @@ import {
   createCompletionInput,
   ParamInfo,
 } from "../completion";
-import { listGlobalSpecs, loadGlobalConfig, getGlobalSpec } from "../global";
 import { LOCK_FILENAME } from "../const";
 
 /** Cached spec data for performance */
@@ -114,42 +113,6 @@ function loadLocalSpec(outDir: string, specName: string): any {
   return null;
 }
 
-/**
- * Load spec from global spec package
- */
-async function loadGlobalSpecData(packageName: string, specName: string): Promise<any> {
-  const cacheKey = `global:${specName}`;
-  if (specCache.has(cacheKey)) {
-    return specCache.get(cacheKey);
-  }
-
-  try {
-    const entry = await getGlobalSpec(packageName);
-    if (!entry) return null;
-
-    // Try to read api-lock.json from various possible paths
-    const possiblePaths = [
-      path.join(entry.path, "src", "services", specName, LOCK_FILENAME),
-      path.join(entry.path, "src", "apis", specName, LOCK_FILENAME),
-      path.join(entry.path, "src", "api", specName, LOCK_FILENAME),
-      path.join(entry.path, ".pontx", specName, LOCK_FILENAME),
-      path.join(entry.path, "services", specName, LOCK_FILENAME),
-    ];
-
-    for (const p of possiblePaths) {
-      if (fs.existsSync(p)) {
-        const content = fs.readFileSync(p, "utf-8");
-        const spec = JSON.parse(content);
-        specCache.set(cacheKey, spec);
-        return spec;
-      }
-    }
-  } catch {
-    // Ignore errors
-  }
-
-  return null;
-}
 
 /**
  * Create lightweight data source for completion
@@ -162,19 +125,9 @@ function createLightweightDataSource(cwd: string): CompletionDataSource {
     async getSpecs(): Promise<string[]> {
       const specs: string[] = [];
 
-      // Local specs
+      // Local specs only
       if (localConfig) {
         specs.push(...localConfig.specNames.filter(Boolean));
-      }
-
-      // Global specs
-      try {
-        const globalConfig = await loadGlobalConfig();
-        for (const entry of Object.values(globalConfig.globalSpecs)) {
-          specs.push(entry.specName);
-        }
-      } catch {
-        // Ignore errors
       }
 
       return [...new Set(specs)];
@@ -244,22 +197,9 @@ function createLightweightDataSource(cwd: string): CompletionDataSource {
   };
 
   async function loadSpec(specName: string): Promise<any> {
-    // Try local first
+    // Try local only
     if (localConfig) {
-      const spec = loadLocalSpec(localConfig.outDir, specName);
-      if (spec) return spec;
-    }
-
-    // Try global
-    try {
-      const globalConfig = await loadGlobalConfig();
-      for (const [pkgName, entry] of Object.entries(globalConfig.globalSpecs)) {
-        if (entry.specName === specName) {
-          return await loadGlobalSpecData(pkgName, specName);
-        }
-      }
-    } catch {
-      // Ignore errors
+      return loadLocalSpec(localConfig.outDir, specName);
     }
 
     return null;

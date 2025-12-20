@@ -5,7 +5,6 @@ import type { PontxManager } from "../manager";
 import type { CliContext } from "../cli-context";
 import type { ApiExecutorContext } from "../type";
 import { parseApiPath, getApiMeta } from "./show-api";
-import { resolveManagerForSpec } from "../global";
 
 export interface CallCommandOptions {
   env?: string;
@@ -14,7 +13,6 @@ export interface CallCommandOptions {
   debug?: boolean;
   dryRun?: boolean;
   useRemote?: boolean;
-  global?: boolean;
   query?: string;
 }
 
@@ -29,7 +27,6 @@ export const CLI_OPTIONS = new Set([
   "debug",
   "dry-run",
   "use-remote",
-  "global",
   "query",
   "q",
   "help",
@@ -362,11 +359,8 @@ export async function callCommand(
   let manager: PontxManager;
 
   if (isCliContext) {
-    // CLI call: support auto-discovery
-    const resolved = await resolveManagerForSpec(specName, managerOrContext, {
-      forceGlobal: options.global,
-    });
-    manager = resolved.manager;
+    // CLI call: use local manager
+    manager = await managerOrContext.getManager();
   } else {
     // Direct call: maintain backward compatibility
     manager = managerOrContext;
