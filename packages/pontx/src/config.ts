@@ -121,16 +121,19 @@ async function loadTypeScriptConfigWithEsbuild(configFile: string) {
   try {
     await fsp.mkdir(cacheDir, { recursive: true });
 
-    // 不打包依赖，保持从 node_modules 加载
+    // bundle: true 可以正确处理相对路径导入
+    // 通过 packages: "external" 排除 node_modules 中的包
     await esbuild.build({
       entryPoints: [configFile],
-      bundle: false, // 不打包依赖
+      bundle: true, // 打包以正确解析相对路径
       platform: "node",
       format: "esm",
       outfile: outFile,
       sourcemap: true,
       target: "node18",
       logLevel: "silent",
+      // 排除 node_modules 中的所有包
+      packages: "external",
     });
 
     // 调试模式提示
