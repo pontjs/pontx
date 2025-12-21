@@ -1,10 +1,17 @@
-import type { ApiExecutorContext } from "../type";
-import type { Parameter } from "@pontx/spec";
-
 /**
- * HTTP API Executor 内置插件
+ * @author jasonHzq
+ * @description HTTP API Executor 内置实现
  * 根据 API 元数据和运行时参数执行 HTTP 请求
  */
+
+import type {
+  ApiExecutionContext,
+  ApiResponse,
+  ApiRequest,
+  ApiError,
+  ExecuteApiConfig
+} from "../types";
+import type { Parameter } from "@pontx/spec";
 
 interface ParsedParams {
   pathParams: Record<string, unknown>;
@@ -234,61 +241,246 @@ async function handleResponse(response: Response): Promise<unknown> {
 }
 
 /**
- * HTTP API Executor 实现
+ * 合并配置获取最终的 baseURL
  */
-export async function builtinApiExecutor(
-  context: ApiExecutorContext
-): Promise<unknown> {
-  const { apiMeta, toolParams, options } = context;
+function resolveBaseUrl(context: ApiExecutionContext): string {
+  // 优先级：context.env.baseURL > config.environments[env.name] > config.baseURL > origin.spec.servers[0].url
+  const { env, executeApiConfig, resolvedConfig, api } = context;
 
-  const resolvedOrigin = (options?.resolvedConfig?.origins || []).find(
-    (origin) => origin.name === context?.apiSelector?.specName
-  );
-
-  // 1. 获取基础 URL
-  const baseUrl = context?.baseUrl || resolvedOrigin?.spec?.servers?.[0]?.url;
-  if (!baseUrl) {
-    throw new Error(`未提供 baseUrl，请在调用时提供 baseUrl。`);
+  // 1. 来自 CLI --env 参数的直接 URL
+  if (env?.baseURL) {
+    return env.baseURL;
   }
+
+  // 2. 来自配置的环境
+  if (env?.name && executeApiConfig?.environments?.[env.name]) {
+    return executeApiConfig.environments[env.name].baseURL;
+  }
+
+  // 3. 配置的默认 baseURL
+  if (executeApiConfig?.baseURL) {
+    return executeApiConfig.baseURL;
+  }
+
+  // 4. origin spec 中的 server URL
+  const origin = resolvedConfig.origins.find((o) => o.name === api.specName);
+  const serverUrl = origin?.spec?.servers?.[0]?.url;
+  if (serverUrl) {
+    return serverUrl;
+  }
+
+  throw new Error(
+    `未找到 baseURL，请在配置中设置 executeApi.baseURL 或使用 --env 参数指定`
+  );
+}
+
+/**
+ * 合并配置获取最终的 headers
+ */
+function resolveHeaders(context: ApiExecutionContext): Record<string, string> {
+  const { env, executeApiConfig } = context;
+  const headers: Record<string, string> = {};
+
+  // 1. 全局默认 headers
+  if (executeApiConfig?.headers) {
+    Object.assign(headers, executeApiConfig.headers);
+  }
+
+  // 2. 环境特定 headers
+  if (env?.name && executeApiConfig?.environments?.[env.name]?.headers) {
+    Object.assign(headers, executeApiConfig.environments[env.name].headers);
+  }
+
+  return headers;
+}
+
+/**
+ * 合并配置获取超时时间
+ */
+function resolveTimeout(context: ApiExecutionContext): number {
+  const { env, executeApiConfig } = context;
+
+  // 环境特定超时 > 全局超时 > 默认 30s
+  if (env?.name && executeApiConfig?.environments?.[env.name]?.timeout) {
+    return executeApiConfig.environments[env.name].timeout!;
+  }
+
+  return executeApiConfig?.timeout || 30000;
+}
+
+/**
+ * 创建 API 错误对象
+ */
+function createApiError(
+  error: unknown,
+  request: ApiRequest,
+  response?: Response
+): ApiError {
+  const message = error instanceof Error ? error.message : String(error);
+  const apiError = new Error(message) as ApiError;
+  apiError.name = 'ApiError';
+  apiError.request = request;
+
+  if (response) {
+    apiError.response = {
+      data: null,
+      status: response.status,
+      headers: Object.fromEntries(response.headers.entries()),
+      raw: response
+    };
+    apiError.type = 'http';
+  } else if (message.includes('timeout')) {
+    apiError.type = 'timeout';
+  } else if (message.includes('network') || message.includes('fetch')) {
+    apiError.type = 'network';
+  } else {
+    apiError.type = 'unknown';
+  }
+
+  return apiError;
+}
+
+/**
+ * 带超时的 fetch 封装
+ */
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+  timeout: number
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, {
+      ...init,
+      signal: controller.signal,
+    });
+    return response;
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+      throw new Error(`Request timeout after ${timeout}ms`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+/**
+ * 内置 HTTP API 执行器实现
+ * 支持 ExecuteApiConfig 配置
+ */
+export async function builtinExecuteApi(
+  context: ApiExecutionContext
+): Promise<ApiResponse> {
+  const { api, meta, params, executeApiConfig, logger } = context;
+
+  // 1. 解析配置
+  const baseUrl = resolveBaseUrl(context);
+  const configHeaders = resolveHeaders(context);
+  const timeout = resolveTimeout(context);
+
+  logger.debug(`Executing API: ${api.specName}.${api.tagName}.${api.apiName}`);
+  logger.debug(`Base URL: ${baseUrl}`);
 
   // 2. 解析和分类参数
   const { pathParams, queryParams, headerParams, bodyParams } = parseParams(
-    apiMeta.parameters,
-    toolParams
+    meta.parameters,
+    params
   );
 
   // 3. 构建完整 URL
-  const url = buildUrl(baseUrl, apiMeta.path, pathParams, queryParams);
+  const url = buildUrl(baseUrl, meta.path, pathParams, queryParams);
 
   // 4. 构建请求配置
-  const requestConfig = buildRequestConfig(
-    apiMeta.method,
-    headerParams,
+  const requestInit = buildRequestConfig(
+    meta.method,
+    { ...configHeaders, ...headerParams },
     bodyParams,
-    apiMeta.consumes,
-    apiMeta.produces
+    meta.consumes,
+    meta.produces
   );
 
-  // 5. 调用 beforeRequest 钩子（如果提供）
-  let finalUrl = url;
-  let finalRequestConfig = requestConfig;
+  // 5. 创建请求对象
+  let request: ApiRequest = {
+    url,
+    init: requestInit,
+    meta: {
+      specName: api.specName,
+      tagName: api.tagName,
+      apiName: api.apiName,
+      method: meta.method,
+      path: meta.path,
+    },
+  };
 
-  if (context.beforeRequest) {
-    const modified = await context.beforeRequest({
-      url,
-      requestInit: requestConfig,
-    });
-    finalUrl = modified.url;
-    finalRequestConfig = modified.requestInit;
+  // 6. 应用 beforeRequest 钩子
+  if (executeApiConfig?.beforeRequest) {
+    try {
+      request = await executeApiConfig.beforeRequest(request);
+    } catch (error) {
+      logger.error('beforeRequest hook failed', error instanceof Error ? error : new Error(String(error)));
+      throw error;
+    }
   }
 
-  // 6. 发送请求并处理响应
+  // 7. 发送请求
+  let rawResponse: Response;
   try {
-    const response = await fetch(finalUrl, finalRequestConfig);
-    return await handleResponse(response);
+    rawResponse = await fetchWithTimeout(request.url, request.init, timeout);
   } catch (error) {
-    throw new Error(
-      `API 调用失败: ${error instanceof Error ? error.message : String(error)}`
-    );
+    const apiError = createApiError(error, request);
+
+    // 调用错误处理钩子
+    if (executeApiConfig?.onError) {
+      try {
+        await executeApiConfig.onError(apiError);
+      } catch (hookError) {
+        logger.error('onError hook failed', hookError instanceof Error ? hookError : new Error(String(hookError)));
+      }
+    }
+
+    throw apiError;
   }
+
+  // 8. 处理响应
+  let data: unknown;
+  try {
+    data = await handleResponse(rawResponse);
+  } catch (error) {
+    const apiError = createApiError(error, request, rawResponse);
+
+    if (executeApiConfig?.onError) {
+      try {
+        await executeApiConfig.onError(apiError);
+      } catch (hookError) {
+        logger.error('onError hook failed', hookError instanceof Error ? hookError : new Error(String(hookError)));
+      }
+    }
+
+    throw apiError;
+  }
+
+  // 9. 构建响应对象
+  let response: ApiResponse = {
+    data,
+    status: rawResponse.status,
+    headers: Object.fromEntries(rawResponse.headers.entries()),
+    raw: rawResponse,
+  };
+
+  // 10. 应用 afterResponse 钩子
+  if (executeApiConfig?.afterResponse) {
+    try {
+      response.data = await executeApiConfig.afterResponse(response);
+    } catch (error) {
+      logger.error('afterResponse hook failed', error instanceof Error ? error : new Error(String(error)));
+      throw error;
+    }
+  }
+
+  logger.debug(`API call successful, status: ${response.status}`);
+
+  return response;
 }

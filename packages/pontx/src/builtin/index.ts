@@ -18,7 +18,7 @@ import {
 } from "@pontx/spec";
 import { createLogger } from "../logger/logger";
 import { builtinCheck } from "./check";
-import { builtinApiExecutor } from "./apiExecutor";
+import { builtinExecuteApi } from "./apiExecutor";
 
 export function getBuiltinPlugin(): Plugin {
   return {
@@ -197,11 +197,11 @@ export function getBuiltinPlugin(): Plugin {
       return fileStructure;
     },
     check: builtinCheck,
-    apiExecutor: builtinApiExecutor,
+    executeApi: builtinExecuteApi,
   };
 }
 
-export { builtinApiExecutor };
+export { builtinExecuteApi };
 
 async function translateCnMeta(
   metaStr: string,

@@ -4,7 +4,9 @@ import * as jmespath from "jmespath";
 import type { PontxManager } from "../manager";
 import type { CliContext } from "../cli-context";
 import type { ApiExecutorContext } from "../type";
+import type { ApiExecutionContext } from "../types";
 import { parseApiPath, getApiMeta } from "./show-api";
+import { createLogger } from "../logger/logger";
 
 export interface CallCommandOptions {
   env?: string;
@@ -158,24 +160,27 @@ export function tryParseJson(value: string): unknown {
  * Format request info for debug/dry-run output
  */
 function formatRequestInfo(
-  context: ApiExecutorContext,
+  context: ApiExecutionContext,
   extraHeaders: Record<string, string>
 ): string {
-  const { apiSelector, apiMeta, toolParams, baseUrl } = context;
+  const { api, meta, params, env } = context;
   const lines: string[] = [];
 
   lines.push("=".repeat(60));
   lines.push(
-    `API: ${apiSelector.specName}/${apiSelector.tagName}/${apiSelector.apiName}`
+    `API: ${api.specName}/${api.tagName}/${api.apiName}`
   );
-  lines.push(`Method: ${apiMeta.method.toUpperCase()}`);
-  lines.push(`Path: ${apiMeta.path}`);
-  lines.push(`Base URL: ${baseUrl || "(not set)"}`);
+  lines.push(`Method: ${meta.method.toUpperCase()}`);
+  lines.push(`Path: ${meta.path}`);
+  lines.push(`Base URL: ${env?.baseURL || "(from config)"}`);
+  if (env?.name) {
+    lines.push(`Environment: ${env.name}`);
+  }
   lines.push("-".repeat(60));
 
-  if (Object.keys(toolParams).length > 0) {
+  if (Object.keys(params).length > 0) {
     lines.push("Parameters:");
-    for (const [key, value] of Object.entries(toolParams)) {
+    for (const [key, value] of Object.entries(params)) {
       lines.push(`  ${key}: ${JSON.stringify(value)}`);
     }
   }
@@ -203,7 +208,7 @@ interface ParamInfo {
  * Extract parameter info from API metadata
  * Body parameters are identified by in: "body" in the parameters array
  */
-function extractParamInfo(apiMeta: ApiExecutorContext["apiMeta"]): ParamInfo[] {
+function extractParamInfo(apiMeta: ApiExecutionContext["meta"]): ParamInfo[] {
   const params: ParamInfo[] = [];
 
   if (apiMeta.parameters) {
@@ -231,7 +236,7 @@ function extractParamInfo(apiMeta: ApiExecutorContext["apiMeta"]): ParamInfo[] {
  * Validate parameters and return missing/invalid ones
  */
 function validateParams(
-  apiMeta: ApiExecutorContext["apiMeta"],
+  apiMeta: ApiExecutionContext["meta"],
   toolParams: Record<string, unknown>
 ): { missing: ParamInfo[]; provided: string[] } {
   const paramInfo = extractParamInfo(apiMeta);
@@ -260,7 +265,7 @@ function formatParamUsage(param: ParamInfo): string {
  */
 function generateUsageHint(
   apiPath: string,
-  apiMeta: ApiExecutorContext["apiMeta"]
+  apiMeta: ApiExecutionContext["meta"]
 ): string {
   const paramInfo = extractParamInfo(apiMeta);
   const requiredParams = paramInfo.filter((p) => p.required);
@@ -284,7 +289,7 @@ function generateUsageHint(
  */
 function formatMissingParamsError(
   apiPath: string,
-  apiMeta: ApiExecutorContext["apiMeta"],
+  apiMeta: ApiExecutionContext["meta"],
   missing: ParamInfo[]
 ): string {
   const lines: string[] = [];
@@ -384,27 +389,14 @@ export async function callCommand(
     throw new Error(`Spec not found: ${specName}`);
   }
 
-  // Determine baseUrl
-  let baseUrl = origin.spec?.servers?.[0]?.url;
-  if (options.env) {
-    // Try to get baseUrl from envs config
-    const envUrl = origin.envs?.[options.env];
-    if (envUrl) {
-      baseUrl = envUrl;
-    } else {
-      // Treat env as direct URL
-      baseUrl = options.env;
-    }
-  }
-
   // Parse tool parameters from remaining args
   const toolParams = parseToolParams(rawArgs);
 
   // Parse extra headers
   const extraHeaders = parseExtraHeaders(options.header);
 
-  // Build apiMeta for context (directly from apiMeta)
-  const apiMetaForContext: ApiExecutorContext["apiMeta"] = {
+  // Build meta for context
+  const apiMetaForContext: ApiExecutionContext["meta"] = {
     path: apiMeta.path,
     method: apiMeta.method,
     description: apiMeta.description || apiMeta.summary,
@@ -421,16 +413,36 @@ export async function callCommand(
     process.exit(1);
   }
 
-  // Build executor context
-  const context: ApiExecutorContext = {
-    apiSelector: { specName, tagName, apiName },
-    apiMeta: apiMetaForContext,
-    toolParams: { ...toolParams, ...extraHeaders },
-    baseUrl,
-    options: {
-      originConfig: origin,
-      resolvedConfig: config,
-    },
+  // 解析环境配置
+  let envConfig: ApiExecutionContext["env"] | undefined;
+  if (options.env) {
+    // 检查是否是 URL
+    if (options.env.startsWith("http://") || options.env.startsWith("https://")) {
+      envConfig = { baseURL: options.env };
+    } else {
+      // 作为环境名称
+      const envUrl = origin.envs?.[options.env] || config.executeApiConfig?.environments?.[options.env];
+      if (envUrl) {
+        envConfig = {
+          name: options.env,
+          baseURL: typeof envUrl === 'string' ? envUrl : envUrl.baseURL
+        };
+      } else {
+        // 尝试作为直接 URL
+        envConfig = { baseURL: options.env };
+      }
+    }
+  }
+
+  // Build execution context using new API
+  const context: ApiExecutionContext = {
+    api: { specName, tagName, apiName },
+    meta: apiMetaForContext,
+    params: { ...toolParams, ...extraHeaders },
+    env: envConfig,
+    executeApiConfig: config.executeApiConfig,
+    resolvedConfig: config,
+    logger: logger || createLogger('info'),
   };
 
   // Debug/dry-run: show request info
@@ -455,18 +467,25 @@ export async function callCommand(
   }
 
   // Execute API call
-  if (!plugin?.apiExecutor) {
-    throw new Error("No apiExecutor plugin configured");
+  if (!plugin?.executeApi) {
+    throw new Error("No executeApi plugin configured");
   }
 
   try {
-    let result = await plugin.apiExecutor(context);
+    // Call the new executeApi hook
+    const response = await plugin.executeApi(context);
+
+    if (!response) {
+      throw new Error("No response from API executor");
+    }
+
+    let result = response.data;
 
     // Apply JMESPath query if specified
     if (options.query) {
       try {
         // Ensure result is an object for JMESPath query
-        const data = typeof result === "string" ? JSON.parse(result) : result;
+        const data = typeof result === "string" ? JSON.parse(result as string) : result;
         result = jmespath.search(data, options.query);
       } catch (queryError: any) {
         throw new Error(
@@ -498,7 +517,7 @@ export async function callCommand(
     }
 
     if (options.debug) {
-      const debugMsgs = ["-".repeat(60), "Request completed successfully"].join('\n');
+      const debugMsgs = ["-".repeat(60), `Request completed successfully (status: ${response.status})`].join('\n');
       if (logger) {
         logger.info(debugMsgs);
       } else {

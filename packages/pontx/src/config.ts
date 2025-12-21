@@ -295,8 +295,9 @@ export async function resolveConfig(
       ? config.outDir
       : path.join(configDir, config.outDir),
     origins: resolvedOrigins,
-    resolvedPlugin: resolvePlugin(config.plugins ?? []),
+    resolvedPlugin: resolvePlugin(config.plugins ?? [], config.executeApi),
     service: config.service,
+    executeApiConfig: config.executeApi,
   } as ResolvedConfig;
   if (config.translateConfig) {
     resolvedConfigContent.translateConfig = {

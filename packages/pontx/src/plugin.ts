@@ -8,10 +8,15 @@ import type {
   CheckResult,
   ApiExecutorContext,
 } from "./type";
+import type {
+  ApiExecutionContext,
+  ApiResponse,
+  ExecuteApiConfig,
+} from "./types";
 import _ from "lodash";
 import { createLogger } from "./logger/logger";
 
-export function resolvePlugin(plugins: Plugin[]): Plugin {
+export function resolvePlugin(plugins: Plugin[], executeApiConfig?: ExecuteApiConfig): Plugin {
   const orderedPlugins = [...plugins, getBuiltinPlugin()];
 
   return {
@@ -181,9 +186,44 @@ export function resolvePlugin(plugins: Plugin[]): Plugin {
 
       return allResults;
     },
+    /**
+     * executeApi hook: supports new ApiExecutionContext
+     */
+    executeApi: async (context: ApiExecutionContext) => {
+      for (const plugin of orderedPlugins) {
+        if (plugin.executeApi) {
+          const result = await plugin.executeApi(context);
+          if (result !== null) {
+            return result;
+          }
+        }
+      }
+      // 如果所有插件都返回 null，应该不会到这里，因为 builtin plugin 会处理
+      return null;
+    },
+    /**
+     * @deprecated apiExecutor hook: legacy support
+     */
     apiExecutor: async (context: ApiExecutorContext) => {
       for (const plugin of orderedPlugins) {
-        if (plugin.apiExecutor) {
+        // 优先使用新的 executeApi
+        if (plugin.executeApi) {
+          // 转换旧的 context 到新的 context
+          const newContext: ApiExecutionContext = {
+            api: context.apiSelector,
+            meta: context.apiMeta,
+            params: context.toolParams,
+            env: context.baseUrl ? { baseURL: context.baseUrl } : undefined,
+            executeApiConfig: executeApiConfig,
+            resolvedConfig: context.options?.resolvedConfig!,
+            logger: createLogger('info'),
+          };
+          const result = await plugin.executeApi(newContext);
+          if (result !== null) {
+            return result.data;
+          }
+        } else if (plugin.apiExecutor) {
+          // 使用旧的 apiExecutor
           return await plugin.apiExecutor(context);
         }
       }
