@@ -5,7 +5,8 @@
 
 import { EventEmitter } from "events";
 import { PontxManager } from "../manager";
-import { createLogger, Logger } from "../logger";
+import { createLogger } from "../logger/logger";
+import type { Logger } from "../logger/types";
 import { ServiceStatus, IPontxService } from "./types";
 import { FileWatcherService } from "./file-watcher";
 import { SyncManager } from "./sync-manager";
@@ -59,14 +60,18 @@ export class PontxService extends EventEmitter implements IPontxService {
    * 构造函数
    * @param rootDir 项目根目录
    * @param config 构造函数传入的服务配置
+   * @param logger 可选的日志实例（用于依赖注入）
    */
-  constructor(rootDir: string, config?: ServiceConfig) {
+  constructor(rootDir: string, config?: ServiceConfig, logger?: Logger) {
     super();
     this.rootDir = rootDir;
     this.config = config || {};
-    this.logger = createLogger(this.config.logLevel!, {
-      prefix: "[pontx service]",
-    });
+
+    // 优先使用传入的 logger，其次根据 config 创建
+    this.logger = logger || createLogger(
+      this.config.logLevel || 'info',
+      { prefix: "[pontx service]" }
+    );
   }
 
   /**

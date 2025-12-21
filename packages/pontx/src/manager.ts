@@ -1,6 +1,7 @@
 import { PontxSpec, PontxSpecs } from "@pontx/spec";
 import { lookForFiles } from "./utils";
-import { createLogger, Logger } from "./logger";
+import { createLogger } from "./logger/logger";
+import type { Logger } from "./logger/types";
 import fsp from "node:fs/promises";
 import * as path from "path";
 import { LOCK_FILENAME } from "./const";
@@ -31,13 +32,19 @@ export class PontxManager {
     );
 
     if (configPathname) {
+      logger.debug(`找到配置文件: ${configPathname}`);
       return PontxManager.constructorFromPontxConfigPath(
         configPathname,
         rootDir,
         logger
       );
     } else {
-      logger.error("未找到 Pontx 配置文件");
+      const error = new Error(`未找到 Pontx 配置文件 (${PontxManager.configFilename})`);
+      logger.error("配置文件查找失败", error, {
+        rootDir,
+        searchFor: PontxManager.configFilename
+      });
+      throw error;
     }
   }
 
@@ -69,12 +76,18 @@ export class PontxManager {
 
     resolvedConfig.resolvedPlugin.configResolved(resolvedConfig);
 
+    logger.debug('开始读取本地 specs');
     await PontxManager.readLocalSpecs(manager);
+
+    logger.debug('开始获取远程元数据');
     try {
       await PontxManager.fetchRemotePontMeta(manager);
     } catch (error) {
-      manager.logger.error("获取远程 Pontx 元数据失败：" + error.message);
+      const err = error instanceof Error ? error : new Error(String(error));
+      manager.logger.warn("获取远程 Pontx 元数据失败", err);
     }
+
+    logger.debug('Manager 初始化完成');
     return manager;
   }
 
@@ -92,6 +105,7 @@ export class PontxManager {
         // 本地元数据是否存在
         const stat = await fsp.stat(filePath).catch(() => null);
         if (stat) {
+          manager.logger.debug(`读取本地 spec: ${config.name}`);
           const localDataStr = await fsp.readFile(filePath, {
             encoding: "utf8",
           });
@@ -99,13 +113,15 @@ export class PontxManager {
             const spec = JSON.parse(localDataStr) as PontxSpec;
             config.spec = spec;
           } catch (e) {
+            const error = e instanceof Error ? e : new Error(String(e));
             manager.logger.error(
-              "读取本地文件失败，文件内容不符合 JSON 规范。" + e.message,
-              {
-                prefix: config.name,
-              }
+              `读取本地 spec 失败 (${config.name})`,
+              error,
+              { filePath }
             );
           }
+        } else {
+          manager.logger.debug(`本地 spec 不存在: ${config.name}`);
         }
       }
     );
@@ -175,14 +191,21 @@ export class PontxManager {
 
   static async generateCode(manager: PontxManager) {
     try {
+      manager.logger.debug('开始生成代码');
       const result = await manager.resolvedConfig.resolvedPlugin.generateEntry({
         resolvedConfig: manager.resolvedConfig,
       });
       if (result) {
+        manager.logger.debug(`生成文件到: ${manager.resolvedConfig.outDir}`);
         await reGenerateFiles(result, manager.resolvedConfig.outDir);
+        manager.logger.info('代码生成完成');
+      } else {
+        manager.logger.warn('插件未返回生成结果');
       }
     } catch (e) {
-      manager.logger.error(e.message, e.stack);
+      const error = e instanceof Error ? e : new Error(String(e));
+      manager.logger.error('代码生成失败', error);
+      throw error;
     }
   }
 

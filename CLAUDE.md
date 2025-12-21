@@ -250,3 +250,31 @@ Pontx 使用混合方案加载 TypeScript 配置文件：
 ```bash
 pontx cache:clean
 ```
+
+## 日志和调试
+
+### 日志级别控制
+
+Pontx 支持通过环境变量和 CLI 参数控制日志输出级别：
+
+```bash
+# 方式 1: 环境变量
+export PONTX_LOG_LEVEL=debug  # trace | debug | info | warn | error | fatal
+export DEBUG=pontx            # 启用 debug 级别
+export NODE_ENV=development   # 自动使用 debug 级别
+
+# 方式 2: CLI 参数
+pontx generate --debug
+pontx service --debug
+```
+
+### 日志级别说明
+
+- **info** (默认): 关键操作信息
+- **debug**: 详细调试信息，适合开发和排查问题
+- **warn**: 警告信息
+- **error**: 错误信息
+
+### 开发规范
+
+开发者请参考 [Logger 开发规范](docs/logger-development.md) 了解如何在代码中正确使用 logger。

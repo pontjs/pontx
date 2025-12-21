@@ -1,6 +1,6 @@
 import { PontxSpec, Parameter, PontxAPI } from "@pontx/spec";
 import { TranslateConfig } from "./builtin/translate";
-import { LogLevel } from "./logger";
+import type { LogLevel } from "./logger/types";
 
 export type PluginHookOptions = {
   originConfig?: ResolvedOriginConfig;

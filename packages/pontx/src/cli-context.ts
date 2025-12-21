@@ -1,5 +1,6 @@
 import { PontxManager } from "./manager";
-import { createLogger, Logger } from "./logger";
+import { createLogger } from "./logger/logger";
+import type { Logger } from "./logger/types";
 
 export interface CliContext {
   /** 静默尝试获取本地 manager，失败返回 null */

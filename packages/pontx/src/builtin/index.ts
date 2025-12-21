@@ -16,7 +16,7 @@ import {
   PontxSpec,
   fixOASTagsByTranslate,
 } from "@pontx/spec";
-import { createLogger } from "../logger";
+import { createLogger } from "../logger/logger";
 import { builtinCheck } from "./check";
 import { builtinApiExecutor } from "./apiExecutor";
 

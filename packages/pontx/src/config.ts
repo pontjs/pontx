@@ -12,7 +12,8 @@ import {
 } from "./utils";
 import colors from "picocolors";
 import fsp from "node:fs/promises";
-import { createLogger, Logger, LogLevel, LogType } from "./logger";
+import { createLogger } from "./logger/logger";
+import type { Logger, LogLevel } from "./logger/types";
 import type {
   OriginConfig,
   PontxConfig,

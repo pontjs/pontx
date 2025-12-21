@@ -9,7 +9,7 @@ import type {
   ApiExecutorContext,
 } from "./type";
 import _ from "lodash";
-import { createLogger } from "./logger";
+import { createLogger } from "./logger/logger";
 
 export function resolvePlugin(plugins: Plugin[]): Plugin {
   const orderedPlugins = [...plugins, getBuiltinPlugin()];

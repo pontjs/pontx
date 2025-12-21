@@ -8,7 +8,7 @@ import * as fs from "fs";
 import fsp from "node:fs/promises";
 import colors from "picocolors";
 import { findNearestNodeModules } from "../utils";
-import type { Logger } from "../logger";
+import type { Logger } from "../logger/types";
 
 /**
  * 获取缓存目录路径

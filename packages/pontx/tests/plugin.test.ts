@@ -24,7 +24,11 @@ describe("Plugin check lifecycle hook", () => {
       "user.getUserById": {
         method: "GET",
         path: "/users/{id}",
-        operationId: "getUserById",
+        responses: {
+          "200": {
+            description: "Success",
+          },
+        },
       },
     },
   };
@@ -35,7 +39,11 @@ describe("Plugin check lifecycle hook", () => {
       "user.getUserById": {
         method: "GET",
         path: "/users/{id}",
-        operationId: "getUserById",
+        responses: {
+          "200": {
+            description: "Success",
+          },
+        },
       },
     },
   };
@@ -117,7 +125,7 @@ describe("Plugin check lifecycle hook", () => {
   it("should handle plugin returning non-array gracefully", async () => {
     const badPlugin: Plugin = {
       name: "bad-plugin",
-      check: async () => ({ invalid: "data" }) as any,
+      check: async () => ({ invalid: "data" } as any),
     };
 
     const resolvedPlugin = resolvePlugin([badPlugin]);
@@ -262,7 +270,11 @@ describe("Plugin check lifecycle hook", () => {
         "user.getUserById": {
           method: "GET",
           path: "/users/{id}",
-          operationId: "getUserById",
+          responses: {
+            "200": {
+              description: "Success",
+            },
+          },
         },
       },
     };
@@ -274,7 +286,11 @@ describe("Plugin check lifecycle hook", () => {
           // tag changed
           method: "GET",
           path: "/users/{id}",
-          operationId: "getUserById",
+          responses: {
+            "200": {
+              description: "Success",
+            },
+          },
         },
       },
     };

@@ -4,7 +4,9 @@ import * as fs from "fs";
 import { PontxManager } from "./manager";
 import { PontxService, ServiceConfig } from "./service/service";
 import { createCliContext } from "./cli-context";
-import { createLogger } from "./logger";
+import { createLogger } from "./logger/logger";
+import { getLogLevelFromEnv } from "./logger/utils";
+import type { LogLevel } from "./logger/types";
 
 const packageFilePath = path.join(__dirname, "..", "package.json");
 const packageInfo = JSON.parse(fs.readFileSync(packageFilePath, "utf8"));
@@ -12,12 +14,13 @@ const packageInfo = JSON.parse(fs.readFileSync(packageFilePath, "utf8"));
 const currentVersion = packageInfo.version;
 const rootDir = process.cwd();
 
-// Check for --debug flag in argv
+// Check for --debug flag in argv and combine with environment variables
 const hasDebugFlag = process.argv.includes('--debug');
-const logLevel = hasDebugFlag ? 'info' : 'error';
+const envLevel = getLogLevelFromEnv();
+const logLevel: LogLevel = hasDebugFlag ? 'debug' : (envLevel === 'debug' || envLevel === 'trace' ? envLevel : 'info');
 
-// 创建 CLI 上下文（使用根据 --debug 决定的日志级别）
-const ctx = createCliContext(rootDir, createLogger(logLevel));
+// 创建 CLI 上下文（使用根据 --debug 和环境变量决定的日志级别）
+const ctx = createCliContext(rootDir, createLogger(logLevel, { prefix: '[pontx cli]' }));
 const { getManager, tryGetLocalManager, logger } = ctx;
 
 program.version(currentVersion).usage("[命令] [配置项]");
@@ -210,7 +213,13 @@ program
       serviceConfig.logLevel = options.logLevel;
     }
 
-    const service = new PontxService(rootDir, serviceConfig as ServiceConfig);
+    // 如果用户显式指定了 service 的 log-level，则创建新 logger
+    // 否则使用 CLI 的 logger（继承 --debug）
+    const serviceLogger = serviceConfig.logLevel
+      ? createLogger(serviceConfig.logLevel as LogLevel, { prefix: '[pontx service]' })
+      : logger;
+
+    const service = new PontxService(rootDir, serviceConfig as ServiceConfig, serviceLogger);
 
     // 监听服务事件
     service.on("started", () => {
@@ -225,7 +234,7 @@ program
     });
 
     service.on("error", (error) => {
-      logger.error("PontxService 发生错误: " + error);
+      logger.error("PontxService 发生错误", error instanceof Error ? error : new Error(String(error)));
       process.exit(1);
     });
 
@@ -244,7 +253,7 @@ program
     try {
       await service.start();
     } catch (error) {
-      logger.error("服务启动失败: " + error);
+      logger.error("服务启动失败", error instanceof Error ? error : new Error(String(error)));
       process.exit(1);
     }
   });
@@ -277,11 +286,7 @@ async function main() {
 }
 
 main().catch((e) => {
-  if (process.env.NODE_ENV === "development") {
-    logger.error(e.message);
-    logger.error(e.stack);
-  } else {
-    logger.error(e.message);
-  }
+  const error = e instanceof Error ? e : new Error(String(e));
+  logger.error("命令执行失败", error);
   process.exit(1);
 });
