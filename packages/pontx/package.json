@@ -26,16 +26,20 @@
     "watch": "rollup -c -w",
     "clean": "rimraf cjs && rimraf tsconfig.tsbuildinfo && rimraf lib"
   },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "@pontx/spec": "^0.1.15",
     "baidu-translate-service": "^2.2.4",
     "commander": "^13.1.0",
+    "esbuild": "^0.20.0",
     "fuse.js": "^7.1.0",
     "jmespath": "^0.16.0",
     "lodash": "^4.17.21",
     "picocolors": "^1.1.1",
     "tslib": "^2.6.2",
-    "typescript": "^5"
+    "tsx": "^4.7.0"
   },
   "files": [
     "lib",

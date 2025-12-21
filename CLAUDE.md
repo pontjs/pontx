@@ -165,6 +165,11 @@ export const X: React.FC<XProps> = (props) => {};
 X.defaultProps = new XProps();
 ```
 
+## 环境要求
+
+- **Node.js**: >= 18.0.0
+- **pnpm**: >= 8.0.0（推荐）
+
 ## 技术栈
 
 - **前端**: React + Vite + TypeScript + TailwindCSS
@@ -192,3 +197,56 @@ pontx 核心包提供多种代码生成能力：
 ## 配置文件
 
 项目使用 `pontx.config.ts` 作为配置文件，VSCode 扩展会自动检测此文件激活相关功能。
+
+### 配置文件加载机制
+
+Pontx 使用混合方案加载 TypeScript 配置文件：
+- **普通模式**：使用 esbuild 编译，速度快（50-100ms），持久化缓存（后续 5-10ms）
+- **调试模式**：使用 tsx register，支持 VSCode 断点调试
+
+调试模式会在检测到 `--inspect` 参数时自动启用。
+
+### 调试配置文件
+
+用户可以在 VSCode 中调试 `pontx.config.ts`：
+
+1. 在项目中创建 `.vscode/launch.json`：
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "调试 Pontx",
+      "program": "${workspaceFolder}/node_modules/.bin/pontx",
+      "args": ["build"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceFolder}/node_modules/.pontx-cache/**/*.js"
+      ],
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ]
+}
+```
+
+2. 在 `pontx.config.ts` 中设置断点
+3. 按 F5 开始调试
+
+支持的配置文件格式：
+- `pontx.config.ts` - TypeScript（推荐，支持调试）
+- `pontx.config.js` - JavaScript
+- `pontx.config.mjs` - ES Module
+- `pontx.config.cjs` - CommonJS
+
+### 缓存管理
+
+编译缓存位于 `node_modules/.pontx-cache/`，使用内容 hash 作为缓存键。
+
+清理缓存：
+```bash
+pontx cache:clean
+```

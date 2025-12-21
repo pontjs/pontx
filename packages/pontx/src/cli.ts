@@ -249,6 +249,14 @@ program
     }
   });
 
+program
+  .command("cache:clean")
+  .description("清理配置文件编译缓存")
+  .action(async () => {
+    const { cleanCacheCommand } = await import("./commands/cache");
+    await cleanCacheCommand(rootDir, logger);
+  });
+
 // Handle --get-completions before normal parsing
 async function main() {
   const args = process.argv;
