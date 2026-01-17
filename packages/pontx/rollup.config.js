@@ -44,11 +44,11 @@ const isExternal = (id) => {
 export default [
   // CommonJS build
   {
-    input: ["src/index.ts", "src/cli.ts"],
+    input: ["src/index.ts", "src/cli.ts", "src/cli-factory.ts"],
     output: {
       dir: "cjs",
       entryFileNames: (chunkInfo) => {
-        if (["index", "cli"].includes(chunkInfo.name)) {
+        if (["index", "cli", "cli-factory"].includes(chunkInfo.name)) {
           return "[name].cjs";
         }
         return "[name].cjs";
@@ -72,7 +72,7 @@ export default [
     external: isExternal,
   },
   {
-    input: ["src/index.ts", "src/cli.ts"],
+    input: ["src/index.ts", "src/cli.ts", "src/cli-factory.ts"],
     output: {
       dir: "cjs-types",
       entryFileNames: "[name].cjs",

@@ -1,6 +1,14 @@
 import type { PontxManager } from "../manager";
 import type { CliContext } from "../cli-context";
 
+/**
+ * Check if a spec has tags (i.e., any API keys contain "/")
+ */
+export function specHasTags(pontSpec: any): boolean {
+  if (!pontSpec?.apis) return false;
+  return Object.keys(pontSpec.apis).some((key) => key.includes("/"));
+}
+
 export function getApiMeta(
   pontxManager: PontxManager,
   specName: string,
@@ -32,8 +40,20 @@ export function getApiMeta(
  *   - petstore.pet."get.pet.by.id"
  *   - petstore."my-tag"."api/name"
  *   - petstore/pet/getPetById (legacy format)
+ *
+ * When only one spec exists, specName can be omitted:
+ *   - pet.getPetById (when singleSpecName is provided and hasTags is true)
+ *   - getPetById (when singleSpecName is provided and hasTags is false)
+ *
+ * @param apiPath - API path string
+ * @param singleSpecName - The spec name when there's only one spec (for auto-completion)
+ * @param hasTags - Whether the single spec has tags (used to resolve ambiguity)
  */
-export function parseApiPath(apiPath: string): {
+export function parseApiPath(
+  apiPath: string,
+  singleSpecName?: string,
+  hasTags?: boolean
+): {
   specName: string;
   tagName: string;
   apiName: string;
@@ -41,6 +61,7 @@ export function parseApiPath(apiPath: string): {
   // Try dot-separated format first (new format)
   if (apiPath.includes(".") || apiPath.includes('"')) {
     const parts = parseDotSeparatedPath(apiPath);
+
     if (parts.length === 3) {
       return {
         specName: parts[0],
@@ -48,11 +69,47 @@ export function parseApiPath(apiPath: string): {
         apiName: parts[2],
       };
     } else if (parts.length === 2) {
-      return {
-        specName: parts[0],
-        tagName: "",
-        apiName: parts[1],
-      };
+      // Ambiguous case: could be specName.apiName or tagName.apiName
+      if (singleSpecName) {
+        // Single spec mode: determine based on hasTags
+        if (hasTags) {
+          // Has tags: treat as tagName.apiName
+          return {
+            specName: singleSpecName,
+            tagName: parts[0],
+            apiName: parts[1],
+          };
+        } else {
+          // No tags: treat as specName.apiName (for backward compatibility)
+          return {
+            specName: parts[0],
+            tagName: "",
+            apiName: parts[1],
+          };
+        }
+      } else {
+        // Multi-spec mode: treat as specName.apiName (no tag)
+        return {
+          specName: parts[0],
+          tagName: "",
+          apiName: parts[1],
+        };
+      }
+    } else if (parts.length === 1) {
+      // Single segment: only valid in single-spec mode without tags
+      if (singleSpecName && !hasTags) {
+        return {
+          specName: singleSpecName,
+          tagName: "",
+          apiName: parts[0],
+        };
+      } else {
+        throw new Error(
+          singleSpecName
+            ? `Invalid API path format: ${apiPath}. Expected: tagName.apiName (spec has tags)`
+            : `Invalid API path format: ${apiPath}. Expected: specName.tagName.apiName or specName.apiName`
+        );
+      }
     } else {
       throw new Error(
         `Invalid API path format: ${apiPath}. Expected: specName.tagName.apiName or specName.tagName."apiName"`
@@ -69,14 +126,50 @@ export function parseApiPath(apiPath: string): {
       apiName: parts[2],
     };
   } else if (parts.length === 2) {
-    return {
-      specName: parts[0],
-      tagName: "",
-      apiName: parts[1],
-    };
+    // Ambiguous case: could be specName/apiName or tagName/apiName
+    if (singleSpecName) {
+      // Single spec mode: determine based on hasTags
+      if (hasTags) {
+        // Has tags: treat as tagName/apiName
+        return {
+          specName: singleSpecName,
+          tagName: parts[0],
+          apiName: parts[1],
+        };
+      } else {
+        // No tags: treat as specName/apiName (for backward compatibility)
+        return {
+          specName: parts[0],
+          tagName: "",
+          apiName: parts[1],
+        };
+      }
+    } else {
+      // Multi-spec mode: treat as specName/apiName (no tag)
+      return {
+        specName: parts[0],
+        tagName: "",
+        apiName: parts[1],
+      };
+    }
+  } else if (parts.length === 1) {
+    // Single segment: only valid in single-spec mode without tags
+    if (singleSpecName && !hasTags) {
+      return {
+        specName: singleSpecName,
+        tagName: "",
+        apiName: parts[0],
+      };
+    } else {
+      throw new Error(
+        singleSpecName
+          ? `Invalid API path format: ${apiPath}. Expected: tagName/apiName (spec has tags)`
+          : `Invalid API path format: ${apiPath}. Expected: specName/tagName/apiName or specName/apiName`
+      );
+    }
   } else {
     throw new Error(
-      `Invalid API path format: ${apiPath}. Expected: specName.tagName.apiName or specName/tagName/apiName`
+      `Invalid API path format: ${apiPath}. Expected: specName/tagName/apiName or specName.tagName.apiName`
     );
   }
 }
@@ -136,8 +229,6 @@ export async function showApiCommand(
   apiPath: string,
   options: { useRemote?: boolean } = {}
 ) {
-  const { specName, tagName, apiName } = parseApiPath(apiPath);
-
   // Determine if called from CLI or directly
   const isCliContext = "tryGetLocalManager" in managerOrContext;
 
@@ -150,6 +241,25 @@ export async function showApiCommand(
     // Direct call: maintain backward compatibility
     manager = managerOrContext;
   }
+
+  // Determine single spec mode
+  const origins = manager.resolvedConfig.origins;
+  let singleSpecName: string | undefined;
+  let hasTags: boolean | undefined;
+
+  if (origins.length === 1) {
+    singleSpecName = origins[0].name;
+    const pontSpec = options.useRemote
+      ? origins[0].remoteSpec
+      : origins[0].spec;
+    hasTags = specHasTags(pontSpec);
+  }
+
+  const { specName, tagName, apiName } = parseApiPath(
+    apiPath,
+    singleSpecName,
+    hasTags
+  );
 
   const apiMeta = getApiMeta(
     manager,

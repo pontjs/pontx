@@ -557,7 +557,3 @@ executeApi: async (context) => {
 ```
 
 ---
-
-更多信息请参考：
-
-- [Pontx 文档](https://github.com/alibaba/pont)

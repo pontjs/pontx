@@ -16,6 +16,9 @@
         "types": "./cjs-types/index.d.cts",
         "default": "./cjs/index.cjs"
       }
+    },
+    "./setup-cli": {
+      "require": "./setup-cli.cjs"
     }
   },
   "bin": {
@@ -45,6 +48,8 @@
     "lib",
     "cjs",
     "cjs-types",
+    "bin",
+    "setup-cli.cjs",
     "package.json",
     "*.md"
   ],

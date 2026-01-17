@@ -5,7 +5,7 @@ import type { PontxManager } from "../manager";
 import type { CliContext } from "../cli-context";
 import type { ApiExecutorContext } from "../type";
 import type { ApiExecutionContext } from "../types";
-import { parseApiPath, getApiMeta } from "./show-api";
+import { parseApiPath, getApiMeta, specHasTags } from "./show-api";
 import { createLogger } from "../logger/logger";
 
 export interface CallCommandOptions {
@@ -356,7 +356,6 @@ export async function callCommand(
 ) {
   // Get logger from context if available
   const logger = ('logger' in managerOrContext) ? managerOrContext.logger : undefined;
-  const { specName, tagName, apiName } = parseApiPath(apiPath);
 
   // Determine if called from CLI or directly
   const isCliContext = "tryGetLocalManager" in managerOrContext;
@@ -370,6 +369,25 @@ export async function callCommand(
     // Direct call: maintain backward compatibility
     manager = managerOrContext;
   }
+
+  // Determine single spec mode
+  const origins = manager.resolvedConfig.origins;
+  let singleSpecName: string | undefined;
+  let hasTags: boolean | undefined;
+
+  if (origins.length === 1) {
+    singleSpecName = origins[0].name;
+    const pontSpec = options.useRemote
+      ? origins[0].remoteSpec
+      : origins[0].spec;
+    hasTags = specHasTags(pontSpec);
+  }
+
+  const { specName, tagName, apiName } = parseApiPath(
+    apiPath,
+    singleSpecName,
+    hasTags
+  );
 
   const config = manager.resolvedConfig;
   const plugin = config.resolvedPlugin;

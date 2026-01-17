@@ -23,13 +23,20 @@ const specCache = new Map<string, any>();
 let localConfigCache: {
   outDir: string;
   specNames: string[];
+  singleSpecName?: string;
+  hasTags?: boolean;
 } | null = null;
 
 /**
  * Try to find pontx.config.ts and extract outDir and spec names
  * This is a lightweight alternative to loading full PontxManager
  */
-function tryLoadLocalConfig(cwd: string): { outDir: string; specNames: string[] } | null {
+function tryLoadLocalConfig(cwd: string): {
+  outDir: string;
+  specNames: string[];
+  singleSpecName?: string;
+  hasTags?: boolean;
+} | null {
   if (localConfigCache) {
     return localConfigCache;
   }
@@ -75,7 +82,20 @@ function tryLoadLocalConfig(cwd: string): { outDir: string; specNames: string[] 
       }
 
       if (specNames.length > 0) {
-        localConfigCache = { outDir, specNames };
+        // Determine if single spec mode and check hasTags
+        let singleSpecName: string | undefined;
+        let hasTags: boolean | undefined;
+
+        if (specNames.length === 1) {
+          singleSpecName = specNames[0];
+          // Load spec to check if it has tags
+          const spec = loadLocalSpec(outDir, singleSpecName);
+          if (spec?.apis) {
+            hasTags = Object.keys(spec.apis).some((key) => key.includes("/"));
+          }
+        }
+
+        localConfigCache = { outDir, specNames, singleSpecName, hasTags };
         return localConfigCache;
       }
     } catch {
@@ -112,7 +132,6 @@ function loadLocalSpec(outDir: string, specName: string): any {
 
   return null;
 }
-
 
 /**
  * Create lightweight data source for completion
@@ -215,8 +234,17 @@ export async function handleCompletionRequest(
   format: string = "plain"
 ): Promise<void> {
   const cwd = process.cwd();
+  const localConfig = tryLoadLocalConfig(cwd);
   const dataSource = createLightweightDataSource(cwd);
-  const engine = new CompletionEngine({ cwd }, dataSource);
+
+  // Build completion options with single spec mode support
+  const completionOptions: any = { cwd };
+  if (localConfig?.singleSpecName) {
+    completionOptions.singleSpecName = localConfig.singleSpecName;
+    completionOptions.hasTags = localConfig.hasTags;
+  }
+
+  const engine = new CompletionEngine(completionOptions, dataSource);
 
   const input = createCompletionInput(line, wordIndex);
   const result = await engine.complete(input);
@@ -244,15 +272,16 @@ export async function handleCompletionRequest(
  */
 export async function completionCommand(
   action: string,
-  options: { shell?: string; output?: string }
+  options: { shell?: string; output?: string; binName?: string }
 ): Promise<void> {
   const generator = new ShellCompletionGenerator();
   const shell = (options.shell ||
     ShellCompletionGenerator.detectShell() ||
     "bash") as ShellType;
 
+  const binName = options.binName || "pontx";
   const scriptOptions = {
-    binName: "pontx",
+    binName,
   };
 
   switch (action) {
@@ -270,7 +299,7 @@ export async function completionCommand(
     }
 
     case "install": {
-      const instructions = generator.getInstallInstructions(shell, "pontx");
+      const instructions = generator.getInstallInstructions(shell, binName);
       console.log(`\n${shell.toUpperCase()} Completion Installation:\n`);
       console.log(instructions);
       break;
@@ -279,7 +308,7 @@ export async function completionCommand(
     case "uninstall": {
       console.log(`\nTo uninstall ${shell} completion:\n`);
       console.log(
-        `Remove the pontx completion line from your shell configuration file.`
+        `Remove the ${binName} completion line from your shell configuration file.`
       );
       break;
     }

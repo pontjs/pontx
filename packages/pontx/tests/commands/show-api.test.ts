@@ -147,4 +147,131 @@ describe("parseApiPath", () => {
       });
     });
   });
+
+  describe("single spec mode with tags", () => {
+    const singleSpecName = "petstore";
+    const hasTags = true;
+
+    it("should parse tag.api format", () => {
+      const result = parseApiPath("pet.getPetById", singleSpecName, hasTags);
+
+      expect(result).toEqual({
+        specName: "petstore",
+        tagName: "pet",
+        apiName: "getPetById",
+      });
+    });
+
+    it("should parse tag/api format (slash)", () => {
+      const result = parseApiPath("pet/getPetById", singleSpecName, hasTags);
+
+      expect(result).toEqual({
+        specName: "petstore",
+        tagName: "pet",
+        apiName: "getPetById",
+      });
+    });
+
+    it("should still support full format for backward compatibility", () => {
+      const result = parseApiPath(
+        "petstore.pet.getPetById",
+        singleSpecName,
+        hasTags
+      );
+
+      expect(result).toEqual({
+        specName: "petstore",
+        tagName: "pet",
+        apiName: "getPetById",
+      });
+    });
+
+    it("should throw error for single part (api only not allowed with tags)", () => {
+      expect(() => parseApiPath("getPetById", singleSpecName, hasTags)).toThrow(
+        "Expected: tagName"
+      );
+    });
+  });
+
+  describe("single spec mode without tags", () => {
+    const singleSpecName = "petstore";
+    const hasTags = false;
+
+    it("should parse api name directly", () => {
+      const result = parseApiPath("getPetById", singleSpecName, hasTags);
+
+      expect(result).toEqual({
+        specName: "petstore",
+        tagName: "",
+        apiName: "getPetById",
+      });
+    });
+
+    it("should parse api name with slash format", () => {
+      const result = parseApiPath("getPetById", singleSpecName, hasTags);
+
+      expect(result).toEqual({
+        specName: "petstore",
+        tagName: "",
+        apiName: "getPetById",
+      });
+    });
+
+    it("should still support full format for backward compatibility", () => {
+      const result = parseApiPath(
+        "petstore.getPetById",
+        singleSpecName,
+        hasTags
+      );
+
+      expect(result).toEqual({
+        specName: "petstore",
+        tagName: "",
+        apiName: "getPetById",
+      });
+    });
+
+    it("should handle two-part path as specName.apiName", () => {
+      // When hasTags=false and two parts, treat as spec.api (backward compatibility)
+      const result = parseApiPath(
+        "petstore.getPetById",
+        singleSpecName,
+        hasTags
+      );
+
+      expect(result).toEqual({
+        specName: "petstore",
+        tagName: "",
+        apiName: "getPetById",
+      });
+    });
+  });
+
+  describe("multi-spec mode (default behavior)", () => {
+    it("should require specName in three-part format", () => {
+      const result = parseApiPath("petstore.pet.getPetById");
+
+      expect(result).toEqual({
+        specName: "petstore",
+        tagName: "pet",
+        apiName: "getPetById",
+      });
+    });
+
+    it("should require specName in two-part format", () => {
+      const result = parseApiPath("petstore.getPetById");
+
+      expect(result).toEqual({
+        specName: "petstore",
+        tagName: "",
+        apiName: "getPetById",
+      });
+    });
+
+    it("should throw error for single part without singleSpecName", () => {
+      expect(() => parseApiPath("getPetById")).toThrow(
+        "Invalid API path format"
+      );
+    });
+  });
 });

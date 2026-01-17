@@ -2,6 +2,7 @@
   "name": "@pontx/monorepo",
   "version": "0.0.1",
   "private": true,
+  "packageManager": "pnpm@9.15.4",
   "workspaces": [
     "packages/*",
     "examples/*",

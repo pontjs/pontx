@@ -68,7 +68,17 @@ export class ApiProvider implements CompletionProvider {
     const tags = await this.dataSource.getTags(specName);
 
     // Build prefix based on mode
-    const prefix = this.options.fixedSpecName ? "" : `${specName}.`;
+    let prefix = "";
+    if (this.options.fixedSpecName) {
+      // Proxy mode: no prefix
+      prefix = "";
+    } else if (this.options.singleSpecName) {
+      // Single spec mode: no prefix (tag completion at root level)
+      prefix = "";
+    } else {
+      // Multi-spec mode: include spec name
+      prefix = `${specName}.`;
+    }
 
     return tags
       .filter((tag) => tag.toLowerCase().startsWith(partial.toLowerCase()))
@@ -87,9 +97,18 @@ export class ApiProvider implements CompletionProvider {
     const apis = await this.dataSource.getApis(specName, tagName);
 
     // Build prefix based on mode
-    const prefix = this.options.fixedSpecName
-      ? `${tagName}.`
-      : `${specName}.${tagName}.`;
+    let prefix = "";
+    if (this.options.fixedSpecName) {
+      // Proxy mode: tag.api
+      prefix = `${tagName}.`;
+    } else if (this.options.singleSpecName) {
+      // Single spec mode with tags: tag.api
+      // Single spec mode without tags: api only
+      prefix = this.options.hasTags && tagName ? `${tagName}.` : "";
+    } else {
+      // Multi-spec mode: spec.tag.api
+      prefix = `${specName}.${tagName}.`;
+    }
 
     return apis
       .filter((api) => api.name.toLowerCase().startsWith(partial.toLowerCase()))

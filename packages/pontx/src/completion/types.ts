@@ -16,6 +16,21 @@ export interface CompletionOptions {
   fixedSpecName?: string;
 
   /**
+   * Single spec mode (only one spec configured)
+   * - When set, specName completion will be skipped
+   * - API path can use simplified format (tag.api or api)
+   */
+  singleSpecName?: string;
+
+  /**
+   * Whether the single spec has tags
+   * - Used to determine API path format in single spec mode
+   * - true: tag.api format
+   * - false: api format only
+   */
+  hasTags?: boolean;
+
+  /**
    * Working directory (for loading local pontx.config.ts)
    */
   cwd?: string;

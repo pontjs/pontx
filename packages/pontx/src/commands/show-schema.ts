@@ -23,7 +23,16 @@ export function getSchemaMeta(
   return schema;
 }
 
-export function parseSchemaPath(schemaPath: string): {
+/**
+ * Parse schema path with support for single-spec mode
+ *
+ * @param schemaPath - Schema path string
+ * @param singleSpecName - The spec name when there's only one spec (for auto-completion)
+ */
+export function parseSchemaPath(
+  schemaPath: string,
+  singleSpecName?: string
+): {
   specName: string;
   schemaName: string;
 } {
@@ -33,9 +42,21 @@ export function parseSchemaPath(schemaPath: string): {
       specName: parts[0],
       schemaName: parts[1],
     };
+  } else if (parts.length === 1) {
+    // Single segment: only valid in single-spec mode
+    if (singleSpecName) {
+      return {
+        specName: singleSpecName,
+        schemaName: parts[0],
+      };
+    } else {
+      throw new Error(
+        `Invalid schema path format: ${schemaPath}. Expected: specName/schemaName`
+      );
+    }
   } else {
     throw new Error(
-      `Invalid schema path format: ${schemaPath}. Expected: specName/schemaName`
+      `Invalid schema path format: ${schemaPath}. Expected: specName/schemaName or schemaName (single-spec mode)`
     );
   }
 }
@@ -48,8 +69,6 @@ export async function showSchemaCommand(
   schemaPath: string,
   options: { useRemote?: boolean } = {}
 ) {
-  const { specName, schemaName } = parseSchemaPath(schemaPath);
-
   // Determine if called from CLI or directly
   const isCliContext = "tryGetLocalManager" in managerOrContext;
 
@@ -62,6 +81,12 @@ export async function showSchemaCommand(
     // Direct call: maintain backward compatibility
     manager = managerOrContext;
   }
+
+  // Determine single spec mode
+  const origins = manager.resolvedConfig.origins;
+  const singleSpecName = origins.length === 1 ? origins[0].name : undefined;
+
+  const { specName, schemaName } = parseSchemaPath(schemaPath, singleSpecName);
 
   const schema = getSchemaMeta(manager, specName, schemaName, options.useRemote);
 

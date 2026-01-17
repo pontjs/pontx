@@ -2,7 +2,7 @@ import type { PontxManager } from "../manager";
 import type { CliContext } from "../cli-context";
 import { PontxManager as PM } from "../manager";
 import { generateApiRequestCode, generateApiUseRequestCode } from "../generate";
-import { parseApiPath, getApiMeta } from "./show-api";
+import { parseApiPath, getApiMeta, specHasTags } from "./show-api";
 
 export async function makeCode(
   pontxManager: PontxManager,
@@ -71,8 +71,6 @@ export async function genCommand(
     useRemote?: boolean;
   }
 ) {
-  const { specName, tagName, apiName } = parseApiPath(apiPath);
-
   // Determine if called from CLI or directly
   const isCliContext = "tryGetLocalManager" in managerOrContext;
 
@@ -85,6 +83,25 @@ export async function genCommand(
     // Direct call: maintain backward compatibility
     manager = managerOrContext;
   }
+
+  // Determine single spec mode
+  const origins = manager.resolvedConfig.origins;
+  let singleSpecName: string | undefined;
+  let hasTags: boolean | undefined;
+
+  if (origins.length === 1) {
+    singleSpecName = origins[0].name;
+    const pontSpec = options.useRemote
+      ? origins[0].remoteSpec
+      : origins[0].spec;
+    hasTags = specHasTags(pontSpec);
+  }
+
+  const { specName, tagName, apiName } = parseApiPath(
+    apiPath,
+    singleSpecName,
+    hasTags
+  );
 
   // Validate API exists
   getApiMeta(manager, specName, tagName, apiName, options.useRemote);

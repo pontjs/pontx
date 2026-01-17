@@ -81,4 +81,52 @@ describe("parseSchemaPath", () => {
       schemaName: "petResponse",
     });
   });
+
+  describe("single spec mode", () => {
+    const singleSpecName = "petstore";
+
+    it("should parse schema name directly in single spec mode", () => {
+      const result = parseSchemaPath("Pet", singleSpecName);
+
+      expect(result).toEqual({
+        specName: "petstore",
+        schemaName: "Pet",
+      });
+    });
+
+    it("should still support full format for backward compatibility", () => {
+      const result = parseSchemaPath("petstore/Pet", singleSpecName);
+
+      expect(result).toEqual({
+        specName: "petstore",
+        schemaName: "Pet",
+      });
+    });
+
+    it("should handle complex schema names in single spec mode", () => {
+      const result = parseSchemaPath("UserResponse_DTO", singleSpecName);
+
+      expect(result).toEqual({
+        specName: "petstore",
+        schemaName: "UserResponse_DTO",
+      });
+    });
+  });
+
+  describe("multi-spec mode (default behavior)", () => {
+    it("should require specName in standard format", () => {
+      const result = parseSchemaPath("petstore/Pet");
+
+      expect(result).toEqual({
+        specName: "petstore",
+        schemaName: "Pet",
+      });
+    });
+
+    it("should throw error for single part without singleSpecName", () => {
+      expect(() => parseSchemaPath("Pet")).toThrow(
+        "Invalid schema path format"
+      );
+    });
+  });
 });

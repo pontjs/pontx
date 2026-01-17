@@ -93,10 +93,20 @@ export function parseDotSeparatedPath(path: string): string[] {
  * - "doc" -> { specName: "yuque", partial: "doc", completing: "tag" }
  * - "doc." -> { specName: "yuque", tagName: "doc", partial: "", completing: "api" }
  * - "doc.read" -> { specName: "yuque", tagName: "doc", partial: "read", completing: "api" }
+ *
+ * With singleSpecName="petstore" and hasTags=true:
+ * - "pet" -> { specName: "petstore", partial: "pet", completing: "tag" }
+ * - "pet." -> { specName: "petstore", tagName: "pet", partial: "", completing: "api" }
+ * - "pet.get" -> { specName: "petstore", tagName: "pet", partial: "get", completing: "api" }
+ *
+ * With singleSpecName="petstore" and hasTags=false:
+ * - "getPet" -> { specName: "petstore", partial: "getPet", completing: "api" }
  */
 export function parsePartialApiPath(
   partial: string,
-  fixedSpecName?: string
+  fixedSpecName?: string,
+  singleSpecName?: string,
+  hasTags?: boolean
 ): ApiPathInfo {
   const endsWithDot = partial.endsWith(".");
   // Filter out empty parts caused by trailing dot
@@ -124,6 +134,38 @@ export function parsePartialApiPath(
       partial: endsWithDot ? "" : parts[1] || "",
       completing: "api",
     };
+  }
+
+  // Single spec mode (only one spec configured)
+  if (singleSpecName) {
+    if (hasTags) {
+      // Has tags: treat input as tag.api format
+      if (dotCount === 0) {
+        // Input: "" or "pet" -> completing tag
+        return {
+          specName: singleSpecName,
+          partial: parts[0] || "",
+          completing: "tag",
+        };
+      }
+
+      // dotCount >= 1: completing api
+      // Input: "pet." or "pet.get" -> completing api
+      return {
+        specName: singleSpecName,
+        tagName: parts[0] || "",
+        partial: endsWithDot ? "" : parts[1] || "",
+        completing: "api",
+      };
+    } else {
+      // No tags: treat input as api name directly
+      // Input: "" or "getPet" -> completing api
+      return {
+        specName: singleSpecName,
+        partial: parts[0] || "",
+        completing: "api",
+      };
+    }
   }
 
   // Standard mode: path starts from spec
@@ -264,9 +306,27 @@ export function parseCompletionContext(
   // Completing argument (e.g., API path for call/show-api/gen)
   if (API_PATH_COMMANDS.includes(command)) {
     // Check if API path argument already exists
-    // API path should have at least 2 dots (spec.tag.api) to be considered complete
+    // Determine minimum dot count based on mode
     const hasCompleteApiPath = args.some((arg) => {
       const dotCount = (arg.match(/\./g) || []).length;
+
+      // Single spec mode
+      if (options.singleSpecName) {
+        if (options.hasTags) {
+          // Has tags: tag.api requires at least 1 dot
+          return dotCount >= 1;
+        } else {
+          // No tags: api only, requires 0 dots (just the api name)
+          return dotCount === 0 && arg.length > 0;
+        }
+      }
+
+      // Fixed spec (proxy) mode: tag.api requires at least 1 dot
+      if (options.fixedSpecName) {
+        return dotCount >= 1;
+      }
+
+      // Multi-spec mode: spec.tag.api requires at least 2 dots
       return dotCount >= 2;
     });
 
@@ -280,7 +340,12 @@ export function parseCompletionContext(
       };
     }
 
-    const apiPath = parsePartialApiPath(currentWord, options.fixedSpecName);
+    const apiPath = parsePartialApiPath(
+      currentWord,
+      options.fixedSpecName,
+      options.singleSpecName,
+      options.hasTags
+    );
     return {
       position: "argument",
       command,
