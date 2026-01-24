@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildUrl } from "../client";
+import { buildUrl } from "../utils";
 
 describe("buildUrl", () => {
   describe("路径参数替换", () => {
@@ -41,7 +41,11 @@ describe("buildUrl", () => {
     });
 
     it("应该过滤掉 undefined 和 null 值", () => {
-      const result = buildUrl("/users", { name: "John", age: undefined, city: null });
+      const result = buildUrl("/users", {
+        name: "John",
+        age: undefined,
+        city: null,
+      });
       expect(result).toBe("/users?name=John");
     });
 
@@ -58,7 +62,10 @@ describe("buildUrl", () => {
       expect(result).toContain("filter=");
       // 验证包含 JSON 编码的内容
       const params = new URLSearchParams(result.split("?")[1]);
-      expect(JSON.parse(params.get("filter")!)).toEqual({ age: 30, city: "NYC" });
+      expect(JSON.parse(params.get("filter")!)).toEqual({
+        age: 30,
+        city: "NYC",
+      });
     });
   });
 
