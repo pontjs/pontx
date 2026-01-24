@@ -1,13 +1,10 @@
-import { OAS2, OAS3 } from "oas-spec-ts";
+import { OAS3 } from "oas-spec-ts";
 import {
   getIdentifierFromOperatorId,
   getIdentifierFromUrl,
   getMaxSamePath,
-  toDashCase,
-  checkHasNonVarialbeCh,
-  transformTagName,
   makeNamesUnique,
-  checkIsCamel,
+  resolveRef,
 } from "./utils.js";
 import _ from "lodash";
 import { Parameter, PontxAPI } from "../api.js";
@@ -31,16 +28,7 @@ export function parseOAS3Interface(
   });
 
   const parameters = (inter.parameters || []).map((param) => {
-    const ref = param?.["$ref"];
-    let finalParam = param;
-
-    if (ref && ref.startsWith("#/components/parameters")) {
-      const refName = ref.split("/").pop();
-      const refParam: any = swagger.components?.parameters?.[refName];
-      if (refParam) {
-        finalParam = refParam;
-      }
-    }
+    const finalParam = resolveRef(param, swagger) || param;
     const { required, name, schema, in: paramIn, ...rest } = finalParam;
     const paramSchema = { ...rest, ...(schema || {}) };
 
@@ -53,20 +41,26 @@ export function parseOAS3Interface(
   });
   let consumes = [];
   if (inter.requestBody) {
-    const consumeContent = (inter.requestBody as OAS3.RequestBodyObject)
-      ?.content;
-    const consume = consumeContent ? Object.keys(consumeContent)[0] : null;
-    if (consume) {
-      const stardardConsume = consume?.split(";")?.[0] || consume;
-      consumes = [stardardConsume];
+    const requestBody = resolveRef<OAS3.RequestBodyObject>(
+      inter.requestBody,
+      swagger
+    );
 
-      const bodyParma = {
-        name: "body",
-        in: "body" as any,
-        required: true,
-        schema: consumeContent[consume]?.schema,
-      } as Parameter;
-      parameters.push(bodyParma);
+    if (requestBody) {
+      const consumeContent = requestBody.content;
+      const consume = consumeContent ? Object.keys(consumeContent)[0] : null;
+      if (consume) {
+        const stardardConsume = consume?.split(";")?.[0] || consume;
+        consumes = [stardardConsume];
+
+        const bodyParma = {
+          name: "body",
+          in: "body" as any,
+          required: true,
+          schema: consumeContent[consume]?.schema,
+        } as Parameter;
+        parameters.push(bodyParma);
+      }
     }
   }
 
