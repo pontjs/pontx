@@ -33,7 +33,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "@pontx/spec": "^0.1.15",
+    "@pontx/spec": "workspace:*",
     "baidu-translate-service": "^2.2.4",
     "commander": "^13.1.0",
     "esbuild": "^0.20.0",
