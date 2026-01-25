@@ -1,6 +1,21 @@
 import { PontxSpec, Parameter, PontxAPI } from "@pontx/spec";
 import { TranslateConfig } from "./builtin/translate";
-import { LogLevel } from "./logger";
+import type { LogLevel } from "./logger/types";
+import {
+  ApiExecutionContext,
+  ApiResponse,
+  ExecuteApiConfig,
+} from "./types/execute-api";
+
+// 重新导出 executeApi 相关类型
+export type {
+  ApiRequest,
+  ApiResponse,
+  ApiError,
+  EnvironmentConfig,
+  ExecuteApiConfig,
+  ApiExecutionContext,
+} from "./types";
 
 export type PluginHookOptions = {
   originConfig?: ResolvedOriginConfig;
@@ -8,8 +23,7 @@ export type PluginHookOptions = {
 };
 
 /**
- * API Executor Context
- * Provides complete context for plugin apiExecutor hook to execute API calls
+ * @deprecated 使用 ApiExecutionContext 代替
  */
 export interface ApiExecutorContext {
   /** API selector identifying the API */
@@ -24,21 +38,35 @@ export interface ApiExecutorContext {
     path: string;
     method: string;
     description?: string;
+    /** Parameters including body params (in: "body") */
     parameters?: Parameter[];
-    requestBody?: {
-      required?: boolean;
-      content?: Record<string, { schema: any }>;
-    };
     responses?: PontxAPI["responses"];
+    /** MIME types the API can consume (for Content-Type header) */
+    consumes?: string[];
+    /** MIME types the API can produce (for Accept header) */
+    produces?: string[];
   };
 
-  /** Runtime parameters from MCP tool invocation */
+  /** key: param name, value: param value */
   toolParams: Record<string, unknown>;
 
   baseUrl?: string;
 
   /** Plugin hook options with resolved configuration */
   options?: PluginHookOptions;
+
+  /**
+   * Hook called before sending the request
+   * Allows modifying url, headers, body, etc.
+   * @param config - The request configuration (url and RequestInit)
+   * @returns Modified request configuration
+   */
+  beforeRequest?: (config: {
+    url: string;
+    requestInit: RequestInit;
+  }) =>
+    | { url: string; requestInit: RequestInit }
+    | Promise<{ url: string; requestInit: RequestInit }>;
 }
 
 export type Plugin = {
@@ -91,10 +119,20 @@ export type Plugin = {
     }>
   >;
   /**
-   * Execute API call with runtime parameters
-   * Used by MCP Studio to execute API tools at runtime
-   * @param context - Complete execution context including API metadata and runtime parameters
-   * @returns Raw API response data (unwrapped)
+   * 执行 API 调用钩子
+   *
+   * @param context - API 执行上下文
+   * @returns API 响应或 null（返回 null 表示由下一个插件处理）
+   *
+   * 执行顺序：
+   * - 按插件注册顺序执行
+   * - 首个返回非 null 值的插件中止后续执行
+   * - 如果所有插件都返回 null，使用内置执行器
+   */
+  executeApi?: (context: ApiExecutionContext) => Promise<ApiResponse | null>;
+
+  /**
+   * @deprecated 使用 executeApi 代替
    */
   apiExecutor?: (context: ApiExecutorContext) => Promise<unknown>;
   /**
@@ -120,6 +158,7 @@ export type Lifecycle =
   | "generate"
   | "generateEntry"
   | "mocks"
+  | "executeApi"
   | "apiExecutor"
   | "check";
 
@@ -178,6 +217,8 @@ export interface ResolvedConfig {
   /** 插件配置 */
   resolvedPlugin?: Plugin;
   service?: ServiceConfig;
+  /** API 调用配置 */
+  executeApiConfig?: ExecuteApiConfig;
 }
 
 /**
@@ -202,15 +243,42 @@ export interface ServiceConfig {
 export interface PontxConfig {
   /** 生成SDK代码的相对路径 */
   outDir: string;
-  /** 数据源 */
-  origins: OriginConfig[];
+  /** API 规范配置（推荐使用） */
+  specs?: OriginConfig[];
+  /** 数据源（兼容旧版，建议使用 specs） */
+  origins?: OriginConfig[];
   /** 翻译配置 */
   translateConfig?: TranslateConfig;
   /** 插件配置 */
   plugins?: Plugin[];
   /** 服务配置 */
   service?: ServiceConfig;
+  /**
+   * API 调用配置
+   * 用于 pontx call 命令和 API Debugger 调试器
+   * 参考 Axios 配置设计
+   */
+  executeApi?: ExecuteApiConfig;
   [x: string]: any;
+}
+
+/** package.json 中的 pontx 配置 */
+export interface PackageJsonPontxConfig {
+  /** SDK 包使用：spec 文件所在目录 */
+  specDir?: string;
+  /**
+   * 项目使用：外置 spec 配置
+   * 支持字符串（SDK 包名）或对象（自定义配置）
+   */
+  specs?: Array<
+    | string
+    | {
+        /** 自定义 spec 名称（可选，默认使用 SDK 的 spec.name） */
+        name?: string;
+        /** SDK 包名 */
+        sdk: string;
+      }
+  >;
 }
 
 /** 数据源配置 */
@@ -225,5 +293,9 @@ export interface OriginConfig {
   env?: string;
   /** 环境变量配置 */
   envs?: any;
+  /** 标记为外置 spec（从 node_modules 加载，不支持代码生成） */
+  external?: boolean;
+  /** 关联的 SDK 包名（仅用于外置 spec） */
+  sdk?: string;
   [x: string]: any;
 }

@@ -5,7 +5,8 @@
 
 import { createServer, IncomingMessage, ServerResponse } from "http";
 import { URL } from "url";
-import { createLogger, Logger } from "../logger";
+import { createLogger } from "../logger/logger";
+import type { Logger } from "../logger/types";
 import { PontxManager } from "../manager";
 
 /**

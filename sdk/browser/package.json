@@ -19,9 +19,12 @@
   "scripts": {
     "clean": "rm -rf cjs lib",
     "watch": "rollup -c -w",
-    "build": "npm run clean && rollup -c"
+    "build": "npm run clean && rollup -c",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage"
   },
-  "dependencies": {},
   "peerDependencies": {
     "react": "*"
   },
@@ -32,9 +35,14 @@
     "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-typescript": "^12.1.2",
+    "@types/node": "catalog:",
     "@types/react": "^18.2.0",
+    "@vitest/ui": "^4.0.6",
     "glob": "^11.0.2",
+    "happy-dom": "^20.0.10",
+    "jsdom": "^27.0.0",
     "react": "*",
-    "rollup": "^4.41.1"
+    "rollup": "^4.41.1",
+    "vitest": "^4.0.6"
   }
 }

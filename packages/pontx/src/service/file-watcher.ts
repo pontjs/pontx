@@ -6,7 +6,8 @@
 import * as fs from "fs";
 import * as path from "path";
 import fsp from "node:fs/promises";
-import { createLogger, Logger } from "../logger";
+import { createLogger } from "../logger/logger";
+import type { Logger } from "../logger/types";
 import { PontxManager } from "../manager";
 import { ResolvedConfig } from "../type";
 import { FileWatcher, IFileWatcher } from "./types";

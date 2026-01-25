@@ -2,6 +2,41 @@ import { PontxJsonSchema } from "../schema.js";
 import _ from "lodash";
 
 /**
+ * 解析 JSON Schema 中的 $ref 引用
+ * @param obj 可能包含 $ref 的对象
+ * @param root 根文档（用于查找引用）
+ * @returns 解析后的对象，如果是非引用对象则返回原对象，如果引用不存在则返回 null
+ */
+export function resolveRef<T>(
+  obj: T | { $ref: string },
+  root: object
+): T | null {
+  if (!obj || typeof obj !== "object") {
+    return obj as T;
+  }
+
+  const ref = (obj as any)["$ref"];
+  if (!ref || typeof ref !== "string" || !ref.startsWith("#/")) {
+    return obj as T;
+  }
+
+  // 解析 JSON 指针路径: "#/components/requestBodies/Xxx" -> ["components", "requestBodies", "Xxx"]
+  const pathParts = ref.slice(2).split("/");
+
+  let current: any = root;
+  for (const part of pathParts) {
+    // 处理 JSON 指针转义: ~1 -> /, ~0 -> ~
+    const decodedPart = part.replace(/~1/g, "/").replace(/~0/g, "~");
+    if (current == null || typeof current !== "object") {
+      return null;
+    }
+    current = current[decodedPart];
+  }
+
+  return current ?? null;
+}
+
+/**
  * Swagger 类型兼容
  */
 export const PrimitiveTypeMap = {

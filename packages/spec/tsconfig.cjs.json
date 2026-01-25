@@ -3,7 +3,7 @@
   "compilerOptions": {
     "module": "ESNext",
     "outDir": "cjs",
-    "removeComments": true,
+    "removeComments": false,
     "rootDir": "./src"
   },
   "include": ["./src/**/*"],

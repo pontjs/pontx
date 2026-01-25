@@ -1,0 +1,125 @@
+{
+  "name": "@pontx/sdk",
+  "version": "0.1.0",
+  "description": "Shared core utilities for Pontx SDK (Browser & Node.js)",
+  "keywords": [
+    "pontx",
+    "sdk",
+    "api",
+    "client",
+    "shared",
+    "url-builder",
+    "serialization"
+  ],
+  "author": "Pontx Team",
+  "license": "MIT",
+  "type": "module",
+  "main": "./lib/index.cjs",
+  "module": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./lib/index.d.ts"
+      ],
+      "core": [
+        "./lib/core/index.d.ts"
+      ],
+      "features": [
+        "./lib/features/index.d.ts"
+      ],
+      "types": [
+        "./lib/types/index.d.ts"
+      ],
+      "graceful-client": [
+        "./lib/graceful-client/index.d.ts"
+      ],
+      "plugin": [
+        "./plugin/index.d.ts"
+      ],
+      "plugin/*": [
+        "./plugin/*.d.ts"
+      ]
+    }
+  },
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js",
+      "require": "./lib/index.cjs"
+    },
+    "./core": {
+      "types": "./lib/core/index.d.ts",
+      "import": "./lib/core/index.js",
+      "require": "./lib/core/index.cjs"
+    },
+    "./features": {
+      "types": "./lib/features/index.d.ts",
+      "import": "./lib/features/index.js",
+      "require": "./lib/features/index.cjs"
+    },
+    "./types": {
+      "types": "./lib/types/index.d.ts",
+      "import": "./lib/types/index.js",
+      "require": "./lib/types/index.cjs"
+    },
+    "./graceful-client": {
+      "types": "./lib/graceful-client/index.d.ts",
+      "import": "./lib/graceful-client/index.js",
+      "require": "./lib/graceful-client/index.cjs"
+    },
+    "./plugin": {
+      "types": "./plugin/index.d.ts",
+      "import": "./plugin/index.js",
+      "require": "./plugin/index.cjs"
+    },
+    "./plugin/*": {
+      "types": "./plugin/*.d.ts",
+      "import": "./plugin/*.js",
+      "require": "./plugin/*.cjs"
+    }
+  },
+  "files": [
+    "lib",
+    "plugin",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "clean": "rm -rf lib"
+  },
+  "dependencies": {
+    "@pontx/spec": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "^1.6.1",
+    "pontx": "workspace:*",
+    "tsup": "^8.0.0",
+    "typescript": "catalog:",
+    "vitest": "^1.0.0"
+  },
+  "peerDependencies": {
+    "typescript": ">=5.0.0",
+    "zod": "^3.20.0"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    },
+    "zod": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

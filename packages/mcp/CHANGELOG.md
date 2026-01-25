@@ -1,5 +1,13 @@
 # @pontx/mcp
 
+## 0.1.15
+
+### Patch Changes
+
+- support pontx call command
+- Updated dependencies
+  - pontx@0.1.13
+
 ## 0.1.14
 
 ### Patch Changes

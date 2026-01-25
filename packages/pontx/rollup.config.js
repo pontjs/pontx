@@ -11,6 +11,7 @@ const input = Object.fromEntries(
     .sync("src/**/*.ts", { ignore: "src/**/*.d.ts" })
     .map((file) => [file.replace(/^src\//, "").replace(/\.ts$/, ""), file])
 );
+// External dependencies - don't bundle these
 const external = [
   "@pontx/spec",
   "lodash",
@@ -19,17 +20,39 @@ const external = [
   "tslib",
   "typescript",
   "commander",
+  "esbuild",
+  "tsx",
+  "tsx/esm/api",
+  "fuse.js",
+  "jmespath",
 ];
+
+// Function to mark all node_modules as external
+const isExternal = (id) => {
+  // Don't mark project source files as external (absolute paths)
+  if (id.includes("/src/") || id.endsWith(".ts")) {
+    return false;
+  }
+  // Don't mark relative imports as external
+  if (id.startsWith(".")) {
+    return false;
+  }
+  // Mark node builtins and node_modules as external
+  return true;
+};
 
 export default [
   // CommonJS build
   {
-    input: ["src/index.ts", "src/cli.ts"],
+    input: ["src/index.ts", "src/cli.ts", "src/cli-factory.ts", "src/sdk-cli/index.ts"],
     output: {
       dir: "cjs",
       entryFileNames: (chunkInfo) => {
-        if (["index", "cli"].includes(chunkInfo.name)) {
-          return "[name].cjs";
+        // 从 facadeModuleId 中提取相对于 src/ 的路径来保留目录结构
+        const match = chunkInfo.facadeModuleId?.match(/src\/(.+)\.ts$/);
+        if (match) {
+          const relativePath = match[1];
+          return `${relativePath}.cjs`;
         }
         return "[name].cjs";
       },
@@ -49,10 +72,10 @@ export default [
         declaration: false,
       }),
     ],
-    external,
+    external: isExternal,
   },
   {
-    input: ["src/index.ts", "src/cli.ts"],
+    input: ["src/index.ts", "src/cli.ts", "src/cli-factory.ts", "src/sdk-cli/index.ts"],
     output: {
       dir: "cjs-types",
       entryFileNames: "[name].cjs",
@@ -96,6 +119,6 @@ export default [
       }),
       rollupPluginGenerateDts(process.cwd()),
     ],
-    external,
+    external: isExternal,
   },
 ];

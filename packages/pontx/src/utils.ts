@@ -1,4 +1,3 @@
-import * as ts from "typescript";
 import * as path from "path";
 import { promises as fsp } from "fs";
 import * as fs from "fs";
@@ -72,7 +71,7 @@ export async function fetchRemoteCacheSpecs(outDir: string) {
         try {
           return JSON.parse(jsonStr);
         } catch (e) {}
-      })
+      }),
     );
 
     return specs.filter((spec) => spec);
@@ -100,7 +99,7 @@ export const findRealPath = (configDir: string, pluginPath: string) => {
 
 export const loadPresetPluginPath = (
   presetPath: string,
-  pluginPath: string
+  pluginPath: string,
 ) => {
   return pluginPath.startsWith("./") || pluginPath.startsWith("../")
     ? path.join(presetPath, pluginPath)
@@ -150,33 +149,6 @@ type TsFileInfo = {
   fileName: string;
 };
 
-/** @deprecated */
-export function requireTsFile(rootDir: string, tsfile: TsFileInfo) {
-  const templateFileName = `${tsfile.filePath}`;
-
-  const outDir = path.join(rootDir, `node_modules/.pontx`);
-  const relativePath = tsfile.filePath.split(rootDir)[1];
-  const outFile = path.join(
-    outDir,
-    path.dirname(relativePath),
-    tsfile.fileName
-  );
-
-  const program = ts.createProgram([templateFileName], {
-    outDir,
-    rootDir,
-    target: ts.ScriptTarget.ES2015,
-    module: ts.ModuleKind.CommonJS,
-    moduleResolution: ts.ModuleResolutionKind.NodeJs,
-    experimentalDecorators: true,
-    allowJs: true,
-  });
-
-  program.emit();
-
-  return requireUncached(outFile);
-}
-
 export async function clearPath(basePath: string): Promise<void> {
   try {
     await fsp.access(basePath);
@@ -190,7 +162,7 @@ export async function clearPath(basePath: string): Promise<void> {
 
 export async function lookForFiles(
   dir: string,
-  fileName: string
+  fileName: string,
 ): Promise<string> {
   const files = await fsp.readdir(dir);
 

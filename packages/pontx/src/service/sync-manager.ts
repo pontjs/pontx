@@ -3,7 +3,8 @@
  * @description: 同步管理器，负责定时同步和手动同步功能
  */
 
-import { createLogger, Logger } from "../logger";
+import { createLogger } from "../logger/logger";
+import type { Logger } from "../logger/types";
 import { PontxManager } from "../manager";
 
 /**

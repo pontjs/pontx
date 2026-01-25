@@ -6,7 +6,7 @@ dist/
 module/
 cjs/
 cjs-types/
-ui/
+packages/ui/
 table/
 schema-table/
 .rollup.cache
@@ -15,6 +15,7 @@ packages/spec/tests/oas3/openapi.yaml
 packages/plugin-egg/tests/openapi.yaml
 .specstory/
 .DS_Store/
-.claude
-.kiro
 *.tmp
+.claude/
+.kiro/
+!packages/mcp-studio/src/ui/lib/

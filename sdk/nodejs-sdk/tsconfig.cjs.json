@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "outDir": "cjs",
+    "removeComments": true,
+    "rootDir": "./src"
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules", "es6", "lib"]
+}

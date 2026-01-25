@@ -15,13 +15,13 @@ describe("resolveConfig", () => {
         await PontxManager.generateCode(manager);
 
         const apisCode = await fsp.readFile(
-          path.join(__dirname, "dist/petstore/apis.ts"),
-          "utf-8"
+          path.join(__dirname, "src/services/petstore/apis.ts"),
+          "utf-8",
         );
         expect(
           apisCode.startsWith(
-            'import type * as schemas from "./schemas";\nexport type APIs = '
-          )
+            'import type * as schemas from "./schemas";\n\nexport type APIs = ',
+          ),
         ).toBe(true);
       } catch (error) {
         console.error("Error in generate api code test:", error);
@@ -30,7 +30,7 @@ describe("resolveConfig", () => {
     },
     {
       timeout: 1000 * 60 * 2, // Reduced timeout to 2 minutes
-    }
+    },
   );
 
   it("should resolve config", async () => {

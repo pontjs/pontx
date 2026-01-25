@@ -1,6 +1,6 @@
 {
   "name": "pontx",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "pontx spec manager",
   "main": "./cjs/index.cjs",
   "module": "./lib/index.js",
@@ -16,6 +16,19 @@
         "types": "./cjs-types/index.d.cts",
         "default": "./cjs/index.cjs"
       }
+    },
+    "./sdk-cli": {
+      "import": {
+        "types": "./lib/sdk-cli/index.d.ts",
+        "default": "./lib/sdk-cli/index.js"
+      },
+      "require": {
+        "types": "./cjs-types/sdk-cli/index.d.cts",
+        "default": "./cjs/sdk-cli/index.cjs"
+      }
+    },
+    "./setup-cli": {
+      "require": "./setup-cli.cjs"
     }
   },
   "bin": {
@@ -26,19 +39,27 @@
     "watch": "rollup -c -w",
     "clean": "rimraf cjs && rimraf tsconfig.tsbuildinfo && rimraf lib"
   },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
-    "@pontx/spec": "^0.1.14",
+    "@pontx/spec": "workspace:*",
     "baidu-translate-service": "^2.2.4",
     "commander": "^13.1.0",
+    "esbuild": "^0.20.0",
+    "fuse.js": "^7.1.0",
+    "jmespath": "^0.16.0",
     "lodash": "^4.17.21",
     "picocolors": "^1.1.1",
     "tslib": "^2.6.2",
-    "typescript": "^5"
+    "tsx": "^4.7.0"
   },
   "files": [
     "lib",
     "cjs",
     "cjs-types",
+    "bin",
+    "setup-cli.cjs",
     "package.json",
     "*.md"
   ],
@@ -51,6 +72,7 @@
   "devDependencies": {
     "@rollup/plugin-json": "^6.1.0",
     "@types/fs-extra": "*",
+    "@types/jmespath": "^0.15.2",
     "@types/lodash": "catalog:"
   },
   "repository": {

@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    // 语言特性
+    "target": "ES2020",
+    "lib": ["ES2020"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+
+    // 输出配置
+    "outDir": "./lib",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+
+    // 严格模式 - 关闭以匹配现有 SDK 模式
+    "strict": false,
+
+    // 额外检查 - 关闭以匹配现有 SDK 模式
+
+    // 模块解析
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+
+    // 其他
+    "isolatedModules": true
+  },
+  "include": ["src/**/*", "plugin/tests/petstore", "generator"],
+  "exclude": ["node_modules", "lib", "test", "**/*.test.ts", "**/*.spec.ts"]
+}
