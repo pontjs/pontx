@@ -12,6 +12,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+import { registerCliCommands } from "./commands/cli-commands";
 
 // 兼容 ESM 和 CJS 的 __dirname
 const getPackageDir = () => {
@@ -122,6 +123,7 @@ function registerCommands(
     .command("search <keyword>")
     .description("搜索当前项目可调用的 API 接口")
     .option("--max <count>", "最大返回数量，默认 6", "6")
+    .option("--spec <specName>", "指定搜索的 spec 名称")
     .option("--use-remote", "使用远程元数据")
     .action(async (keyword, options) => {
       const { searchCommand } = await import("./commands/search");
@@ -343,6 +345,21 @@ function registerCommands(
       const { cleanCacheCommand } = await import("./commands/cache");
       await cleanCacheCommand(rootDir, logger);
     });
+
+  program
+    .command("add-spec <sdk-name>")
+    .description("从已安装的 SDK 包添加 API 规范到 package.json")
+    .option("--name <custom-name>", "自定义 spec 名称")
+    .action(async (sdkName, options) => {
+      const { addSpecCommand } = await import("./commands/add-spec");
+      await addSpecCommand(sdkName, {
+        name: options.name,
+      });
+    });
+
+  // 注册 SDK CLI 管理命令（不依赖 pontx.config.ts）
+  const cliCmd = program.command("cli").description("SDK CLI 管理命令");
+  registerCliCommands(cliCmd);
 }
 
 /**

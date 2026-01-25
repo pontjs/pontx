@@ -44,12 +44,15 @@ const isExternal = (id) => {
 export default [
   // CommonJS build
   {
-    input: ["src/index.ts", "src/cli.ts", "src/cli-factory.ts"],
+    input: ["src/index.ts", "src/cli.ts", "src/cli-factory.ts", "src/sdk-cli/index.ts"],
     output: {
       dir: "cjs",
       entryFileNames: (chunkInfo) => {
-        if (["index", "cli", "cli-factory"].includes(chunkInfo.name)) {
-          return "[name].cjs";
+        // 从 facadeModuleId 中提取相对于 src/ 的路径来保留目录结构
+        const match = chunkInfo.facadeModuleId?.match(/src\/(.+)\.ts$/);
+        if (match) {
+          const relativePath = match[1];
+          return `${relativePath}.cjs`;
         }
         return "[name].cjs";
       },
@@ -72,7 +75,7 @@ export default [
     external: isExternal,
   },
   {
-    input: ["src/index.ts", "src/cli.ts", "src/cli-factory.ts"],
+    input: ["src/index.ts", "src/cli.ts", "src/cli-factory.ts", "src/sdk-cli/index.ts"],
     output: {
       dir: "cjs-types",
       entryFileNames: "[name].cjs",

@@ -17,6 +17,16 @@
         "default": "./cjs/index.cjs"
       }
     },
+    "./sdk-cli": {
+      "import": {
+        "types": "./lib/sdk-cli/index.d.ts",
+        "default": "./lib/sdk-cli/index.js"
+      },
+      "require": {
+        "types": "./cjs-types/sdk-cli/index.d.cts",
+        "default": "./cjs/sdk-cli/index.cjs"
+      }
+    },
     "./setup-cli": {
       "require": "./setup-cli.cjs"
     }

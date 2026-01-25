@@ -128,6 +128,7 @@ export async function searchCommand(
   options: {
     max?: number;
     useRemote?: boolean;
+    spec?: string;
   } = {}
 ) {
   // Determine if called from CLI or directly
@@ -143,7 +144,7 @@ export async function searchCommand(
     manager = managerOrContext;
   }
 
-  const fuse = buildFuse(manager, options.useRemote);
+  const fuse = buildFuse(manager, options.useRemote, options.spec);
   const results = searchApis(keyword, fuse, options.max || 6);
 
   if (results.length === 0) {

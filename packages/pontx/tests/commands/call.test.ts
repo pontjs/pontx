@@ -184,13 +184,6 @@ describe("parseToolParams", () => {
       expect(result).not.toHaveProperty("dry-run");
     });
 
-    it("should skip --global boolean flag", () => {
-      const args = ["--global", "--userId", "123"];
-      const result = parseToolParams(args);
-      expect(result).toEqual({ userId: 123 });
-      expect(result).not.toHaveProperty("global");
-    });
-
     it("should skip --use-remote boolean flag", () => {
       const args = ["--use-remote", "--userId", "123"];
       const result = parseToolParams(args);
@@ -345,6 +338,236 @@ describe("parseToolParams", () => {
       });
     });
   });
+
+  describe("equals sign format (--param=value)", () => {
+  describe("basic parameter parsing with equals", () => {
+    it("should parse single parameter with equals separator", () => {
+      const args = ["--userId=123"];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ userId: 123 });
+    });
+
+    it("should parse string parameter with equals", () => {
+      const args = ["--userId=user-123"];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ userId: "user-123" });
+    });
+
+    it("should parse multiple parameters with equals", () => {
+      const args = ["--userId=123", "--name=John"];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ userId: 123, name: "John" });
+    });
+
+    it("should parse parameters with hyphens using equals", () => {
+      const args = ["--user-id=123", "--first-name=John"];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ "user-id": 123, "first-name": "John" });
+    });
+  });
+
+  describe("JSON value parsing with equals", () => {
+    it("should parse JSON object with equals", () => {
+      const args = ['--body={"name":"John","age":30}'];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ body: { name: "John", age: 30 } });
+    });
+
+    it("should parse JSON array with equals", () => {
+      const args = ["--ids=[1,2,3]"];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ ids: [1, 2, 3] });
+    });
+
+    it("should parse complex nested JSON with equals", () => {
+      const args = [
+        '--data={"user":{"name":"John","roles":["admin","user"]},"active":true}',
+      ];
+      const result = parseToolParams(args);
+      expect(result).toEqual({
+        data: {
+          user: { name: "John", roles: ["admin", "user"] },
+          active: true,
+        },
+      });
+    });
+
+    it("should parse boolean values with equals", () => {
+      const args = ["--enabled=true", "--disabled=false"];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ enabled: true, disabled: false });
+    });
+  });
+
+  describe("empty value handling", () => {
+    it("should handle empty value as empty string", () => {
+      const args = ["--name="];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ name: "" });
+    });
+
+    it("should handle multiple empty values", () => {
+      const args = ["--first=", "--second=", "--third=123"];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ first: "", second: "", third: 123 });
+    });
+  });
+
+  describe("values containing equals signs", () => {
+    it("should handle URL with query params", () => {
+      const args = ["--url=http://api.com?a=1&b=2"];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ url: "http://api.com?a=1&b=2" });
+    });
+
+    it("should handle value starting with equals", () => {
+      const args = ["--param==value"];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ param: "=value" });
+    });
+
+    it("should handle multiple equals in value", () => {
+      const args = ["--equation=a=b=c"];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ equation: "a=b=c" });
+    });
+  });
+
+  describe("file body syntax with equals", () => {
+    it("should load body from --body=@file syntax", () => {
+      const args = [`--body=@${testJsonFile}`];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ body: { name: "test", value: 123 } });
+    });
+
+    it("should load any parameter from --param=@file syntax", () => {
+      const args = [`--data=@${testJsonFile}`];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ data: { name: "test", value: 123 } });
+    });
+  });
+
+  describe("mixed format usage", () => {
+    it("should handle mix of equals and space formats", () => {
+      const args = ["--userId=123", "--name", "John", "--age=30"];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ userId: 123, name: "John", age: 30 });
+    });
+
+    it("should handle complex mixed scenario", () => {
+      const args = [
+        "--env",
+        "prod",
+        "--userId=123",
+        "--name",
+        "John",
+        '--body={"key":"value"}',
+        "--debug",
+      ];
+      const result = parseToolParams(args);
+      // env and debug are CLI options, should be filtered out
+      expect(result).toEqual({
+        userId: 123,
+        name: "John",
+        body: { key: "value" },
+      });
+    });
+  });
+
+  describe("CLI options filtering with equals", () => {
+    it("should skip --env=value option", () => {
+      const args = ["--env=prod", "--userId=123"];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ userId: 123 });
+      expect(result).not.toHaveProperty("env");
+    });
+
+    it("should skip --output=file option", () => {
+      const args = ["--userId=123", "--output=result.json"];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ userId: 123 });
+      expect(result).not.toHaveProperty("output");
+    });
+
+    it("should skip --query=expr option", () => {
+      const args = ["--userId=123", "--query=[].name"];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ userId: 123 });
+      expect(result).not.toHaveProperty("query");
+    });
+
+    it("should skip multiple CLI options with equals", () => {
+      const args = [
+        "--env=prod",
+        "--userId=123",
+        "--output=out.json",
+        "--name=John",
+        "--query=[0]",
+      ];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ userId: 123, name: "John" });
+    });
+  });
+
+  describe("negative numbers with equals", () => {
+    it("should handle negative integer with equals", () => {
+      const args = ["--offset=-5"];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ offset: -5 });
+    });
+
+    it("should handle negative float with equals", () => {
+      const args = ["--temp=-3.14"];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ temp: -3.14 });
+    });
+
+    it("should handle multiple negative numbers", () => {
+      const args = ["--min=-100", "--max=100", "--offset=-5"];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ min: -100, max: 100, offset: -5 });
+    });
+  });
+
+  describe("real-world scenarios with equals", () => {
+    it("should parse typical API call with equals format", () => {
+      const args = [
+        "--env=production",
+        "--petId=123",
+        "--query=[].name",
+        "--debug",
+      ];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ petId: 123 });
+    });
+
+    it("should parse POST request with body using equals", () => {
+      const args = ['--body={"name":"Fluffy","species":"cat"}', "--env=dev"];
+      const result = parseToolParams(args);
+      expect(result).toEqual({
+        body: { name: "Fluffy", species: "cat" },
+      });
+    });
+
+    it("should parse request with multiple params in equals format", () => {
+      const args = [
+        "--storeId=store-001",
+        "--orderId=order-123",
+        "--includeDetails=true",
+        "--limit=10",
+        "--offset=0",
+      ];
+      const result = parseToolParams(args);
+      expect(result).toEqual({
+        storeId: "store-001",
+        orderId: "order-123",
+        includeDetails: true,
+        limit: 10,
+        offset: 0,
+      });
+    });
+  });
+});
 });
 
 describe("tryParseJson", () => {
@@ -393,7 +616,6 @@ describe("CLI_OPTIONS", () => {
       "debug",
       "dry-run",
       "use-remote",
-      "global",
       "query",
       "q",
       "help",

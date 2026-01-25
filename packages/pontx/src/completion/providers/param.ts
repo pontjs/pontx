@@ -132,6 +132,27 @@ export class ParamProvider implements CompletionProvider {
               apiName: parts[1],
             };
           }
+        } else if (this.options.singleSpecName) {
+          // Single spec mode
+          if (this.options.hasTags) {
+            // Has tags: tagName.apiName
+            if (parts.length >= 2) {
+              return {
+                specName: this.options.singleSpecName,
+                tagName: parts[0],
+                apiName: parts[1],
+              };
+            }
+          } else {
+            // No tags: apiName only
+            if (parts.length >= 1 && parts[0]) {
+              return {
+                specName: this.options.singleSpecName,
+                tagName: "", // No tag in this mode
+                apiName: parts[0],
+              };
+            }
+          }
         } else {
           // Standard mode: specName.tagName.apiName
           if (parts.length >= 3) {

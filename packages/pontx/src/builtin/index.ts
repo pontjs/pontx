@@ -179,7 +179,24 @@ export function getBuiltinPlugin(): Plugin {
 
       const fileStructure = {};
 
-      const promises = resolvedConfig.origins.map(async (origin) => {
+      // 过滤掉外置 specs（仅用于查询，不生成代码）
+      const writableOrigins = resolvedConfig.origins.filter(
+        (origin) => !origin.external
+      );
+
+      if (writableOrigins.length === 0 && resolvedConfig.origins.length > 0) {
+        const externalNames = resolvedConfig.origins
+          .filter((o) => o.external)
+          .map((o) => o.name)
+          .join(", ");
+        throw new Error(
+          `无可生成的 origin：所有 origins 均为外置 spec (${externalNames})\n\n` +
+            `外置 spec 仅用于查询和调用，不支持代码生成\n` +
+            `提示：请在 pontx.config.ts 中添加本地 spec 配置`
+        );
+      }
+
+      const promises = writableOrigins.map(async (origin) => {
         const originSpec = origin.spec;
         const originFileStructure =
           await options.resolvedConfig.resolvedPlugin.generate(

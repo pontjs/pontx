@@ -16,11 +16,13 @@ import { createLogger } from "./logger/logger";
 import type { Logger, LogLevel } from "./logger/types";
 import type {
   OriginConfig,
+  PackageJsonPontxConfig,
   PontxConfig,
   ResolvedConfig,
   ResolvedOriginConfig,
 } from "./type";
 import { resolvePlugin } from "./plugin";
+import type { PontxSpec } from "@pontx/spec";
 
 type PontxConfigFn = () => PontxConfig | Promise<PontxConfig>;
 
@@ -121,6 +123,16 @@ async function loadTypeScriptConfigWithEsbuild(configFile: string) {
   try {
     await fsp.mkdir(cacheDir, { recursive: true });
 
+    // 在 ESM 环境中注入 __dirname 和 __filename 兼容定义
+    const banner = {
+      js: `
+import { fileURLToPath as __fileURLToPath } from 'node:url';
+import { dirname as __pathDirname } from 'node:path';
+const __filename = __fileURLToPath(import.meta.url);
+const __dirname = __pathDirname(__filename);
+`.trim(),
+    };
+
     // bundle: true 可以正确处理相对路径导入
     // 通过 packages: "external" 排除 node_modules 中的包
     await esbuild.build({
@@ -129,6 +141,7 @@ async function loadTypeScriptConfigWithEsbuild(configFile: string) {
       platform: "node",
       format: "esm",
       outfile: outFile,
+      banner, // 注入 __dirname 和 __filename
       sourcemap: true,
       target: "node18",
       logLevel: "silent",
@@ -174,8 +187,11 @@ async function loadTypeScriptConfig(configFile: string) {
 
 /**
  * 加载配置文件（支持 .js/.mjs/.cjs/.ts）
+ * @param rootDir 根目录（用于日志显示）
+ * @param fileName 配置文件路径
+ * @returns 配置文件导出的内容
  */
-async function resolveConfigFile(rootDir: string, fileName: string) {
+export async function resolveConfigFile(rootDir: string, fileName: string) {
   const ext = path.extname(fileName);
 
   try {
@@ -241,6 +257,97 @@ async function loadConfigFromFile(
   }
 }
 
+/**
+ * 从 package.json 加载外置 specs
+ * @param projectRoot - 项目根目录
+ * @param logger - 日志实例
+ * @returns 解析后的外置 OriginConfig 数组
+ */
+async function resolveExternalSpecs(
+  projectRoot: string,
+  logger?: Logger
+): Promise<ResolvedOriginConfig[]> {
+  const pkgPath = path.join(projectRoot, "package.json");
+
+  // 检查 package.json 是否存在
+  if (!fs.existsSync(pkgPath)) {
+    return [];
+  }
+
+  // 读取 package.json
+  let pkg: { pontx?: PackageJsonPontxConfig };
+  try {
+    pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+  } catch (error) {
+    logger?.warn(`读取 package.json 失败: ${error}`);
+    return [];
+  }
+
+  // 检查是否有外置 specs 配置
+  const externalSpecs = pkg.pontx?.specs;
+  if (!externalSpecs || externalSpecs.length === 0) {
+    return [];
+  }
+
+  logger?.debug(`发现 ${externalSpecs.length} 个外置 spec 配置`);
+
+  // 解析每个外置 spec
+  const results: ResolvedOriginConfig[] = [];
+
+  for (const spec of externalSpecs) {
+    try {
+      const sdkName = typeof spec === "string" ? spec : spec.sdk;
+      const customName = typeof spec === "object" ? spec.name : undefined;
+
+      // 定位 SDK package.json
+      const sdkPkgPath = require.resolve(`${sdkName}/package.json`, {
+        paths: [projectRoot],
+      });
+      const sdkDir = path.dirname(sdkPkgPath);
+      const sdkPkg: { pontx?: PackageJsonPontxConfig } = JSON.parse(
+        fs.readFileSync(sdkPkgPath, "utf-8")
+      );
+
+      // 读取 pontx.specDir
+      const specDir = sdkPkg.pontx?.specDir;
+      if (!specDir) {
+        logger?.warn(
+          `SDK "${sdkName}" 未配置 pontx.specDir，跳过该 spec`
+        );
+        continue;
+      }
+
+      // 加载 spec 文件
+      const specPath = path.join(sdkDir, specDir, "api-lock.json");
+      if (!fs.existsSync(specPath)) {
+        logger?.warn(`未找到 spec 文件: ${specPath}，跳过该 spec`);
+        continue;
+      }
+
+      const loadedSpec: PontxSpec = JSON.parse(
+        fs.readFileSync(specPath, "utf-8")
+      );
+
+      // 创建 ResolvedOriginConfig
+      const resolvedOrigin: ResolvedOriginConfig = {
+        name: customName || loadedSpec.name,
+        spec: loadedSpec,
+        external: true, // 标记为外置
+        sdk: sdkName,
+        localPath: specPath,
+      };
+
+      results.push(resolvedOrigin);
+      logger?.debug(`已加载外置 spec: ${resolvedOrigin.name} (来自 ${sdkName})`);
+    } catch (error: any) {
+      const sdkName = typeof spec === "string" ? spec : spec.sdk;
+      logger?.warn(`加载外置 spec "${sdkName}" 失败: ${error.message}`);
+    }
+  }
+
+  return results;
+}
+
 export async function resolveConfig(
   configFile: string,
   options?: {
@@ -287,6 +394,18 @@ export async function resolveConfig(
     return result;
   });
 
+  // 加载 package.json 中的外置 specs
+  const logger = createLogger(options?.logLevel, {
+    customLogger: options?.customLogger,
+  });
+  const externalSpecs = await resolveExternalSpecs(
+    options?.rootDir || configDir,
+    logger
+  );
+
+  // 合并 pontx.config.ts 和 package.json 的 specs
+  const allResolvedOrigins = [...resolvedOrigins, ...externalSpecs];
+
   const resolvedConfigContent = {
     rootDir: options?.rootDir || path.dirname(configPath),
     configDir,
@@ -294,7 +413,7 @@ export async function resolveConfig(
     outDir: path.isAbsolute(config.outDir)
       ? config.outDir
       : path.join(configDir, config.outDir),
-    origins: resolvedOrigins,
+    origins: allResolvedOrigins,
     resolvedPlugin: resolvePlugin(config.plugins ?? [], config.executeApi),
     service: config.service,
     executeApiConfig: config.executeApi,

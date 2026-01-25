@@ -262,6 +262,25 @@ export interface PontxConfig {
   [x: string]: any;
 }
 
+/** package.json 中的 pontx 配置 */
+export interface PackageJsonPontxConfig {
+  /** SDK 包使用：spec 文件所在目录 */
+  specDir?: string;
+  /**
+   * 项目使用：外置 spec 配置
+   * 支持字符串（SDK 包名）或对象（自定义配置）
+   */
+  specs?: Array<
+    | string
+    | {
+        /** 自定义 spec 名称（可选，默认使用 SDK 的 spec.name） */
+        name?: string;
+        /** SDK 包名 */
+        sdk: string;
+      }
+  >;
+}
+
 /** 数据源配置 */
 export interface OriginConfig {
   /** 远程数据源 */
@@ -274,5 +293,9 @@ export interface OriginConfig {
   env?: string;
   /** 环境变量配置 */
   envs?: any;
+  /** 标记为外置 spec（从 node_modules 加载，不支持代码生成） */
+  external?: boolean;
+  /** 关联的 SDK 包名（仅用于外置 spec） */
+  sdk?: string;
   [x: string]: any;
 }

@@ -58,8 +58,11 @@ function looksLikeFlag(str: string): boolean {
  * Parse command line arguments to extract API parameters
  * Supports:
  *   --paramName value
+ *   --paramName=value
  *   --body '{"key":"value"}'
+ *   --body={"key":"value"}
  *   --body @./file.json
+ *   --body=@./file.json
  *   @./file.json (shorthand for body)
  *
  * Note: Values starting with dash are treated as values (not flags) when they
@@ -84,6 +87,31 @@ export function parseToolParams(args: string[]): Record<string, unknown> {
     // Skip non-parameter arguments
     if (!arg.startsWith("--")) {
       continue;
+    }
+
+    // Handle --param=value format
+    if (arg.includes("=")) {
+      const equalIndex = arg.indexOf("=");
+      const key = arg.slice(2, equalIndex);
+      const value = arg.slice(equalIndex + 1);
+
+      // Skip known CLI options
+      if (CLI_OPTIONS.has(key)) {
+        continue;
+      }
+
+      // Handle empty value: --param= → ''
+      if (value === "") {
+        params[key] = "";
+      } else if (value.startsWith("@")) {
+        // Handle @file syntax: --body=@./file.json
+        params[key] = readBodyFromFile(value.slice(1));
+      } else {
+        // Try to parse JSON values
+        params[key] = tryParseJson(value);
+      }
+
+      continue; // Done processing this argument
     }
 
     const key = arg.slice(2);
