@@ -135,6 +135,8 @@ export interface ParamInfo {
   type: string;
   description?: string;
   enum?: string[];
+  /** 参数位置（path/query/body/formData/header 等） */
+  in?: string;
 }
 
 /**

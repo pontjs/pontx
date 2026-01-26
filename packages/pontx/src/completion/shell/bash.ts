@@ -28,8 +28,20 @@ _${binName}_completions() {
       # This replaces the entire current word
       COMPREPLY=(\$completions)
     else
-      # Normal completion with prefix matching
-      COMPREPLY=($(compgen -W "\$completions" -- "\$cur"))
+      # Manual prefix matching to preserve order (avoid compgen -W sorting)
+      if [[ -z "\$cur" ]]; then
+        # No prefix, return all completions
+        COMPREPLY=(\$completions)
+      else
+        # Filter completions matching the prefix, preserving order
+        local matches=()
+        while IFS= read -r item; do
+          if [[ "\$item" == "\$cur"* ]]; then
+            matches+=("\$item")
+          fi
+        done <<< "\$completions"
+        COMPREPLY=("\${matches[@]}")
+      fi
     fi
   fi
 }

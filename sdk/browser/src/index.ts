@@ -1,4 +1,5 @@
-export { createClient, serializeRequestBody, buildUrl } from "./client";
+export { createClient, serializeRequestBody } from "./client";
+export { buildUrl } from "./utils";
 export type {
   RequestHeaders,
   APIMethod,

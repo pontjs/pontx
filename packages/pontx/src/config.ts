@@ -258,15 +258,23 @@ async function loadConfigFromFile(
 }
 
 /**
- * 从 package.json 加载外置 specs
+ * 解析外置 spec 配置的元数据
+ * @description 从 package.json 读取外置 spec 配置，并行解析每个 SDK 的 specDir 和 lockPath
+ * 这个函数不包含日志输出，是纯粹的解析逻辑，可被多个场景复用
  * @param projectRoot - 项目根目录
- * @param logger - 日志实例
- * @returns 解析后的外置 OriginConfig 数组
+ * @returns 外置 spec 的元数据数组，失败的项返回 null
  */
-async function resolveExternalSpecs(
-  projectRoot: string,
-  logger?: Logger
-): Promise<ResolvedOriginConfig[]> {
+export async function resolveExternalSpecConfigs(
+  projectRoot: string
+): Promise<
+  Array<{
+    sdkName: string;
+    customName?: string;
+    sdkDir: string;
+    specDir: string;
+    lockPath: string;
+  } | null>
+> {
   const pkgPath = path.join(projectRoot, "package.json");
 
   // 检查 package.json 是否存在
@@ -278,8 +286,7 @@ async function resolveExternalSpecs(
   let pkg: { pontx?: PackageJsonPontxConfig };
   try {
     pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
-  } catch (error) {
-    logger?.warn(`读取 package.json 失败: ${error}`);
+  } catch {
     return [];
   }
 
@@ -289,59 +296,97 @@ async function resolveExternalSpecs(
     return [];
   }
 
-  logger?.debug(`发现 ${externalSpecs.length} 个外置 spec 配置`);
+  // 并行解析每个外置 spec
+  return Promise.all(
+    externalSpecs.map(async (spec) => {
+      try {
+        const sdkName = typeof spec === "string" ? spec : spec.sdk;
+        const customName = typeof spec === "object" ? spec.name : undefined;
 
-  // 解析每个外置 spec
+        // 定位 SDK package.json
+        const sdkPkgPath = require.resolve(`${sdkName}/package.json`, {
+          paths: [projectRoot],
+        });
+        const sdkDir = path.dirname(sdkPkgPath);
+        const sdkPkg: { pontx?: PackageJsonPontxConfig } = JSON.parse(
+          fs.readFileSync(sdkPkgPath, "utf-8")
+        );
+
+        // 读取 pontx.specDir
+        const specDir = sdkPkg.pontx?.specDir;
+        if (!specDir) {
+          return null;
+        }
+
+        // 构造 api-lock.json 路径
+        const lockPath = path.join(sdkDir, specDir, "api-lock.json");
+        if (!fs.existsSync(lockPath)) {
+          return null;
+        }
+
+        return {
+          sdkName,
+          customName,
+          sdkDir,
+          specDir,
+          lockPath,
+        };
+      } catch {
+        return null;
+      }
+    })
+  );
+}
+
+/**
+ * 从 package.json 加载外置 specs
+ * @param projectRoot - 项目根目录
+ * @param logger - 日志实例
+ * @returns 解析后的外置 OriginConfig 数组
+ */
+async function resolveExternalSpecs(
+  projectRoot: string,
+  logger?: Logger
+): Promise<ResolvedOriginConfig[]> {
+  // 使用核心函数解析外置 spec 配置
+  const configs = await resolveExternalSpecConfigs(projectRoot);
+  const validConfigs = configs.filter(
+    (c): c is NonNullable<typeof c> => c !== null
+  );
+
+  if (validConfigs.length === 0) {
+    return [];
+  }
+
+  logger?.debug(`发现 ${validConfigs.length} 个外置 spec 配置`);
+
+  // 加载完整的 PontxSpec 并创建 ResolvedOriginConfig
   const results: ResolvedOriginConfig[] = [];
 
-  for (const spec of externalSpecs) {
+  for (const config of validConfigs) {
     try {
-      const sdkName = typeof spec === "string" ? spec : spec.sdk;
-      const customName = typeof spec === "object" ? spec.name : undefined;
-
-      // 定位 SDK package.json
-      const sdkPkgPath = require.resolve(`${sdkName}/package.json`, {
-        paths: [projectRoot],
-      });
-      const sdkDir = path.dirname(sdkPkgPath);
-      const sdkPkg: { pontx?: PackageJsonPontxConfig } = JSON.parse(
-        fs.readFileSync(sdkPkgPath, "utf-8")
-      );
-
-      // 读取 pontx.specDir
-      const specDir = sdkPkg.pontx?.specDir;
-      if (!specDir) {
-        logger?.warn(
-          `SDK "${sdkName}" 未配置 pontx.specDir，跳过该 spec`
-        );
-        continue;
-      }
-
-      // 加载 spec 文件
-      const specPath = path.join(sdkDir, specDir, "api-lock.json");
-      if (!fs.existsSync(specPath)) {
-        logger?.warn(`未找到 spec 文件: ${specPath}，跳过该 spec`);
-        continue;
-      }
-
+      // 加载完整的 PontxSpec
       const loadedSpec: PontxSpec = JSON.parse(
-        fs.readFileSync(specPath, "utf-8")
+        fs.readFileSync(config.lockPath, "utf-8")
       );
 
       // 创建 ResolvedOriginConfig
       const resolvedOrigin: ResolvedOriginConfig = {
-        name: customName || loadedSpec.name,
+        name: config.customName || loadedSpec.name,
         spec: loadedSpec,
         external: true, // 标记为外置
-        sdk: sdkName,
-        localPath: specPath,
+        sdk: config.sdkName,
+        localPath: config.lockPath,
       };
 
       results.push(resolvedOrigin);
-      logger?.debug(`已加载外置 spec: ${resolvedOrigin.name} (来自 ${sdkName})`);
+      logger?.debug(
+        `已加载外置 spec: ${resolvedOrigin.name} (来自 ${config.sdkName})`
+      );
     } catch (error: any) {
-      const sdkName = typeof spec === "string" ? spec : spec.sdk;
-      logger?.warn(`加载外置 spec "${sdkName}" 失败: ${error.message}`);
+      logger?.warn(
+        `加载外置 spec "${config.sdkName}" 失败: ${error.message}`
+      );
     }
   }
 

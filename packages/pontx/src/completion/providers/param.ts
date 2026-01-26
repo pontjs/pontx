@@ -82,29 +82,83 @@ export class ParamProvider implements CompletionProvider {
     // Get API parameters
     const params = await this.dataSource.getParams(specName, tagName, apiName);
 
-    // Filter already provided options
-    const suggestions: CompletionSuggestion[] = [];
+    // 1. 分组：必填参数 vs 可选参数
+    const requiredParams: ParamInfo[] = [];
+    const optionalParams: ParamInfo[] = [];
 
-    // Add API parameters
     for (const param of params) {
+      if (param.required) {
+        requiredParams.push(param);
+      } else {
+        optionalParams.push(param);
+      }
+    }
+
+    // 2. 合并参数：必填优先，其他按原顺序
+    const sortedParams = [...requiredParams, ...optionalParams];
+
+    // 3. 生成 API 参数补全建议
+    const apiSuggestions: CompletionSuggestion[] = [];
+
+    for (const param of sortedParams) {
+      // 过滤已提供的参数
       if (context.providedOptions.has(param.name)) {
         continue;
       }
 
+      // 过滤不匹配当前输入的参数
       if (param.name.toLowerCase().startsWith(partial.toLowerCase())) {
-        suggestions.push({
+        apiSuggestions.push({
           value: `--${param.name}`,
-          description: param.description || `${param.type}${param.required ? " (required)" : ""}`,
+          description: this.formatParamDescription(param),
           type: "param" as const,
         });
       }
     }
 
-    // Add common CLI options
-    const commonOptions = this.getCommonOptions(partial, context.providedOptions);
-    suggestions.push(...commonOptions);
+    // 4. 获取 CLI options
+    const cliOptions = this.getCommonOptions(partial, context.providedOptions);
 
-    return suggestions;
+    // 5. 合并：API 参数在前，CLI options 在后
+    return [...apiSuggestions, ...cliOptions];
+  }
+
+  /**
+   * 格式化参数描述，显示完整信息
+   *
+   * 格式：[位置] [type] [required?] description [enum values?]
+   *
+   * 示例：
+   * - [path] number, required - ID of pet to update
+   * - [query] string (optional) - Additional metadata
+   * - [body] string, required - Status (available|pending|sold)
+   */
+  private formatParamDescription(param: ParamInfo): string {
+    const parts: string[] = [];
+
+    // 1. 参数位置标记（如果有）
+    if (param.in) {
+      parts.push(`[${param.in}]`);
+    }
+
+    // 2. 类型 + 必填标记
+    const typeInfo = param.required
+      ? `${param.type}, required`
+      : `${param.type} (optional)`;
+    parts.push(typeInfo);
+
+    // 3. 描述（如果有）
+    if (param.description) {
+      parts.push(`- ${param.description}`);
+    }
+
+    // 4. 枚举值（如果有）
+    if (param.enum && param.enum.length > 0) {
+      const enumValues = param.enum.join("|");
+      parts.push(`(${enumValues})`);
+    }
+
+    return parts.join(" ");
   }
 
   /**
@@ -177,12 +231,12 @@ export class ParamProvider implements CompletionProvider {
     providedOptions: Set<string>
   ): CompletionSuggestion[] {
     const options: Array<{ name: string; description: string }> = [
-      { name: "env", description: "Specify environment/baseUrl" },
-      { name: "debug", description: "Show detailed request/response" },
-      { name: "dry-run", description: "Show request without executing" },
-      { name: "output", description: "Output result to file" },
-      { name: "query", description: "JMESPath query expression" },
-      { name: "header", description: "Add request header" },
+      { name: "env", description: "[CLI] Specify environment/baseUrl" },
+      { name: "debug", description: "[CLI] Show detailed request/response" },
+      { name: "dry-run", description: "[CLI] Show request without executing" },
+      { name: "output", description: "[CLI] Output result to file" },
+      { name: "query", description: "[CLI] JMESPath query expression" },
+      { name: "header", description: "[CLI] Add request header" },
     ];
 
     return options

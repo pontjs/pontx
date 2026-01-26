@@ -26,6 +26,7 @@
     "vitest": "^3.1.1"
   },
   "scripts": {
+    "build:all": "pnpm -r --filter '!vscode-pontx-v2' --filter '!react-app' --filter '!@pontx/nodejs-sdk' --filter '!@pontx/plugin-eggjs' build",
     "test": "vitest",
     "changeset": "changeset",
     "changeset:version": "changeset version",

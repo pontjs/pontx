@@ -30,8 +30,9 @@ _${binName}() {
     completions=(\${(f)output})
 
     # Use _describe for completions with descriptions
+    # -V '': preserve original order (no sorting)
     # -S '': no space suffix (we handle it ourselves for dotted paths)
-    _describe 'completion' completions -S ''
+    _describe -V 'completion' completions -S ''
   fi
 }
 

@@ -10,3 +10,4 @@ export * from "./context";
 export * from "./engine";
 export * from "./providers";
 export * from "./shell";
+export * from "./manifest";
