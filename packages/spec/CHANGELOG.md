@@ -1,5 +1,11 @@
 # @pontx/spec
 
+## 1.0.0-beta.0
+
+### Major Changes
+
+- Release 1.0.0 beta version with breaking changes
+
 ## 0.1.15
 
 ### Patch Changes

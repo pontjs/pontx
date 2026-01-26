@@ -1,5 +1,5 @@
 ---
-"pontx": minor
+"pontx": major
 ---
 
 # 配置加载机制优化

@@ -8,6 +8,7 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
-    "vscode-pontx-v2"
+    "vscode-pontx-v2",
+    "@pontx/nodejs-sdk"
   ]
 }

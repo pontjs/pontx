@@ -1,6 +1,6 @@
 {
   "name": "pontx",
-  "version": "0.1.13",
+  "version": "1.0.0-beta.0",
   "description": "pontx spec manager",
   "main": "./cjs/index.cjs",
   "module": "./lib/index.js",

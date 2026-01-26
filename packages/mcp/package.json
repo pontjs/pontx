@@ -1,6 +1,6 @@
 {
   "name": "@pontx/mcp",
-  "version": "0.1.15",
+  "version": "1.0.0-beta.0",
   "type": "module",
   "bin": {
     "pontx-server": "./dist/index.js"
@@ -25,7 +25,7 @@
     "@pontx/sdk-browser-client": "^0.0.11",
     "@modelcontextprotocol/sdk": "^1.18.0",
     "fuse.js": "^7.1.0",
-    "pontx": "^0.1.13",
+    "pontx": "^1.0.0-beta.0",
     "zod": "^3.24.1"
   }
 }

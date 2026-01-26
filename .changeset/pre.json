@@ -1,0 +1,21 @@
+{
+  "mode": "pre",
+  "tag": "beta",
+  "initialVersions": {
+    "react-app": "0.0.6",
+    "@pontx/mcp": "0.1.15",
+    "oas-spec-ts": "0.6.4",
+    "pontx": "0.1.13",
+    "@pontx/spec": "0.1.15",
+    "vscode-pontx-v2": "2.0.8",
+    "@pontx/sdk-browser-client": "0.0.11",
+    "@pontx/sdk": "0.1.0",
+    "@pontx/nodejs-sdk": "0.1.0"
+  },
+  "changesets": [
+    "config-loader-improvement",
+    "mcp-major-release",
+    "sdk-major-release",
+    "spec-major-release"
+  ]
+}

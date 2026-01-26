@@ -1,5 +1,16 @@
 # @pontx/mcp
 
+## 1.0.0-beta.0
+
+### Major Changes
+
+- Release 1.0.0 beta version with breaking changes
+
+### Patch Changes
+
+- Updated dependencies [2ff5d1d]
+  - pontx@1.0.0-beta.0
+
 ## 0.1.15
 
 ### Patch Changes
