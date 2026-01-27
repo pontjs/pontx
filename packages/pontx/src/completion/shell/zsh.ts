@@ -26,13 +26,20 @@ _${binName}() {
   output=$("${binName}" --get-completions "\$line" "\$cursor" --format zsh 2>/dev/null)
 
   if [[ -n "\$output" ]]; then
-    # Split output into array (each line is "value:description")
-    completions=(\${(f)output})
+    # Split output into value and description arrays
+    local -a values descs
+    while IFS=: read -r value desc; do
+      values+=("\$value")
+      descs+=("\$desc")
+    done < <(printf '%s\\n' "\$output")
 
-    # Use _describe for completions with descriptions
-    # -V '': preserve original order (no sorting)
-    # -S '': no space suffix (we handle it ourselves for dotted paths)
-    _describe -V 'completion' completions -S ''
+    # Use compadd for completions with descriptions
+    # -l: single column (each item on separate line, prevents grouping)
+    # -d: descriptions array
+    # -a: values from array
+    if [[ \${#values[@]} -gt 0 ]]; then
+      compadd -l -d descs -a values
+    fi
   fi
 }
 
