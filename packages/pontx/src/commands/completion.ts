@@ -144,16 +144,21 @@ export async function handleCompletionRequest(
   if (format === "zsh") {
     // Zsh format: "value:description"
     for (const s of result.suggestions) {
-      console.log(s.description ? `${s.value}:${s.description}` : s.value);
+      if (!s.value?.trim()) continue; // Skip empty values
+      const desc = s.description?.replace(/\n/g, ' ').trim() || '';
+      console.log(desc ? `${s.value}:${desc}` : s.value);
     }
   } else if (format === "fish") {
     // Fish format: "value\tdescription"
     for (const s of result.suggestions) {
-      console.log(s.description ? `${s.value}\t${s.description}` : s.value);
+      if (!s.value?.trim()) continue; // Skip empty values
+      const desc = s.description?.replace(/\n/g, ' ').trim() || '';
+      console.log(desc ? `${s.value}\t${desc}` : s.value);
     }
   } else {
     // Plain format
     for (const s of result.suggestions) {
+      if (!s.value?.trim()) continue; // Skip empty values
       console.log(s.value);
     }
   }

@@ -65,10 +65,11 @@ _${binName}() {
     done
 
     # Use compadd: values for insertion, display for visual presentation
+    # -1: force one column (each completion on a new line)
     # -d: display array (what user sees in completion menu, with padding)
     # -a: values array (what gets inserted when selected, without padding)
     if [[ \${#values[@]} -gt 0 ]]; then
-      compadd -d display -a values
+      compadd -1 -d display -a values
     fi
   fi
 }
