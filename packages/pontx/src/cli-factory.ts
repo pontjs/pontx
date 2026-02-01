@@ -260,6 +260,17 @@ function registerCommands(
     });
 
   program
+    .command("skill")
+    .description("生成 AI SKILL 文件（用于 Claude Code 等 AI 工具）")
+    .option("-o, --output <path>", "自定义输出路径")
+    .option("--global", "输出到全局目录 (~/.claude/skills/pontx/)")
+    .option("--print", "打印内容到 stdout（不生成文件）")
+    .action(async (options) => {
+      const { skillCommand } = await import("./commands/skill");
+      await skillCommand(options);
+    });
+
+  program
     .command("service")
     .description("启动 Pontx 服务")
     .option("-p, --port <port>", "Web 服务端口", "3000")
