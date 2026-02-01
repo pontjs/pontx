@@ -271,6 +271,24 @@ function registerSdkCommands(
       }
     });
 
+  // init-skill 命令
+  program
+    .command("init-skill")
+    .description("生成 Claude Code SKILL 文件")
+    .option("--output <path>", "输出路径")
+    .option("--force", "覆盖已存在的文件")
+    .action(async (options) => {
+      try {
+        const { initSkillCommand } = await import("./commands/init-skill");
+        // cliDir 是 specPath 的父目录
+        const cliDir = path.dirname(specPath);
+        await initSkillCommand(config, cliDir, specPath, options);
+      } catch (error: any) {
+        logger.error("生成 SKILL 失败", error);
+        process.exit(1);
+      }
+    });
+
   // SDK list 命令（父命令）
   const listCmd = program
     .command("list")
