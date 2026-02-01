@@ -22,6 +22,8 @@ import {
   ParamInfo,
 } from "../completion";
 import type { PontxSpec } from "@pontx/spec";
+import { registerSdkListCommands } from "./list-commands";
+import { listSpecsCommand } from "../commands/list-specs";
 
 /* 声明 banner 注入的全局变量 */
 declare global {
@@ -106,6 +108,7 @@ function createSdkCli(options: {
 }): Command {
   const { name, config, specPath, cliDir } = options;
   const program = new Command(name);
+  program.enablePositionalOptions(); // 启用位置选项，支持子命令的 passThroughOptions
 
   // 从 package.json 读取版本号
   const version = getPackageVersion(cliDir);
@@ -267,6 +270,27 @@ function registerSdkCommands(
         process.exit(1);
       }
     });
+
+  // SDK list 命令（父命令）
+  const listCmd = program
+    .command("list")
+    .alias("ls")
+    .description("列举 API 信息（默认列举所有 specs）")
+    // 父命令定义自己的选项（用于默认行为）
+    .option("--use-remote", "使用远程元数据")
+    .option("--json", "以 JSON 格式输出")
+    // 允许子命令使用未知选项
+    .passThroughOptions()
+    .action(async (options) => {
+      // 默认行为：列举所有 specs（仅当没有子命令时执行）
+      try {
+        await listSpecsCommand(context, options);
+      } catch (error: any) {
+        logger.error("列举 specs 失败", error);
+        process.exit(1);
+      }
+    });
+  registerSdkListCommands(listCmd, context);
 
   // completion 命令
   program

@@ -13,6 +13,8 @@ import * as path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { registerCliCommands } from "./commands/cli-commands";
+import { registerListCommands } from "./commands/list-commands";
+import { listSpecsCommand } from "./commands/list-specs";
 
 // 兼容 ESM 和 CJS 的 __dirname
 const getPackageDir = () => {
@@ -72,6 +74,7 @@ export function createCli(options: CreateCliOptions): Command {
   const program = new Command(binName);
   program.version(currentVersion).usage("[命令] [配置项]");
   program.description(`${binName} cli`);
+  program.enablePositionalOptions(); // 启用位置选项，支持子命令的 passThroughOptions
 
   // 全局选项
   program.option("--debug", "启用调试日志");
@@ -107,17 +110,6 @@ function registerCommands(
       await checkCommand(manager);
     });
 
-  program
-    .command("ls")
-    .description("查看数据源")
-    .action(async () => {
-      const manager = await getManager();
-      console.log(
-        manager.resolvedConfig.origins
-          .map((origin: any) => origin.name)
-          .join("\n")
-      );
-    });
 
   program
     .command("search <keyword>")
@@ -183,6 +175,22 @@ function registerCommands(
       );
       await listTemplatesCommand(manager);
     });
+
+  // pontx list (父命令)
+  const listCmd = program
+    .command("list")
+    .alias("ls")
+    .description("列举 API 信息（默认列举所有 specs）")
+    // 父命令定义自己的选项（用于默认行为）
+    .option("--use-remote", "使用远程元数据")
+    .option("--json", "以 JSON 格式输出")
+    // 允许子命令使用未知选项
+    .passThroughOptions()
+    .action(async (options) => {
+      // 默认行为：列举所有 specs（仅当没有子命令时执行）
+      await listSpecsCommand(ctx, options);
+    });
+  registerListCommands(listCmd, ctx);
 
   program
     .command("call <apiPath>")
