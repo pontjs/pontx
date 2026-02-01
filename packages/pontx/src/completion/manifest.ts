@@ -59,6 +59,16 @@ export interface ApiEntry {
 }
 
 /**
+ * Tag 信息
+ */
+export interface TagEntry {
+  /** tag 名称 */
+  name: string;
+  /** tag 描述 */
+  description?: string;
+}
+
+/**
  * Spec 信息
  */
 export interface SpecEntry {
@@ -68,6 +78,10 @@ export interface SpecEntry {
   path: string;
   /** 文件 mtime (ms) */
   mtime: number;
+  /** spec 描述（来自 info.title 或 info.description） */
+  description?: string;
+  /** 缓存的 tags 列表 */
+  tags?: TagEntry[];
   /** 缓存的 API 列表 */
   apis: ApiEntry[];
 }
@@ -175,48 +189,80 @@ function getFileMtime(filePath: string): number {
 }
 
 /**
- * 从 api-lock.json 解析 API 列表
+ * 从 api-lock.json 解析数据
+ * @returns 包含 description, tags, apis 的对象
  */
-function parseApiLock(lockPath: string): ApiEntry[] {
+function parseApiLock(lockPath: string): {
+  description?: string;
+  tags: TagEntry[];
+  apis: ApiEntry[];
+} {
   try {
     const content = fs.readFileSync(lockPath, "utf-8");
     const lock = JSON.parse(content);
 
-    if (!lock.apis) {
-      return [];
-    }
+    // 提取 spec 描述（优先使用 info.title，fallback 到 info.description）
+    const description = lock.info?.title || lock.info?.description;
 
-    const apis: ApiEntry[] = [];
-
-    for (const [apiKey, api] of Object.entries(lock.apis)) {
-      const apiData = api as any;
-
-      // 解析参数
-      const params: ParamEntry[] = [];
-      if (Array.isArray(apiData.parameters)) {
-        for (const param of apiData.parameters) {
-          params.push({
-            name: param.name,
-            type: param.schema?.type || "string",
-            required: param.required || false,
-            description: param.description || param.schema?.description,
-            enum: param.schema?.enum,
-            in: param.in,
-          });
+    // 提取 tags 信息（从 lock.tags 数组）
+    const tagMap = new Map<string, string>();
+    if (Array.isArray(lock.tags)) {
+      for (const tag of lock.tags) {
+        if (tag.name) {
+          tagMap.set(tag.name, tag.description || "");
         }
       }
-
-      apis.push({
-        name: apiKey,
-        title: apiData.summary || apiData.description || apiKey,
-        description: apiData.description,
-        params,
-      });
     }
 
-    return apis;
+    // 从 APIs 中提取命名空间作为 tags（补充 lock.tags 中可能缺失的）
+    const tagSet = new Set<string>(tagMap.keys());
+    const apis: ApiEntry[] = [];
+
+    if (lock.apis) {
+      for (const [apiKey, api] of Object.entries(lock.apis)) {
+        const apiData = api as any;
+
+        // 提取命名空间（如 "pet/uploadFile" -> "pet"）
+        if (apiKey.includes("/")) {
+          const namespace = apiKey.split("/")[0];
+          tagSet.add(namespace);
+        }
+
+        // 解析参数
+        const params: ParamEntry[] = [];
+        if (Array.isArray(apiData.parameters)) {
+          for (const param of apiData.parameters) {
+            params.push({
+              name: param.name,
+              type: param.schema?.type || "string",
+              required: param.required || false,
+              description: param.description || param.schema?.description,
+              enum: param.schema?.enum,
+              in: param.in,
+            });
+          }
+        }
+
+        apis.push({
+          name: apiKey,
+          title: apiData.summary || apiData.description || apiKey,
+          description: apiData.description,
+          params,
+        });
+      }
+    }
+
+    // 构建最终的 tags 列表（合并命名空间和 lock.tags）
+    const tags: TagEntry[] = Array.from(tagSet)
+      .sort()
+      .map((name) => ({
+        name,
+        description: tagMap.get(name),
+      }));
+
+    return { description, tags, apis };
   } catch {
-    return [];
+    return { tags: [], apis: [] };
   }
 }
 
@@ -284,11 +330,14 @@ async function scanOutDir(outDir: string): Promise<SpecEntry[]> {
 
     for (const item of lockPaths) {
       if (item) {
+        const lockData = parseApiLock(item.path);
         specs.push({
           name: item.name,
           path: item.path,
           mtime: getFileMtime(item.path),
-          apis: parseApiLock(item.path),
+          description: lockData.description,
+          tags: lockData.tags,
+          apis: lockData.apis,
         });
       }
     }
@@ -296,11 +345,14 @@ async function scanOutDir(outDir: string): Promise<SpecEntry[]> {
     // 检查 outDir 根目录的 api-lock.json（单 spec 模式）
     const directLockPath = path.join(outDir, LOCK_FILENAME);
     if (fs.existsSync(directLockPath) && specs.length === 0) {
+      const lockData = parseApiLock(directLockPath);
       specs.push({
         name: "",
         path: directLockPath,
         mtime: getFileMtime(directLockPath),
-        apis: parseApiLock(directLockPath),
+        description: lockData.description,
+        tags: lockData.tags,
+        apis: lockData.apis,
       });
     }
   } catch {
@@ -389,11 +441,14 @@ async function scanExternalSpecs(cwd: string): Promise<SpecEntry[]> {
           }
         }
 
+        const lockData = parseApiLock(config.lockPath);
         return {
           name: specName,
           path: config.lockPath,
           mtime: getFileMtime(config.lockPath),
-          apis: parseApiLock(config.lockPath),
+          description: lockData.description,
+          tags: lockData.tags,
+          apis: lockData.apis,
         };
       } catch {
         // 加载失败，跳过该 spec
@@ -403,7 +458,7 @@ async function scanExternalSpecs(cwd: string): Promise<SpecEntry[]> {
   );
 
   // 过滤掉失败的结果
-  return results.filter((r): r is SpecEntry => r !== null);
+  return results.filter((r) => r !== null) as SpecEntry[];
 }
 
 /**
@@ -423,10 +478,13 @@ async function updateSpecsIncremental(
       }
 
       // mtime 变化了，重新解析
+      const lockData = parseApiLock(spec.path);
       return {
         ...spec,
         mtime: currentMtime,
-        apis: parseApiLock(spec.path),
+        description: lockData.description,
+        tags: lockData.tags,
+        apis: lockData.apis,
       };
     })
   );

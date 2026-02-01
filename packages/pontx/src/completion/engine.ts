@@ -20,9 +20,12 @@ import {
   SpecProvider,
   ApiProvider,
   ParamProvider,
+  ListProvider,
+  OptionProvider,
   SpecDataSource,
   ApiDataSource,
   ParamDataSource,
+  ListDataSource,
 } from "./providers";
 
 /**
@@ -32,7 +35,8 @@ import {
 export interface CompletionDataSource
   extends SpecDataSource,
     ApiDataSource,
-    ParamDataSource {}
+    ParamDataSource,
+    ListDataSource {}
 
 /**
  * Completion Engine
@@ -67,12 +71,29 @@ export class CompletionEngine {
         return this.cache.getOrLoad("specs", () => dataSource.getSpecs());
       },
 
+      getSpecsWithDesc: dataSource.getSpecsWithDesc
+        ? async () => {
+            return this.cache.getOrLoad("specs:desc", () =>
+              dataSource.getSpecsWithDesc!()
+            );
+          }
+        : undefined,
+
       getTags: async (specName: string) => {
         const cacheKey = `tags:${specName}`;
         return this.cache.getOrLoad(cacheKey, () =>
           dataSource.getTags(specName)
         );
       },
+
+      getTagsWithDesc: dataSource.getTagsWithDesc
+        ? async (specName: string) => {
+            const cacheKey = `tags:desc:${specName}`;
+            return this.cache.getOrLoad(cacheKey, () =>
+              dataSource.getTagsWithDesc!(specName)
+            );
+          }
+        : undefined,
 
       getApis: async (specName: string, tagName?: string) => {
         const cacheKey = `apis:${specName}:${tagName || "*"}`;
@@ -102,6 +123,8 @@ export class CompletionEngine {
       new CommandProvider(this.options),
       new SpecProvider(this.options, this.dataSource),
       new ApiProvider(this.options, this.dataSource),
+      new OptionProvider(this.options),
+      new ListProvider(this.options, this.dataSource),
       new ParamProvider(this.options, this.dataSource),
     ];
   }

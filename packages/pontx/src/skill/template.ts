@@ -51,34 +51,24 @@ pontx gen user/info
 import { defineConfig } from 'pontx';
 
 export default defineConfig({
-  // API 数据源配置
-  origins: [
+  // SDK 代码输出目录
+  outDir: './src/services',
+
+  // API 数据源配置（推荐使用 specs，也支持 origins）
+  specs: [
     {
       name: 'my-api',
       url: 'https://api.example.com/swagger.json',  // OpenAPI spec URL
-      // 或使用本地文件
-      // specPath: './specs/openapi.json'
-    }
+    },
+    // 或使用本地文件
+    // {
+    //   name: 'local-api',
+    //   localPath: './openapi.json',
+    // }
   ],
 
-  // 代码生成配置
-  generator: {
-    outDir: './src/sdk',
-    language: 'typescript',
-  },
-
-  // API 调用配置（用于 pontx call）
-  executeApi: {
-    envs: {
-      dev: { baseURL: 'https://dev-api.example.com' },
-      prod: { baseURL: 'https://api.example.com' }
-    },
-    // 认证配置
-    auth: {
-      type: 'bearer',
-      token: process.env.API_TOKEN
-    }
-  }
+  // 插件配置（可选）
+  // plugins: [createGracefulClientPlugin()],
 });
 \`\`\`
 
@@ -221,19 +211,18 @@ pontx call user/create --params '{"name": "John", "email": "john@example.com"}'
 pontx cli init my-api-cli
 cd my-api-cli
 
-# Step 2: 配置 pontx-cli.config.ts
-# 配置 API 数据源、认证、命令等
+# Step 2: 配置 pontx.cli.ts
+# 配置 CLI 名称、API 执行配置等
 
 # Step 3: 构建 CLI
 pontx cli build
 
 # Step 4: 测试 CLI
-./bin/my-api-cli --help
-./bin/my-api-cli call user/info --params '{"id": 123}'
+./dist/cli.cjs --help
+./dist/cli.cjs call user/info --id 123
 
 # Step 5: 发布 CLI（npm 或二进制）
 npm publish
-# 或打包为独立可执行文件
 \`\`\`
 
 **产物**: 独立的命令行工具
@@ -244,23 +233,19 @@ npm publish
 npm install -g my-api-cli
 
 # 使用
-my-api-cli call user/info --params '{"id": 123}'
+my-api-cli call user/info --id 123
 my-api-cli search user
 \`\`\`
 
-**配置文件 \`pontx-cli.config.ts\` 示例**:
+**配置文件 \`pontx.cli.ts\` 示例**:
 \`\`\`typescript
-import { defineCliConfig } from 'pontx';
+import { runCLI } from 'pontx/sdk-cli';
 
-export default defineCliConfig({
+export default runCLI({
   name: 'my-api-cli',
-  origins: [
-    { name: 'my-api', url: 'https://api.example.com/swagger.json' }
-  ],
-  commands: {
-    call: { enabled: true },
-    search: { enabled: true }
-  }
+  executeApi: {
+    baseURL: 'https://api.example.com',
+  },
 });
 \`\`\`
 

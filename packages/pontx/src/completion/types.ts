@@ -76,7 +76,7 @@ export interface CompletionSuggestion {
   description?: string;
 
   /** Completion type (for grouping) */
-  type?: "command" | "spec" | "tag" | "api" | "param" | "value";
+  type?: "command" | "spec" | "tag" | "api" | "param" | "value" | "option";
 }
 
 /**
@@ -110,8 +110,11 @@ export interface CompletionContext {
   /** Current command (e.g., 'call', 'search') */
   command?: string;
 
+  /** Current subcommand (e.g., 'specs', 'tags' for list command) */
+  subcommand?: string;
+
   /** Current completion position */
-  position: "command" | "argument" | "option" | "option-value";
+  position: "command" | "subcommand" | "argument" | "option" | "option-value";
 
   /** Parsed API path parts */
   apiPath?: ApiPathInfo;

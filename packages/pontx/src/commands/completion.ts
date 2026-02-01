@@ -38,10 +38,27 @@ function createManifestDataSource(specs: SpecEntry[]): CompletionDataSource {
       return specs.map((s) => s.name).filter(Boolean);
     },
 
+    async getSpecsWithDesc(): Promise<
+      Array<{ name: string; description?: string }>
+    > {
+      return specs
+        .filter((s) => s.name)
+        .map((s) => ({
+          name: s.name,
+          description: s.description,
+        }));
+    },
+
     async getTags(specName: string): Promise<string[]> {
       const spec = specMap.get(specName);
       if (!spec) return [];
 
+      // 优先使用缓存的 tags
+      if (spec.tags && spec.tags.length > 0) {
+        return spec.tags.map((t) => t.name);
+      }
+
+      // fallback: 从 APIs 中提取
       const tags = new Set<string>();
       for (const api of spec.apis) {
         if (api.name.includes("/")) {
@@ -50,6 +67,28 @@ function createManifestDataSource(specs: SpecEntry[]): CompletionDataSource {
       }
 
       return [...tags].sort();
+    },
+
+    async getTagsWithDesc(
+      specName: string
+    ): Promise<Array<{ name: string; description?: string }>> {
+      const spec = specMap.get(specName);
+      if (!spec) return [];
+
+      // 优先使用缓存的 tags（包含描述）
+      if (spec.tags && spec.tags.length > 0) {
+        return spec.tags;
+      }
+
+      // fallback: 从 APIs 中提取（无描述）
+      const tags = new Set<string>();
+      for (const api of spec.apis) {
+        if (api.name.includes("/")) {
+          tags.add(api.name.split("/")[0]);
+        }
+      }
+
+      return [...tags].sort().map((name) => ({ name }));
     },
 
     async getApis(

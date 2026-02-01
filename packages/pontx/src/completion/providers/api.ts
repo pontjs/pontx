@@ -18,8 +18,16 @@ export interface ApiDataSource {
   /** Get tags for a spec */
   getTags(specName: string): Promise<string[]>;
 
+  /** Get tags for a spec with descriptions (optional method) */
+  getTagsWithDesc?(
+    specName: string
+  ): Promise<Array<{ name: string; description?: string }>>;
+
   /** Get APIs for a spec/tag */
-  getApis(specName: string, tagName?: string): Promise<Array<{ name: string; description?: string }>>;
+  getApis(
+    specName: string,
+    tagName?: string
+  ): Promise<Array<{ name: string; description?: string }>>;
 }
 
 export class ApiProvider implements CompletionProvider {

@@ -17,6 +17,9 @@ const API_PATH_COMMANDS = ["call", "show-api", "gen"];
 export interface SpecDataSource {
   /** Get available spec names */
   getSpecs(): Promise<string[]>;
+
+  /** Get available spec names with descriptions (optional method) */
+  getSpecsWithDesc?(): Promise<Array<{ name: string; description?: string }>>;
 }
 
 export class SpecProvider implements CompletionProvider {

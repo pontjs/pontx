@@ -14,6 +14,9 @@ import {
 /** Commands that accept API path as argument */
 const API_PATH_COMMANDS = ["call", "show-api", "gen"];
 
+/** Commands that have subcommands */
+const COMMANDS_WITH_SUBCOMMANDS = new Set(["list", "ls"]);
+
 /** Options that require a value */
 const OPTIONS_WITH_VALUES = new Set([
   "env",
@@ -35,6 +38,8 @@ const OPTIONS_WITH_VALUES = new Set([
   "i",
   "log-level",
   "l",
+  "spec",
+  "tag",
 ]);
 
 /** Boolean options (no value) */
@@ -271,9 +276,26 @@ export function parseCompletionContext(
     };
   }
 
-  // Parse existing options and args (excluding command name and subcommand)
+  // Check if this command has subcommands
+  const hasSubcommands = COMMANDS_WITH_SUBCOMMANDS.has(command);
+  const subcommand = hasSubcommands ? words[2] : undefined;
+
+  // If command has subcommands and we're at position 2, complete the subcommand
+  if (hasSubcommands && wordIndex === 2) {
+    return {
+      position: "subcommand",
+      command,
+      input,
+      providedOptions: new Set(),
+    };
+  }
+
+  // Determine where to start parsing options (skip command and subcommand if present)
+  const startIndex = hasSubcommands && subcommand ? 3 : 2;
+
+  // Parse existing options and args
   const { options: parsedOptions, args } = parseWordsToOptionsAndArgs(
-    words.slice(2, wordIndex)
+    words.slice(startIndex, wordIndex)
   );
 
   // Current word being completed
@@ -282,22 +304,36 @@ export function parseCompletionContext(
   // Previous word
   const prevWord = words[wordIndex - 1] || "";
 
-  // Check if completing an option name
-  if (currentWord.startsWith("-")) {
+  // Check if completing an option value (must check before option name)
+  if (prevWord.startsWith("-") && optionNeedsValue(prevWord)) {
     return {
-      position: "option",
+      position: "option-value",
       command,
+      subcommand,
+      currentOption: prevWord,
       input,
       providedOptions: parsedOptions,
     };
   }
 
-  // Check if completing an option value
-  if (prevWord.startsWith("-") && optionNeedsValue(prevWord)) {
+  // Check if completing an option name
+  if (currentWord.startsWith("-")) {
     return {
-      position: "option-value",
+      position: "option",
       command,
-      currentOption: prevWord,
+      subcommand,
+      input,
+      providedOptions: parsedOptions,
+    };
+  }
+
+  // If currentWord is empty and we're after a subcommand, suggest options
+  // This handles cases like "pontx list apis <TAB>"
+  if (currentWord === "" && hasSubcommands && subcommand) {
+    return {
+      position: "option",
+      command,
+      subcommand,
       input,
       providedOptions: parsedOptions,
     };
@@ -335,6 +371,7 @@ export function parseCompletionContext(
       return {
         position: "option",
         command,
+        subcommand,
         input,
         providedOptions: parsedOptions,
       };
@@ -349,6 +386,7 @@ export function parseCompletionContext(
     return {
       position: "argument",
       command,
+      subcommand,
       apiPath,
       input,
       providedOptions: parsedOptions,
@@ -359,6 +397,7 @@ export function parseCompletionContext(
   return {
     position: "argument",
     command,
+    subcommand,
     input,
     providedOptions: parsedOptions,
   };
