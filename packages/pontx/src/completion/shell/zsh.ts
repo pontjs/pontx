@@ -29,16 +29,46 @@ _${binName}() {
     # Split output into value and description arrays
     local -a values descs
     while IFS=: read -r value desc; do
-      values+=("\$value")
-      descs+=("\$desc")
+      if [[ -n "\$value" ]]; then
+        values+=("\$value")
+        descs+=("\$desc")
+      fi
     done < <(printf '%s\\n' "\$output")
 
-    # Use compadd for completions with descriptions
-    # -l: single column (each item on separate line, prevents grouping)
-    # -d: descriptions array
-    # -a: values from array
+    # Calculate max value width for alignment
+    local max_width=0
+    for v in "\${values[@]}"; do
+      if [[ \${#v} -gt \$max_width ]]; then
+        max_width=\${#v}
+      fi
+    done
+
+    # Build display array with aligned descriptions
+    local -a display
+    for i in {1..\${#values[@]}}; do
+      local value="\${values[\$i]}"
+      local desc="\${descs[\$i]}"
+
+      # Pad value to max_width (spaces only in display, not in values!)
+      local padding=\$((max_width - \${#value}))
+      local spaces=""
+      if [[ \$padding -gt 0 ]]; then
+        spaces=\$(printf ' %.0s' \$(seq 1 \$padding))
+      fi
+
+      # Build display string with padding
+      if [[ -n "\$desc" ]]; then
+        display+=("\${value}\${spaces} -- \$desc")
+      else
+        display+=("\${value}\${spaces}")
+      fi
+    done
+
+    # Use compadd: values for insertion, display for visual presentation
+    # -d: display array (what user sees in completion menu, with padding)
+    # -a: values array (what gets inserted when selected, without padding)
     if [[ \${#values[@]} -gt 0 ]]; then
-      compadd -l -d descs -a values
+      compadd -d display -a values
     fi
   fi
 }
