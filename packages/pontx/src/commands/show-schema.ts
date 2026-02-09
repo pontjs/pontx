@@ -24,7 +24,59 @@ export function getSchemaMeta(
 }
 
 /**
- * Parse schema path with support for single-spec mode
+ * Parse dot-separated path with support for quoted segments
+ * Examples:
+ *   - "a.b" => ["a", "b"]
+ *   - 'a."b.c"' => ["a", "b.c"]
+ */
+function parseDotSeparatedPath(path: string): string[] {
+  const parts: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  let i = 0;
+
+  while (i < path.length) {
+    const char = path[i];
+
+    if (char === '"') {
+      inQuotes = !inQuotes;
+      i++;
+      continue;
+    }
+
+    if (char === "." && !inQuotes) {
+      if (current) {
+        parts.push(current);
+        current = "";
+      }
+      i++;
+      continue;
+    }
+
+    current += char;
+    i++;
+  }
+
+  if (current) {
+    parts.push(current);
+  }
+
+  if (inQuotes) {
+    throw new Error(`Unclosed quote in schema path: ${path}`);
+  }
+
+  return parts;
+}
+
+/**
+ * Parse schema path with support for both dot and slash separators
+ * Supports quoted segments for special characters:
+ *   - petstore.Pet
+ *   - petstore."com.example.DTO"
+ *   - petstore/Pet (legacy format)
+ *
+ * When only one spec exists, specName can be omitted:
+ *   - Pet (when singleSpecName is provided)
  *
  * @param schemaPath - Schema path string
  * @param singleSpecName - The spec name when there's only one spec (for auto-completion)
@@ -36,6 +88,34 @@ export function parseSchemaPath(
   specName: string;
   schemaName: string;
 } {
+  // Try dot-separated format first (new format)
+  if (schemaPath.includes(".") || schemaPath.includes('"')) {
+    const parts = parseDotSeparatedPath(schemaPath);
+
+    if (parts.length === 2) {
+      return {
+        specName: parts[0],
+        schemaName: parts[1],
+      };
+    } else if (parts.length === 1) {
+      if (singleSpecName) {
+        return {
+          specName: singleSpecName,
+          schemaName: parts[0],
+        };
+      } else {
+        throw new Error(
+          `Invalid schema path format: ${schemaPath}. Expected: specName.schemaName`
+        );
+      }
+    } else {
+      throw new Error(
+        `Invalid schema path format: ${schemaPath}. Expected: specName.schemaName，特殊字符用引号包裹`
+      );
+    }
+  }
+
+  // Fallback to slash-separated format (legacy format)
   const parts = schemaPath.split("/");
   if (parts.length === 2) {
     return {
@@ -51,12 +131,12 @@ export function parseSchemaPath(
       };
     } else {
       throw new Error(
-        `Invalid schema path format: ${schemaPath}. Expected: specName/schemaName`
+        `Invalid schema path format: ${schemaPath}. Expected: specName.schemaName`
       );
     }
   } else {
     throw new Error(
-      `Invalid schema path format: ${schemaPath}. Expected: specName/schemaName or schemaName (single-spec mode)`
+      `Invalid schema path format: ${schemaPath}. Expected: specName.schemaName，特殊字符用引号包裹`
     );
   }
 }

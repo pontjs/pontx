@@ -163,13 +163,13 @@ export function parseApiPath(
     } else {
       throw new Error(
         singleSpecName
-          ? `Invalid API path format: ${apiPath}. Expected: tagName/apiName (spec has tags)`
-          : `Invalid API path format: ${apiPath}. Expected: specName/tagName/apiName or specName/apiName`
+          ? `Invalid API path format: ${apiPath}. Expected: tagName.apiName (spec has tags)`
+          : `Invalid API path format: ${apiPath}. Expected: specName.tagName.apiName or specName.apiName`
       );
     }
   } else {
     throw new Error(
-      `Invalid API path format: ${apiPath}. Expected: specName/tagName/apiName or specName.tagName.apiName`
+      `Invalid API path format: ${apiPath}. Expected: specName.tagName.apiName`
     );
   }
 }

@@ -1,9 +1,8 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "composite": true,
     "module": "es6",
-    "target": "es5",
+    "target": "ES2015",
     "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {},
