@@ -26,6 +26,7 @@ const ALL_COMMANDS: Array<{ name: string; description: string }> = [
   { name: "mocks", description: "Generate mock data" },
   { name: "service", description: "Start Pontx service" },
   { name: "completion", description: "Manage shell completion" },
+  { name: "skill", description: "Generate AI SKILL file" },
 ];
 
 /** Subcommands for commands that support them */

@@ -271,18 +271,39 @@ function registerSdkCommands(
       }
     });
 
-  // init-skill 命令
+  // skill 命令
   program
-    .command("init-skill")
-    .description("生成 Claude Code SKILL 文件")
-    .option("--output <path>", "输出路径")
+    .command("skill")
+    .description("生成 AI SKILL 文件（用于 Claude Code 等 AI 工具）")
+    .option("-o, --output <path>", "自定义输出路径")
+    .option("--print", "打印内容到 stdout（不生成文件）")
     .option("--force", "覆盖已存在的文件")
     .action(async (options) => {
       try {
-        const { initSkillCommand } = await import("./commands/init-skill");
-        // cliDir 是 specPath 的父目录
+        const { generateSdkSkillContent, extractSkillMetadata } = await import("../skill/sdk-generator");
+        const { writeSkillFile } = await import("../skill/shared");
         const cliDir = path.dirname(specPath);
-        await initSkillCommand(config, cliDir, specPath, options);
+        const content = generateSdkSkillContent(specPath, cliDir, binName);
+
+        if (options.print) {
+          console.log(content);
+          return;
+        }
+
+        /* 确定输出路径 */
+        const metadata = extractSkillMetadata(specPath, cliDir, binName);
+        const sanitizedName = metadata.name.replace(/^@/, '').replace(/\//g, '-');
+        const outputPath = options.output
+          || path.join(process.cwd(), '.claude', 'skills', sanitizedName, 'SKILL.md');
+
+        /* 检查是否已存在 */
+        if (fs.existsSync(outputPath) && !options.force) {
+          logger.error(`文件已存在: ${outputPath}\n使用 --force 选项覆盖`);
+          process.exit(1);
+        }
+
+        await writeSkillFile(outputPath, content);
+        logger.info(`✓ SKILL 文件已生成: ${outputPath}`);
       } catch (error: any) {
         logger.error("生成 SKILL 失败", error);
         process.exit(1);

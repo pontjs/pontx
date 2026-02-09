@@ -9,9 +9,9 @@
  * - pontx skill -o <path>    # 自定义输出路径
  */
 
-import * as fs from 'fs';
 import * as path from 'path';
 import { generateSkillContent } from '../skill/generator';
+import { writeSkillFile } from '../skill/shared';
 import { createLogger } from '../logger/logger';
 
 /**
@@ -82,14 +82,3 @@ function getGlobalSkillPath(): string {
   return path.join(home, '.claude', 'skills', 'pontx', 'SKILL.md');
 }
 
-/**
- * 写入 SKILL 文件
- */
-async function writeSkillFile(outputPath: string, content: string): Promise<void> {
-  // 确保目录存在
-  const dir = path.dirname(outputPath);
-  await fs.promises.mkdir(dir, { recursive: true });
-
-  // 写入文件
-  await fs.promises.writeFile(outputPath, content, 'utf-8');
-}
