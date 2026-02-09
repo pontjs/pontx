@@ -257,7 +257,7 @@ const result = await request.{{API_METHOD_EXAMPLE}}({ id: 123 });
  * @returns API 路径示例字符串
  */
 export function getApiPathExample(hasTags: boolean): string {
-  return hasTags ? "user/getUserInfo" : "getUserInfo";
+  return hasTags ? "user.getUserInfo" : "getUserInfo";
 }
 
 /**
@@ -276,8 +276,8 @@ export function getApiMethodExample(hasTags: boolean): string {
  */
 export function getApiPathFormatHelp(hasTags: boolean): string {
   if (hasTags) {
-    return `API 路径格式: \`tag/apiName\` 或 \`tag.apiName\`
-示例: \`pet/getPetById\` 或 \`pet.getPetById\``;
+    return `API 路径格式: \`tag.apiName\`
+示例: \`pet.getPetById\``;
   } else {
     return `API 路径格式: \`apiName\`
 示例: \`getUserInfo\``;

@@ -136,7 +136,7 @@ function registerCommands(
   program
     .command("show-schema <schemaPath>")
     .description(
-      "查看 Schema 元数据。schemaPath 格式: specName/schemaName，schemaName 可从 API 元数据的 $ref 字段提取。例如 '#/components/schemas/ResultDTO' 的 schemaName 是 ResultDTO"
+      "查看 Schema 元数据。schemaPath 格式: specName.schemaName，特殊字符用引号包裹。schemaName 可从 API 元数据的 $ref 字段提取。例如 '#/components/schemas/ResultDTO' 的 schemaName 是 ResultDTO"
     )
     .option("--use-remote", "使用远程元数据")
     .action(async (schemaPath, options) => {
