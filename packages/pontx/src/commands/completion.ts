@@ -181,11 +181,12 @@ export async function handleCompletionRequest(
   const result = await engine.complete(input);
 
   if (format === "zsh") {
-    // Zsh format: "value:description"
+    // Zsh format: "value\tdescription\tgroup" (tab-separated)
     for (const s of result.suggestions) {
       if (!s.value?.trim()) continue; // Skip empty values
       const desc = s.description?.replace(/\n/g, ' ').trim() || '';
-      console.log(desc ? `${s.value}:${desc}` : s.value);
+      const group = s.group || '';
+      console.log(`${s.value}\t${desc}\t${group}`);
     }
   } else if (format === "fish") {
     // Fish format: "value\tdescription"

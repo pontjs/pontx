@@ -433,9 +433,11 @@ async function handleCompletionRequest(
   const result = await engine.complete(input);
 
   if (format === "zsh") {
-    // Zsh format: "value:description"
+    // Zsh format: "value\tdescription\tgroup" (tab-separated)
     for (const s of result.suggestions) {
-      console.log(s.description ? `${s.value}:${s.description}` : s.value);
+      const desc = s.description || '';
+      const group = s.group || '';
+      console.log(`${s.value}\t${desc}\t${group}`);
     }
   } else if (format === "fish") {
     // Fish format: "value\tdescription"

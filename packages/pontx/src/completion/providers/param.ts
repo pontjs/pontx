@@ -112,6 +112,7 @@ export class ParamProvider implements CompletionProvider {
           value: `--${param.name}`,
           description: this.formatParamDescription(param),
           type: "param" as const,
+          group: "API Parameters",
         });
       }
     }
@@ -249,6 +250,7 @@ export class ParamProvider implements CompletionProvider {
         value: `--${opt.name}`,
         description: opt.description,
         type: "param" as const,
+        group: "Options",
       }));
   }
 }

@@ -20,57 +20,75 @@ _${binName}() {
   local cursor=\$((CURRENT - 1))
   local current_word="\${words[CURRENT]}"
 
-  # Call CLI to get completion suggestions with descriptions (zsh format: "value:description")
-  local -a completions
+  # Call CLI to get completion suggestions (tab-separated: value\\tdescription\\tgroup)
   local output
   output=$("${binName}" --get-completions "\$line" "\$cursor" --format zsh 2>/dev/null)
 
   if [[ -n "\$output" ]]; then
-    # Split output into value and description arrays
-    local -a values descs
-    while IFS=: read -r value desc; do
-      if [[ -n "\$value" ]]; then
-        values+=("\$value")
-        descs+=("\$desc")
+    # Collect unique group names (preserve order)
+    local -a group_order
+    local -A group_seen
+    while IFS=\$'\\t' read -r value desc group; do
+      [[ -z "\$value" ]] && continue
+      group="\${group:-}"
+      if [[ -z "\${group_seen[\$group]:-}" ]]; then
+        group_order+=("\$group")
+        group_seen[\$group]=1
       fi
     done < <(printf '%s\\n' "\$output")
 
-    # Calculate max value width for alignment
-    local max_width=0
-    for v in "\${values[@]}"; do
-      if [[ \${#v} -gt \$max_width ]]; then
-        max_width=\${#v}
+    # For each group, collect items and call compadd separately
+    for grp in "\${group_order[@]}"; do
+      local -a g_values g_descs
+      g_values=()
+      g_descs=()
+
+      while IFS=\$'\\t' read -r value desc group; do
+        [[ -z "\$value" ]] && continue
+        group="\${group:-}"
+        if [[ "\$group" == "\$grp" ]]; then
+          g_values+=("\$value")
+          g_descs+=("\$desc")
+        fi
+      done < <(printf '%s\\n' "\$output")
+
+      # Calculate max value width for alignment within this group
+      local max_width=0
+      for v in "\${g_values[@]}"; do
+        if [[ \${#v} -gt \$max_width ]]; then
+          max_width=\${#v}
+        fi
+      done
+
+      # Build display array with aligned descriptions
+      local -a g_display
+      g_display=()
+      for i in {1..\${#g_values[@]}}; do
+        local val="\${g_values[\$i]}"
+        local dsc="\${g_descs[\$i]}"
+        local padding=\$((max_width - \${#val}))
+        local spaces=""
+        if [[ \$padding -gt 0 ]]; then
+          spaces=\$(printf ' %.0s' \$(seq 1 \$padding))
+        fi
+        if [[ -n "\$dsc" ]]; then
+          g_display+=("\${val}\${spaces} -- \$dsc")
+        else
+          g_display+=("\${val}\${spaces}")
+        fi
+      done
+
+      # Use compadd with -V (unsorted group) and -X (group header)
+      if [[ \${#g_values[@]} -gt 0 ]]; then
+        local group_id="\${grp// /-}"
+        [[ -z "\$group_id" ]] && group_id="default"
+        if [[ -n "\$grp" ]]; then
+          compadd -V "\$group_id" -X "\$grp" -l -d g_display -a g_values
+        else
+          compadd -V "\$group_id" -l -d g_display -a g_values
+        fi
       fi
     done
-
-    # Build display array with aligned descriptions
-    local -a display
-    for i in {1..\${#values[@]}}; do
-      local value="\${values[\$i]}"
-      local desc="\${descs[\$i]}"
-
-      # Pad value to max_width (spaces only in display, not in values!)
-      local padding=\$((max_width - \${#value}))
-      local spaces=""
-      if [[ \$padding -gt 0 ]]; then
-        spaces=\$(printf ' %.0s' \$(seq 1 \$padding))
-      fi
-
-      # Build display string with padding
-      if [[ -n "\$desc" ]]; then
-        display+=("\${value}\${spaces} -- \$desc")
-      else
-        display+=("\${value}\${spaces}")
-      fi
-    done
-
-    # Use compadd: values for insertion, display for visual presentation
-    # -l: force one completion per line (only works with -d)
-    # -d: display array (what user sees in completion menu, with padding)
-    # -a: values array (what gets inserted when selected, without padding)
-    if [[ \${#values[@]} -gt 0 ]]; then
-      compadd -l -d display -a values
-    fi
   fi
 }
 

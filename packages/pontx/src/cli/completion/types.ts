@@ -84,6 +84,9 @@ export interface CompletionSuggestion {
 
   /** Completion type (for grouping) */
   type?: "command" | "spec" | "tag" | "api" | "param" | "value" | "option";
+
+  /** 分组名称（用于 zsh 分区显示，如 "API Parameters" / "Options"） */
+  group?: string;
 }
 
 /**
