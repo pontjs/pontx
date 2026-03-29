@@ -1,7 +1,7 @@
 import type { PontxManager } from "../manager";
 import type { CliContext } from "../cli-context";
 import { PontxManager as PM } from "../manager";
-import { generateApiRequestCode, generateApiUseRequestCode } from "../generate";
+import { generateApiRequestCode, generateApiUseRequestCode, generateApiCliCommandCode } from "../generate";
 import { parseApiPath, getApiMeta, specHasTags } from "./show-api";
 
 export async function makeCode(
@@ -37,6 +37,15 @@ export async function makeCode(
           tagName,
           apiName,
           requestParams
+        );
+      }
+      case "cliCommand": {
+        return generateApiCliCommandCode(
+          specName,
+          tagName,
+          apiName,
+          requestParams,
+          bodyParams
         );
       }
       default: {

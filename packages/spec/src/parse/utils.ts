@@ -214,7 +214,11 @@ export function transformTagName(name: string) {
     if (name.endsWith("Controller")) {
       name = name.slice(0, name.length - "Controller".length);
     }
-    return name;
+    /* 全大写视为缩写，保持不变（如 API、HTTP） */
+    if (name === name.toUpperCase()) {
+      return name;
+    }
+    return name.charAt(0).toLowerCase() + name.slice(1);
   }
 
   let result = "";

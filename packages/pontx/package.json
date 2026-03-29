@@ -51,6 +51,7 @@
     "jmespath": "^0.16.0",
     "lodash": "^4.17.21",
     "picocolors": "^1.1.1",
+    "@pontx/shadcn-ui": "^1.1.11",
     "tslib": "^2.6.2",
     "tsx": "^4.7.0"
   },
@@ -60,6 +61,7 @@
     "cjs-types",
     "bin",
     "setup-cli.cjs",
+    "skills",
     "package.json",
     "*.md"
   ],

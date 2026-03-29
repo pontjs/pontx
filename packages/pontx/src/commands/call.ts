@@ -200,7 +200,19 @@ function formatRequestInfo(
   );
   lines.push(`Method: ${meta.method.toUpperCase()}`);
   lines.push(`Path: ${meta.path}`);
-  lines.push(`Base URL: ${env?.baseURL || "(from config)"}`);
+  // 解析实际的 baseURL，与 apiExecutor.resolveBaseUrl 逻辑一致
+  const resolvedBaseURL = (() => {
+    if (env?.baseURL) return env.baseURL;
+    if (env?.name && context.executeApiConfig?.environments?.[env.name]) {
+      return context.executeApiConfig.environments[env.name].baseURL;
+    }
+    if (context.executeApiConfig?.baseURL) return context.executeApiConfig.baseURL;
+    const origin = context.resolvedConfig?.origins?.find((o) => o.name === context.api.specName);
+    const serverUrl = origin?.spec?.servers?.[0]?.url;
+    if (serverUrl) return serverUrl;
+    return "(未配置)";
+  })();
+  lines.push(`Base URL: ${resolvedBaseURL}`);
   if (env?.name) {
     lines.push(`Environment: ${env.name}`);
   }

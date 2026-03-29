@@ -90,6 +90,33 @@ export function generateApiRequestCode(
 }`;
 }
 
+/**
+ * 生成 CLI 调用命令
+ * @returns
+ * pontx call specName.tagName.apiName --param1 value1 --body '{"key": "value"}'
+ */
+export function generateApiCliCommandCode(
+  originName: string,
+  controllerName: string,
+  apiName: string,
+  params: Record<string, any>,
+  bodyParams: Record<string, any>
+) {
+  const apiPath = `${originName}.${controllerName}.${apiName}`;
+
+  const paramParts = Object.entries(params).map(
+    ([key, value]) => `--${key} ${typeof value === "string" ? value : JSON.stringify(value)}`
+  );
+
+  if (Object.keys(bodyParams).length > 0) {
+    paramParts.push(`--body '${JSON.stringify(bodyParams)}'`);
+  }
+
+  const argsStr = paramParts.length > 0 ? " " + paramParts.join(" ") : "";
+
+  return `pontx call ${apiPath}${argsStr}`;
+}
+
 export function generateApiUseRequestCode(
   originName: string,
   controllerName: string,

@@ -123,9 +123,9 @@ export async function listApisCommand(
         return;
       }
 
-      const pureApiName = apiKey.includes("/") ? apiKey.split("/")[1] : apiKey;
+      const displayName = apiKey.includes("/") ? apiKey.replace("/", ".") : apiKey;
       const description = api.title || api.summary || api.description;
-      console.log(formatItem(pureApiName, description));
+      console.log(formatItem(displayName, description));
     });
   }
 }

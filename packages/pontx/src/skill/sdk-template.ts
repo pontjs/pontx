@@ -12,11 +12,6 @@ export const SDK_SKILL_TEMPLATE = `---
 name: {{CLI_NAME}}
 description: {{SKILL_DESCRIPTION}}
 version: {{VERSION}}
-argument-hint: [command] [args...]
-tags:
-  - api
-  - sdk
-  - code-generation
 ---
 
 # {{CLI_NAME}} CLI SKILL
@@ -32,9 +27,6 @@ tags:
 \`\`\`bash
 # 安装 SDK（全局安装以使用 CLI）
 npm install -g {{SDK_NAME}}
-
-# 生成 SKILL 到项目
-{{CLI_NAME}} skill
 
 # 搜索 API
 {{CLI_NAME}} search <keyword>
@@ -60,21 +52,21 @@ npm install -g {{SDK_NAME}}
 
 **示例**:
 \`\`\`bash
-# 搜索包含 "user" 的 API
-{{CLI_NAME}} search user
+# 搜索包含 "{{SEARCH_KEYWORD_EXAMPLE}}" 的 API
+{{CLI_NAME}} search {{SEARCH_KEYWORD_EXAMPLE}}
 
 # 限制返回 3 条结果
-{{CLI_NAME}} search user -m 3
+{{CLI_NAME}} search {{SEARCH_KEYWORD_EXAMPLE}} -m 3
 \`\`\`
 
 ### 2. API 详情查看
 
 \`\`\`bash
 # 查看 API 详情（参数、请求体、响应等）
-{{CLI_NAME}} show-api <api-path> [--remote]
+{{CLI_NAME}} show-api [<tagName>.]<apiName> [--remote]
 
 # 查看 Schema 定义
-{{CLI_NAME}} show-schema <schema-path> [--use-remote]
+{{CLI_NAME}} show-schema <schemaName> [--use-remote]
 \`\`\`
 
 **示例**:
@@ -83,7 +75,7 @@ npm install -g {{SDK_NAME}}
 {{CLI_NAME}} show-api {{API_PATH_EXAMPLE}}
 
 # 查看 Schema
-{{CLI_NAME}} show-schema User
+{{CLI_NAME}} show-schema {{SCHEMA_NAME_EXAMPLE}}
 \`\`\`
 
 {{API_PATH_FORMAT}}
@@ -95,7 +87,8 @@ npm install -g {{SDK_NAME}}
 
 Options:
   --case <case>        代码模板名称 (默认: request)
-                       常见值: request (基础请求), reactHooks (React Hooks)
+                       常见值: request (基础请求), reactHooks (React Hooks), cliCommand (CLI 命令)
+                       可用 list-cases 查询
   --params <json>      请求参数，JSON 格式字符串
   --body <json>        请求体参数，JSON 格式
   --use-remote         使用远程元数据
@@ -110,10 +103,13 @@ Options:
 {{CLI_NAME}} gen {{API_PATH_EXAMPLE}} --case reactHooks
 
 # 带参数生成代码
-{{CLI_NAME}} gen {{API_PATH_EXAMPLE}} --params '{"id": 123}'
+{{CLI_NAME}} gen {{API_PATH_EXAMPLE}} --params '{{PARAM_JSON_EXAMPLE}}'
 
-# 查看可用模板
-{{CLI_NAME}} list-templates
+# 生成 CLI 调用命令
+{{CLI_NAME}} gen {{API_PATH_EXAMPLE}} --case cliCommand
+
+# 查看可用 case
+{{CLI_NAME}} list-cases
 \`\`\`
 
 **SDK 集成示例**:
@@ -122,7 +118,7 @@ Options:
 import { request } from './generated/api';
 
 // 调用 API
-const result = await request.{{API_METHOD_EXAMPLE}}({ id: 123 });
+const result = await request.{{API_METHOD_EXAMPLE}}({{PARAM_JSON_EXAMPLE}});
 \`\`\`
 
 ### 4. API 调用（CLI Call）
@@ -154,22 +150,22 @@ Options:
 **示例**:
 \`\`\`bash
 # Step 1: 查看 API 详情
-{{CLI_NAME}} show-api {{API_PATH_EXAMPLE}}
+{{CLI_NAME}} show-api {{API_WITH_PARAMS_EXAMPLE}}
 
 # Step 2: 预览请求（不实际发送）
-{{CLI_NAME}} call {{API_PATH_EXAMPLE}} --id 123 --dry-run
+{{CLI_NAME}} call {{API_WITH_PARAMS_EXAMPLE}} {{PARAM_EXAMPLE}} --dry-run
 
 # Step 3: 实际调用
-{{CLI_NAME}} call {{API_PATH_EXAMPLE}} --id 123
+{{CLI_NAME}} call {{API_WITH_PARAMS_EXAMPLE}} {{PARAM_EXAMPLE}}
 
 # 使用 JMESPath 查询结果
-{{CLI_NAME}} call {{API_PATH_EXAMPLE}} --id 123 -q "data.name"
+{{CLI_NAME}} call {{API_WITH_PARAMS_EXAMPLE}} {{PARAM_EXAMPLE}} -q "data.name"
 
 # 保存结果到文件
-{{CLI_NAME}} call {{API_PATH_EXAMPLE}} --id 123 -o result.json
+{{CLI_NAME}} call {{API_WITH_PARAMS_EXAMPLE}} {{PARAM_EXAMPLE}} -o result.json
 
 # 切换环境
-{{CLI_NAME}} call {{API_PATH_EXAMPLE}} --id 123 -e production
+{{CLI_NAME}} call {{API_WITH_PARAMS_EXAMPLE}} {{PARAM_EXAMPLE}} -e production
 \`\`\`
 
 ### 5. Shell 自动补全
@@ -211,7 +207,7 @@ Options:
 - ⚠️ **保护凭证**: 使用环境变量存储 token，不要硬编码
 
 ### 代码生成
-- 使用 \`list-templates\` 查看可用模板
+- 使用 \`list-cases\` 查看可用模板
 - 生成的代码可直接在项目中使用
 - 不要手动修改生成的代码（会被覆盖）
 
@@ -231,9 +227,8 @@ Options:
 | \`list\` | 列出 specs |
 | \`list tags\` | 列出所有 tags |
 | \`list apis\` | 列出所有 API |
-| \`list-templates\` | 列出代码模板 |
+| \`list-cases\` | 列出代码模板 |
 | \`completion install\` | 安装 Shell 补全 |
-| \`skill\` | 生成此 SKILL 文件 |
 
 ## 相关资源
 
@@ -250,30 +245,41 @@ Options:
 /**
  * 获取 API 路径示例
  * @param hasTags 是否有 tags
+ * @param apiPath 可选的实际 API 路径
  */
-export function getApiPathExample(hasTags: boolean): string {
-  return hasTags ? "user.getUserInfo" : "getUserInfo";
+export function getApiPathExample(hasTags: boolean, apiPath?: string): string {
+  if (apiPath) {
+    return apiPath;
+  }
+  return hasTags ? "<tag>.<apiName>" : "<apiName>";
 }
 
 /**
  * 获取 API 方法示例
  * @param hasTags 是否有 tags
+ * @param apiName 可选的实际 API 名称
  */
-export function getApiMethodExample(hasTags: boolean): string {
-  return hasTags ? "getUserInfo" : "getUserInfo";
+export function getApiMethodExample(hasTags: boolean, apiName?: string): string {
+  if (apiName) {
+    return apiName;
+  }
+  return "<apiName>";
 }
 
 /**
  * 获取 API 路径格式说明
  * @param hasTags 是否有 tags
+ * @param apiPath 可选的实际 API 路径作为示例
  */
-export function getApiPathFormatHelp(hasTags: boolean): string {
+export function getApiPathFormatHelp(hasTags: boolean, apiPath?: string): string {
   if (hasTags) {
+    const example = apiPath || "<tag>.<apiName>";
     return `**API Path 格式**: \`tag.apiName\`
-示例: \`pet.getPetById\``;
+示例: \`${example}\``;
   } else {
+    const example = apiPath || "<apiName>";
     return `**API Path 格式**: \`apiName\`
-示例: \`getUserInfo\``;
+示例: \`${example}\``;
   }
 }
 

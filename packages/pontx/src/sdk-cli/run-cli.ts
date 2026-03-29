@@ -13,7 +13,7 @@ import { showApiCommand } from "../commands/show-api";
 import { callCommand } from "../commands/call";
 import { genCommand } from "../commands/gen";
 import { showSchemaCommand } from "../commands/show-schema";
-import { listTemplatesCommand } from "../commands/list-templates";
+import { listCasesCommand } from "../commands/list-cases";
 import { createLogger } from "../logger/logger";
 import {
   CompletionEngine,
@@ -225,7 +225,7 @@ function registerSdkCommands(
     .description("生成 API 调用示例代码")
     .option(
       "--case <case>",
-      "代码模板名称，常见值: request (基础请求), reactHooks (React Hooks)",
+      "代码模板名称，常见值: request, reactHooks, cliCommand。可用 list-cases 查询",
       "request"
     )
     .option(
@@ -257,55 +257,16 @@ function registerSdkCommands(
       }
     });
 
-  // list-templates 命令
+  // list-cases 命令
   program
-    .command("list-templates")
-    .description("获取可用的代码生成模板列表")
+    .command("list-cases")
+    .description("获取可用的代码生成 case 列表")
     .action(async () => {
       try {
         const manager = await context.getManager();
-        await listTemplatesCommand(manager);
+        await listCasesCommand(manager);
       } catch (error: any) {
-        logger.error("获取模板列表失败", error);
-        process.exit(1);
-      }
-    });
-
-  // skill 命令
-  program
-    .command("skill")
-    .description("生成 AI SKILL 文件（用于 Claude Code 等 AI 工具）")
-    .option("-o, --output <path>", "自定义输出路径")
-    .option("--print", "打印内容到 stdout（不生成文件）")
-    .option("--force", "覆盖已存在的文件")
-    .action(async (options) => {
-      try {
-        const { generateSdkSkillContent, extractSkillMetadata } = await import("../skill/sdk-generator");
-        const { writeSkillFile } = await import("../skill/shared");
-        const cliDir = path.dirname(specPath);
-        const content = generateSdkSkillContent(specPath, cliDir, binName);
-
-        if (options.print) {
-          console.log(content);
-          return;
-        }
-
-        /* 确定输出路径 */
-        const metadata = extractSkillMetadata(specPath, cliDir, binName);
-        const sanitizedName = metadata.name.replace(/^@/, '').replace(/\//g, '-');
-        const outputPath = options.output
-          || path.join(process.cwd(), '.claude', 'skills', sanitizedName, 'SKILL.md');
-
-        /* 检查是否已存在 */
-        if (fs.existsSync(outputPath) && !options.force) {
-          logger.error(`文件已存在: ${outputPath}\n使用 --force 选项覆盖`);
-          process.exit(1);
-        }
-
-        await writeSkillFile(outputPath, content);
-        logger.info(`✓ SKILL 文件已生成: ${outputPath}`);
-      } catch (error: any) {
-        logger.error("生成 SKILL 失败", error);
+        logger.error("获取 case 列表失败", error);
         process.exit(1);
       }
     });

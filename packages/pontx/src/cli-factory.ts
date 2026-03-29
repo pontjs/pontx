@@ -60,13 +60,13 @@ export function createCli(options: CreateCliOptions): Command {
   const logLevel: LogLevel = hasDebugFlag
     ? "debug"
     : envLevel === "debug" || envLevel === "trace"
-    ? envLevel
-    : "info";
+      ? envLevel
+      : "info";
 
   // 创建 CLI 上下文
   const ctx = createCliContext(
     rootDir,
-    createLogger(logLevel, { prefix: `[${binName} cli]` })
+    createLogger(logLevel, { prefix: `[${binName} cli]` }),
   );
   const { getManager, logger } = ctx;
 
@@ -80,7 +80,7 @@ export function createCli(options: CreateCliOptions): Command {
   program.option("--debug", "启用调试日志");
   program.option(
     "--get-completions <line>",
-    "(internal) Get shell completions"
+    "(internal) Get shell completions",
   );
   program.option("--format <format>", "Output format for completions", "plain");
 
@@ -99,8 +99,22 @@ function registerCommands(
   getManager: any,
   logger: any,
   binName: string,
-  rootDir: string
+  rootDir: string,
 ) {
+  program
+    .command("init")
+    .description("初始化生成 pontx.config.ts 配置文件")
+    .option("--url <url>", "远程数据源 URL")
+    .option("--name <name>", "数据源名称")
+    .option("--localPath <path>", "本地数据源路径")
+    .option("--outDir <dir>", "生成代码的输出目录", "src/apis")
+    .option("--runtime <runtime>", "运行时环境: nodejs | browser", "nodejs")
+    .option("--skip-install", "跳过安装 SDK 依赖")
+    .action(async (options) => {
+      const { initCommand } = await import("./commands/init");
+      await initCommand(rootDir, options, logger);
+    });
+
   program
     .command("check")
     .description("检测本地和远程元数据的兼容性")
@@ -109,7 +123,6 @@ function registerCommands(
       const { checkCommand } = await import("./commands/check");
       await checkCommand(manager);
     });
-
 
   program
     .command("search <keyword>")
@@ -125,7 +138,7 @@ function registerCommands(
   program
     .command("show-api <apiPath>")
     .description(
-      "查看 API 元数据，包括入参、出参等。apiPath 格式: specName.tagName.apiName，特殊字符用引号包裹"
+      "查看 API 元数据，包括入参、出参等。apiPath 格式: specName.tagName.apiName，特殊字符用引号包裹",
     )
     .option("--use-remote", "使用远程元数据")
     .action(async (apiPath, options) => {
@@ -136,7 +149,7 @@ function registerCommands(
   program
     .command("show-schema <schemaPath>")
     .description(
-      "查看 Schema 元数据。schemaPath 格式: specName.schemaName，特殊字符用引号包裹。schemaName 可从 API 元数据的 $ref 字段提取。例如 '#/components/schemas/ResultDTO' 的 schemaName 是 ResultDTO"
+      "查看 Schema 元数据。schemaPath 格式: specName.schemaName，特殊字符用引号包裹。schemaName 可从 API 元数据的 $ref 字段提取。例如 '#/components/schemas/ResultDTO' 的 schemaName 是 ResultDTO",
     )
     .option("--use-remote", "使用远程元数据")
     .action(async (schemaPath, options) => {
@@ -147,16 +160,16 @@ function registerCommands(
   program
     .command("gen <apiPath>")
     .description(
-      "生成项目中精准的 API 调用示例代码。apiPath 格式: specName.tagName.apiName，特殊字符用引号包裹"
+      "生成项目中精准的 API 调用示例代码。apiPath 格式: specName.tagName.apiName，特殊字符用引号包裹",
     )
     .option(
       "--case <case>",
-      "代码模板名称，常见值: request (基础请求), reactHooks (React Hooks)。可用 pontx list-templates 命令查询",
-      "request"
+      "代码模板名称，常见值: request, reactHooks, cliCommand。可用 pontx list-cases 命令查询",
+      "request",
     )
     .option(
       "--params <json>",
-      "参照 API 元数据中的 parameters 构造的请求参数，JSON 格式字符串"
+      "参照 API 元数据中的 parameters 构造的请求参数，JSON 格式字符串",
     )
     .option("--body <json>", "API 请求体参数，JSON 格式")
     .option("--use-remote", "使用远程元数据")
@@ -166,14 +179,13 @@ function registerCommands(
     });
 
   program
-    .command("list-templates")
-    .description("获取当前项目可用的代码生成模板列表")
+    .command("list-cases")
+    .description("获取当前项目可用的代码生成 case 列表")
     .action(async () => {
       const manager = await getManager();
-      const { listTemplatesCommand } = await import(
-        "./commands/list-templates"
-      );
-      await listTemplatesCommand(manager);
+      const { listCasesCommand } =
+        await import("./commands/list-cases");
+      await listCasesCommand(manager);
     });
 
   // pontx list (父命令)
@@ -195,7 +207,7 @@ function registerCommands(
   program
     .command("call <apiPath>")
     .description(
-      '调用 API 接口。apiPath 格式: specName.tagName.apiName，特殊字符用引号包裹。参数: --paramName value，body: --body \'{"key":"value"}\' 或 --body @file.json'
+      '调用 API 接口。apiPath 格式: specName.tagName.apiName，特殊字符用引号包裹。参数: --paramName value，body: --body \'{"key":"value"}\' 或 --body @file.json',
     )
     .option(
       "-H, --header <header>",
@@ -204,12 +216,12 @@ function registerCommands(
         acc.push(val);
         return acc;
       },
-      []
+      [],
     )
     .option("-o, --output <path>", "输出结果到文件 (支持相对/绝对路径)")
     .option(
       "-q, --query <expression>",
-      'JMESPath 查询表达式，用于筛选返回结果 (例如: "[].{Id: Id, Name: Name}")'
+      'JMESPath 查询表达式，用于筛选返回结果 (例如: "[].{Id: Id, Name: Name}")',
     )
     .option("--debug", "显示详细请求/响应信息")
     .option("--dry-run", "只显示请求，不实际执行")
@@ -261,10 +273,7 @@ function registerCommands(
 
   program
     .command("skill")
-    .description("生成 AI SKILL 文件（用于 Claude Code 等 AI 工具）")
-    .option("-o, --output <path>", "自定义输出路径")
-    .option("--global", "输出到全局目录 (~/.claude/skills/pontx/)")
-    .option("--print", "打印内容到 stdout（不生成文件）")
+    .description("安装 Agent SKILL")
     .action(async (options) => {
       const { skillCommand } = await import("./commands/skill");
       await skillCommand(options);
@@ -312,14 +321,13 @@ function registerCommands(
 
       const service = new PontxService(rootDir, serviceConfig, serviceLogger);
 
-      service.on("started", () => {
-        logger.info("PontxService 启动成功");
-        logger.info("Web 服务地址: http://localhost:" + options.port);
+      service.on("started", ({ port }: { port: number }) => {
+        logger.info("Web 服务地址: http://localhost:" + port);
         logger.info(
-          "状态接口: http://localhost:" + options.port + "/api/status"
+          "状态接口: http://localhost:" + port + "/api/status",
         );
         logger.info(
-          "Specs 接口: http://localhost:" + options.port + "/api/specs"
+          "Specs 接口: http://localhost:" + port + "/api/specs",
         );
       });
 
@@ -330,28 +338,29 @@ function registerCommands(
       service.on("error", (error) => {
         logger.error(
           "PontxService 发生错误",
-          error instanceof Error ? error : new Error(String(error))
+          error instanceof Error ? error : new Error(String(error)),
         );
         process.exit(1);
       });
 
-      process.on("SIGINT", async () => {
-        logger.info("\n正在停止服务...");
-        await service.stop();
-      });
-
-      process.on("SIGTERM", async () => {
+      let stopping = false;
+      const gracefulStop = async () => {
+        if (stopping) return;
+        stopping = true;
         logger.info("\n正在停止服务...");
         await service.stop();
         process.exit(0);
-      });
+      };
+
+      process.on("SIGINT", gracefulStop);
+      process.on("SIGTERM", gracefulStop);
 
       try {
         await service.start();
       } catch (error) {
         logger.error(
           "服务启动失败",
-          error instanceof Error ? error : new Error(String(error))
+          error instanceof Error ? error : new Error(String(error)),
         );
         process.exit(1);
       }

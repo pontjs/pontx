@@ -18,7 +18,7 @@ const ALL_COMMANDS: Array<{ name: string; description: string }> = [
   { name: "show-api", description: "Show API metadata" },
   { name: "show-schema", description: "Show schema definition" },
   { name: "gen", description: "Generate API call code" },
-  { name: "list-templates", description: "List available templates" },
+  { name: "list-cases", description: "List available cases" },
   { name: "check", description: "Check spec compatibility" },
   { name: "ls", description: "List data sources" },
   { name: "list", description: "List API metadata (specs/tags/apis/schemas)" },

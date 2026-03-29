@@ -123,11 +123,12 @@ export class PontxService extends EventEmitter implements IPontxService {
       // 启动 Web 服务
       if (this.config.enableWebServer) {
         await this.webServer.start();
+        this.config.port = this.webServer.getPort();
       }
 
       this.status = ServiceStatus.RUNNING;
       this.logger.info("PontxService 启动成功");
-      this.emit("started");
+      this.emit("started", { port: this.config.port });
     } catch (error) {
       this.status = ServiceStatus.ERROR;
       this.logger.error("PontxService 启动失败", { error });

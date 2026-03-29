@@ -1,84 +1,72 @@
 /**
  * @author pontx
- * @description AI SKILL 生成命令（无子命令版本）
+ * @description AI SKILL 安装命令
  *
  * 用法:
- * - pontx skill              # 生成到项目目录 (.claude/skills/pontx/SKILL.md)
- * - pontx skill --global     # 生成到全局目录 (~/.claude/skills/pontx/SKILL.md)
- * - pontx skill --print      # 打印到 stdout
- * - pontx skill -o <path>    # 自定义输出路径
+ * - pontx skill              # 执行 npx skills add 安装 SKILL
+ * - pontx skill --print      # 打印 SKILL.md 内容到 stdout
  */
 
-import * as path from 'path';
-import { generateSkillContent } from '../skill/generator';
-import { writeSkillFile } from '../skill/shared';
-import { createLogger } from '../logger/logger';
+import { execSync } from "child_process";
+import * as path from "path";
+import * as fs from "fs";
+import { createLogger } from "../logger/logger";
 
 /**
  * Skill 命令选项
  */
-export interface SkillCommandOptions {
-  /** 自定义输出路径 */
-  output?: string;
-  /** 输出到全局目录 (~/.claude/skills/pontx/SKILL.md) */
-  global?: boolean;
-  /** 打印到 stdout，不生成文件 */
-  print?: boolean;
+export interface SkillCommandOptions {}
+
+/**
+ * 获取 pontx 包中 skills 目录的绝对路径
+ */
+function getPontxSkillsDir(): string {
+  // CJS 编译后文件平铺在 cjs/ 目录下: cjs/skill.cjs -> skills/pontx
+  // ESM 编译后文件在子目录: lib/commands/skill.js -> skills/pontx
+  // 使用 __dirname 向上找到包根目录
+  let packageDir = __dirname;
+
+  // 检查是否在 cjs 或 lib 目录下
+  const dirName = path.basename(packageDir);
+  if (dirName === "cjs" || dirName === "lib") {
+    // 平铺结构：cjs/skill.cjs 或 lib/commands/skill.js
+    packageDir = path.dirname(packageDir);
+  } else if (dirName === "commands") {
+    // 嵌套结构：lib/commands/skill.js
+    packageDir = path.resolve(packageDir, "..", "..");
+  }
+
+  return path.join(packageDir, "skills", "pontx");
 }
 
 /**
  * Skill 命令入口
  */
-export async function skillCommand(options: SkillCommandOptions): Promise<void> {
-  const logger = createLogger('info', { prefix: '[pontx skill]' });
+export async function skillCommand(
+  options: SkillCommandOptions,
+): Promise<void> {
+  const logger = createLogger("info", { prefix: "[pontx skill]" });
+
+  const skillsDir = getPontxSkillsDir();
+  const skillFilePath = path.join(skillsDir, "SKILL.md");
+
+  // 检查 SKILL.md 文件是否存在
+  if (!fs.existsSync(skillFilePath)) {
+    logger.error(`SKILL.md not found at: ${skillFilePath}`);
+    throw new Error("SKILL.md file not found");
+  }
+
+  // 默认行为：执行 npx skills add
+  logger.info("Installing pontx skill...");
 
   try {
-    // 生成 SKILL 内容
-    const content = await generateSkillContent();
-
-    // --print 选项：打印到 stdout
-    if (options.print) {
-      console.log(content);
-      return;
-    }
-
-    // 默认行为：生成文件
-    const { output, global } = options;
-    const outputPath = output || getDefaultOutputPath(global);
-
-    await writeSkillFile(outputPath, content);
-
-    logger.info(`✓ SKILL file generated: ${outputPath}`);
-    logger.info('');
-    logger.info('Next steps:');
-    logger.info('  1. Open Claude Code or your AI assistant');
-    logger.info('  2. The SKILL will be automatically detected');
-    logger.info('  3. Try using /pontx or ask AI to help with API tasks');
+    execSync(`npx skills add "${skillsDir}"`, {
+      stdio: "inherit",
+      cwd: process.cwd(),
+    });
+    logger.info("Pontx skill installed successfully!");
   } catch (error) {
-    logger.error('Failed to generate SKILL file:', error);
+    logger.error("Failed to install skill:", error);
     throw error;
   }
 }
-
-/**
- * 获取默认输出路径
- */
-function getDefaultOutputPath(global?: boolean): string {
-  if (global) {
-    return getGlobalSkillPath();
-  }
-  // 项目目录: .claude/skills/pontx/SKILL.md
-  return path.join(process.cwd(), '.claude', 'skills', 'pontx', 'SKILL.md');
-}
-
-/**
- * 获取全局 SKILL 路径
- */
-function getGlobalSkillPath(): string {
-  const home = process.env.HOME || process.env.USERPROFILE;
-  if (!home) {
-    throw new Error('Cannot determine home directory');
-  }
-  return path.join(home, '.claude', 'skills', 'pontx', 'SKILL.md');
-}
-

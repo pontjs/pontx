@@ -11,6 +11,17 @@ import { listApisCommand } from "./list-apis";
 import { listSchemasCommand } from "./list-schemas";
 
 /**
+ * 推断 spec 名称：如果未指定且只有一个 spec，自动使用它
+ */
+async function resolveSpecName(ctx: CliContext, specName?: string): Promise<string> {
+  if (specName) return specName;
+  const manager = await ctx.getManager();
+  const origins = manager.resolvedConfig.origins;
+  if (origins.length === 1) return origins[0].name;
+  throw new Error("Multiple specs found. Please specify one with --spec <specName>");
+}
+
+/**
  * 注册 list 子命令
  * @param listCmd list 父命令对象
  * @param ctx CLI 上下文
@@ -34,9 +45,7 @@ export function registerListCommands(listCmd: Command, ctx: CliContext): void {
     .option("--use-remote", "使用远程元数据")
     .option("--json", "以 JSON 格式输出")
     .action(async (options) => {
-      if (!options.spec) {
-        throw new Error("Missing required option: --spec <specName>");
-      }
+      options.spec = await resolveSpecName(ctx, options.spec);
       await listTagsCommand(ctx, options.spec, options);
     });
 
@@ -49,9 +58,7 @@ export function registerListCommands(listCmd: Command, ctx: CliContext): void {
     .option("--use-remote", "使用远程元数据")
     .option("--json", "以 JSON 格式输出")
     .action(async (options) => {
-      if (!options.spec) {
-        throw new Error("Missing required option: --spec <specName>");
-      }
+      options.spec = await resolveSpecName(ctx, options.spec);
       await listApisCommand(ctx, options.spec, options.tag, options);
     });
 
@@ -63,9 +70,7 @@ export function registerListCommands(listCmd: Command, ctx: CliContext): void {
     .option("--use-remote", "使用远程元数据")
     .option("--json", "以 JSON 格式输出")
     .action(async (options) => {
-      if (!options.spec) {
-        throw new Error("Missing required option: --spec <specName>");
-      }
+      options.spec = await resolveSpecName(ctx, options.spec);
       await listSchemasCommand(ctx, options.spec, options);
     });
 }
