@@ -14,7 +14,9 @@
   },
   "changesets": [
     "config-loader-improvement",
+    "fix-spec-resolve-ref",
     "mcp-major-release",
+    "opencli-refactor",
     "sdk-major-release",
     "spec-major-release"
   ]

@@ -1,5 +1,11 @@
 # @pontx/spec
 
+## 1.0.0-beta.1
+
+### Patch Changes
+
+- 新增 resolveRef 函数，支持解析 JSON Schema 中的 $ref 引用，正确处理 JSON 指针路径和转义字符
+
 ## 1.0.0-beta.0
 
 ### Major Changes
