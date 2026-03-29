@@ -11,7 +11,7 @@ SDK CLI 是一个独立的、可分发的命令行工具，让团队成员无需
 | 方式 | 使用场景 | 示例 |
 |------|----------|------|
 | **SDK 集成** | 在代码中调用 API | `import { client } from '@/sdk'` |
-| **SDK CLI** | 命令行直接调用 | `my-api-cli call user.info` |
+| **SDK CLI** | 命令行直接调用 | `my-api-cli call user info` |
 
 ### 适用场景
 
@@ -129,7 +129,15 @@ npm link
 my-api-cli --help
 my-api-cli list apis
 my-api-cli search user
-my-api-cli call user.info --id 123 --dry-run
+
+# 使用 -h 逐层探索
+my-api-cli call -h              # 查看可用 Tags
+my-api-cli call user -h         # 查看 user 下的 APIs
+my-api-cli call user info -h    # 查看 info 的入参详情
+
+# 调用 API（先 dry-run）
+my-api-cli call user info --id 123 --dry-run
+my-api-cli call user info --id 123
 ```
 
 ### Step 6: 发布
@@ -268,20 +276,27 @@ my-api-cli list apis
 my-api-cli search user
 
 # 查看 API 详情
-my-api-cli show-api user-service.user.info
+my-api-cli show-api user info
+
+# 使用 -h 查看参数详情
+my-api-cli call user info -h
 
 # 调用 API
-my-api-cli call user-service.user.info --id 123
+my-api-cli call user info --id 123
+
+# 多 spec 时需加 spec 前缀
+my-api-cli user-service show-api user info
+my-api-cli user-service call user info --id 123
 ```
 
 ### 多环境使用
 
 ```bash
 # 开发环境
-my-api-cli call user.info --id 123 --env dev
+my-api-cli call user info --id 123 --env dev
 
 # 生产环境
-my-api-cli call user.info --id 123 --env prod
+my-api-cli call user info --id 123 --env prod
 ```
 
 ### 认证配置
@@ -291,7 +306,7 @@ my-api-cli call user.info --id 123 --env prod
 export MY_API_TOKEN="your-token-here"
 
 # 调用需要认证的 API
-my-api-cli call user.profile
+my-api-cli call user profile
 ```
 
 ### 在脚本中使用
@@ -302,11 +317,11 @@ my-api-cli call user.profile
 
 # 检查用户服务
 echo "Checking user service..."
-my-api-cli call user.health --env prod -q "status"
+my-api-cli call user health --env prod -q "status"
 
 # 检查订单服务
 echo "Checking order service..."
-my-api-cli call order.health --env prod -q "status"
+my-api-cli call order health --env prod -q "status"
 ```
 
 ## 高级配置

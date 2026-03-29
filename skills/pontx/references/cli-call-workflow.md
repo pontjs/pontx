@@ -15,18 +15,28 @@ CLI Call Workflow 允许你直接通过命令行调用 API，无需生成 SDK �
 
 ### Step 1: 探索可用 API
 
+使用 `-h` 逐层探索命令结构，或用 `list` 命令查看资源。
+
 ```bash
+# 查看所有可用命令和 spec
+pontx -h
+
 # 列出所有数据源
 pontx list specs
+
+# 列出所有 API 标签
+pontx list tags
 
 # 列出所有 API
 pontx list apis
 
-# 按标签浏览
-pontx list tags
+# 多 spec 时指定 spec
+pontx mySpec list tags
+pontx mySpec list apis
 
-# 列出指定 spec 的 API
-pontx list apis --spec mySpec
+# 用 -h 逐层探索
+pontx call -h            # 查看可用的 Tags
+pontx call user -h       # 查看 user 标签下的所有 APIs
 ```
 
 ### Step 2: 搜索目标 API
@@ -41,15 +51,24 @@ pontx search "create"
 # 限制搜索结果数量
 pontx search user --max 10
 
-# 在指定 spec 中搜索
-pontx search user --spec mySpec
+# 多 spec 时在指定 spec 中搜索
+pontx mySpec search user
 ```
 
 ### Step 3: 查看 API 元数据
 
+两种方式查看 API 参数详情：
+
 ```bash
-# 查看 API 详细信息（格式: specName.tagName.apiName）
-pontx show-api mySpec.user.info
+# 方式 1: 使用 show-api 命令
+pontx show-api user info
+
+# 方式 2: 使用 call -h（推荐，直接显示入参详情和示例）
+pontx call user info -h
+
+# 多 spec 时
+pontx mySpec show-api user info
+pontx mySpec call user info -h
 ```
 
 输出包含：
@@ -65,7 +84,7 @@ pontx show-api mySpec.user.info
 
 ```bash
 # 干运行模式 - 只预览不发送
-pontx call mySpec.user.info --dry-run --id 123
+pontx call user info --dry-run --id 123
 ```
 
 输出内容：
@@ -79,20 +98,20 @@ pontx call mySpec.user.info --dry-run --id 123
 
 ```bash
 # GET 请求 - 路径/查询参数
-pontx call mySpec.user.info --id 123
+pontx call user info --id 123
 
 # 多个参数
-pontx call mySpec.user.search --keyword "john" --page 1 --pageSize 20
+pontx call user search --keyword "john" --page 1 --pageSize 20
 ```
 
 #### 4c. POST/PUT 请求
 
 ```bash
 # 使用 --body 传递 JSON
-pontx call mySpec.user.create --body '{"name": "John", "email": "john@example.com"}'
+pontx call user create --body '{"name": "John", "email": "john@example.com"}'
 
 # 更新请求
-pontx call mySpec.user.update --id 123 --body '{"name": "Jane"}'
+pontx call user update --id 123 --body '{"name": "Jane"}'
 ```
 
 #### 4d. 从文件读取参数
@@ -111,14 +130,14 @@ cat > params.json << 'EOF'
 EOF
 
 # 使用 @文件名 语法
-pontx call mySpec.user.create --body @params.json
+pontx call user create --body @params.json
 ```
 
 #### 4e. 添加请求头
 
 ```bash
 # 添加自定义请求头
-pontx call mySpec.user.info --id 123 \
+pontx call user info --id 123 \
   -H "Authorization: Bearer token123" \
   -H "X-Custom-Header: value"
 ```
@@ -127,8 +146,8 @@ pontx call mySpec.user.info --id 123 \
 
 ```bash
 # 使用 pontx.config.ts 中配置的环境
-pontx call mySpec.user.info --id 123 --env dev
-pontx call mySpec.user.info --id 123 --env prod
+pontx call user info --id 123 --env dev
+pontx call user info --id 123 --env prod
 ```
 
 ### Step 5: 处理响应
@@ -136,20 +155,20 @@ pontx call mySpec.user.info --id 123 --env prod
 #### 输出到文件
 
 ```bash
-pontx call mySpec.user.list -o result.json
+pontx call user list -o result.json
 ```
 
 #### 使用 JMESPath 筛选
 
 ```bash
 # 只提取 data 字段
-pontx call mySpec.user.list -q "data"
+pontx call user list -q "data"
 
 # 提取特定字段
-pontx call mySpec.user.list -q "[].{Id: id, Name: name}"
+pontx call user list -q "[].{Id: id, Name: name}"
 
 # 条件筛选
-pontx call mySpec.user.list -q "[?status=='active']"
+pontx call user list -q "[?status=='active']"
 ```
 
 ## 命令参数参考
@@ -171,17 +190,20 @@ pontx call mySpec.user.list -q "[?status=='active']"
 
 ```bash
 # 先用 --dry-run 检查请求内容
-pontx call mySpec.order.delete --id 123 --dry-run
+pontx call order delete --id 123 --dry-run
 
 # 确认无误后再执行
-pontx call mySpec.order.delete --id 123
+pontx call order delete --id 123
 ```
 
 ### 2. 验证参数格式
 
 ```bash
-# 查看 API 需要的参数
-pontx show-api mySpec.order.delete
+# 使用 -h 查看 API 需要的参数（推荐）
+pontx call order delete -h
+
+# 或使用 show-api
+pontx show-api order delete
 
 # 确认参数类型和必填项
 ```
@@ -209,8 +231,8 @@ export API_TOKEN="your-secret-token"
 
 ```bash
 # 明确指定环境
-pontx call mySpec.user.delete --id 123 --env dev  # 开发环境
-# pontx call mySpec.user.delete --id 123 --env prod  # 生产环境（谨慎！）
+pontx call user delete --id 123 --env dev  # 开发环境
+# pontx call user delete --id 123 --env prod  # 生产环境（谨慎！）
 ```
 
 ## 常见问题
@@ -219,7 +241,7 @@ pontx call mySpec.user.delete --id 123 --env dev  # 开发环境
 
 ```bash
 # 使用 --debug 查看详细信息
-pontx call mySpec.user.info --id 123 --debug
+pontx call user info --id 123 --debug
 ```
 
 ### Q: 如何处理复杂的嵌套参数？
@@ -243,7 +265,7 @@ cat > complex-params.json << 'EOF'
 }
 EOF
 
-pontx call mySpec.report.generate --body @complex-params.json
+pontx call report generate --body @complex-params.json
 ```
 
 ### Q: 如何在脚本中使用？
@@ -252,12 +274,12 @@ pontx call mySpec.report.generate --body @complex-params.json
 #!/bin/bash
 
 # 获取用户列表并提取 ID
-USER_IDS=$(pontx call mySpec.user.list -q "[].id" | jq -r '.[]')
+USER_IDS=$(pontx call user list -q "[].id" | jq -r '.[]')
 
 # 遍历处理
 for id in $USER_IDS; do
   echo "Processing user: $id"
-  pontx call mySpec.user.process --id "$id"
+  pontx call user process --id "$id"
 done
 ```
 

@@ -1,0 +1,739 @@
+{
+  "$schema": "https://opencli.org/draft.json",
+  "opencli": "0.1",
+  "info": {
+    "title": "pontx",
+    "version": "0.0.0",
+    "description": "API 生命周期管理工具 — 基于 pontx-spec 协议，提供 API 搜索、文档、代码生成和调用能力",
+    "license": {
+      "name": "MIT License",
+      "identifier": "MIT"
+    }
+  },
+  "metadata": [
+    { "name": "dynamicSpecCommands", "value": true }
+  ],
+  "options": [
+    {
+      "name": "--debug",
+      "description": "启用调试日志"
+    },
+    {
+      "name": "--get-completions",
+      "description": "(internal) Get shell completions",
+      "hidden": true,
+      "arguments": [
+        {
+          "name": "LINE",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "--format",
+      "description": "Output format for completions",
+      "hidden": true,
+      "arguments": [
+        {
+          "name": "FORMAT",
+          "required": true,
+          "acceptedValues": ["plain", "zsh", "fish"]
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "description": "搜索当前项目可调用的 API 接口（全局搜索所有 specs）",
+      "arguments": [
+        {
+          "name": "keyword",
+          "required": true,
+          "description": "搜索关键词"
+        }
+      ],
+      "options": [
+        {
+          "name": "--max",
+          "aliases": ["-m"],
+          "description": "最大返回数量，默认 6",
+          "arguments": [
+            {
+              "name": "COUNT",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "--spec",
+          "description": "指定搜索的 spec 名称",
+          "arguments": [
+            {
+              "name": "SPEC_NAME",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "--use-remote",
+          "description": "使用远程元数据"
+        }
+      ],
+      "metadata": [
+        { "name": "scope", "value": "shared" },
+        { "name": "handler", "value": "search" }
+      ]
+    },
+    {
+      "name": "list",
+      "aliases": ["ls"],
+      "description": "列举 API 信息（默认列举所有 specs）",
+      "options": [
+        {
+          "name": "--use-remote",
+          "description": "使用远程元数据"
+        },
+        {
+          "name": "--json",
+          "description": "以 JSON 格式输出"
+        }
+      ],
+      "commands": [
+        {
+          "name": "specs",
+          "description": "列举所有 specs",
+          "options": [
+            {
+              "name": "--use-remote",
+              "description": "使用远程元数据"
+            },
+            {
+              "name": "--json",
+              "description": "以 JSON 格式输出"
+            }
+          ],
+          "metadata": [
+            { "name": "handler", "value": "list-specs" }
+          ]
+        }
+      ],
+      "metadata": [
+        { "name": "scope", "value": "shared" },
+        { "name": "handler", "value": "list-specs" }
+      ]
+    },
+    {
+      "name": "list-cases",
+      "description": "获取当前项目可用的代码生成 case 列表",
+      "metadata": [
+        { "name": "scope", "value": "shared" },
+        { "name": "handler", "value": "list-cases" }
+      ]
+    },
+    {
+      "name": "completion",
+      "description": "管理 shell 自动补全",
+      "arguments": [
+        {
+          "name": "action",
+          "required": false,
+          "description": "操作类型",
+          "acceptedValues": ["install", "generate", "uninstall"]
+        }
+      ],
+      "options": [
+        {
+          "name": "--shell",
+          "description": "Shell 类型",
+          "arguments": [
+            {
+              "name": "SHELL",
+              "required": true,
+              "acceptedValues": ["bash", "zsh", "fish"]
+            }
+          ]
+        },
+        {
+          "name": "--output",
+          "description": "输出脚本到文件",
+          "arguments": [
+            {
+              "name": "PATH",
+              "required": true
+            }
+          ]
+        }
+      ],
+      "metadata": [
+        { "name": "scope", "value": "shared" },
+        { "name": "handler", "value": "completion" }
+      ]
+    },
+    {
+      "name": "init",
+      "description": "初始化生成 pontx.config.ts 配置文件",
+      "options": [
+        {
+          "name": "--url",
+          "description": "远程数据源 URL",
+          "arguments": [
+            {
+              "name": "URL",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "--name",
+          "description": "数据源名称",
+          "arguments": [
+            {
+              "name": "NAME",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "--localPath",
+          "description": "本地数据源路径",
+          "arguments": [
+            {
+              "name": "PATH",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "--outDir",
+          "description": "生成代码的输出目录",
+          "arguments": [
+            {
+              "name": "DIR",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "--runtime",
+          "description": "运行时环境",
+          "arguments": [
+            {
+              "name": "RUNTIME",
+              "required": true,
+              "acceptedValues": ["nodejs", "browser"]
+            }
+          ]
+        },
+        {
+          "name": "--skip-install",
+          "description": "跳过安装 SDK 依赖"
+        }
+      ],
+      "metadata": [
+        { "name": "scope", "value": "project" },
+        { "name": "handler", "value": "init" }
+      ]
+    },
+    {
+      "name": "check",
+      "description": "检测本地和远程元数据的兼容性",
+      "metadata": [
+        { "name": "scope", "value": "project" },
+        { "name": "handler", "value": "check" }
+      ]
+    },
+    {
+      "name": "generate",
+      "description": "拉取远程数据源并生成代码",
+      "options": [
+        {
+          "name": "--use-remote",
+          "description": "使用远程元数据生成"
+        }
+      ],
+      "metadata": [
+        { "name": "scope", "value": "project" },
+        { "name": "handler", "value": "generate" }
+      ]
+    },
+    {
+      "name": "mocks",
+      "description": "拉取远程数据源并生成 Mocks",
+      "metadata": [
+        { "name": "scope", "value": "project" },
+        { "name": "handler", "value": "mocks" }
+      ]
+    },
+    {
+      "name": "service",
+      "description": "启动 Pontx 服务",
+      "options": [
+        {
+          "name": "--port",
+          "aliases": ["-p"],
+          "description": "Web 服务端口",
+          "arguments": [
+            {
+              "name": "PORT",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "--interval",
+          "aliases": ["-i"],
+          "description": "同步间隔（毫秒）",
+          "arguments": [
+            {
+              "name": "INTERVAL",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "--no-watch",
+          "description": "禁用文件监听"
+        },
+        {
+          "name": "--no-sync",
+          "description": "禁用定时同步"
+        },
+        {
+          "name": "--no-web",
+          "description": "禁用 Web 服务"
+        },
+        {
+          "name": "--log-level",
+          "aliases": ["-l"],
+          "description": "日志级别",
+          "arguments": [
+            {
+              "name": "LEVEL",
+              "required": true,
+              "acceptedValues": ["trace", "debug", "info", "warn", "error", "fatal"]
+            }
+          ]
+        }
+      ],
+      "metadata": [
+        { "name": "scope", "value": "project" },
+        { "name": "handler", "value": "service" }
+      ]
+    },
+    {
+      "name": "skill",
+      "description": "安装 Agent SKILL",
+      "metadata": [
+        { "name": "scope", "value": "project" },
+        { "name": "handler", "value": "skill" }
+      ]
+    },
+    {
+      "name": "cache:clean",
+      "description": "清理配置文件编译缓存",
+      "metadata": [
+        { "name": "scope", "value": "project" },
+        { "name": "handler", "value": "cache:clean" }
+      ]
+    },
+    {
+      "name": "add-spec",
+      "description": "从已安装的 SDK 包添加 API 规范到 package.json",
+      "arguments": [
+        {
+          "name": "sdk-name",
+          "required": true,
+          "description": "SDK 包名"
+        }
+      ],
+      "options": [
+        {
+          "name": "--name",
+          "description": "自定义 spec 名称",
+          "arguments": [
+            {
+              "name": "CUSTOM_NAME",
+              "required": true
+            }
+          ]
+        }
+      ],
+      "metadata": [
+        { "name": "scope", "value": "project" },
+        { "name": "handler", "value": "add-spec" }
+      ]
+    },
+    {
+      "name": "cli",
+      "description": "SDK CLI 管理命令",
+      "commands": [
+        {
+          "name": "init",
+          "description": "初始化 SDK CLI 配置",
+          "options": [
+            {
+              "name": "--name",
+              "description": "CLI 名称",
+              "required": true,
+              "arguments": [
+                {
+                  "name": "NAME",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "--out",
+              "aliases": ["-o"],
+              "description": "输出目录",
+              "arguments": [
+                {
+                  "name": "DIR",
+                  "required": true
+                }
+              ]
+            }
+          ],
+          "metadata": [
+            { "name": "handler", "value": "cli-init" }
+          ]
+        },
+        {
+          "name": "build",
+          "description": "构建 SDK CLI",
+          "options": [
+            {
+              "name": "--config",
+              "aliases": ["-c"],
+              "description": "配置文件路径",
+              "arguments": [
+                {
+                  "name": "CONFIG",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "--out",
+              "aliases": ["-o"],
+              "description": "输出目录",
+              "arguments": [
+                {
+                  "name": "DIR",
+                  "required": true
+                }
+              ]
+            }
+          ],
+          "metadata": [
+            { "name": "handler", "value": "cli-build" }
+          ]
+        }
+      ],
+      "metadata": [
+        { "name": "scope", "value": "sdk-management" }
+      ]
+    }
+  ],
+  "specCommands": [
+    {
+      "name": "call",
+      "description": "调用 API 接口。用法: pontx <spec> call <tag> <api> [--参数名 值]",
+      "arguments": [
+        {
+          "name": "tag",
+          "required": true,
+          "description": "Tag/命名空间"
+        },
+        {
+          "name": "api",
+          "required": true,
+          "description": "API 名称"
+        }
+      ],
+      "options": [
+        {
+          "name": "--header",
+          "aliases": ["-H"],
+          "description": "添加请求头 (可多次使用)",
+          "arguments": [
+            {
+              "name": "HEADER",
+              "required": true,
+              "arity": { "minimum": 1, "maximum": null }
+            }
+          ]
+        },
+        {
+          "name": "--output",
+          "aliases": ["-o"],
+          "description": "输出结果到文件 (支持相对/绝对路径)",
+          "arguments": [
+            {
+              "name": "PATH",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "--query",
+          "aliases": ["-q"],
+          "description": "JMESPath 查询表达式，用于筛选返回结果",
+          "arguments": [
+            {
+              "name": "EXPRESSION",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "--debug",
+          "description": "显示详细请求/响应信息"
+        },
+        {
+          "name": "--dry-run",
+          "description": "只显示请求，不实际执行"
+        },
+        {
+          "name": "--use-remote",
+          "description": "使用远程元数据"
+        },
+        {
+          "name": "--env",
+          "aliases": ["-e"],
+          "description": "指定环境/baseUrl",
+          "arguments": [
+            {
+              "name": "ENV",
+              "required": true
+            }
+          ]
+        }
+      ],
+      "metadata": [
+        { "name": "scope", "value": "shared" },
+        { "name": "handler", "value": "call" },
+        { "name": "allowUnknownOption", "value": true }
+      ]
+    },
+    {
+      "name": "show-api",
+      "description": "查看 API 元数据，包括入参、出参等。用法: pontx <spec> show-api <tag> <api>",
+      "arguments": [
+        {
+          "name": "tag",
+          "required": true,
+          "description": "Tag/命名空间"
+        },
+        {
+          "name": "api",
+          "required": true,
+          "description": "API 名称"
+        }
+      ],
+      "options": [
+        {
+          "name": "--use-remote",
+          "description": "使用远程元数据"
+        }
+      ],
+      "metadata": [
+        { "name": "scope", "value": "shared" },
+        { "name": "handler", "value": "show-api" }
+      ]
+    },
+    {
+      "name": "show-schema",
+      "description": "查看 Schema 元数据。用法: pontx <spec> show-schema <schema>。schemaName 可从 API 元数据的 $ref 字段提取",
+      "arguments": [
+        {
+          "name": "schema",
+          "required": true,
+          "description": "Schema 名称"
+        }
+      ],
+      "options": [
+        {
+          "name": "--use-remote",
+          "description": "使用远程元数据"
+        }
+      ],
+      "metadata": [
+        { "name": "scope", "value": "shared" },
+        { "name": "handler", "value": "show-schema" }
+      ]
+    },
+    {
+      "name": "gen",
+      "description": "生成项目中精准的 API 调用示例代码。用法: pontx <spec> gen <tag> <api>",
+      "arguments": [
+        {
+          "name": "tag",
+          "required": true,
+          "description": "Tag/命名空间"
+        },
+        {
+          "name": "api",
+          "required": true,
+          "description": "API 名称"
+        }
+      ],
+      "options": [
+        {
+          "name": "--case",
+          "description": "代码模板名称，常见值: request, reactHooks, cliCommand。可用 pontx list-cases 命令查询",
+          "arguments": [
+            {
+              "name": "CASE",
+              "required": true,
+              "acceptedValues": ["request", "reactHooks", "cliCommand"]
+            }
+          ]
+        },
+        {
+          "name": "--params",
+          "description": "参照 API 元数据中的 parameters 构造的请求参数，JSON 格式字符串",
+          "arguments": [
+            {
+              "name": "JSON",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "--body",
+          "description": "API 请求体参数，JSON 格式",
+          "arguments": [
+            {
+              "name": "JSON",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "--use-remote",
+          "description": "使用远程元数据"
+        }
+      ],
+      "metadata": [
+        { "name": "scope", "value": "shared" },
+        { "name": "handler", "value": "gen" }
+      ]
+    },
+    {
+      "name": "search",
+      "description": "在指定 spec 下搜索 API 接口。用法: pontx <spec> search <keyword>",
+      "arguments": [
+        {
+          "name": "keyword",
+          "required": true,
+          "description": "搜索关键词"
+        }
+      ],
+      "options": [
+        {
+          "name": "--max",
+          "aliases": ["-m"],
+          "description": "最大返回数量，默认 6",
+          "arguments": [
+            {
+              "name": "COUNT",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "--use-remote",
+          "description": "使用远程元数据"
+        }
+      ],
+      "metadata": [
+        { "name": "scope", "value": "shared" },
+        { "name": "handler", "value": "search" }
+      ]
+    },
+    {
+      "name": "list",
+      "aliases": ["ls"],
+      "description": "列举指定 spec 下的资源",
+      "options": [
+        {
+          "name": "--use-remote",
+          "description": "使用远程元数据"
+        },
+        {
+          "name": "--json",
+          "description": "以 JSON 格式输出"
+        }
+      ],
+      "commands": [
+        {
+          "name": "tags",
+          "description": "列举指定 spec 下的 tags",
+          "options": [
+            {
+              "name": "--use-remote",
+              "description": "使用远程元数据"
+            },
+            {
+              "name": "--json",
+              "description": "以 JSON 格式输出"
+            }
+          ],
+          "metadata": [
+            { "name": "handler", "value": "list-tags" }
+          ]
+        },
+        {
+          "name": "apis",
+          "description": "列举指定 spec 下的 APIs",
+          "options": [
+            {
+              "name": "--tag",
+              "description": "指定 tag 名称（可选）",
+              "arguments": [
+                {
+                  "name": "TAG_NAME",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "--use-remote",
+              "description": "使用远程元数据"
+            },
+            {
+              "name": "--json",
+              "description": "以 JSON 格式输出"
+            }
+          ],
+          "metadata": [
+            { "name": "handler", "value": "list-apis" }
+          ]
+        },
+        {
+          "name": "schemas",
+          "description": "列举指定 spec 下的 schemas",
+          "options": [
+            {
+              "name": "--use-remote",
+              "description": "使用远程元数据"
+            },
+            {
+              "name": "--json",
+              "description": "以 JSON 格式输出"
+            }
+          ],
+          "metadata": [
+            { "name": "handler", "value": "list-schemas" }
+          ]
+        }
+      ],
+      "metadata": [
+        { "name": "scope", "value": "shared" },
+        { "name": "handler", "value": "list-tags" }
+      ]
+    }
+  ]
+}

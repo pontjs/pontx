@@ -22,14 +22,41 @@ version: {{VERSION}}
 
 版本: {{VERSION}}
 
+**核心设计**: 在任意子命令层级使用 \`-h\` 都能获取下一步可用的操作和参数。
+
 ## Quick Start
 
 \`\`\`bash
 # 安装 SDK（全局安装以使用 CLI）
 npm install -g {{SDK_NAME}}
 
+# 查看所有可用命令
+{{CLI_NAME}} -h
+
 # 搜索 API
 {{CLI_NAME}} search <keyword>
+\`\`\`
+
+## 命令层级结构
+
+\`\`\`
+{{CLI_NAME}}
+├── call {{API_ARGS_FORMAT}}       调用 API
+├── show-api {{API_ARGS_FORMAT}}   查看 API 元数据
+├── gen {{API_ARGS_FORMAT}}        生成调用代码
+├── show-schema <schema>   查看 Schema
+├── search <keyword>       搜索 API
+├── list-cases             列举代码模板
+├── list (tags|apis|schemas)  列举信息
+└── completion             管理 Shell 补全
+\`\`\`
+
+**在每个层级使用 \`-h\` 获取帮助**:
+
+\`\`\`bash
+{{CLI_NAME}} -h                          # 所有命令
+{{CLI_NAME}} call -h                     # 可用的 tags 或 APIs
+{{CALL_TAG_HELP_EXAMPLE}}{{CLI_NAME}} call {{API_WITH_PARAMS_EXAMPLE}} -h   # API 入参详情和调用示例
 \`\`\`
 
 ## Core Workflows
@@ -38,43 +65,28 @@ npm install -g {{SDK_NAME}}
 
 \`\`\`bash
 # 搜索 API
-{{CLI_NAME}} search <keyword> [-m, --max <count>] [--remote]
+{{CLI_NAME}} search <keyword>
 
 # 列出所有 tags
 {{CLI_NAME}} list tags
 
 # 列出所有 API
 {{CLI_NAME}} list apis [--tag <tag>]
-
-# 列出所有 specs
-{{CLI_NAME}} list
 \`\`\`
 
 **示例**:
 \`\`\`bash
-# 搜索包含 "{{SEARCH_KEYWORD_EXAMPLE}}" 的 API
 {{CLI_NAME}} search {{SEARCH_KEYWORD_EXAMPLE}}
-
-# 限制返回 3 条结果
 {{CLI_NAME}} search {{SEARCH_KEYWORD_EXAMPLE}} -m 3
 \`\`\`
 
-### 2. API 详情查看
+### 2. 查看 API 详情
 
 \`\`\`bash
 # 查看 API 详情（参数、请求体、响应等）
-{{CLI_NAME}} show-api [<tagName>.]<apiName> [--remote]
-
-# 查看 Schema 定义
-{{CLI_NAME}} show-schema <schemaName> [--use-remote]
-\`\`\`
-
-**示例**:
-\`\`\`bash
-# 查看 API 详情
 {{CLI_NAME}} show-api {{API_PATH_EXAMPLE}}
 
-# 查看 Schema
+# 查看 Schema 定义
 {{CLI_NAME}} show-schema {{SCHEMA_NAME_EXAMPLE}}
 \`\`\`
 
@@ -82,19 +94,6 @@ npm install -g {{SDK_NAME}}
 
 ### 3. 代码生成
 
-\`\`\`bash
-{{CLI_NAME}} gen <api-path> [options]
-
-Options:
-  --case <case>        代码模板名称 (默认: request)
-                       常见值: request (基础请求), reactHooks (React Hooks), cliCommand (CLI 命令)
-                       可用 list-cases 查询
-  --params <json>      请求参数，JSON 格式字符串
-  --body <json>        请求体参数，JSON 格式
-  --use-remote         使用远程元数据
-\`\`\`
-
-**示例**:
 \`\`\`bash
 # 生成基础请求代码
 {{CLI_NAME}} gen {{API_PATH_EXAMPLE}}
@@ -105,20 +104,8 @@ Options:
 # 带参数生成代码
 {{CLI_NAME}} gen {{API_PATH_EXAMPLE}} --params '{{PARAM_JSON_EXAMPLE}}'
 
-# 生成 CLI 调用命令
-{{CLI_NAME}} gen {{API_PATH_EXAMPLE}} --case cliCommand
-
-# 查看可用 case
+# 查看可用模板
 {{CLI_NAME}} list-cases
-\`\`\`
-
-**SDK 集成示例**:
-\`\`\`typescript
-// 使用 gen 命令生成的代码
-import { request } from './generated/api';
-
-// 调用 API
-const result = await request.{{API_METHOD_EXAMPLE}}({{PARAM_JSON_EXAMPLE}});
 \`\`\`
 
 ### 4. API 调用（CLI Call）
@@ -126,31 +113,10 @@ const result = await request.{{API_METHOD_EXAMPLE}}({{PARAM_JSON_EXAMPLE}});
 ⚠️ **安全警告**: 实际调用会产生**真实的副作用**（创建、更新、删除数据）。
 
 **推荐安全流程**:
-1. 使用 \`show-api\` 确认 API 参数和行为
-2. 使用 \`call --dry-run\` 预览请求内容
-3. 确认无误后执行实际调用
 
 \`\`\`bash
-{{CLI_NAME}} call <api-path> [args...] [options]
-
-Options:
-  -e, --env <env>           环境名称
-  -H, --header <header...>  额外的 HTTP 头
-  -o, --output <file>       输出到文件
-  --debug                   调试模式
-  --dry-run                 仅显示请求信息，不发送请求
-  --use-remote              使用远程元数据
-  -q, --query <jmespath>    使用 JMESPath 查询响应
-\`\`\`
-
-**参数格式**:
-- 命名参数: \`--param-name value\`
-- 请求体: \`--body '{"key": "value"}'\`
-
-**示例**:
-\`\`\`bash
-# Step 1: 查看 API 详情
-{{CLI_NAME}} show-api {{API_WITH_PARAMS_EXAMPLE}}
+# Step 1: 查看 API 入参（使用 -h）
+{{CLI_NAME}} call {{API_WITH_PARAMS_EXAMPLE}} -h
 
 # Step 2: 预览请求（不实际发送）
 {{CLI_NAME}} call {{API_WITH_PARAMS_EXAMPLE}} {{PARAM_EXAMPLE}} --dry-run
@@ -174,61 +140,41 @@ Options:
 # 安装自动补全（自动检测 shell 类型）
 {{CLI_NAME}} completion install
 
-# 手动指定 shell
-{{CLI_NAME}} completion install --shell zsh
-
-# 生成补全脚本
-{{CLI_NAME}} completion generate
-
-# 卸载补全
-{{CLI_NAME}} completion uninstall
+# 支持 TAB 补全命令名、tag 名、API 名和参数名
 \`\`\`
 
-### 6. Pontx 统一工具
+## \`-h\` 逐层探索指南
 
-\`pontx\` 是跨所有 API 规范的统一管理工具，而 \`{{CLI_NAME}}\` 是针对单个 spec 的专用 CLI。
+| 命令 | \`-h\` 显示内容 |
+|------|---------------|
+| \`{{CLI_NAME}} -h\` | 所有可用命令 |
+| \`{{CLI_NAME}} call -h\` | 可用的 Tags 列表（或 APIs） |
+{{CALL_TAG_HELP_TABLE_ROW}}| \`{{CLI_NAME}} call {{API_WITH_PARAMS_EXAMPLE}} -h\` | 该 API 的入参详情 + 调用示例 |
+| \`{{CLI_NAME}} list -h\` | list 子命令 |
 
-| 特性 | pontx | {{CLI_NAME}} |
-|------|-------|-------------|
-| 管理范围 | 多个 API spec | 单个 API spec |
-| API 路径格式 | \`spec.tag.api\` | {{API_PATH_FORMAT_SHORT}} |
-| 代码生成 | 批量生成 SDK | 单个 API 代码片段 |
-| 配置文件 | \`pontx.config.ts\` | 内置 \`api-lock.json\` |
-
-如果需要管理多个 API 数据源或批量生成 SDK 代码，推荐使用 \`pontx\`。
-
-## Safety & Best Practices
-
-### API 调用安全
-- ✅ **总是先用 \`--dry-run\`**: 预览请求内容，避免误操作
-- ✅ **检查环境**: 使用 \`--env\` 确认目标环境（dev/prod）
-- ✅ **验证参数**: 使用 \`show-api\` 查看参数要求
-- ⚠️ **小心副作用**: DELETE/PUT/POST 操作会修改数据
-- ⚠️ **保护凭证**: 使用环境变量存储 token，不要硬编码
-
-### 代码生成
-- 使用 \`list-cases\` 查看可用模板
-- 生成的代码可直接在项目中使用
-- 不要手动修改生成的代码（会被覆盖）
-
-### 调试技巧
-- 使用 \`--debug\` 查看详细日志
-- 使用 \`call --dry-run\` 排查请求问题
+**最佳实践**: 不确定下一步怎么写时，追加 \`-h\` 即可。
 
 ## 命令速查表
 
 | 命令 | 说明 |
 |------|------|
 | \`search <keyword>\` | 搜索 API |
-| \`show-api <path>\` | 查看 API 详情 |
-| \`show-schema <path>\` | 查看 Schema 定义 |
-| \`gen <path>\` | 生成 API 调用代码 |
-| \`call <path>\` | 调用 API（⚠️ 有副作用） |
-| \`list\` | 列出 specs |
+| \`show-api {{API_ARGS_FORMAT}}\` | 查看 API 详情 |
+| \`show-schema <schema>\` | 查看 Schema 定义 |
+| \`gen {{API_ARGS_FORMAT}}\` | 生成 API 调用代码 |
+| \`call {{API_ARGS_FORMAT}}\` | 调用 API（⚠️ 有副作用） |
 | \`list tags\` | 列出所有 tags |
 | \`list apis\` | 列出所有 API |
 | \`list-cases\` | 列出代码模板 |
 | \`completion install\` | 安装 Shell 补全 |
+
+## Safety & Best Practices
+
+- **总是先用 \`-h\` 查看参数**: \`{{CLI_NAME}} call <api> -h\`
+- **总是先用 \`--dry-run\`**: 预览请求内容，避免误操作
+- **检查环境**: 使用 \`--env\` 确认目标环境
+- **小心副作用**: DELETE/PUT/POST 操作会修改数据
+- **保护凭证**: 使用环境变量存储 token
 
 ## 相关资源
 
@@ -243,15 +189,26 @@ Options:
 `;
 
 /**
+ * 获取 API 参数格式（用于命令结构展示）
+ * @param hasTags 是否有 tags
+ */
+export function getApiArgsFormat(hasTags: boolean): string {
+  return hasTags ? "<tag> <api>" : "<api>";
+}
+
+/**
  * 获取 API 路径示例
  * @param hasTags 是否有 tags
- * @param apiPath 可选的实际 API 路径
+ * @param tagName 可选的 tag 名
+ * @param apiName 可选的 API 名
  */
-export function getApiPathExample(hasTags: boolean, apiPath?: string): string {
-  if (apiPath) {
-    return apiPath;
+export function getApiPathExample(hasTags: boolean, tagName?: string, apiName?: string): string {
+  if (hasTags) {
+    const tag = tagName || "<tag>";
+    const api = apiName || "<apiName>";
+    return `${tag} ${api}`;
   }
-  return hasTags ? "<tag>.<apiName>" : "<apiName>";
+  return apiName || "<apiName>";
 }
 
 /**
@@ -269,18 +226,37 @@ export function getApiMethodExample(hasTags: boolean, apiName?: string): string 
 /**
  * 获取 API 路径格式说明
  * @param hasTags 是否有 tags
- * @param apiPath 可选的实际 API 路径作为示例
+ * @param tagName 可选的 tag 名
+ * @param apiName 可选的 API 名
  */
-export function getApiPathFormatHelp(hasTags: boolean, apiPath?: string): string {
+export function getApiPathFormatHelp(hasTags: boolean, tagName?: string, apiName?: string): string {
   if (hasTags) {
-    const example = apiPath || "<tag>.<apiName>";
-    return `**API Path 格式**: \`tag.apiName\`
+    const example = tagName && apiName ? `${tagName} ${apiName}` : "<tag> <apiName>";
+    return `**API 参数格式**: \`<tag> <apiName>\`
 示例: \`${example}\``;
   } else {
-    const example = apiPath || "<apiName>";
-    return `**API Path 格式**: \`apiName\`
+    const example = apiName || "<apiName>";
+    return `**API 参数格式**: \`<apiName>\`
 示例: \`${example}\``;
   }
+}
+
+/**
+ * 获取 call <tag> -h 的帮助示例行
+ */
+export function getCallTagHelpExample(hasTags: boolean, cliName: string, tagName?: string): string {
+  if (!hasTags) return "";
+  const tag = tagName || "<tag>";
+  return `${cliName} call ${tag} -h                     # ${tag} 下的所有 APIs\n`;
+}
+
+/**
+ * 获取 -h 指南表格中 tag 行
+ */
+export function getCallTagHelpTableRow(hasTags: boolean, cliName: string, tagName?: string): string {
+  if (!hasTags) return "";
+  const tag = tagName || "<tag>";
+  return `| \`${cliName} call ${tag} -h\` | 该 tag 下的所有 APIs |\n`;
 }
 
 /**
@@ -288,5 +264,5 @@ export function getApiPathFormatHelp(hasTags: boolean, apiPath?: string): string
  * @param hasTags 是否有 tags
  */
 export function getApiPathFormatShort(hasTags: boolean): string {
-  return hasTags ? "`tag.api`" : "`api`";
+  return hasTags ? "`<tag> <api>`" : "`<api>`";
 }

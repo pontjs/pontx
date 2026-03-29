@@ -10,7 +10,7 @@ export { createCli, runCli };
 
 // 主函数 - 仅在作为入口文件运行时执行
 async function main() {
-  const program = createCli({
+  const program = await createCli({
     rootDir: process.cwd(),
     binName: "pontx",
   });

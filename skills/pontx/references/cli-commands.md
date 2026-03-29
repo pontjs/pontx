@@ -2,6 +2,22 @@
 
 本文档提供 Pontx CLI 所有命令的详细参考。
 
+## 命令层级结构
+
+Pontx CLI 采用层级式命令结构。Spec 作用域命令（call、show-api、gen 等）使用位置参数 `<tag> <api>` 替代旧的点分隔路径格式。
+
+**单 spec** 时直接使用命令：`pontx call user info`
+**多 spec** 时需加 spec 前缀：`pontx mySpec call user info`
+
+**核心特性：`-h` 逐层帮助** — 在任意层级追加 `-h` 可探索可用命令和参数：
+
+```bash
+pontx -h                        # 所有全局命令 + spec 命令
+pontx call -h                   # 可用的 Tags 列表
+pontx call pet -h               # pet 下的所有 APIs
+pontx call pet getPetById -h    # getPetById 的入参详情 + 示例
+```
+
 ## 命令概览
 
 | 命令 | 说明 |
@@ -28,7 +44,7 @@
 
 | 选项 | 说明 |
 |------|------|
-| `--help`, `-h` | 显示帮助信息 |
+| `--help`, `-h` | 显示帮助信息（逐层探索命令结构） |
 | `--version`, `-V` | 显示版本号 |
 | `--debug` | 启用调试日志 |
 
@@ -68,20 +84,29 @@ pontx init --localPath "./openapi.json" --name "local"
 
 ## pontx list
 
-列出各种资源信息。
+列出各种资源信息。`list specs` 是全局命令；`list tags/apis/schemas` 是 spec 作用域命令。
+
+### 全局用法
 
 ```bash
-pontx list [type] [options]
+# 列出所有 specs（默认行为）
+pontx list
+pontx list specs
 ```
 
-### 子命令
+### Spec 作用域用法
 
-| 子命令 | 说明 |
-|--------|------|
-| `pontx list specs` | 列出所有数据源 |
-| `pontx list apis` | 列出所有 API |
-| `pontx list tags` | 列出所有 API 标签 |
-| `pontx list schemas` | 列出所有数据模型 |
+```bash
+# 单 spec 时直接使用
+pontx list tags
+pontx list apis
+pontx list schemas
+
+# 多 spec 时加 spec 前缀
+pontx mySpec list tags
+pontx mySpec list apis
+pontx mySpec list schemas
+```
 
 ### 选项
 
@@ -89,32 +114,38 @@ pontx list [type] [options]
 |------|------|
 | `--use-remote` | 使用远程元数据 |
 | `--json` | 以 JSON 格式输出 |
-| `--spec <name>` | 指定 spec 名称（仅 apis/tags/schemas） |
 
 ### 示例
 
 ```bash
-# 列出所有 specs（默认行为）
+# 列出所有 specs
 pontx list
 
-# 列出所有 API
-pontx list apis
+# 列出所有 API 标签
+pontx list tags
 
 # 列出指定 spec 的 API
-pontx list apis --spec mySpec
+pontx mySpec list apis
 
 # JSON 格式输出
 pontx list schemas --json
+
+# 使用 -h 查看可用子命令
+pontx list -h
 ```
 
 ---
 
 ## pontx search
 
-搜索 API 接口。
+搜索 API 接口。这是 spec 作用域命令。
 
 ```bash
+# 单 spec
 pontx search <keyword> [options]
+
+# 多 spec 时指定 spec
+pontx mySpec search <keyword> [options]
 ```
 
 ### 参数
@@ -128,7 +159,6 @@ pontx search <keyword> [options]
 | 选项 | 说明 | 默认值 |
 |------|------|--------|
 | `--max <count>` | 最大返回数量 | 6 |
-| `--spec <name>` | 指定搜索的 spec | 全部 |
 | `--use-remote` | 使用远程元数据 | false |
 
 ### 示例
@@ -140,25 +170,30 @@ pontx search user
 # 限制结果数量
 pontx search user --max 20
 
-# 在指定 spec 中搜索
-pontx search "create" --spec mySpec
+# 在指定 spec 中搜索（多 spec 时）
+pontx mySpec search "create"
 ```
 
 ---
 
 ## pontx show-api
 
-查看 API 元数据详情。
+查看 API 元数据详情。这是 spec 作用域命令，使用 `<tag> <api>` 位置参数。
 
 ```bash
-pontx show-api <apiPath> [options]
+# 单 spec
+pontx show-api <tag> <api> [options]
+
+# 多 spec
+pontx mySpec show-api <tag> <api> [options]
 ```
 
 ### 参数
 
 | 参数 | 说明 |
 |------|------|
-| `apiPath` | API 路径，格式: `specName.tagName.apiName` |
+| `tag` | API 标签名 |
+| `api` | API 名称 |
 
 ### 选项
 
@@ -170,10 +205,13 @@ pontx show-api <apiPath> [options]
 
 ```bash
 # 查看 API 详情
-pontx show-api mySpec.user.info
+pontx show-api user info
 
-# 特殊字符用引号包裹
-pontx show-api "mySpec.user-manage.get-info"
+# 多 spec 时
+pontx mySpec show-api user info
+
+# 也可以用 call -h 替代 show-api 查看参数详情
+pontx call user info -h
 ```
 
 ### 输出内容
@@ -188,17 +226,21 @@ pontx show-api "mySpec.user-manage.get-info"
 
 ## pontx show-schema
 
-查看 Schema 元数据详情。
+查看 Schema 元数据详情。这是 spec 作用域命令。
 
 ```bash
-pontx show-schema <schemaPath> [options]
+# 单 spec
+pontx show-schema <schema> [options]
+
+# 多 spec
+pontx mySpec show-schema <schema> [options]
 ```
 
 ### 参数
 
 | 参数 | 说明 |
 |------|------|
-| `schemaPath` | Schema 路径，格式: `specName.schemaName` |
+| `schema` | Schema 名称 |
 
 ### 选项
 
@@ -210,28 +252,36 @@ pontx show-schema <schemaPath> [options]
 
 ```bash
 # 查看 Schema 详情
-pontx show-schema mySpec.UserDTO
+pontx show-schema UserDTO
+
+# 多 spec 时
+pontx mySpec show-schema UserDTO
 
 # 从 API $ref 提取 schemaName
 # $ref: "#/components/schemas/ResultDTO" -> schemaName 是 ResultDTO
-pontx show-schema mySpec.ResultDTO
+pontx show-schema ResultDTO
 ```
 
 ---
 
 ## pontx gen
 
-生成 API 调用示例代码。
+生成 API 调用示例代码。这是 spec 作用域命令，使用 `<tag> <api>` 位置参数。
 
 ```bash
-pontx gen <apiPath> [options]
+# 单 spec
+pontx gen <tag> <api> [options]
+
+# 多 spec
+pontx mySpec gen <tag> <api> [options]
 ```
 
 ### 参数
 
 | 参数 | 说明 |
 |------|------|
-| `apiPath` | API 路径，格式: `specName.tagName.apiName` |
+| `tag` | API 标签名 |
+| `api` | API 名称 |
 
 ### 选项
 
@@ -256,16 +306,19 @@ pontx gen <apiPath> [options]
 
 ```bash
 # 生成基础请求代码
-pontx gen mySpec.user.info
+pontx gen user info
 
 # 生成 React Hooks 代码
-pontx gen mySpec.user.info --case reactHooks
+pontx gen user info --case reactHooks
 
 # 生成 CLI 调用命令
-pontx gen mySpec.user.info --case cliCommand
+pontx gen user info --case cliCommand
 
 # 带参数生成
-pontx gen mySpec.user.info --params '{"id": 123}'
+pontx gen user info --params '{"id": 123}'
+
+# 多 spec 时
+pontx mySpec gen user info --case reactHooks
 ```
 
 ---
@@ -298,17 +351,22 @@ pontx generate --use-remote
 
 ## pontx call
 
-调用 API 接口。
+调用 API 接口。这是 spec 作用域命令，使用 `<tag> <api>` 位置参数。
 
 ```bash
-pontx call <apiPath> [options] [--paramName value...]
+# 单 spec
+pontx call <tag> <api> [options] [--paramName value...]
+
+# 多 spec
+pontx mySpec call <tag> <api> [options] [--paramName value...]
 ```
 
 ### 参数
 
 | 参数 | 说明 |
 |------|------|
-| `apiPath` | API 路径，格式: `specName.tagName.apiName` |
+| `tag` | API 标签名 |
+| `api` | API 名称 |
 
 ### 选项
 
@@ -323,32 +381,42 @@ pontx call <apiPath> [options] [--paramName value...]
 | `--debug` | - | 显示详细信息 |
 | `--use-remote` | - | 使用远程元数据 |
 
+### 使用 `-h` 查看参数详情
+
+```bash
+# 查看 API 的入参详情和示例（替代 show-api）
+pontx call user info -h
+```
+
 ### 示例
 
 ```bash
 # 预览请求
-pontx call mySpec.user.info --dry-run --id 123
+pontx call user info --dry-run --id 123
 
 # 发送请求
-pontx call mySpec.user.info --id 123
+pontx call user info --id 123
 
 # POST 请求
-pontx call mySpec.user.create --body '{"name": "John"}'
+pontx call user create --body '{"name": "John"}'
 
 # 从文件读取 body
-pontx call mySpec.user.create --body @data.json
+pontx call user create --body @data.json
 
 # 添加请求头
-pontx call mySpec.user.info -H "Authorization: Bearer token"
+pontx call user info -H "Authorization: Bearer token"
 
 # 输出到文件
-pontx call mySpec.user.list -o result.json
+pontx call user list -o result.json
 
 # 使用 JMESPath 筛选
-pontx call mySpec.user.list -q "[].{Id: id, Name: name}"
+pontx call user list -q "[].{Id: id, Name: name}"
 
 # 指定环境
-pontx call mySpec.user.info --env prod
+pontx call user info --env prod
+
+# 多 spec 时
+pontx mySpec call user info --id 123
 ```
 
 ---
@@ -531,7 +599,7 @@ pontx skill
 
 ## pontx list-cases
 
-获取可用的代码生成 case 列表。
+获取可用的代码生成 case 列表。这是 spec 作用域命令。
 
 ```bash
 pontx list-cases

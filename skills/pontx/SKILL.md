@@ -15,7 +15,7 @@ Pontx 是一个 API 生命周期管理工具，提供 API 搜索、探索、文�
 
 > **IMPORTANT**: 本文件是工作流索引。每个工作流的详细步骤、参数、分支逻辑都在 `references/` 目录下的对应文件中。**执行任何工作流之前，必须先读取对应的 reference 文件，不要仅凭本文件中的概要信息执行操作。**
 
-**Tip**: 运行 `pontx list` 查看当前项目配置的 API specs。
+**Tip**: 运行 `pontx list` 查看当前项目配置的 API specs。**在任何子命令后追加 `-h` 可逐层探索命令结构。**
 
 ---
 
@@ -33,7 +33,7 @@ Pontx 是一个 API 生命周期管理工具，提供 API 搜索、探索、文�
 
 在 TypeScript/JavaScript 项目中搜索 API、查看详情、生成类型安全的 SDK 代码。
 
-核心命令：`pontx list apis` / `pontx search <keyword>` / `pontx show-api <spec.tag.api>` / `pontx generate`
+核心命令：`pontx list apis` / `pontx search <keyword>` / `pontx show-api <tag> <api>` / `pontx generate`
 
 > **MUST READ**: 查看 `references/cli-commands.md` 了解每个命令的完整选项和用法。
 
@@ -71,21 +71,57 @@ Pontx 的核心配置文件，控制数据源、输出目录、插件、API 调�
 
 ---
 
-## 7. CLI 命令速查
+## 7. 命令层级结构
 
-| 命令                       | 说明                                    |
-| -------------------------- | --------------------------------------- |
-| `pontx init`               | 初始化配置文件                          |
-| `pontx list <type>`        | 列出资源（specs/apis/tags/schemas）     |
-| `pontx search <keyword>`   | 搜索 API                               |
-| `pontx show-api <path>`    | 查看 API 详情（格式: spec.tag.api）     |
-| `pontx gen <path>`         | 生成单个 API 调用代码                   |
-| `pontx generate`           | 生成所有 SDK 代码                       |
-| `pontx call <path>`        | 调用 API（推荐先加 `--dry-run`）        |
-| `pontx cli init`           | 初始化 SDK CLI 项目                     |
-| `pontx cli build`          | 构建 SDK CLI                            |
-| `pontx completion install` | 安装 Shell 补全                         |
-| `pontx skill`              | 安装此 SKILL                            |
+```
+pontx
+├── 全局命令
+│   ├── init / check / generate / mocks / service / skill / cache:clean / add-spec
+│   ├── completion
+│   ├── cli (init|build)
+│   └── list specs
+├── Spec 作用域命令（单 spec 时省略 spec 名）
+│   ├── call <tag> <api>
+│   ├── show-api <tag> <api>
+│   ├── gen <tag> <api>
+│   ├── show-schema <schema>
+│   ├── search <keyword>
+│   ├── list-cases
+│   └── list (tags|apis|schemas)
+└── <specName>（多 spec 时，每个 spec 一个子命令）
+    └── (同上 spec 作用域命令)
+```
+
+**核心特性：`-h` 逐层帮助** — 在任意子命令层级追加 `-h` 都能获取上下文帮助：
+
+```bash
+pontx -h                        # 所有全局命令 + spec 命令
+pontx call -h                   # 可用的 Tags 列表
+pontx call pet -h               # pet 下的所有 APIs
+pontx call pet getPetById -h    # getPetById 的入参详情 + 示例
+```
+
+## 8. CLI 命令速查
+
+| 命令                            | 说明                                    |
+| ------------------------------- | --------------------------------------- |
+| `pontx init`                    | 初始化配置文件                          |
+| `pontx list specs`              | 列出所有数据源                          |
+| `pontx list tags`               | 列出所有 API 标签                       |
+| `pontx list apis`               | 列出所有 API                            |
+| `pontx list schemas`            | 列出所有数据模型                        |
+| `pontx search <keyword>`        | 搜索 API                               |
+| `pontx show-api <tag> <api>`    | 查看 API 详情                           |
+| `pontx show-schema <schema>`    | 查看 Schema 详情                        |
+| `pontx gen <tag> <api>`         | 生成单个 API 调用代码                   |
+| `pontx generate`                | 生成所有 SDK 代码                       |
+| `pontx call <tag> <api>`        | 调用 API（推荐先加 `--dry-run`）        |
+| `pontx cli init`                | 初始化 SDK CLI 项目                     |
+| `pontx cli build`               | 构建 SDK CLI                            |
+| `pontx completion install`      | 安装 Shell 补全                         |
+| `pontx skill`                   | 安装此 SKILL                            |
+
+> 多 spec 时需加 spec 前缀：`pontx mySpec call user info`。单 spec 时可直接 `pontx call user info`。
 
 > **MUST READ**: 查看 `references/cli-commands.md` 了解每个命令的完整选项、参数和示例。
 
@@ -94,7 +130,7 @@ Pontx 的核心配置文件，控制数据源、输出目录、插件、API 调�
 ## Safety & Best Practices
 
 - **总是先用 `--dry-run`**: 调用 API 前先预览请求内容
-- **使用 `show-api` 确认参数**: 了解必填参数和类型
+- **使用 `-h` 确认参数**: `pontx call <tag> <api> -h` 查看入参详情和示例
 - **小心副作用操作**: DELETE/PUT/POST 会修改数据，需二次确认
 - **保护凭证**: 使用环境变量，不要硬编码 token
 - **使用 `--debug`**: 排查问题时启用详细日志

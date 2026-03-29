@@ -1,0 +1,32 @@
+{
+  "name": "test-api",
+  "apis": {
+    "pet/list": {
+      "method": "GET",
+      "path": "/pet/list",
+      "title": "获取宠物列表",
+      "description": "返回所有宠物",
+      "parameters": [
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": { "type": "integer" }
+        }
+      ]
+    },
+    "pet/get": {
+      "method": "GET",
+      "path": "/pet/{id}",
+      "title": "获取单个宠物",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string" }
+        }
+      ]
+    }
+  }
+}
