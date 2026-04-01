@@ -1,5 +1,11 @@
 # pontx
 
+## 1.0.0-beta.2
+
+### Patch Changes
+
+- Add README documentation for pontx package
+
 ## 1.0.0-beta.1
 
 ### Minor Changes
