@@ -26,9 +26,6 @@
         "types": "./cjs-types/sdk-cli/index.d.cts",
         "default": "./cjs/sdk-cli/index.cjs"
       }
-    },
-    "./setup-cli": {
-      "require": "./setup-cli.cjs"
     }
   },
   "bin": {
@@ -60,7 +57,6 @@
     "cjs",
     "cjs-types",
     "bin",
-    "setup-cli.cjs",
     "skills",
     "package.json",
     "*.md"
