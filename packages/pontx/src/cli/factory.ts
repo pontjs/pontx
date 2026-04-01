@@ -141,7 +141,7 @@ function registerGlobalCommands(
     .option("--name <name>", "数据源名称")
     .option("--localPath <path>", "本地数据源路径")
     .option("--outDir <dir>", "生成代码的输出目录", "src/apis")
-    .option("--runtime <runtime>", "运行时环���: nodejs | browser", "nodejs")
+    .option("--runtime <runtime>", "运行时环境: nodejs | browser", "nodejs")
     .option("--skip-install", "跳过安装 SDK 依赖")
     .action(async (options) => {
       const { initCommand } = await import("./commands/init");
@@ -150,7 +150,7 @@ function registerGlobalCommands(
 
   program
     .command("check")
-    .description("检测本地和远���元数据的兼容性")
+    .description("检测本地和远程元数据的兼容性")
     .action(async () => {
       const manager = await getManager();
       const { checkCommand } = await import("./commands/check");
@@ -159,7 +159,7 @@ function registerGlobalCommands(
 
   program
     .command("generate")
-    .description("拉���远程数据源并生成代码")
+    .description("拉取远程数据源并生成代码")
     .option("--use-remote", "使用远程元数据生成")
     .action(async (options) => {
       const manager = await getManager();
@@ -172,7 +172,7 @@ function registerGlobalCommands(
       }
 
       await PontxManager.generateCode(manager);
-      logger.info("Pontx SDK 生成完��!");
+      logger.info("Pontx SDK 生成完成!");
     });
 
   program

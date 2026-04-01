@@ -95,7 +95,7 @@ pontx call mySpec.user.<Tab>
 # 显示该 tag 下的 APIs
 ```
 
-## 各 Shell 配置详��
+## 各 Shell 配置详解
 
 ### Zsh
 
