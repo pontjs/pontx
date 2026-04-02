@@ -2,8 +2,9 @@
  * @author pontx
  * @description SDK CLI 运行入口
  *
- * SDK CLI 天然是单 spec 模式，复用 registerSpecCommands 注册命令。
- * 命令格式：yuque call doc getDoc（位置参数风格）
+ * 支持单 spec 和多 spec 模式，复用 registerSpecCommands 注册命令。
+ * 单 spec：命令在根级别，如 yuque call doc getDoc
+ * 多 spec：每个 spec 作为子命令，如 cli currency call tag api
  */
 
 import * as path from "path";
@@ -12,8 +13,10 @@ import { Command } from "commander";
 import type { CLIConfig } from "./types";
 import { createSdkCliContext } from "./context-adapter";
 import { createLogger } from "../../logger/logger";
-import { registerSpecCommands, type SpecInfo } from "../spec-commands";
-import { listSpecsCommand } from "../commands/list-specs";
+import {
+  registerSpecCommands,
+  type SpecInfo,
+} from "../spec-commands";
 import {
   CompletionEngine,
   CompletionDataSource,
@@ -25,6 +28,15 @@ import type { PontxSpec } from "@pontx/spec";
 /* 声明 banner 注入的全局变量 */
 declare global {
   var __CLI_DIR__: string | undefined;
+}
+
+/**
+ * 获取 CLI 所在目录
+ */
+function getCliDir(): string {
+  return typeof globalThis.__CLI_DIR__ !== "undefined"
+    ? globalThis.__CLI_DIR__
+    : __dirname;
 }
 
 /**
@@ -42,36 +54,22 @@ export async function runCLI(config: CLIConfig): Promise<void> {
     const formatIndex = args.indexOf("--format");
     const format = formatIndex !== -1 ? args[formatIndex + 1] : "plain";
 
-    const cliDir =
-      typeof globalThis.__CLI_DIR__ !== "undefined"
-        ? globalThis.__CLI_DIR__
-        : __dirname;
-    const specPath = path.join(cliDir, "api-lock.json");
+    const cliDir = getCliDir();
+    const specs = loadSpecs(cliDir);
 
-    await handleCompletionRequest(
-      config.name,
-      specPath,
-      line,
-      wordIndex,
-      format
-    );
+    await handleCompletionRequest(config.name, specs, line, wordIndex, format);
     process.exit(0);
   }
 
   // 1. 获取 CLI 所在目录
-  const cliDir =
-    typeof globalThis.__CLI_DIR__ !== "undefined"
-      ? globalThis.__CLI_DIR__
-      : __dirname;
+  const cliDir = getCliDir();
 
-  // 2. 解析 spec 路径
-  const specPath = path.join(cliDir, "api-lock.json");
-
-  // 3. 检查文件是否存在
-  if (!fs.existsSync(specPath)) {
+  // 2. 加载 specs
+  const specs = loadSpecs(cliDir);
+  if (specs.length === 0) {
     const errorMsg = [
       `错误：找不到 API 规范文件`,
-      `  期望路径: ${specPath}`,
+      `  搜索目录: ${cliDir}`,
       ``,
       `提示：`,
       `  - 请先运行 'pontx cli build' 命令构建 CLI`,
@@ -80,16 +78,66 @@ export async function runCLI(config: CLIConfig): Promise<void> {
     throw new Error(errorMsg);
   }
 
-  // 4. 创建 CLI 程序
+  // 3. 创建 CLI 程序
   const program = createSdkCli({
     name: config.name,
     config,
-    specPath,
+    specs,
     cliDir,
   });
 
-  // 5. 运行 CLI
+  // 4. 运行 CLI
   await program.parseAsync(process.argv);
+}
+
+/**
+ * 从 CLI 目录加载 specs
+ * 单 origin：读取 api-lock.json
+ * 多 origin：扫描 *.api-lock.json
+ */
+function loadSpecs(cliDir: string): PontxSpec[] {
+  /* 优先检查单 origin 的 api-lock.json */
+  const singlePath = path.join(cliDir, "api-lock.json");
+  if (fs.existsSync(singlePath)) {
+    try {
+      const content = fs.readFileSync(singlePath, "utf-8");
+      return [JSON.parse(content) as PontxSpec];
+    } catch {
+      /* ignore */
+    }
+  }
+
+  /* 扫描 *.api-lock.json（多 origin） */
+  const specs: PontxSpec[] = [];
+  try {
+    const files = fs.readdirSync(cliDir);
+    for (const file of files) {
+      if (file.endsWith(".api-lock.json")) {
+        const filePath = path.join(cliDir, file);
+        const content = fs.readFileSync(filePath, "utf-8");
+        specs.push(JSON.parse(content) as PontxSpec);
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+
+  return specs;
+}
+
+/**
+ * 从 PontxSpec 构建 SpecInfo
+ */
+function buildSpecInfo(spec: PontxSpec, fallbackName: string): SpecInfo {
+  const specName = spec?.name || fallbackName;
+  const hasTags = spec?.apis
+    ? Object.keys(spec.apis).some((key) => key.includes("/"))
+    : false;
+  return {
+    name: specName,
+    hasTags,
+    description: spec?.info?.description || spec?.info?.title,
+  };
 }
 
 /**
@@ -98,10 +146,10 @@ export async function runCLI(config: CLIConfig): Promise<void> {
 function createSdkCli(options: {
   name: string;
   config: CLIConfig;
-  specPath: string;
+  specs: PontxSpec[];
   cliDir: string;
 }): Command {
-  const { name, config, specPath, cliDir } = options;
+  const { name, config, specs, cliDir } = options;
   const program = new Command(name);
   program.enablePositionalOptions();
 
@@ -117,25 +165,45 @@ function createSdkCli(options: {
   );
   program.option("--format <format>", "Output format for completions", "plain");
 
-  /* 创建上下文 */
   const logger = createLogger("info", { prefix: "[sdk cli]" });
-  const context = createSdkCliContext(config, specPath, logger);
 
-  /* 加载 spec 获取 hasTags 信息 */
-  const spec = loadSpec(specPath);
-  const specName = spec?.name || name;
-  const hasTags = spec?.apis
-    ? Object.keys(spec.apis).some((key) => key.includes("/"))
-    : false;
+  if (specs.length === 1) {
+    /* 单 spec：命令在根级别（现有行为） */
+    const spec = specs[0];
+    const context = createSdkCliContext(config, spec, logger);
+    const specInfo = buildSpecInfo(spec, name);
+    registerSpecCommands(program, specInfo, context);
+  } else {
+    /* 多 spec：每个 spec 注册为子命令（复用 factory.ts 模式） */
+    for (const spec of specs) {
+      const specName = spec.name || "unknown";
+      const context = createSdkCliContext(config, spec, logger);
+      const specInfo = buildSpecInfo(spec, specName);
+      const specCmd = program
+        .command(specName)
+        .description(`${specInfo.description || specName} API 操作`);
+      registerSpecCommands(specCmd, specInfo, context);
+    }
 
-  const specInfo: SpecInfo = {
-    name: specName,
-    hasTags,
-    description: spec?.info?.description || spec?.info?.title,
-  };
-
-  /* 使用 registerSpecCommands 注册所有 spec 作用域命令（单 spec，直接在根级别） */
-  registerSpecCommands(program, specInfo, context);
+    /* list 命令展示所有 specs */
+    const listCmd = program.command("list").description("列举信息");
+    listCmd
+      .command("specs")
+      .description("列出所有可用的 specs")
+      .action(() => {
+        console.log("\n可用的 Specs:\n");
+        for (const spec of specs) {
+          const desc = spec.info?.description || spec.info?.title || "";
+          console.log(`  ${spec.name}${desc ? `  - ${desc}` : ""}`);
+        }
+        console.log("");
+      });
+    listCmd.action(() => {
+      listCmd.commands
+        .find((c) => c.name() === "specs")
+        ?.parseAsync([], { from: "user" });
+    });
+  }
 
   /* completion 命令 */
   program
@@ -173,33 +241,28 @@ function getPackageVersion(startDir: string): string | null {
 }
 
 /**
- * 加载 spec 文件
- */
-function loadSpec(specPath: string): PontxSpec | null {
-  try {
-    if (fs.existsSync(specPath)) {
-      const content = fs.readFileSync(specPath, "utf-8");
-      return JSON.parse(content);
-    }
-  } catch {
-    // Ignore errors
-  }
-  return null;
-}
-
-/**
  * 创建 SDK 补全数据源
  */
 function createSdkCompletionDataSource(
-  specPath: string
+  specs: PontxSpec[]
 ): CompletionDataSource {
+  const specMap = new Map(
+    specs.map((s) => [s.name, s])
+  );
+
+  function findSpec(specName: string): PontxSpec | undefined {
+    return specMap.get(specName) || specs[0];
+  }
+
   return {
     async getSpecs(): Promise<string[]> {
-      return [];
+      return specs.length > 1
+        ? specs.map((s) => s.name).filter(Boolean)
+        : [];
     },
 
     async getTags(specName: string): Promise<string[]> {
-      const spec = loadSpec(specPath);
+      const spec = findSpec(specName);
       if (!spec?.apis) return [];
 
       const tags = new Set<string>();
@@ -216,16 +279,16 @@ function createSdkCompletionDataSource(
       specName: string,
       tagName?: string
     ): Promise<Array<{ name: string; description?: string }>> {
-      const spec = loadSpec(specPath);
+      const spec = findSpec(specName);
       if (!spec?.apis) return [];
 
       const apis: Array<{ name: string; description?: string }> = [];
       for (const [apiKey, api] of Object.entries(spec.apis)) {
         if (tagName) {
           if (apiKey.startsWith(`${tagName}/`)) {
-            const name = apiKey.split("/")[1];
+            const apiName = apiKey.split("/")[1];
             apis.push({
-              name,
+              name: apiName,
               description: (api as any).summary || (api as any).description,
             });
           }
@@ -245,7 +308,7 @@ function createSdkCompletionDataSource(
       tagName: string,
       apiName: string
     ): Promise<ParamInfo[]> {
-      const spec = loadSpec(specPath);
+      const spec = findSpec(specName);
       if (!spec?.apis) return [];
 
       const apiKey = tagName ? `${tagName}/${apiName}` : apiName;
@@ -267,27 +330,24 @@ function createSdkCompletionDataSource(
  */
 async function handleCompletionRequest(
   binName: string,
-  specPath: string,
+  specs: PontxSpec[],
   line: string,
   wordIndex: number,
   format: string = "plain"
 ): Promise<void> {
-  const spec = loadSpec(specPath);
-  if (!spec) {
-    return;
-  }
+  if (specs.length === 0) return;
 
-  let hasTags = false;
-  if (spec.apis) {
-    hasTags = Object.keys(spec.apis).some((key) => key.includes("/"));
-  }
+  const dataSource = createSdkCompletionDataSource(specs);
 
-  const dataSource = createSdkCompletionDataSource(specPath);
-
-  const completionOptions: any = {
-    singleSpecName: spec.name || "",
-    hasTags,
-  };
+  const completionOptions: any =
+    specs.length === 1
+      ? {
+          singleSpecName: specs[0].name || "",
+          hasTags: specs[0].apis
+            ? Object.keys(specs[0].apis).some((key) => key.includes("/"))
+            : false,
+        }
+      : {};
 
   const engine = new CompletionEngine(completionOptions, dataSource);
 
@@ -295,10 +355,9 @@ async function handleCompletionRequest(
   const result = await engine.complete(input);
 
   if (format === "zsh") {
-    // Zsh format: "value\tdescription\tgroup" (tab-separated)
     for (const s of result.suggestions) {
-      const desc = s.description || '';
-      const group = s.group || '';
+      const desc = s.description || "";
+      const group = s.group || "";
       console.log(`${s.value}\t${desc}\t${group}`);
     }
   } else if (format === "fish") {

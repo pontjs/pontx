@@ -1,6 +1,10 @@
 /**
  * @author pontx
  * @description SDK CLI 运行入口
+ *
+ * 支持单 spec 和多 spec 模式，复用 registerSpecCommands 注册命令。
+ * 单 spec：命令在根级别，如 yuque call doc getDoc
+ * 多 spec：每个 spec 作为子命令，如 cli currency call tag api
  */
 
 import * as path from "path";
@@ -8,13 +12,15 @@ import * as fs from "fs";
 import { Command } from "commander";
 import type { CLIConfig } from "./types";
 import { createSdkCliContext } from "./context-adapter";
-import { searchCommand } from "../commands/search";
-import { showApiCommand } from "../commands/show-api";
-import { callCommand } from "../commands/call";
-import { genCommand } from "../commands/gen";
-import { showSchemaCommand } from "../commands/show-schema";
-import { listCasesCommand } from "../commands/list-cases";
 import { createLogger } from "../logger/logger";
+import {
+  registerSpecCommands,
+  registerSpecListCommands,
+  type SpecInfo,
+  type ApiSummary,
+  type TagSummary,
+} from "../cli/spec-commands";
+import { listSpecsCommand } from "../commands/list-specs";
 import {
   CompletionEngine,
   CompletionDataSource,
@@ -22,12 +28,123 @@ import {
   ParamInfo,
 } from "../completion";
 import type { PontxSpec } from "@pontx/spec";
-import { registerSdkListCommands } from "./list-commands";
-import { listSpecsCommand } from "../commands/list-specs";
+import { PontxManager } from "../manager";
+import { resolvePlugin } from "../plugin";
 
 /* 声明 banner 注入的全局变量 */
 declare global {
   var __CLI_DIR__: string | undefined;
+}
+
+/**
+ * 获取 CLI 所在目录
+ */
+function getCliDir(): string {
+  return typeof globalThis.__CLI_DIR__ !== "undefined"
+    ? globalThis.__CLI_DIR__
+    : __dirname;
+}
+
+/**
+ * 从 CLI 目录加载 specs
+ * 单 origin：读取 api-lock.json
+ * 多 origin：扫描 *.api-lock.json
+ */
+function loadSpecs(cliDir: string): PontxSpec[] {
+  /* 优先检查单 origin 的 api-lock.json */
+  const singlePath = path.join(cliDir, "api-lock.json");
+  if (fs.existsSync(singlePath)) {
+    try {
+      const content = fs.readFileSync(singlePath, "utf-8");
+      return [JSON.parse(content) as PontxSpec];
+    } catch {
+      /* ignore */
+    }
+  }
+
+  /* 扫描 *.api-lock.json（多 origin） */
+  const specs: PontxSpec[] = [];
+  try {
+    const files = fs.readdirSync(cliDir);
+    for (const file of files) {
+      if (file.endsWith(".api-lock.json")) {
+        const filePath = path.join(cliDir, file);
+        const content = fs.readFileSync(filePath, "utf-8");
+        specs.push(JSON.parse(content) as PontxSpec);
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+
+  return specs;
+}
+
+/**
+ * 从 PontxSpec 构建完整的 SpecInfo（包含 tags 和 apis，用于上下文帮助）
+ * 复用 loadSpecInfos 相同的逻辑
+ */
+function buildSpecInfo(spec: PontxSpec, fallbackName: string): SpecInfo {
+  const specName = spec?.name || fallbackName;
+  const specApis = spec?.apis || {};
+  const apiKeys = Object.keys(specApis);
+  const hasTags = apiKeys.some((k) => k.includes("/"));
+
+  const apis: ApiSummary[] = apiKeys.map((key) => {
+    const hasSlash = key.includes("/");
+    const api = specApis[key] as any;
+    return {
+      key,
+      name: hasSlash ? key.split("/")[1] : key,
+      tag: hasSlash ? key.split("/")[0] : undefined,
+      description: api?.title || api?.summary || api?.description,
+      method: api?.method,
+      apiPath: api?.path,
+      params: (api?.parameters || []).map((p: any) => ({
+        name: p.name,
+        type: p.schema?.type || (p.in === "body" ? "object" : "string"),
+        required: p.required || false,
+        description: p.schema?.description || p.description,
+        enum: p.schema?.enum,
+        in: p.in,
+      })),
+    };
+  });
+
+  /* 从 spec.tags 获取 tag description */
+  const specTags =
+    (spec as any)?.tags as Array<{ name?: string; description?: string }> || [];
+  const tagDescMap = new Map<string, string>();
+  for (const t of specTags) {
+    if (t.name && t.description) {
+      tagDescMap.set(t.name.toLowerCase(), t.description);
+    }
+  }
+
+  const tagMap = new Map<string, TagSummary>();
+  if (hasTags) {
+    for (const a of apis) {
+      if (!a.tag) continue;
+      const existing = tagMap.get(a.tag);
+      if (existing) {
+        existing.apiCount++;
+      } else {
+        tagMap.set(a.tag, {
+          name: a.tag,
+          description: tagDescMap.get(a.tag.toLowerCase()),
+          apiCount: 1,
+        });
+      }
+    }
+  }
+
+  return {
+    name: specName,
+    hasTags,
+    description: spec?.info?.description || spec?.info?.title,
+    tags: hasTags ? [...tagMap.values()] : undefined,
+    apis,
+  };
 }
 
 /**
@@ -45,38 +162,22 @@ export async function runCLI(config: CLIConfig): Promise<void> {
     const formatIndex = args.indexOf("--format");
     const format = formatIndex !== -1 ? args[formatIndex + 1] : "plain";
 
-    // 获取 CLI 目录和 spec 路径
-    const cliDir =
-      typeof globalThis.__CLI_DIR__ !== "undefined"
-        ? globalThis.__CLI_DIR__
-        : __dirname;
-    const specPath = path.join(cliDir, "api-lock.json");
+    const cliDir = getCliDir();
+    const specs = loadSpecs(cliDir);
 
-    await handleCompletionRequest(
-      config.name,
-      specPath,
-      line,
-      wordIndex,
-      format
-    );
+    await handleCompletionRequest(config.name, specs, line, wordIndex, format);
     process.exit(0);
   }
 
   // 1. 获取 CLI 所在目录
-  // 使用 banner 注入的 __CLI_DIR__（cli.cjs 的 __dirname）
-  const cliDir =
-    typeof globalThis.__CLI_DIR__ !== "undefined"
-      ? globalThis.__CLI_DIR__
-      : __dirname; // fallback for development
+  const cliDir = getCliDir();
 
-  // 2. 解析 spec 路径（api-lock.json 与 cli.cjs 在同一目录）
-  const specPath = path.join(cliDir, "api-lock.json");
-
-  // 3. 检查文件是否存在（提供友好的错误提示）
-  if (!fs.existsSync(specPath)) {
+  // 2. 加载 specs
+  const specs = loadSpecs(cliDir);
+  if (specs.length === 0) {
     const errorMsg = [
       `错误：找不到 API 规范文件`,
-      `  期望路径: ${specPath}`,
+      `  搜索目录: ${cliDir}`,
       ``,
       `提示：`,
       `  - 请先运行 'pontx cli build' 命令构建 CLI`,
@@ -85,15 +186,15 @@ export async function runCLI(config: CLIConfig): Promise<void> {
     throw new Error(errorMsg);
   }
 
-  // 4. 创建 CLI 程序
+  // 3. 创建 CLI 程序
   const program = createSdkCli({
     name: config.name,
     config,
-    specPath,
+    specs,
     cliDir,
   });
 
-  // 5. 运行 CLI
+  // 4. 运行 CLI
   await program.parseAsync(process.argv);
 }
 
@@ -103,28 +204,101 @@ export async function runCLI(config: CLIConfig): Promise<void> {
 function createSdkCli(options: {
   name: string;
   config: CLIConfig;
-  specPath: string;
+  specs: PontxSpec[];
   cliDir: string;
 }): Command {
-  const { name, config, specPath, cliDir } = options;
+  const { name, config, specs, cliDir } = options;
   const program = new Command(name);
-  program.enablePositionalOptions(); // 启用位置选项，支持子命令的 passThroughOptions
+  program.enablePositionalOptions();
 
-  // 从 package.json 读取版本号
   const version = getPackageVersion(cliDir);
   if (version) {
     program.version(version);
   }
 
-  // 全局选项（用于自动补全）
+  /* 全局选项 */
   program.option(
     "--get-completions <line>",
     "(internal) Get shell completions"
   );
   program.option("--format <format>", "Output format for completions", "plain");
 
-  // 注册子命令
-  registerSdkCommands(program, config, specPath, name);
+  const logger = createLogger("info", { prefix: "[sdk cli]" });
+
+  if (specs.length === 1) {
+    /* 单 spec：命令在根级别（复用 registerSpecCommands） */
+    const spec = specs[0];
+    const context = createSdkCliContext(config, spec, logger);
+    const specInfo = buildSpecInfo(spec, name);
+    registerSpecCommands(program, specInfo, context);
+  } else {
+    /* 多 spec：每个 spec 注册为子命令（复用 factory.ts 模式） */
+    const specNames: Array<{ name: string; desc: string }> = [];
+    for (const spec of specs) {
+      const specName = spec.name || "unknown";
+      const context = createSdkCliContext(config, spec, logger);
+      const specInfo = buildSpecInfo(spec, specName);
+      const fullDesc = spec.info?.title || spec.info?.description || specName;
+      const shortDesc = fullDesc.split("\n")[0].trim();
+      specNames.push({ name: specName, desc: shortDesc });
+      const specCmd = program
+        .command(specName)
+        .description(shortDesc);
+      specCmd.enablePositionalOptions();
+      registerSpecCommands(specCmd, specInfo, context);
+    }
+
+    /* 在 help 输出前追加 specs 概览 */
+    const maxLen = Math.max(...specNames.map((s) => s.name.length));
+    const specLines = specNames
+      .map((s) => `  ${s.name.padEnd(maxLen + 2)}${s.desc}`)
+      .join("\n");
+    program.addHelpText(
+      "before",
+      `\n可用的 Specs:\n\n${specLines}\n\n使用 '${name} <spec> -h' 查看 spec 下的命令。\n`
+    );
+
+    /* 全局 list 命令展示所有 specs */
+    const allSpecsContext = createMultiSpecContext(config, specs, logger);
+    const listCmd = program
+      .command("list")
+      .alias("ls")
+      .description("列举信息（默认列举所有 specs）")
+      .option("--json", "以 JSON 格式输出")
+      .passThroughOptions()
+      .action(async (opts) => {
+        try {
+          await listSpecsCommand(allSpecsContext, opts);
+        } catch (error: any) {
+          logger.error("列举 specs 失败", error);
+          process.exit(1);
+        }
+      });
+    listCmd
+      .command("specs")
+      .description("列举所有 specs")
+      .option("--json", "以 JSON 格式输出")
+      .action(async (opts) => {
+        try {
+          await listSpecsCommand(allSpecsContext, opts);
+        } catch (error: any) {
+          logger.error("列举 specs 失败", error);
+          process.exit(1);
+        }
+      });
+  }
+
+  /* completion 命令 */
+  program
+    .command("completion")
+    .description("管理 shell 自动补全")
+    .argument("[action]", "install | generate | uninstall", "install")
+    .option("--shell <shell>", "Shell 类型: bash | zsh | fish")
+    .option("--output <path>", "输出脚本到文件")
+    .action(async (action, opts) => {
+      const { completionCommand } = await import("../commands/completion");
+      await completionCommand(action, { ...opts, binName: name });
+    });
 
   return program;
 }
@@ -150,190 +324,64 @@ function getPackageVersion(startDir: string): string | null {
 }
 
 /**
- * 注册 SDK CLI 子命令
+ * 创建包含所有 specs 的 context（用于多 spec 模式下的全局 list 命令）
  */
-function registerSdkCommands(
-  program: Command,
+function createMultiSpecContext(
   config: CLIConfig,
-  specPath: string,
-  binName: string
-): void {
-  // 创建 logger
-  const logger = createLogger("info", { prefix: "[sdk cli]" });
+  specs: PontxSpec[],
+  logger: ReturnType<typeof createLogger>
+) {
+  const origins = specs.map((spec) => ({
+    name: spec.name,
+    url: "",
+    spec,
+    remoteSpec: undefined,
+    outDir: "",
+  }));
 
-  // 创建 CLI context
-  const context = createSdkCliContext(config, specPath, logger);
+  const resolvedConfig = {
+    rootDir: "",
+    configDir: "",
+    configPath: "",
+    outDir: "",
+    origins,
+    resolvedPlugin: resolvePlugin([], config.executeApi),
+    executeApiConfig: config.executeApi,
+  };
 
-  // search 命令
-  program
-    .command("search <keyword>")
-    .description("搜索 API")
-    .option("-m, --max <count>", "最大结果数", "6")
-    .option("--remote", "搜索远程元数据")
-    .action(async (keyword, options) => {
-      try {
-        await searchCommand(context, keyword, {
-          max: parseInt(options.max, 10),
-          useRemote: options.remote,
-        });
-      } catch (error: any) {
-        logger.error("搜索失败", error);
-        process.exit(1);
-      }
-    });
+  const manager = new PontxManager();
+  manager.resolvedConfig = resolvedConfig;
+  manager.logger = logger;
+  resolvedConfig.resolvedPlugin.configResolved(resolvedConfig);
 
-  // show-api 命令
-  program
-    .command("show-api <api-path>")
-    .description("显示 API 详情")
-    .option("--remote", "显示远程元数据")
-    .action(async (apiPath, options) => {
-      try {
-        await showApiCommand(context, apiPath, {
-          useRemote: options.remote,
-        });
-      } catch (error: any) {
-        logger.error("显示 API 失败", error);
-        process.exit(1);
-      }
-    });
-
-  // call 命令
-  program
-    .command("call <api-path> [args...]")
-    .description("调用 API")
-    .option("-e, --env <env>", "环境名称")
-    .option("-H, --header <header...>", "额外的 HTTP 头")
-    .option("-o, --output <file>", "输出到文件")
-    .option("--debug", "调试模式")
-    .option("--dry-run", "仅显示请求信息，不发送请求")
-    .option("--use-remote", "使用远程元数据")
-    .option("-q, --query <jmespath>", "使用 JMESPath 查询响应")
-    .allowUnknownOption(true)
-    .action(async (apiPath, rawArgs, options) => {
-      try {
-        await callCommand(context, apiPath, rawArgs, options);
-      } catch (error: any) {
-        logger.error("调用 API 失败", error);
-        process.exit(1);
-      }
-    });
-
-  // gen 命令
-  program
-    .command("gen <api-path>")
-    .description("生成 API 调用示例代码")
-    .option(
-      "--case <case>",
-      "代码模板名称，常见值: request, reactHooks, cliCommand。可用 list-cases 查询",
-      "request"
-    )
-    .option(
-      "--params <json>",
-      "参照 API 元数据中的 parameters 构造的请求参数，JSON 格式字符串"
-    )
-    .option("--body <json>", "API 请求体参数，JSON 格式")
-    .option("--use-remote", "使用远程元数据")
-    .action(async (apiPath, options) => {
-      try {
-        await genCommand(context, apiPath, options);
-      } catch (error: any) {
-        logger.error("生成代码失败", error);
-        process.exit(1);
-      }
-    });
-
-  // show-schema 命令
-  program
-    .command("show-schema <schema-path>")
-    .description("查看 Schema 元数据")
-    .option("--use-remote", "使用远程元数据")
-    .action(async (schemaPath, options) => {
-      try {
-        await showSchemaCommand(context, schemaPath, options);
-      } catch (error: any) {
-        logger.error("显示 Schema 失败", error);
-        process.exit(1);
-      }
-    });
-
-  // list-cases 命令
-  program
-    .command("list-cases")
-    .description("获取可用的代码生成 case 列表")
-    .action(async () => {
-      try {
-        const manager = await context.getManager();
-        await listCasesCommand(manager);
-      } catch (error: any) {
-        logger.error("获取 case 列表失败", error);
-        process.exit(1);
-      }
-    });
-
-  // SDK list 命令（父命令）
-  const listCmd = program
-    .command("list")
-    .alias("ls")
-    .description("列举 API 信息（默认列举所有 specs）")
-    // 父命令定义自己的选项（用于默认行为）
-    .option("--use-remote", "使用远程元数据")
-    .option("--json", "以 JSON 格式输出")
-    // 允许子命令使用未知选项
-    .passThroughOptions()
-    .action(async (options) => {
-      // 默认行为：列举所有 specs（仅当没有子命令时执行）
-      try {
-        await listSpecsCommand(context, options);
-      } catch (error: any) {
-        logger.error("列举 specs 失败", error);
-        process.exit(1);
-      }
-    });
-  registerSdkListCommands(listCmd, context);
-
-  // completion 命令
-  program
-    .command("completion")
-    .description("管理 shell 自动补全")
-    .argument("[action]", "install | generate | uninstall", "install")
-    .option("--shell <shell>", "Shell 类型: bash | zsh | fish")
-    .option("--output <path>", "输出脚本到文件")
-    .action(async (action, options) => {
-      const { completionCommand } = await import("../commands/completion");
-      await completionCommand(action, { ...options, binName });
-    });
-}
-
-/**
- * 加载 spec 文件
- */
-function loadSpec(specPath: string): PontxSpec | null {
-  try {
-    if (fs.existsSync(specPath)) {
-      const content = fs.readFileSync(specPath, "utf-8");
-      return JSON.parse(content);
-    }
-  } catch {
-    // Ignore errors
-  }
-  return null;
+  return {
+    getManager: async () => manager,
+    tryGetLocalManager: async () => manager,
+    logger,
+  };
 }
 
 /**
  * 创建 SDK 补全数据源
  */
 function createSdkCompletionDataSource(
-  specPath: string
+  specs: PontxSpec[]
 ): CompletionDataSource {
+  const specMap = new Map(specs.map((s) => [s.name, s]));
+
+  function findSpec(specName: string): PontxSpec | undefined {
+    return specMap.get(specName) || specs[0];
+  }
+
   return {
     async getSpecs(): Promise<string[]> {
-      // SDK CLI 只有一个 spec，不需要补全 spec 名称
-      return [];
+      return specs.length > 1
+        ? specs.map((s) => s.name).filter(Boolean)
+        : [];
     },
 
     async getTags(specName: string): Promise<string[]> {
-      const spec = loadSpec(specPath);
+      const spec = findSpec(specName);
       if (!spec?.apis) return [];
 
       const tags = new Set<string>();
@@ -350,16 +398,16 @@ function createSdkCompletionDataSource(
       specName: string,
       tagName?: string
     ): Promise<Array<{ name: string; description?: string }>> {
-      const spec = loadSpec(specPath);
+      const spec = findSpec(specName);
       if (!spec?.apis) return [];
 
       const apis: Array<{ name: string; description?: string }> = [];
       for (const [apiKey, api] of Object.entries(spec.apis)) {
         if (tagName) {
           if (apiKey.startsWith(`${tagName}/`)) {
-            const name = apiKey.split("/")[1];
+            const apiName = apiKey.split("/")[1];
             apis.push({
-              name,
+              name: apiName,
               description: (api as any).summary || (api as any).description,
             });
           }
@@ -379,10 +427,9 @@ function createSdkCompletionDataSource(
       tagName: string,
       apiName: string
     ): Promise<ParamInfo[]> {
-      const spec = loadSpec(specPath);
+      const spec = findSpec(specName);
       if (!spec?.apis) return [];
 
-      // Handle both with and without tags
       const apiKey = tagName ? `${tagName}/${apiName}` : apiName;
       const api = spec.apis[apiKey] as any;
       if (!api?.parameters) return [];
@@ -402,30 +449,24 @@ function createSdkCompletionDataSource(
  */
 async function handleCompletionRequest(
   binName: string,
-  specPath: string,
+  specs: PontxSpec[],
   line: string,
   wordIndex: number,
   format: string = "plain"
 ): Promise<void> {
-  const spec = loadSpec(specPath);
-  if (!spec) {
-    // 如果 spec 不存在，不提供补全
-    return;
-  }
+  if (specs.length === 0) return;
 
-  // 检测是否有 tags
-  let hasTags = false;
-  if (spec.apis) {
-    hasTags = Object.keys(spec.apis).some((key) => key.includes("/"));
-  }
+  const dataSource = createSdkCompletionDataSource(specs);
 
-  const dataSource = createSdkCompletionDataSource(specPath);
-
-  // 使用 singleSpecName 模式
-  const completionOptions: any = {
-    singleSpecName: spec.name || "",
-    hasTags,
-  };
+  const completionOptions: any =
+    specs.length === 1
+      ? {
+          singleSpecName: specs[0].name || "",
+          hasTags: specs[0].apis
+            ? Object.keys(specs[0].apis).some((key) => key.includes("/"))
+            : false,
+        }
+      : {};
 
   const engine = new CompletionEngine(completionOptions, dataSource);
 
@@ -433,19 +474,16 @@ async function handleCompletionRequest(
   const result = await engine.complete(input);
 
   if (format === "zsh") {
-    // Zsh format: "value\tdescription\tgroup" (tab-separated)
     for (const s of result.suggestions) {
-      const desc = s.description || '';
-      const group = s.group || '';
+      const desc = s.description || "";
+      const group = s.group || "";
       console.log(`${s.value}\t${desc}\t${group}`);
     }
   } else if (format === "fish") {
-    // Fish format: "value\tdescription"
     for (const s of result.suggestions) {
       console.log(s.description ? `${s.value}\t${s.description}` : s.value);
     }
   } else {
-    // Plain format
     for (const s of result.suggestions) {
       console.log(s.value);
     }

@@ -4,7 +4,6 @@
  * 将 SDK CLI 配置（api-lock.json + executeApi）适配成主 CLI 命令所需的 CliContext
  */
 
-import * as fs from "fs";
 import { PontxSpec } from "@pontx/spec";
 import { PontxManager } from "../../manager";
 import type { CliContext } from "../context";
@@ -16,12 +15,12 @@ import { resolvePlugin } from "../../plugin";
 /**
  * 从 SDK CLI 配置创建 CliContext
  * @param config SDK CLI 配置
- * @param specPath api-lock.json 文件路径
+ * @param spec PontxSpec 对象
  * @param logger 日志实例
  */
 export function createSdkCliContext(
   config: CLIConfig,
-  specPath: string,
+  spec: PontxSpec,
   logger: Logger
 ): CliContext {
   let managerInstance: PontxManager | null = null;
@@ -31,11 +30,7 @@ export function createSdkCliContext(
       return managerInstance;
     }
 
-    // 1. 加载 spec 文件
-    const specContent = fs.readFileSync(specPath, "utf-8");
-    const spec: PontxSpec = JSON.parse(specContent);
-
-    // 2. 创建最小化的 origin 配置
+    // 1. 创建最小化的 origin 配置
     const origin: ResolvedOriginConfig = {
       name: spec.name,
       url: "",
@@ -44,7 +39,7 @@ export function createSdkCliContext(
       outDir: "",
     };
 
-    // 3. 创建最小化的 resolvedConfig
+    // 2. 创建最小化的 resolvedConfig
     const resolvedConfig: ResolvedConfig = {
       rootDir: "",
       configDir: "",
@@ -55,7 +50,7 @@ export function createSdkCliContext(
       executeApiConfig: config.executeApi,
     };
 
-    // 4. 创建 manager
+    // 3. 创建 manager
     managerInstance = new PontxManager();
     managerInstance.resolvedConfig = resolvedConfig;
     managerInstance.logger = logger;

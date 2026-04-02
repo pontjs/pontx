@@ -36,18 +36,20 @@ export function resolveBuildOptions(options: CliBuildOptions): {
 /* loadCLIConfig 已移除 - spec 现在从 pontx.config.ts 中读取 */
 
 /**
- * 从 pontx.config.ts 读取 spec
+ * 从 pontx.config.ts 读取所有 specs
  * @param rootDir - 项目根目录
- * @returns PontxSpec 对象
+ * @returns 包含 name 和 spec 的数组
  */
-async function getSpecFromPontxConfig(rootDir: string): Promise<PontxSpec> {
+async function getSpecsFromPontxConfig(
+  rootDir: string
+): Promise<Array<{ name: string; spec: PontxSpec }>> {
   const logger = createLogger("info", { prefix: "[cli build]" });
 
   // 1. 从项目根目录加载 PontxManager
   logger.debug(`加载 pontx.config.ts from ${rootDir}`);
   const manager = await PontxManager.constructorFromRootDir(rootDir, logger);
 
-  // 2. 验证只有一个 origin
+  // 2. 验证至少有一个 origin
   const origins = manager.resolvedConfig.origins;
   if (origins.length === 0) {
     throw new Error(
@@ -55,48 +57,90 @@ async function getSpecFromPontxConfig(rootDir: string): Promise<PontxSpec> {
         `提示：请在 pontx.config.ts 中配置 origins`
     );
   }
+
+  // 3. 多 origin 时校验 name 不重复
   if (origins.length > 1) {
-    throw new Error(
-      `错误：SDK CLI 目前只支持单 origin 项目\n` +
-        `  当前配置了 ${origins.length} 个 origins: ${origins.map(o => o.name).join(", ")}\n\n` +
-        `提示：多 origin 项目暂不支持 SDK CLI 功能`
-    );
+    const names = origins.map((o) => o.name);
+    const duplicates = names.filter((n, i) => names.indexOf(n) !== i);
+    if (duplicates.length > 0) {
+      throw new Error(
+        `错误：存在重复的 origin name: ${[...new Set(duplicates)].join(", ")}\n` +
+          `提示：请确保每个 origin 的 name 唯一`
+      );
+    }
   }
 
-  // 3. 获取 spec
-  const origin = origins[0];
-  if (!origin.spec) {
-    throw new Error(
-      `错误：origin "${origin.name}" 尚未生成本地 spec\n\n` +
-        `提示：请先运行 'pontx generate' 生成 API 规范文件`
-    );
+  // 4. 获取所有 specs
+  const results: Array<{ name: string; spec: PontxSpec }> = [];
+  for (const origin of origins) {
+    if (!origin.spec) {
+      throw new Error(
+        `错误：origin "${origin.name}" 尚未生成本地 spec\n\n` +
+          `提示：请先运行 'pontx generate' 生成 API 规范文件`
+      );
+    }
+    logger.debug(`从 origin "${origin.name}" 读取 spec`);
+    results.push({ name: origin.name, spec: origin.spec });
   }
 
-  logger.debug(`从 origin "${origin.name}" 读取 spec`);
-  return origin.spec;
+  return results;
 }
 
 /**
- * 将 spec 序列化为 JSON 并写入文件
- * @param spec - PontxSpec 对象
- * @param outDir - 输出目录
+ * 将 specs 序列化为 JSON 并写入文件
+ * 单 origin：写 api-lock.json（向后兼容）
+ * 多 origin：每个 spec 写 {name}.api-lock.json
  */
-async function writeSpecToFile(
-  spec: PontxSpec,
+async function writeSpecsToFile(
+  specs: Array<{ name: string; spec: PontxSpec }>,
   outDir: string
 ): Promise<void> {
-  const targetSpecPath = path.join(outDir, "api-lock.json");
+  /* 确保目录存在 */
+  await fsp.mkdir(outDir, { recursive: true });
 
-  // 序列化 spec 为格式化的 JSON
-  const specJson = JSON.stringify(spec, null, 2);
+  if (specs.length === 1) {
+    /* 单 origin：保持原格式，清理多 origin 残留 */
+    const targetPath = path.join(outDir, "api-lock.json");
+    await fsp.writeFile(targetPath, JSON.stringify(specs[0].spec, null, 2), "utf-8");
+    console.log(`✓ 已生成 api-lock.json`);
+    await cleanupSpecFiles(outDir, "multi");
+  } else {
+    /* 多 origin：每个 spec 一个文件，清理单 origin 残留 */
+    for (const { name, spec } of specs) {
+      const targetPath = path.join(outDir, `${name}.api-lock.json`);
+      await fsp.writeFile(targetPath, JSON.stringify(spec, null, 2), "utf-8");
+      console.log(`✓ 已生成 ${name}.api-lock.json`);
+    }
+    await cleanupSpecFiles(outDir, "single");
+  }
+}
 
-  // 确保目录存在
-  await fsp.mkdir(path.dirname(targetSpecPath), { recursive: true });
-
-  // 写入文件
-  await fsp.writeFile(targetSpecPath, specJson, "utf-8");
-
-  console.log(`✓ 已生成 api-lock.json`);
+/**
+ * 清理旧格式的 spec 文件
+ * @param outDir 输出目录
+ * @param cleanType "single" 清理 api-lock.json，"multi" 清理 *.api-lock.json
+ */
+async function cleanupSpecFiles(
+  outDir: string,
+  cleanType: "single" | "multi"
+): Promise<void> {
+  try {
+    if (cleanType === "single") {
+      const singlePath = path.join(outDir, "api-lock.json");
+      if (fs.existsSync(singlePath)) {
+        await fsp.unlink(singlePath);
+      }
+    } else {
+      const files = await fsp.readdir(outDir);
+      for (const file of files) {
+        if (file.endsWith(".api-lock.json")) {
+          await fsp.unlink(path.join(outDir, file));
+        }
+      }
+    }
+  } catch {
+    /* 清理失败不影响构建 */
+  }
 }
 
 /**
@@ -179,9 +223,9 @@ export async function cliBuildCommand(options: CliBuildOptions): Promise<void> {
   // 2. 创建输出目录
   await fsp.mkdir(outDir, { recursive: true });
 
-  // 3. 从 pontx.config.ts 读取 spec 并写入到构建目录
-  const spec = await getSpecFromPontxConfig(configDir);
-  await writeSpecToFile(spec, outDir);
+  // 3. 从 pontx.config.ts 读取 specs 并写入到构建目录
+  const specs = await getSpecsFromPontxConfig(configDir);
+  await writeSpecsToFile(specs, outDir);
 
   // 4. 更新 package.json，添加 pontx.specDir 字段
   await updateSdkPackageJson(configDir, outDir);
