@@ -91,6 +91,30 @@ export function normalizeBaseUrl(baseUrl: string): string {
 }
 
 /**
+ * 构建相对 URL（path + query），不包含 baseURL。
+ * 用于 fetchFn 模式，fetchFn 自行处理 baseURL。
+ */
+export function buildPathUrl(
+  path: string,
+  pathParams: Record<string, unknown>,
+  queryParams: Record<string, unknown>
+): string {
+  let finalPath = path.replace(/\{([^}]+)\}/g, (_, key) => {
+    const value = pathParams[key];
+    if (value === undefined || value === null) {
+      return `{${key}}`;
+    }
+    return encodeURIComponent(String(value));
+  });
+
+  const queryString = new URLSearchParams(
+    Object.entries(queryParams).map(([k, v]) => [k, String(v)])
+  ).toString();
+
+  return `${finalPath}${queryString ? `?${queryString}` : ""}`;
+}
+
+/**
  * Build complete URL from base URL, path, and parameters.
  * Handles path parameter substitution and query string construction.
  *
@@ -346,13 +370,15 @@ function createApiError(
 async function fetchWithTimeout(
   url: string,
   init: RequestInit,
-  timeout: number
+  timeout: number,
+  customFetch?: (url: string, init: RequestInit) => Promise<Response>
 ): Promise<Response> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
+  const fetchImpl = customFetch || fetch;
 
   try {
-    const response = await fetch(url, {
+    const response = await fetchImpl(url, {
       ...init,
       signal: controller.signal,
     });
@@ -377,12 +403,11 @@ export async function builtinExecuteApi(
   const { api, meta, params, executeApiConfig, logger } = context;
 
   // 1. 解析配置
-  const baseUrl = resolveBaseUrl(context);
+  const hasFetchFn = !!executeApiConfig?.fetchFn;
   const configHeaders = resolveHeaders(context);
   const timeout = resolveTimeout(context);
 
   logger.debug(`Executing API: ${api.specName}.${api.tagName}.${api.apiName}`);
-  logger.debug(`Base URL: ${baseUrl}`);
 
   // 2. 解析和分类参数
   const { pathParams, queryParams, headerParams, bodyParams } = parseParams(
@@ -390,8 +415,18 @@ export async function builtinExecuteApi(
     params
   );
 
-  // 3. 构建完整 URL
-  const url = buildUrl(baseUrl, meta.path, pathParams, queryParams);
+  // 3. 构建 URL
+  let url: string;
+  if (hasFetchFn) {
+    // fetchFn 模式：只传 path + query，fetchFn 自行处理 baseURL
+    url = buildPathUrl(meta.path, pathParams, queryParams);
+    logger.debug(`Path URL: ${url}`);
+  } else {
+    // 原生 fetch 模式：构建完整 URL
+    const baseUrl = resolveBaseUrl(context);
+    url = buildUrl(baseUrl, meta.path, pathParams, queryParams);
+    logger.debug(`Base URL: ${baseUrl}`);
+  }
 
   // 4. 构建请求配置
   const requestInit = buildRequestConfig(
@@ -428,7 +463,7 @@ export async function builtinExecuteApi(
   // 7. 发送请求
   let rawResponse: Response;
   try {
-    rawResponse = await fetchWithTimeout(request.url, request.init, timeout);
+    rawResponse = await fetchWithTimeout(request.url, request.init, timeout, executeApiConfig?.fetchFn);
   } catch (error) {
     const apiError = createApiError(error, request);
 

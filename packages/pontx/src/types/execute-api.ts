@@ -94,6 +94,18 @@ export interface ExecuteApiConfig {
   headers?: Record<string, string>;
 
   /**
+   * 自定义 fetch 函数
+   * 与标准 fetch 签名相同: (url: string, init: RequestInit) => Promise<Response>
+   *
+   * 当提供时，builtinExecuteApi 使用此函数替代原生 fetch。
+   * 传入的 url 为相对路径（path + query），不包含 baseURL，
+   * 因为 SDK 的 fetchFn 通常已内置 baseURL 处理。
+   *
+   * 典型用法：SDK 项目将已有的 fetchFn 传入，避免重复配置。
+   */
+  fetchFn?: (url: string, init: RequestInit) => Promise<Response>;
+
+  /**
    * 环境配置
    * pontx call api --env dev 时会使用对应环境配置
    */
