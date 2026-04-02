@@ -14,10 +14,11 @@
   },
   "changesets": [
     "config-loader-improvement",
-    "docs-readme",
     "fix-spec-resolve-ref",
     "mcp-major-release",
     "opencli-refactor",
+    "sdk-cli-multi-origin-fix",
+    "sdk-cli-multi-origin",
     "sdk-major-release",
     "spec-major-release"
   ]

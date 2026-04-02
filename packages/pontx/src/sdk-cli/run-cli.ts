@@ -15,7 +15,6 @@ import { createSdkCliContext } from "./context-adapter";
 import { createLogger } from "../logger/logger";
 import {
   registerSpecCommands,
-  registerSpecListCommands,
   type SpecInfo,
   type ApiSummary,
   type TagSummary,
