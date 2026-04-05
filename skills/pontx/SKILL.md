@@ -1,6 +1,6 @@
 ---
 name: pontx
-description: API lifecycle management - search, explore, and call APIs with type-safe code generation
+description: "Pontx CLI and SDK - API lifecycle management including searching, exploring, and calling APIs with type-safe code generation. Use this skill whenever the user mentions pontx, pontx.config.ts, pontx CLI commands (pontx init/generate/call/search/list/service/skill), API spec management, SDK code generation from OpenAPI/OAS specs, or wants to set up, configure, or troubleshoot a pontx project."
 author: pontx
 tags:
   - api
@@ -33,7 +33,13 @@ Pontx 是一个 API 生命周期管理工具，提供 API 搜索、探索、文�
 
 在 TypeScript/JavaScript 项目中搜索 API、查看详情、生成类型安全的 SDK 代码。
 
-核心命令：`pontx list apis` / `pontx search <keyword>` / `pontx show-api <tag> <api>` / `pontx generate`
+核心流程：
+1. `pontx list apis` / `pontx search <keyword>` — 发现 API
+2. `pontx show-api [tag] <api>` — 查看参数、响应类型等详情
+3. **试调用验证传参** — 在生成代码前先调用一次，确认对参数的理解正确：
+   - GET 等安全接口：直接调用，如 `pontx call [tag] <api> --id=123`
+   - POST/PUT/DELETE 等有副作用的接口：加 `--dry-run` 预览，如 `pontx call [tag] <api> --name=test --dry-run`
+4. `pontx gen [tag] <api>` / `pontx generate` — 确认无误后生成 SDK 代码
 
 > **MUST READ**: 查看 `references/cli-commands.md` 了解每个命令的完整选项和用法。
 
@@ -63,7 +69,15 @@ Pontx 的核心配置文件，控制数据源、输出目录、插件、API 调�
 
 ---
 
-## 6. Shell 自动补全 (Shell Completion)
+## 6. 为 SDK 工程创建 Agent SKILL (SDK Project SKILL Guide)
+
+为通过 pontx 构建的 SDK 工程创建高质量的 Agent SKILL，让 AI Agent 能高效使用该工程的 SDK 和 CLI。
+
+> **MUST READ**: 创建 SDK 工程的 Agent SKILL 前，**必须先完整阅读** `references/sdk-project-skill-guide.md`。该文件包含 SKILL 触发词设计、Agent 使用 SDK 和 CLI 的最佳实践工作流、以及 SKILL 文件结构建议。
+
+---
+
+## 7. Shell 自动补全 (Shell Completion)
 
 为 Pontx CLI 安装 Shell 自动补全（支持 Zsh/Bash/Fish），包括命令补全和 API 路径补全。
 
@@ -71,7 +85,7 @@ Pontx 的核心配置文件，控制数据源、输出目录、插件、API 调�
 
 ---
 
-## 7. 命令层级结构
+## 8. 命令层级结构
 
 ```
 pontx
@@ -101,7 +115,7 @@ pontx call pet -h               # pet 下的所有 APIs
 pontx call pet getPetById -h    # getPetById 的入参详情 + 示例
 ```
 
-## 8. CLI 命令速查
+## 9. CLI 命令速查
 
 | 命令                            | 说明                                    |
 | ------------------------------- | --------------------------------------- |
@@ -115,7 +129,7 @@ pontx call pet getPetById -h    # getPetById 的入参详情 + 示例
 | `pontx show-schema <schema>`    | 查看 Schema 详情                        |
 | `pontx gen <tag> <api>`         | 生成单个 API 调用代码                   |
 | `pontx generate`                | 生成所有 SDK 代码                       |
-| `pontx call <tag> <api>`        | 调用 API（推荐先加 `--dry-run`）        |
+| `pontx call [tag] <api>`        | 调用 API（有副作用的接口先加 `--dry-run`）|
 | `pontx cli init`                | 初始化 SDK CLI 项目                     |
 | `pontx service [spec]`          | 启动服务（可传 spec URL/路径零配置启动）|
 | `pontx cli build`               | 构建 SDK CLI                            |
@@ -130,7 +144,7 @@ pontx call pet getPetById -h    # getPetById 的入参详情 + 示例
 
 ## Safety & Best Practices
 
-- **总是先用 `--dry-run`**: 调用 API 前先预览请求内容
+- **有副作用的接口先用 `--dry-run`**: POST/PUT/DELETE 等接口调用前先预览请求内容；GET 等安全接口可直接调用
 - **使用 `-h` 确认参数**: `pontx call <tag> <api> -h` 查看入参详情和示例
 - **小心副作用操作**: DELETE/PUT/POST 会修改数据，需二次确认
 - **保护凭证**: 使用环境变量，不要硬编码 token
@@ -147,6 +161,7 @@ pontx call pet getPetById -h    # getPetById 的入参详情 + 示例
 | `references/cli-call-workflow.md` | CLI 调用 API 的完整工作流                  |
 | `references/cli-commands.md`      | 所有 CLI 命令的参数和用法                  |
 | `references/sdk-cli-build.md`     | 构建独立 CLI 工具的完整流程                |
+| `references/sdk-project-skill-guide.md` | SDK 工程 Agent SKILL 创建指南        |
 | `references/shell-completion.md`  | Shell 自动补全安装和配置                   |
 
 ---
