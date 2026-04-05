@@ -131,6 +131,19 @@ npm run changeset:publish
 git add . && git commit -m 'chore: release version x.x.x'
 ```
 
+### 发布注意事项
+
+> **⚠️ 禁止使用 `npm publish` 发布！必须使用 `pnpm publish` 或 `pnpm changeset:publish`。**
+>
+> 项目中 `package.json` 的依赖使用了 pnpm workspace 协议（如 `"@pontx/spec": "workspace:*"`）。
+> - `pnpm publish` 会自动将 `workspace:*` 替换为实际版本号再发布
+> - `npm publish` **不会**做此转换，会把 `workspace:*` 原样发布到 npm，导致消费者安装失败
+>
+> 如果 `pnpm changeset:publish` 因 OTP 等原因无法在非交互环境执行，应提示用户在终端中手动运行：
+> ```bash
+> cd packages/xx && pnpm publish --registry=https://registry.npmjs.org --tag beta --access public
+> ```
+
 ## 代码规范
 
 ### 文件头部注释

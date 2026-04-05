@@ -1,6 +1,8 @@
 import type { Plugin, ResolvedConfig, ResolvedOriginConfig } from "../type";
 import path from "node:path";
 import fsp from "node:fs/promises";
+import https from "node:https";
+import http from "node:http";
 import _ from "lodash";
 const { uniq } = _;
 import { translateTexts, TranslateConfig, translate } from "./translate";
@@ -50,15 +52,51 @@ export function getBuiltinPlugin(): Plugin {
       }
 
       try {
-        // 设置环境变量来忽略 HTTPS 证书验证
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+        const fileContent = await new Promise<string>((resolve, reject) => {
+          const doRequest = (reqUrl: string, redirectCount = 0) => {
+            if (redirectCount > 5) {
+              reject(new Error("Too many redirects"));
+              return;
+            }
+            const parsedUrl = new URL(reqUrl);
+            const isHttps = parsedUrl.protocol === "https:";
+            const requestFn = isHttps ? https.get : http.get;
+            const reqOptions: https.RequestOptions = {
+              ...(isHttps ? { rejectUnauthorized: false } : {}),
+            };
 
-        const response = await fetch(url);
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const fileContent = await response.text();
+            requestFn(reqUrl, reqOptions, (res) => {
+              /* 处理重定向 */
+              if (
+                res.statusCode &&
+                res.statusCode >= 300 &&
+                res.statusCode < 400 &&
+                res.headers.location
+              ) {
+                const redirectUrl = new URL(
+                  res.headers.location,
+                  reqUrl
+                ).toString();
+                doRequest(redirectUrl, redirectCount + 1);
+                return;
+              }
+              if (
+                res.statusCode &&
+                (res.statusCode < 200 || res.statusCode >= 300)
+              ) {
+                reject(new Error(`HTTP error! status: ${res.statusCode}`));
+                return;
+              }
+              const chunks: Buffer[] = [];
+              res.on("data", (chunk) => chunks.push(chunk));
+              res.on("end", () =>
+                resolve(Buffer.concat(chunks).toString("utf-8"))
+              );
+              res.on("error", reject);
+            }).on("error", reject);
+          };
+          doRequest(url);
+        });
         return fileContent;
       } catch (e) {
         if (e instanceof TypeError) {
@@ -67,9 +105,6 @@ export function getBuiltinPlugin(): Plugin {
           throw new Error(`Failed to fetch ${url}: ${e.message}`);
         }
         throw new Error(`Unknown error while fetching ${url}: ${e}`);
-      } finally {
-        // 恢复 HTTPS 证书验证
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "1";
       }
     },
     transformMeta: async (metaString: string, options) => {

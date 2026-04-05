@@ -86,7 +86,7 @@ export class WebServer {
         this.port = startPort + i;
         if (i > 0) {
           this.logger.warn(
-            `端口 ${startPort} 被占用，已自动切换到端口 ${this.port}`
+            `端口 ${startPort} 被占用，已自动切换到端口 ${this.port}`,
           );
         }
         this.logger.info(`Web 服务启动成功，端口: ${this.port}`);
@@ -115,7 +115,7 @@ export class WebServer {
             res.writeHead(500, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ error: "Internal Server Error" }));
           }
-        }
+        },
       );
 
       this.server.listen(port, () => {
@@ -150,7 +150,7 @@ export class WebServer {
    */
   private async handleRequest(
     req: IncomingMessage,
-    res: ServerResponse
+    res: ServerResponse,
   ): Promise<void> {
     const url = new URL(req.url!, `http://${req.headers.host}`);
     const pathname = url.pathname;
@@ -159,7 +159,7 @@ export class WebServer {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader(
       "Access-Control-Allow-Methods",
-      "GET, POST, PUT, DELETE, OPTIONS"
+      "GET, POST, PUT, DELETE, OPTIONS",
     );
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
@@ -226,7 +226,7 @@ export class WebServer {
    */
   private async handleRootRequest(
     req: IncomingMessage,
-    res: ServerResponse
+    res: ServerResponse,
   ): Promise<void> {
     try {
       const html = await this.getAppHtml();
@@ -280,9 +280,8 @@ export class WebServer {
     let html = await response.text();
 
     /* 将相对路径资源转为 CDN 绝对路径 */
-    html = html.replace(
-      /(?:src|href)="\.\/assets\//g,
-      (match) => match.replace("./assets/", `${WebServer.CDN_BASE}/assets/`)
+    html = html.replace(/(?:src|href)="\.\/assets\//g, (match) =>
+      match.replace("./assets/", `${WebServer.CDN_BASE}/assets/`),
     );
 
     /* 注入 pontx 配置 */
@@ -354,7 +353,7 @@ export class WebServer {
    */
   private handleLocalAssetRequest(
     pathname: string,
-    res: ServerResponse
+    res: ServerResponse,
   ): boolean {
     const appDir = this.resolveLocalAppDir();
     if (!appDir) return false;
@@ -369,8 +368,7 @@ export class WebServer {
     if (!existsSync(filePath)) return false;
 
     const ext = extname(filePath);
-    const contentType =
-      WebServer.MIME_TYPES[ext] || "application/octet-stream";
+    const contentType = WebServer.MIME_TYPES[ext] || "application/octet-stream";
 
     res.writeHead(200, { "Content-Type": contentType });
     res.end(readFileSync(filePath));
@@ -457,7 +455,7 @@ export class WebServer {
    */
   private async handleStatusRequest(
     req: IncomingMessage,
-    res: ServerResponse
+    res: ServerResponse,
   ): Promise<void> {
     res.writeHead(200);
     res.end(
@@ -466,7 +464,7 @@ export class WebServer {
         version: "1.0.0",
         timestamp: new Date().toISOString(),
         port: this.port,
-      })
+      }),
     );
   }
 
@@ -475,7 +473,7 @@ export class WebServer {
    */
   private async handleSpecsRequest(
     req: IncomingMessage,
-    res: ServerResponse
+    res: ServerResponse,
   ): Promise<void> {
     if (!this.manager?.resolvedConfig) {
       res.writeHead(200);
@@ -507,7 +505,7 @@ export class WebServer {
    */
   private async handleSyncRequest(
     req: IncomingMessage,
-    res: ServerResponse
+    res: ServerResponse,
   ): Promise<void> {
     if (req.method === "POST") {
       // 这里需要触发同步，但需要从外部传入回调
@@ -525,7 +523,7 @@ export class WebServer {
   private async handleSpecRequest(
     req: IncomingMessage,
     res: ServerResponse,
-    url: URL
+    url: URL,
   ): Promise<void> {
     const specName = url.searchParams.get("name");
 
@@ -578,7 +576,7 @@ export class WebServer {
    */
   private async handleCodeGenScenariosRequest(
     req: IncomingMessage,
-    res: ServerResponse
+    res: ServerResponse,
   ): Promise<void> {
     if (!this.manager) {
       res.writeHead(200);
@@ -612,7 +610,7 @@ export class WebServer {
    */
   private async handleCodeGenGenerateRequest(
     req: IncomingMessage,
-    res: ServerResponse
+    res: ServerResponse,
   ): Promise<void> {
     if (req.method !== "POST") {
       res.writeHead(405);
@@ -636,13 +634,18 @@ export class WebServer {
         bodyParams?: Record<string, any>;
       }>(req);
 
-      if (!body.scenarioId || !body.specName || !body.tagName || !body.apiName) {
+      if (
+        !body.scenarioId ||
+        !body.specName ||
+        !body.tagName ||
+        !body.apiName
+      ) {
         res.writeHead(400);
         res.end(
           JSON.stringify({
             error:
               "Missing required fields: scenarioId, specName, tagName, apiName",
-          })
+          }),
         );
         return;
       }
@@ -662,7 +665,7 @@ export class WebServer {
       this.logger.error("代码生成失败", error);
       res.writeHead(400);
       res.end(
-        JSON.stringify({ error: error?.message || "Code generation failed" })
+        JSON.stringify({ error: error?.message || "Code generation failed" }),
       );
     }
   }

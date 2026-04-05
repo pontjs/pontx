@@ -1,6 +1,6 @@
 {
   "name": "pontx",
-  "version": "1.0.0-beta.4",
+  "version": "1.0.0-beta.5",
   "description": "pontx spec manager",
   "main": "./cjs/index.cjs",
   "module": "./lib/index.js",
@@ -48,7 +48,6 @@
     "jmespath": "^0.16.0",
     "lodash": "^4.17.21",
     "picocolors": "^1.1.1",
-    "@pontx/shadcn-ui": "^1.1.11",
     "tslib": "^2.6.2",
     "tsx": "^4.7.0"
   },

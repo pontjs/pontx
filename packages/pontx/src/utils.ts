@@ -160,27 +160,28 @@ export async function clearPath(basePath: string): Promise<void> {
   }
 }
 
+/** 广度优先搜索文件，确保离起始目录最近的文件优先返回 */
 export async function lookForFiles(
   dir: string,
   fileName: string,
 ): Promise<string> {
-  const files = await fsp.readdir(dir);
+  const queue = [dir];
 
-  for (let file of files) {
-    const currName = path.join(dir, file);
+  while (queue.length > 0) {
+    const currentDir = queue.shift();
+    const files = await fsp.readdir(currentDir);
 
-    const info = await fsp.lstat(currName);
-    if (info.isDirectory()) {
-      if (file === ".git" || file === "node_modules") {
-        continue;
+    for (const file of files) {
+      const currName = path.join(currentDir, file);
+      const info = await fsp.lstat(currName);
+
+      if (info.isFile() && file === fileName) {
+        return currName;
       }
 
-      const foundFile = await lookForFiles(currName, fileName);
-      if (foundFile) {
-        return foundFile;
+      if (info.isDirectory() && file !== ".git" && file !== "node_modules") {
+        queue.push(currName);
       }
-    } else if (info.isFile() && file === fileName) {
-      return currName;
     }
   }
 }
