@@ -208,6 +208,11 @@ export default runCLI({
       "X-Client": "my-api-cli",
     },
 
+    // 自定义 fetch 函数（可选）
+    // 传入的 url 为相对路径（path + query），不包含 baseURL
+    // 适用于 SDK 项目复用已有的 fetch 函数，避免重复配置 baseURL 和认证
+    // fetchFn: async (url, init) => myExistingFetch(url, init),
+
     // 多环境配置
     environments: {
       dev: {
@@ -263,7 +268,7 @@ export default runCLI({
 
 ## 使用示例
 
-### 基本使用
+### 基本使用（单 spec）
 
 ```bash
 # 查看帮助
@@ -283,10 +288,34 @@ my-api-cli call user info -h
 
 # 调用 API
 my-api-cli call user info --id 123
+```
 
-# 多 spec 时需加 spec 前缀
-my-api-cli user-service show-api user info
+### 多 spec 使用
+
+配置多个 spec 时，每个 spec 自动注册为子命令：
+
+```bash
+# 查看帮助 — 自动展示可用 Specs 列表
+my-api-cli -h
+# 可用的 Specs:
+#   user-service    用户服务 API
+#   order-service   订单服务 API
+#
+# 使用 'my-api-cli <spec> -h' 查看 spec 下的命令。
+
+# 每个 spec 是独立的子命令
 my-api-cli user-service call user info --id 123
+my-api-cli order-service search "product"
+my-api-cli user-service show-api user info
+
+# 逐层探索
+my-api-cli user-service -h           # 查看该 spec 下所有命令
+my-api-cli user-service call -h      # 查看可用 Tags
+my-api-cli user-service call user -h # 查看 user 下的 APIs
+
+# 全局 list 命令展示所有 specs
+my-api-cli list
+my-api-cli list specs
 ```
 
 ### 多环境使用

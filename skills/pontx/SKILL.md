@@ -76,7 +76,7 @@ Pontx 的核心配置文件，控制数据源、输出目录、插件、API 调�
 ```
 pontx
 ├── 全局命令
-│   ├── init / check / generate / mocks / service / skill / cache:clean / add-spec
+│   ├── init / check / generate / mocks / service [spec] / skill / cache:clean / add-spec
 │   ├── completion
 │   ├── cli (init|build)
 │   └── list specs
@@ -117,6 +117,7 @@ pontx call pet getPetById -h    # getPetById 的入参详情 + 示例
 | `pontx generate`                | 生成所有 SDK 代码                       |
 | `pontx call <tag> <api>`        | 调用 API（推荐先加 `--dry-run`）        |
 | `pontx cli init`                | 初始化 SDK CLI 项目                     |
+| `pontx service [spec]`          | 启动服务（可传 spec URL/路径零配置启动）|
 | `pontx cli build`               | 构建 SDK CLI                            |
 | `pontx completion install`      | 安装 Shell 补全                         |
 | `pontx skill`                   | 安装此 SKILL                            |

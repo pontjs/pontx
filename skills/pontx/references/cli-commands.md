@@ -442,8 +442,14 @@ pontx check
 启动 Pontx 服务（Web 服务、文件监听、定时同步）。
 
 ```bash
-pontx service [options]
+pontx service [spec] [options]
 ```
+
+### 参数
+
+| 参数 | 说明 |
+|------|------|
+| `[spec]` | OAS spec 文件路径或远程 URL（零配置快速启动，可选） |
 
 ### 选项
 
@@ -459,11 +465,18 @@ pontx service [options]
 ### 示例
 
 ```bash
-# 启动服务
+# 启动服务（需要 pontx.config.ts）
 pontx service
+
+# 零配置快速启动 — 直接传入 spec 文件或 URL，无需 pontx.config.ts
+pontx service https://petstore.swagger.io/v2/swagger.json
+pontx service ./specs/openapi.json
 
 # 指定端口
 pontx service -p 8080
+
+# 零配置 + 指定端口
+pontx service https://api.example.com/swagger.json -p 8080
 
 # 仅启用 Web 服务
 pontx service --no-watch --no-sync

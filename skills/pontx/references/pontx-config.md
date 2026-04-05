@@ -114,6 +114,15 @@ API 数据源配置数组。`specs` 是推荐的写法，`origins` 是兼容旧�
       "X-Custom-Header": "value",
     },
 
+    // 自定义 fetch 函数（可选）
+    // 提供时，builtinExecuteApi 使用此函数替代原生 fetch
+    // 传入的 url 为相对路径（path + query），不包含 baseURL，
+    // 因为 SDK 的 fetchFn 通常已内置 baseURL 处理
+    fetchFn: async (url, init) => {
+      // 典型用法：SDK 项目复用已有的 fetch 函数，避免重复配置 baseURL 和认证
+      return myExistingFetch(url, init);
+    },
+
     // 多环境配置
     environments: {
       dev: {
@@ -241,6 +250,30 @@ export default defineConfig({
 
     // 日志级别
     logLevel: "info", // trace | debug | info | warn | error | fatal
+
+    // 零配置快速启动：直接指定 spec 来源（文件路径或 URL）
+    // 提供此选项时无需 pontx.config.ts，文件监听自动跳过
+    specSource: "https://petstore.swagger.io/v2/swagger.json",
+    // 也支持本地文件：
+    // specSource: "./specs/openapi.json",
+  },
+}
+```
+
+### 零配置快速启动
+
+当提供 `specSource` 时，Pontx 可以跳过 `pontx.config.ts` 直接启动服务：
+
+- 支持远程 URL 或本地文件路径
+- spec 名称从文件名或 URL 路径自动推导
+- 文件监听自动跳过（没有配置文件可监听）
+- 输出目录使用系统临时目录
+
+```typescript
+{
+  service: {
+    specSource: "https://api.example.com/swagger.json",
+    port: 3001,
   },
 }
 ```
