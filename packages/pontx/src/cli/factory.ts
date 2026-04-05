@@ -183,13 +183,14 @@ function registerGlobalCommands(
   program
     .command("service")
     .description("启动 Pontx 服务")
+    .argument("[spec]", "OAS spec 文件路径或远程 URL（零配置快速启动）")
     .option("-p, --port <port>", "Web 服务端口", "3000")
     .option("-i, --interval <interval>", "同步间隔（毫秒）", "300000")
     .option("--no-watch", "禁用文件监听")
     .option("--no-sync", "禁用定时同步")
     .option("--no-web", "禁用 Web 服务")
     .option("-l, --log-level <level>", "日志级别", "info")
-    .action(async (options) => {
+    .action(async (spec, options) => {
       const { PontxService } = await import("../service/service");
       const argvs = process.argv;
 
@@ -212,6 +213,10 @@ function registerGlobalCommands(
       }
       if (argvs.includes("-l") || argvs.includes("--log-level")) {
         serviceConfig.logLevel = options.logLevel;
+      }
+
+      if (spec) {
+        serviceConfig.specSource = spec;
       }
 
       const serviceLogger = serviceConfig.logLevel

@@ -237,6 +237,8 @@ export interface ServiceConfig {
   enableWebServer?: boolean;
   /** 日志级别 */
   logLevel?: LogLevel;
+  /** 直接指定 spec 来源（文件路径或 URL），用于零配置快速启动 */
+  specSource?: string;
 }
 
 /** 用户配置 */

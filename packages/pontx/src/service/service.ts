@@ -110,8 +110,8 @@ export class PontxService extends EventEmitter implements IPontxService {
       this.webServer.setManager(this.manager!);
       this.fileWatcher.setManager(this.manager!);
 
-      // 启动文件监听
-      if (this.config.enableFileWatch) {
+      // 启动文件监听（零配置模式下跳过，没有配置文件可监听）
+      if (this.config.enableFileWatch && !this.config.specSource) {
         await this.fileWatcher.start();
       }
 
@@ -199,10 +199,20 @@ export class PontxService extends EventEmitter implements IPontxService {
    */
   private async initializeManager(): Promise<void> {
     this.logger.info("初始化 PontxManager...");
-    this.manager = await PontxManager.constructorFromRootDir(
-      this.rootDir,
-      this.logger
-    );
+
+    if (this.config.specSource) {
+      this.manager = await PontxManager.constructorFromSpecSource(
+        this.config.specSource,
+        this.rootDir,
+        this.logger
+      );
+    } else {
+      this.manager = await PontxManager.constructorFromRootDir(
+        this.rootDir,
+        this.logger
+      );
+    }
+
     if (!this.manager) {
       throw new Error("无法初始化 PontxManager");
     }

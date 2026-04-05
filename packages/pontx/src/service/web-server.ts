@@ -246,20 +246,20 @@ export class WebServer {
       return this.appHtmlCache;
     }
 
-    /* 优先从本地 node_modules 获取 */
-    const localHtml = this.getLocalAppHtml();
-    if (localHtml) {
-      this.appHtmlCache = localHtml;
-      return localHtml;
-    }
-
-    /* 本地不可用时降级到 CDN */
+    /* 优先从 CDN 获取，如果失败则降级到本地 */
     try {
       const cdnHtml = await this.fetchCdnAppHtml();
       this.appHtmlCache = cdnHtml;
       return cdnHtml;
     } catch (cdnError) {
       this.logger.warn("CDN 加载 UI 也失败", cdnError);
+    }
+
+    /* 降级到本地 */
+    const localHtml = this.getLocalAppHtml();
+    if (localHtml) {
+      this.appHtmlCache = localHtml;
+      return localHtml;
     }
 
     throw new Error("本地 node_modules 和 CDN 均无法加载 @pontx/shadcn-ui");

@@ -4,8 +4,10 @@ import { createLogger } from "./logger/logger";
 import type { Logger } from "./logger/types";
 import fsp from "node:fs/promises";
 import * as path from "path";
+import * as os from "node:os";
 import { LOCK_FILENAME } from "./const";
 import { resolveConfig } from "./config";
+import { resolvePlugin } from "./plugin";
 import { reGenerateFiles } from "./generate";
 import type { ResolvedConfig } from "./type";
 
@@ -89,6 +91,51 @@ export class PontxManager {
 
     logger.debug('Manager 初始化完成');
     return manager;
+  }
+
+  /**
+   * 从 spec 文件路径或 URL 直接构造 Manager（零配置模式）
+   * @param specSource 本地文件路径或远程 URL
+   * @param rootDir 项目根目录
+   * @param logger 日志实例
+   */
+  static async constructorFromSpecSource(
+    specSource: string,
+    rootDir: string,
+    logger = createLogger("info", { prefix: "[pontx manager]" })
+  ) {
+    const isUrl = /^https?:\/\//.test(specSource);
+
+    /* 推导 spec 名称 */
+    let specName: string;
+    if (isUrl) {
+      try {
+        const urlPath = new URL(specSource).pathname;
+        specName = path.basename(urlPath, path.extname(urlPath)) || "default";
+      } catch {
+        specName = "default";
+      }
+    } else {
+      specName = path.basename(specSource, path.extname(specSource));
+    }
+
+    const resolvedConfig: ResolvedConfig = {
+      rootDir,
+      configDir: rootDir,
+      configPath: "",
+      outDir: path.join(os.tmpdir(), "pontx-quickstart"),
+      origins: [
+        {
+          name: specName,
+          url: isUrl ? specSource : undefined,
+          localPath: isUrl ? undefined : path.resolve(rootDir, specSource),
+        },
+      ],
+      resolvedPlugin: resolvePlugin([]),
+    };
+
+    logger.info(`零配置模式: 加载 spec "${specName}" from ${specSource}`);
+    return PontxManager.constructorFromPontxConfig(resolvedConfig, logger);
   }
 
   static async readLocalSpecs(manager: PontxManager): Promise<PontxManager> {
