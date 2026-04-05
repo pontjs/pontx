@@ -461,9 +461,20 @@ export async function builtinExecuteApi(
   }
 
   // 7. 发送请求
+  if (hasFetchFn) {
+    // fetchFn 模式：返回值即最终结果，错误即最终错误，跳过后续响应处理
+    const data = await executeApiConfig!.fetchFn!(request.url, request.init);
+    logger.debug(`API call successful (fetchFn mode)`);
+    return {
+      data,
+      status: 200,
+      headers: {},
+    };
+  }
+
   let rawResponse: Response;
   try {
-    rawResponse = await fetchWithTimeout(request.url, request.init, timeout, executeApiConfig?.fetchFn);
+    rawResponse = await fetchWithTimeout(request.url, request.init, timeout);
   } catch (error) {
     const apiError = createApiError(error, request);
 

@@ -94,16 +94,18 @@ export interface ExecuteApiConfig {
   headers?: Record<string, string>;
 
   /**
-   * 自定义 fetch 函数
-   * 与标准 fetch 签名相同: (url: string, init: RequestInit) => Promise<Response>
+   * 自定义请求函数
    *
-   * 当提供时，builtinExecuteApi 使用此函数替代原生 fetch。
+   * 当提供时，builtinExecuteApi 直接调用此函数，其返回值作为最终结果，
+   * 抛出的错误作为最终错误。跳过后续的响应解析（handleResponse）、
+   * afterResponse 钩子等处理步骤。
+   *
    * 传入的 url 为相对路径（path + query），不包含 baseURL，
    * 因为 SDK 的 fetchFn 通常已内置 baseURL 处理。
    *
    * 典型用法：SDK 项目将已有的 fetchFn 传入，避免重复配置。
    */
-  fetchFn?: (url: string, init: RequestInit) => Promise<Response>;
+  fetchFn?: (url: string, init: RequestInit) => Promise<any>;
 
   /**
    * 环境配置
