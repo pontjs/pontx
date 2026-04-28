@@ -37,9 +37,10 @@ Pontx 是一个 API 生命周期管理工具，提供 API 搜索、探索、文�
 1. `pontx list apis` / `pontx search <keyword>` — 发现 API
 2. `pontx show-api [tag] <api>` — 查看参数、响应类型等详情
 3. **试调用验证传参** — 在生成代码前先调用一次，确认对参数的理解正确：
-   - GET 等安全接口：直接调用，如 `pontx call [tag] <api> --id=123`
+   - GET 等安全接口：**直接调用，不要加 `--dry-run`**，这样能确保调用成功并拿到真实响应验证参数理解，如 `pontx call [tag] <api> --id=123`
    - POST/PUT/DELETE 等有副作用的接口：加 `--dry-run` 预览，如 `pontx call [tag] <api> --name=test --dry-run`
-4. `pontx gen [tag] <api>` / `pontx generate` — 确认无误后生成 SDK 代码
+4. **高效处理返回结果** — API 返回可能很大，应通过管道 `grep`、`-q` JMESPath 筛选、或写入 `/tmp` 临时文件后按需读取，避免直接阅读全部内容
+5. `pontx gen [tag] <api>` / `pontx generate` — 确认无误后生成 SDK 代码
 
 > **MUST READ**: 查看 `references/cli-commands.md` 了解每个命令的完整选项和用法。
 
@@ -115,40 +116,16 @@ pontx call pet -h               # pet 下的所有 APIs
 pontx call pet getPetById -h    # getPetById 的入参详情 + 示例
 ```
 
-## 9. CLI 命令速查
-
-| 命令                            | 说明                                    |
-| ------------------------------- | --------------------------------------- |
-| `pontx init`                    | 初始化配置文件                          |
-| `pontx list specs`              | 列出所有数据源                          |
-| `pontx list tags`               | 列出所有 API 标签                       |
-| `pontx list apis`               | 列出所有 API                            |
-| `pontx list schemas`            | 列出所有数据模型                        |
-| `pontx search <keyword>`        | 搜索 API                               |
-| `pontx show-api <tag> <api>`    | 查看 API 详情                           |
-| `pontx show-schema <schema>`    | 查看 Schema 详情                        |
-| `pontx gen <tag> <api>`         | 生成单个 API 调用代码                   |
-| `pontx generate`                | 生成所有 SDK 代码                       |
-| `pontx call [tag] <api>`        | 调用 API（有副作用的接口先加 `--dry-run`）|
-| `pontx cli init`                | 初始化 SDK CLI 项目                     |
-| `pontx service [spec]`          | 启动服务（可传 spec URL/路径零配置启动）|
-| `pontx cli build`               | 构建 SDK CLI                            |
-| `pontx completion install`      | 安装 Shell 补全                         |
-| `pontx skill`                   | 安装此 SKILL                            |
-
-> 多 spec 时需加 spec 前缀：`pontx mySpec call user info`。单 spec 时可直接 `pontx call user info`。
-
 > **MUST READ**: 查看 `references/cli-commands.md` 了解每个命令的完整选项、参数和示例。
 
 ---
 
 ## Safety & Best Practices
 
-- **有副作用的接口先用 `--dry-run`**: POST/PUT/DELETE 等接口调用前先预览请求内容；GET 等安全接口可直接调用
-- **使用 `-h` 确认参数**: `pontx call <tag> <api> -h` 查看入参详情和示例
-- **小心副作用操作**: DELETE/PUT/POST 会修改数据，需二次确认
 - **保护凭证**: 使用环境变量，不要硬编码 token
 - **使用 `--debug`**: 排查问题时启用详细日志
+
+> 更多安全实践（dry-run 策略、结果处理等）见 Section 2 的核心流程和 `references/cli-call-workflow.md`。
 
 ---
 

@@ -80,11 +80,13 @@ pontx mySpec call user info -h
 
 ### Step 4: 调用 API
 
-#### 4a. 预览请求（推荐先执行）
+#### 4a. 预览请求（仅用于有副作用的接口）
+
+对于 POST/PUT/DELETE 等有副作用的接口，**必须先用 `--dry-run` 预览**：
 
 ```bash
 # 干运行模式 - 只预览不发送
-pontx call user info --dry-run --id 123
+pontx call user create --dry-run --body '{"name": "test"}'
 ```
 
 输出内容：
@@ -94,10 +96,12 @@ pontx call user info --dry-run --id 123
 - 请求体（Body）
 - **不会发送实际请求**
 
+> **注意**: GET 等安全接口**不需要** `--dry-run`，直接调用即可。跳过 dry-run 能确保请求真正成功并获取真实响应，用于验证参数理解是否正确。
+
 #### 4b. 发送请求
 
 ```bash
-# GET 请求 - 路径/查询参数
+# GET 请求 - 直接调用，无需 dry-run
 pontx call user info --id 123
 
 # 多个参数
@@ -152,13 +156,38 @@ pontx call user info --id 123 --env prod
 
 ### Step 5: 处理响应
 
-#### 输出到文件
+API 返回结果可能包含大量数据。**Agent 应避免直接阅读全部返回内容**，而是通过以下方式有选择地读取，节省 tokens 并保持注意力集中：
+
+#### 使用管道筛选
+
+```bash
+# 通过 grep 筛选关键信息
+pontx call user list | grep "userName"
+
+# 通过 jq 提取特定字段
+pontx call user list | jq '.data[0:3]'
+```
+
+#### 写入临时文件后按需读取
+
+```bash
+# 写入 /tmp 下唯一文件名（时间戳+PID 避免并行调用冲突）
+pontx call user list > /tmp/pontx-result-$(date +%s)-$$.json
+
+# 之后按需读取文件的特定部分
+head -20 /tmp/pontx-result-*.json
+grep "keyword" /tmp/pontx-result-*.json
+```
+
+> **为什么文件名要唯一？** Agent 可能并行执行多个 API 调用，如果使用固定文件名（如 `result.json`），后写入的会覆盖先写入的，导致数据丢失。使用 `$(date +%s)-$$`（时间戳-进程ID）可确保每次调用生成唯一文件。
+
+#### 输出到指定文件
 
 ```bash
 pontx call user list -o result.json
 ```
 
-#### 使用 JMESPath 筛选
+#### 使用 JMESPath 筛选（推荐）
 
 ```bash
 # 只提取 data 字段
@@ -169,6 +198,9 @@ pontx call user list -q "[].{Id: id, Name: name}"
 
 # 条件筛选
 pontx call user list -q "[?status=='active']"
+
+# 只取前几条，快速验证结构
+pontx call user list -q "data[0:3]"
 ```
 
 ## 命令参数参考
@@ -186,14 +218,16 @@ pontx call user list -q "[?status=='active']"
 
 ## 安全最佳实践
 
-### 1. 总是先预览
+### 1. 有副作用的接口先预览，安全接口直接调用
 
 ```bash
-# 先用 --dry-run 检查请求内容
+# POST/PUT/DELETE — 先用 --dry-run 检查请求内容
 pontx call order delete --id 123 --dry-run
-
 # 确认无误后再执行
 pontx call order delete --id 123
+
+# GET 等安全接口 — 直接调用，不需要 --dry-run
+pontx call order info --id 123
 ```
 
 ### 2. 验证参数格式
