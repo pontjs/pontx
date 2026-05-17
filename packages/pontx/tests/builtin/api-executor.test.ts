@@ -9,6 +9,8 @@ import {
   normalizeBaseUrl,
   buildUrl,
   buildRequestConfig,
+  buildApiRequest,
+  requestToCurl,
 } from '../../src/builtin/apiExecutor';
 
 describe('Plugin apiExecutor lifecycle hook', () => {
@@ -319,6 +321,53 @@ describe('buildUrl', () => {
     );
 
     expect(result).toBe('https://api.example.com/users/123/posts/456');
+  });
+});
+
+describe('requestToCurl', () => {
+  it('should render URL, headers, and body as curl', async () => {
+    const request = await buildApiRequest({
+      api: {
+        specName: 'test-spec',
+        tagName: 'users',
+        apiName: 'createUser',
+      },
+      meta: {
+        path: '/users',
+        method: 'POST',
+        parameters: [
+          { name: 'body', in: 'body' as const, required: true, schema: { type: 'object' } },
+        ],
+        consumes: ['application/json'],
+        produces: ['application/json'],
+      },
+      params: {
+        body: { name: 'John' },
+      },
+      executeApiConfig: {
+        baseURL: 'https://api.example.com',
+        headers: {
+          Authorization: 'Bearer token',
+        },
+      },
+      resolvedConfig: {
+        rootDir: '/test',
+        configDir: '/test',
+        configPath: '/test/pontx.config.ts',
+        outDir: '/test/api',
+        origins: [],
+      },
+      logger: {
+        debug: () => {},
+        info: () => {},
+        warn: () => {},
+        error: () => {},
+      } as any,
+    });
+
+    expect(requestToCurl(request)).toBe(
+      'curl -X \'POST\' \'https://api.example.com/users\' -H \'Accept: application/json\' -H \'Authorization: Bearer token\' -H \'Content-Type: application/json\' --data-raw \'{"name":"John"}\''
+    );
   });
 });
 

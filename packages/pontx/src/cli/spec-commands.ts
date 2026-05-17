@@ -290,6 +290,7 @@ export function registerSpecCommands(
     .option("-o, --output <path>", "输出结果到文件")
     .option("-q, --query <expression>", "JMESPath 查询表达式")
     .option("--debug", "显示详细请求/响应信息")
+    .option("--curl", "输出等价 cURL 命令")
     .option("--dry-run", "只显示请求，不实际执行")
     .option("--use-remote", "使用远程元数据")
     .option("-e, --env <env>", "指定环境/baseUrl")

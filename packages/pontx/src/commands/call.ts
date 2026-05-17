@@ -7,12 +7,14 @@ import type { ApiExecutorContext } from "../type";
 import type { ApiExecutionContext } from "../types";
 import { parseApiPath, getApiMeta, specHasTags } from "./show-api";
 import { createLogger } from "../logger/logger";
+import { buildApiRequest, requestToCurl } from "../builtin/apiExecutor";
 
 export interface CallCommandOptions {
   env?: string;
   header?: string[];
   output?: string;
   debug?: boolean;
+  curl?: boolean;
   dryRun?: boolean;
   useRemote?: boolean;
   query?: string;
@@ -27,6 +29,7 @@ export const CLI_OPTIONS = new Set([
   "output",
   "o",
   "debug",
+  "curl",
   "dry-run",
   "use-remote",
   "query",
@@ -510,6 +513,15 @@ export async function callCommand(
       logger.info(requestInfo);
     } else {
       process.stderr.write(requestInfo + '\n');
+    }
+  }
+
+  if (options.curl) {
+    const curlCommand = requestToCurl(await buildApiRequest(context));
+    if (logger) {
+      logger.info(curlCommand);
+    } else {
+      process.stderr.write(curlCommand + '\n');
     }
   }
 

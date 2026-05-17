@@ -333,6 +333,131 @@ function resolveTimeout(context: ApiExecutionContext): number {
 }
 
 /**
+ * 构建最终请求对象，包含参数分类、baseURL、请求体和 beforeRequest 钩子。
+ */
+export async function buildApiRequest(
+  context: ApiExecutionContext
+): Promise<ApiRequest> {
+  const { api, meta, params, executeApiConfig, logger } = context;
+  const hasFetchFn = !!executeApiConfig?.fetchFn;
+  const configHeaders = resolveHeaders(context);
+
+  const { pathParams, queryParams, headerParams, bodyParams } = parseParams(
+    meta.parameters,
+    params
+  );
+
+  let url: string;
+  if (hasFetchFn) {
+    url = buildPathUrl(meta.path, pathParams, queryParams);
+    logger.debug(`Path URL: ${url}`);
+  } else {
+    const baseUrl = resolveBaseUrl(context);
+    url = buildUrl(baseUrl, meta.path, pathParams, queryParams);
+    logger.debug(`Base URL: ${baseUrl}`);
+  }
+
+  const requestInit = buildRequestConfig(
+    meta.method,
+    { ...configHeaders, ...headerParams },
+    bodyParams,
+    meta.consumes,
+    meta.produces
+  );
+
+  let request: ApiRequest = {
+    url,
+    init: requestInit,
+    meta: {
+      specName: api.specName,
+      tagName: api.tagName,
+      apiName: api.apiName,
+      method: meta.method,
+      path: meta.path,
+    },
+  };
+
+  if (executeApiConfig?.beforeRequest) {
+    try {
+      request = await executeApiConfig.beforeRequest(request);
+    } catch (error) {
+      logger.error(
+        'beforeRequest hook failed',
+        error instanceof Error ? error : new Error(String(error))
+      );
+      throw error;
+    }
+  }
+
+  return request;
+}
+
+function shellQuote(value: string): string {
+  return `'${value.replace(/'/g, "'\\''")}'`;
+}
+
+function headersToEntries(
+  headers: RequestInit["headers"]
+): Array<[string, string]> {
+  if (!headers) {
+    return [];
+  }
+
+  if (headers instanceof Headers) {
+    return Array.from(headers.entries());
+  }
+
+  if (Array.isArray(headers)) {
+    return headers.map(([key, value]) => [key, String(value)]);
+  }
+
+  return Object.entries(headers).map(([key, value]) => [key, String(value)]);
+}
+
+function bodyToCurlData(body: BodyInit): string {
+  if (typeof body === "string") {
+    return body;
+  }
+
+  if (body instanceof URLSearchParams) {
+    return body.toString();
+  }
+
+  if (body instanceof FormData) {
+    return "[FormData body omitted]";
+  }
+
+  if (body instanceof Blob) {
+    return `[Blob body: ${body.size} bytes]`;
+  }
+
+  return String(body);
+}
+
+/**
+ * 将 ApiRequest 转换为可复制执行的 cURL 命令。
+ */
+export function requestToCurl(request: ApiRequest): string {
+  const method = String(
+    request.init.method || request.meta.method || "GET"
+  ).toUpperCase();
+  const parts = ["curl", "-X", shellQuote(method), shellQuote(request.url)];
+
+  for (const [key, value] of headersToEntries(request.init.headers)) {
+    parts.push("-H", shellQuote(`${key}: ${value}`));
+  }
+
+  if (request.init.body !== undefined && request.init.body !== null) {
+    parts.push(
+      "--data-raw",
+      shellQuote(bodyToCurlData(request.init.body as BodyInit))
+    );
+  }
+
+  return parts.join(" ");
+}
+
+/**
  * 创建 API 错误对象
  */
 function createApiError(
@@ -400,67 +525,18 @@ async function fetchWithTimeout(
 export async function builtinExecuteApi(
   context: ApiExecutionContext
 ): Promise<ApiResponse> {
-  const { api, meta, params, executeApiConfig, logger } = context;
+  const { api, executeApiConfig, logger } = context;
 
   // 1. 解析配置
   const hasFetchFn = !!executeApiConfig?.fetchFn;
-  const configHeaders = resolveHeaders(context);
   const timeout = resolveTimeout(context);
 
   logger.debug(`Executing API: ${api.specName}.${api.tagName}.${api.apiName}`);
 
-  // 2. 解析和分类参数
-  const { pathParams, queryParams, headerParams, bodyParams } = parseParams(
-    meta.parameters,
-    params
-  );
+  // 2. 构建请求对象并应用 beforeRequest 钩子
+  const request = await buildApiRequest(context);
 
-  // 3. 构建 URL
-  let url: string;
-  if (hasFetchFn) {
-    // fetchFn 模式：只传 path + query，fetchFn 自行处理 baseURL
-    url = buildPathUrl(meta.path, pathParams, queryParams);
-    logger.debug(`Path URL: ${url}`);
-  } else {
-    // 原生 fetch 模式：构建完整 URL
-    const baseUrl = resolveBaseUrl(context);
-    url = buildUrl(baseUrl, meta.path, pathParams, queryParams);
-    logger.debug(`Base URL: ${baseUrl}`);
-  }
-
-  // 4. 构建请求配置
-  const requestInit = buildRequestConfig(
-    meta.method,
-    { ...configHeaders, ...headerParams },
-    bodyParams,
-    meta.consumes,
-    meta.produces
-  );
-
-  // 5. 创建请求对象
-  let request: ApiRequest = {
-    url,
-    init: requestInit,
-    meta: {
-      specName: api.specName,
-      tagName: api.tagName,
-      apiName: api.apiName,
-      method: meta.method,
-      path: meta.path,
-    },
-  };
-
-  // 6. 应用 beforeRequest 钩子
-  if (executeApiConfig?.beforeRequest) {
-    try {
-      request = await executeApiConfig.beforeRequest(request);
-    } catch (error) {
-      logger.error('beforeRequest hook failed', error instanceof Error ? error : new Error(String(error)));
-      throw error;
-    }
-  }
-
-  // 7. 发送请求
+  // 3. 发送请求
   if (hasFetchFn) {
     // fetchFn 模式：返回值即最终结果，错误即最终错误，跳过后续响应处理
     const data = await executeApiConfig!.fetchFn!(request.url, request.init);

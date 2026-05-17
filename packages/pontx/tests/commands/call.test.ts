@@ -177,6 +177,13 @@ describe("parseToolParams", () => {
       expect(result).not.toHaveProperty("debug");
     });
 
+    it("should skip --curl boolean flag", () => {
+      const args = ["--curl", "--userId", "123"];
+      const result = parseToolParams(args);
+      expect(result).toEqual({ userId: 123 });
+      expect(result).not.toHaveProperty("curl");
+    });
+
     it("should skip --dry-run boolean flag", () => {
       const args = ["--dry-run", "--userId", "123"];
       const result = parseToolParams(args);

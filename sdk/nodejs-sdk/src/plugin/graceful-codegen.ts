@@ -45,6 +45,18 @@ export interface GracefulApiMeta {
   bodyType: BodyType;
 }
 
+function getSuccessResponse(api: PontxAPI) {
+  if (api.responses?.["200"]) {
+    return api.responses["200"];
+  }
+
+  const successStatus = Object.keys(api.responses || {})
+    .filter((status) => /^2\d\d$/.test(status))
+    .sort((a, b) => Number(a) - Number(b))[0];
+
+  return successStatus ? api.responses[successStatus] : undefined;
+}
+
 /**
  * Extract path parameter names from API
  */
@@ -155,7 +167,7 @@ function apiDTsCodeGraceful(api: PontxAPI): string {
     consume ? `consume: '${consume}';` : "", // New field
     `bodyParams: ${bodyParamType};`,
     `Response: ${generateSchemaCode(
-      api.responses["200"]?.schema,
+      getSuccessResponse(api)?.schema,
       "schemas."
     )};`,
   ]

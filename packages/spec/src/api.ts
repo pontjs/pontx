@@ -89,3 +89,21 @@ export class PontxAPI {
     return _.union(structs);
   }
 }
+
+export function getSuccessResponse(
+  responses?: PontxAPI["responses"]
+): ResponseObject | undefined {
+  if (!responses) {
+    return undefined;
+  }
+
+  if (responses["200"]) {
+    return responses["200"];
+  }
+
+  const successStatus = Object.keys(responses)
+    .filter((status) => /^2\d\d$/.test(status))
+    .sort((a, b) => Number(a) - Number(b))[0];
+
+  return successStatus ? responses[successStatus] : undefined;
+}

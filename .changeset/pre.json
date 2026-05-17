@@ -15,6 +15,7 @@
   "changesets": [
     "config-loader-improvement",
     "fix-spec-resolve-ref",
+    "fresh-curl-2xx-beta",
     "mcp-major-release",
     "opencli-refactor",
     "sdk-cli-multi-origin-fix",

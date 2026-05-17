@@ -12,12 +12,14 @@ import type { ApiExecutorContext } from "../../../type";
 import type { ApiExecutionContext } from "../../../types";
 import { getApiMeta } from "./show-api";
 import { createLogger } from "../../../logger/logger";
+import { buildApiRequest, requestToCurl } from "../../../builtin/apiExecutor";
 
 export interface CallCommandOptions {
   env?: string;
   header?: string[];
   output?: string;
   debug?: boolean;
+  curl?: boolean;
   dryRun?: boolean;
   useRemote?: boolean;
   query?: string;
@@ -32,6 +34,7 @@ export const CLI_OPTIONS = new Set([
   "output",
   "o",
   "debug",
+  "curl",
   "dry-run",
   "use-remote",
   "query",
@@ -420,6 +423,10 @@ export async function callCommand(
   if (options.debug || options.dryRun) {
     const requestInfo = formatRequestInfo(context, extraHeaders);
     process.stderr.write(requestInfo + '\n');
+  }
+
+  if (options.curl) {
+    process.stderr.write(requestToCurl(await buildApiRequest(context)) + '\n');
   }
 
   if (options.dryRun) {

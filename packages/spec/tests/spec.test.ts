@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { PontxSpec, PontxSpecs } from "../src/spec";
+import { generateSpecApis, getSuccessResponse, PontxSpec, PontxSpecs } from "../src";
 import { PontxAPI } from "../src/api";
 
 describe("PontxSpec", () => {
@@ -155,6 +155,44 @@ describe("PontxSpec", () => {
       const meta = PontxSpec.getMeta(spec, "tag", "test");
       expect(meta.description).toBe("test tag");
     });
+  });
+});
+
+describe("getSuccessResponse", () => {
+  it("should prefer 200 response", () => {
+    const response = getSuccessResponse({
+      "200": { schema: { type: "string" } },
+      "201": { schema: { type: "object" } },
+    } as PontxAPI["responses"]);
+
+    expect(response?.schema?.type).toBe("string");
+  });
+
+  it("should fall back to another 2xx response", () => {
+    const response = getSuccessResponse({
+      "201": { schema: { type: "object" } },
+      "400": { schema: { type: "string" } },
+    } as PontxAPI["responses"]);
+
+    expect(response?.schema?.type).toBe("object");
+  });
+
+  it("should use 2xx response types during API code generation", () => {
+    const code = generateSpecApis({
+      name: "test",
+      apis: {
+        createUser: {
+          path: "/users",
+          method: "POST",
+          parameters: [],
+          responses: {
+            "201": { schema: { type: "string" } },
+          },
+        } as PontxAPI,
+      },
+    } as PontxSpec);
+
+    expect(code).toContain("Response: string;");
   });
 });
 

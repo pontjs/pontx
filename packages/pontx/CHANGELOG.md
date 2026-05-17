@@ -1,5 +1,13 @@
 # pontx
 
+## 1.0.0-beta.8
+
+### Patch Changes
+
+- Support successful non-200 2xx response schemas and add cURL output for API calls.
+- Updated dependencies
+  - @pontx/spec@1.0.0-beta.2
+
 ## 1.0.0-beta.4
 
 ### Patch Changes

@@ -45,6 +45,7 @@ const OPTIONS_WITH_VALUES = new Set([
 /** Boolean options (no value) */
 const BOOLEAN_OPTIONS = new Set([
   "debug",
+  "curl",
   "dry-run",
   "use-remote",
   "help",

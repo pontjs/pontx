@@ -1,4 +1,4 @@
-import { Parameter, PontxAPI } from "../../api.js";
+import { getSuccessResponse, Parameter, PontxAPI } from "../../api.js";
 import { generateSchemaCode } from "./schema.js";
 import { checkNeedQuotationMark, indentation } from "../utils.js";
 import { PontxSpec, TagGroup } from "../../spec.js";
@@ -25,7 +25,7 @@ export const apiDTsCode = (api: PontxAPI) => {
     method ? `method: '${method.toUpperCase()}';` : "",
     `bodyParams: ${bodyParamType};`,
     `Response: ${generateSchemaCode(
-      api.responses["200"]?.schema,
+      getSuccessResponse(api.responses)?.schema,
       "schemas."
     )};`,
   ]

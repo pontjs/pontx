@@ -26,6 +26,7 @@ const CLI_OPTIONS = new Set([
   "query",
   "q",
   "debug",
+  "curl",
   "dry-run",
   "use-remote",
   "global",
@@ -234,6 +235,7 @@ export class ParamProvider implements CompletionProvider {
     const options: Array<{ name: string; description: string }> = [
       { name: "env", description: "[CLI] Specify environment/baseUrl" },
       { name: "debug", description: "[CLI] Show detailed request/response" },
+      { name: "curl", description: "[CLI] Output equivalent cURL command" },
       { name: "dry-run", description: "[CLI] Show request without executing" },
       { name: "output", description: "[CLI] Output result to file" },
       { name: "query", description: "[CLI] JMESPath query expression" },

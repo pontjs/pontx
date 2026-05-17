@@ -14,6 +14,18 @@ import {
   checkNeedQuotationMark,
 } from "@pontx/spec";
 
+function getSuccessResponse(api: PontxAPI) {
+  if (api.responses?.["200"]) {
+    return api.responses["200"];
+  }
+
+  const successStatus = Object.keys(api.responses || {})
+    .filter((status) => /^2\d\d$/.test(status))
+    .sort((a, b) => Number(a) - Number(b))[0];
+
+  return successStatus ? api.responses[successStatus] : undefined;
+}
+
 /**
  * 从 path 中提取参数名称并按照出现顺序排序
  * @param path API 路径，如 /api/{userId}/posts/{postId}
@@ -145,7 +157,7 @@ function generateApiMethodType(
     contentType === "application/json" && bodyParam?.schema?.type === "object";
 
   const responseType = generateSchemaCode(
-    api.responses?.["200"]?.schema as PontxJsonSchema,
+    getSuccessResponse(api)?.schema as PontxJsonSchema,
     "schemas."
   );
 

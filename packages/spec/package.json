@@ -1,6 +1,6 @@
 {
   "name": "@pontx/spec",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "type": "module",
   "description": "pontx spec",
   "exports": {

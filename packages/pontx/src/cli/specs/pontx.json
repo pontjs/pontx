@@ -492,6 +492,10 @@
           "description": "显示详细请求/响应信息"
         },
         {
+          "name": "--curl",
+          "description": "输出等价 cURL 命令"
+        },
+        {
           "name": "--dry-run",
           "description": "只显示请求，不实际执行"
         },
