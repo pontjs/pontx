@@ -201,6 +201,74 @@ describe("evaluatePontxQuality", () => {
       && finding.ruleId === "structure.schema-type")).toBe(false);
   });
 
+  it("does not require duplicate prose on an anonymous allOf constraint branch", () => {
+    const spec = goodSpec();
+    spec.components!.schemas.CreateUser = {
+      type: "object",
+      title: "创建用户",
+      description: "创建用户请求。",
+      allOf: [
+        { $ref: "#/components/schemas/User" },
+        { type: "object", required: ["name"] },
+        { type: "object", minProperties: 1, additionalProperties: false },
+      ],
+    } as any;
+
+    const report = evaluatePontxQuality({ spec });
+
+    expect(report.findings.some((finding) => finding.ruleId === "description.schema"
+      && finding.path.endsWith(".allOf[1]"))).toBe(false);
+    expect(report.findings.some((finding) => finding.ruleId === "description.schema"
+      && finding.path.endsWith(".allOf[2]"))).toBe(false);
+  });
+
+  it("still requires prose on semantic allOf branches", () => {
+    const spec = goodSpec();
+    spec.components!.schemas.CreateUser = {
+      type: "object",
+      description: "创建用户请求。",
+      allOf: [
+        { $ref: "#/components/schemas/User" },
+        {
+          type: "object",
+          properties: {
+            invitationCode: {
+              type: "string",
+              description: "邀请码",
+              examples: ["invite-123"],
+            },
+          },
+        },
+        { type: "string", enum: ["invited"] },
+      ],
+    } as any;
+
+    const report = evaluatePontxQuality({ spec });
+    const descriptionPaths = report.findings
+      .filter((finding) => finding.ruleId === "description.schema")
+      .map((finding) => finding.path);
+
+    expect(descriptionPaths).toContain('$.components.schemas["CreateUser"].allOf[1]');
+    expect(descriptionPaths).toContain('$.components.schemas["CreateUser"].allOf[2]');
+  });
+
+  it("does not exempt an allOf required constraint for an undocumented field", () => {
+    const spec = goodSpec();
+    spec.components!.schemas.CreateUser = {
+      type: "object",
+      description: "创建用户请求。",
+      allOf: [
+        { $ref: "#/components/schemas/User" },
+        { type: "object", required: ["invitationCode"] },
+      ],
+    } as any;
+
+    const report = evaluatePontxQuality({ spec });
+
+    expect(report.findings.some((finding) => finding.ruleId === "description.schema"
+      && finding.path.endsWith(".allOf[1]"))).toBe(true);
+  });
+
   it("accepts a described referenced Schema as the parameter description", () => {
     const spec = goodSpec();
     spec.apis["users/getUser"].parameters = [{

@@ -73,6 +73,52 @@ const VALID_METHODS = new Set([
 ]);
 const VALID_PARAM_LOCATIONS = new Set(["query", "body", "path", "formData", "header"]);
 
+const STRUCTURAL_ALLOF_BRANCH_KEYS = new Set([
+  "type", "required", "multipleOf", "maximum", "exclusiveMaximum", "minimum",
+  "exclusiveMinimum", "maxLength", "minLength", "pattern", "format",
+  "contentMediaType", "contentEncoding", "maxItems", "minItems", "uniqueItems",
+  "maxProperties", "minProperties", "additionalProperties", "nullable",
+]);
+
+/** 判断字段是否已在父 Schema 或其 allOf 引用链中获得面向用户的说明。 */
+function hasDocumentedProperty(
+  schema: PontxJsonSchema,
+  propertyName: string,
+  schemas: Record<string, PontxJsonSchema>,
+  seen = new Set<PontxJsonSchema>(),
+): boolean {
+  if (seen.has(schema)) return false;
+  seen.add(schema);
+  if (schema.$ref?.startsWith("#/components/schemas/")) {
+    const name = schema.$ref.split("/").pop() || "";
+    return !!schemas[name] && hasDocumentedProperty(schemas[name], propertyName, schemas, seen);
+  }
+  const property = schema.properties?.[propertyName];
+  if (property && (isText(property.description) || isText(property.title))) return true;
+  const allOf = (schema as PontxJsonSchema & { allOf?: PontxJsonSchema[] }).allOf || [];
+  return allOf.some((branch) => hasDocumentedProperty(branch, propertyName, schemas, seen));
+}
+
+/**
+ * 匿名 allOf 分支若只收紧已描述字段的结构约束，可继承父 Schema 的说明。
+ * 含属性、枚举、常量或嵌套 Schema 的分支仍需独立说明，避免隐藏新的业务语义。
+ */
+function canInheritAllOfBranchDescription(
+  branch: PontxJsonSchema,
+  parent: PontxJsonSchema,
+  schemas: Record<string, PontxJsonSchema>,
+): boolean {
+  if (!isText(parent.description) && !isText(parent.title)) return false;
+  if (isText(branch.description) || isText(branch.title)) return false;
+  const keys = Object.keys(branch);
+  if (!keys.length || !keys.every((key) => STRUCTURAL_ALLOF_BRANCH_KEYS.has(key))) return false;
+  if (branch.required !== undefined && !Array.isArray(branch.required)) return false;
+  if (branch.additionalProperties !== undefined
+    && typeof branch.additionalProperties !== "boolean") return false;
+  return (branch.required || []).every((propertyName) =>
+    hasDocumentedProperty(parent, propertyName, schemas));
+}
+
 /** 评估 PontxSpec 静态质量并返回可机器消费的报告。 */
 export function evaluatePontxQuality(input: PontxQualityInput): PontxQualityReport {
   const spec = input?.spec;
@@ -150,7 +196,13 @@ export function evaluatePontxQuality(input: PontxQualityInput): PontxQualityRepo
   const seenSchemas = new Set<PontxJsonSchema>();
   const checkedRefs = new Set<string>();
 
-  const visitSchema = (schema: PontxJsonSchema | undefined, path: string, entity: string, apiKey?: string) => {
+  const visitSchema = (
+    schema: PontxJsonSchema | undefined,
+    path: string,
+    entity: string,
+    apiKey?: string,
+    descriptionOptional = false,
+  ) => {
     if (!schema || typeof schema !== "object") {
       record("structure", entity, false, {
         ruleId: "structure.schema", path, message: "Schema 缺失或不是对象。",
@@ -191,7 +243,7 @@ export function evaluatePontxQuality(input: PontxQualityInput): PontxQualityRepo
       ruleId: "structure.schema-type", path: `${path}.type`, message: "Schema 缺少 type。",
       remediation: "为 Schema 声明 PontxSpec 支持的明确 type 或有效组合结构。", affectedApis: apiKey ? [apiKey] : undefined,
     });
-    record("description", entity, isText(schema.description) || isText(schema.title), {
+    record("description", entity, descriptionOptional || isText(schema.description) || isText(schema.title), {
       ruleId: "description.schema", path, message: "Schema 或字段缺少描述。",
       remediation: "填写面向使用者的 title 或 description。", affectedApis: apiKey ? [apiKey] : undefined,
     });
@@ -237,7 +289,9 @@ export function evaluatePontxQuality(input: PontxQualityInput): PontxQualityRepo
     }
     for (const keyword of ["allOf", "anyOf", "oneOf"] as const) {
       for (const [index, branch] of (schemaRecord[keyword] || []).entries()) {
-        visitSchema(branch, `${path}.${keyword}[${index}]`, entity, apiKey);
+        const isStructuralAllOfBranch = keyword === "allOf"
+          && canInheritAllOfBranchDescription(branch, schema, schemas);
+        visitSchema(branch, `${path}.${keyword}[${index}]`, entity, apiKey, isStructuralAllOfBranch);
       }
     }
     if (schemaRecord.not) visitSchema(schemaRecord.not, `${path}.not`, entity, apiKey);
