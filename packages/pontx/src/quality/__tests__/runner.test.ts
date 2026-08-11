@@ -4,7 +4,12 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { evaluatePontxQuality, type PontxSpec } from "@pontx/spec";
+import {
+  evaluatePontxQuality,
+  PontxRequestInputLocation,
+  PontxRequestInputSourceKind,
+  type PontxSpec,
+} from "@pontx/spec";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -70,9 +75,98 @@ describe("quality dynamic runner", () => {
   it("reports required parameters that cannot be generated", async () => {
     const spec = specFixture();
     delete spec.apis["pets/getPet"].parameters![0].schema.examples;
+    delete spec.apis["pets/getPet"].requestExamples;
     const result = await validatePontxCliCompatibility(spec);
     expect(result.coverage).toBe(0);
     expect(result.findings[0].ruleId).toBe("deterministic.required-examples");
+  });
+
+  it("builds path, query, header, and body inputs from a complete request example", async () => {
+    const spec = specFixture();
+    spec.apis["pets/getPet"].method = "POST";
+    spec.apis["pets/getPet"].parameters = [
+      { name: "id", in: "path", required: true, schema: { type: "string" } },
+      { name: "expand", in: "query", required: true, schema: { type: "boolean" } },
+      { name: "x-trace", in: "header", required: true, schema: { type: "string" } },
+      {
+        name: "body", in: "body", required: true,
+        schema: {
+          type: "object", required: ["name"],
+          properties: { name: { type: "string" } },
+        },
+      },
+    ];
+    spec.apis["pets/getPet"].requestExamples = {
+      default: {
+        request: {
+          path: { id: "p-from-request-example" },
+          query: { expand: true },
+          headers: { "x-trace": "trace-1" },
+          body: { name: "Milo" },
+        },
+        expectedStatus: "200",
+      },
+    };
+
+    const result = await validatePontxCliCompatibility(spec);
+
+    expect(result.coverage).toBe(1);
+    expect(result.findings).toEqual([]);
+  });
+
+  it("counts a validated operation dependency as deterministically resolved", async () => {
+    const spec = specFixture();
+    delete spec.apis["pets/getPet"].parameters![0].schema.examples;
+    spec.apis["pets/listPets"] = {
+      path: "/pets", method: "GET", operationId: "listPets",
+      parameters: [], responses: { "200": { description: "宠物列表" } },
+    };
+    spec.apis["pets/getPet"].requestExamples = {
+      default: {
+        request: {}, expectedStatus: "200",
+        unresolved: [{
+          in: PontxRequestInputLocation.Path, name: "id",
+          source: { kind: PontxRequestInputSourceKind.Operation, operationId: "listPets" },
+        }],
+      },
+    };
+
+    const result = await validatePontxCliCompatibility(spec);
+
+    expect(result.coverage).toBe(1);
+    expect(result.findings).toEqual([]);
+  });
+
+  it.each([
+    {
+      name: "a dependency without a source",
+      unresolved: [{ in: "path", name: "id" }],
+    },
+    {
+      name: "a dependency on an unknown operation",
+      unresolved: [{
+        in: "path", name: "id",
+        source: { kind: "operation", operationId: "missingOperation" },
+      }],
+    },
+    {
+      name: "an example that does not cover the required input",
+      unresolved: [],
+    },
+  ])("rejects $name", async ({ unresolved }) => {
+    const spec = specFixture();
+    delete spec.apis["pets/getPet"].parameters![0].schema.examples;
+    spec.apis["pets/getPet"].requestExamples = {
+      default: { request: {}, expectedStatus: "200", unresolved } as any,
+    };
+
+    const result = await validatePontxCliCompatibility(spec);
+
+    expect(result.coverage).toBe(0);
+    expect(result.findings).toContainEqual(expect.objectContaining({
+      ruleId: "deterministic.required-examples",
+      affectedApis: ["pets/getPet"],
+    }));
   });
 
   it("builds required request bodies composed with allOf", async () => {

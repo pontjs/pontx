@@ -3,7 +3,15 @@
  * @description 使用真实请求构造器验证全部 PontxAPI 的 CLI 可调用性
  */
 
-import type { PontxAPI, PontxJsonSchema, PontxSpec, QualityFinding } from "@pontx/spec";
+import type {
+  PontxAPI,
+  PontxJsonSchema,
+  Parameter,
+  PontxRequestExample,
+  PontxRequestExampleRequest,
+  PontxSpec,
+  QualityFinding,
+} from "@pontx/spec";
 import { QualitySeverity } from "@pontx/spec";
 import { buildApiRequest } from "../builtin/apiExecutor";
 import { createLogger } from "../logger/logger";
@@ -57,7 +65,93 @@ export function exampleForSchema(
   return undefined;
 }
 
-function requiredParams(api: PontxAPI, spec: PontxSpec): { params: Record<string, unknown>; missing: string[] } {
+type RequiredParams = {
+  params: Record<string, unknown>;
+  missing: string[];
+  dependencyResolved: boolean;
+};
+
+/** 判断值是否为可安全遍历的普通对象。 */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
+/** 读取整体请求示例中与参数位置对应的值集合。 */
+function requestValues(
+  request: PontxRequestExampleRequest,
+  location: Parameter["in"],
+): Record<string, unknown> {
+  if (location === "path") return isRecord(request.path) ? request.path : {};
+  if (location === "query") return isRecord(request.query) ? request.query : {};
+  if (location === "header") return isRecord(request.headers) ? request.headers : {};
+  return {};
+}
+
+/**
+ * 尝试从一个整体请求示例构造必填参数。
+ * operation 来源的动态输入只证明依赖可解析，不伪造运行时值。
+ */
+function paramsForRequestExample(
+  api: PontxAPI,
+  rawExample: PontxRequestExample,
+  operationIds: Set<string>,
+): RequiredParams | undefined {
+  if (!isRecord(rawExample) || !isRecord(rawExample.request)) return undefined;
+  const request = rawExample.request as PontxRequestExampleRequest;
+  const unresolved = Array.isArray(rawExample.unresolved) ? rawExample.unresolved : [];
+  const parameters = api.parameters || [];
+  const parameterKeys = new Set(parameters.map((parameter) => `${parameter.in}:${parameter.name}`));
+  const dependencyKeys = new Set<string>();
+
+  for (const input of unresolved) {
+    if (!isRecord(input) || typeof input.in !== "string" || typeof input.name !== "string"
+      || !isRecord(input.source) || input.source.kind !== "operation"
+      || typeof input.source.operationId !== "string" || !operationIds.has(input.source.operationId)) {
+      return undefined;
+    }
+    const key = `${input.in}:${input.name}`;
+    const declared = input.in === "body"
+      ? parameters.some((parameter) => parameter.in === "body")
+        && (input.name === "body" || input.name === "/" || input.name.startsWith("/"))
+      : parameterKeys.has(key);
+    if (!declared || dependencyKeys.has(key)) return undefined;
+    dependencyKeys.add(key);
+  }
+
+  const params: Record<string, unknown> = {};
+  const missing: string[] = [];
+  let dependencyResolved = false;
+  for (const parameter of parameters) {
+    let hasConcreteValue = false;
+    let concreteValue: unknown;
+    if (parameter.in === "body") {
+      hasConcreteValue = Object.prototype.hasOwnProperty.call(request, "body") && request.body !== undefined;
+      concreteValue = request.body;
+    } else {
+      const values = requestValues(request, parameter.in);
+      hasConcreteValue = Object.prototype.hasOwnProperty.call(values, parameter.name)
+        && values[parameter.name] !== undefined;
+      concreteValue = values[parameter.name];
+    }
+    if (hasConcreteValue) params[parameter.name] = concreteValue;
+    if (!parameter.required || hasConcreteValue) continue;
+
+    const dependencyKey = parameter.in === "body"
+      ? "body:body"
+      : `${parameter.in}:${parameter.name}`;
+    if (dependencyKeys.has(dependencyKey)) dependencyResolved = true;
+    else missing.push(parameter.name);
+  }
+  return { params, missing, dependencyResolved };
+}
+
+/** 优先使用完整请求示例，并保留叶子 examples 的向后兼容路径。 */
+function requiredParams(api: PontxAPI, spec: PontxSpec, operationIds: Set<string>): RequiredParams {
+  for (const example of Object.values(api.requestExamples || {})) {
+    const result = paramsForRequestExample(api, example, operationIds);
+    if (result && result.missing.length === 0) return result;
+  }
+
   const params: Record<string, unknown> = {};
   const missing: string[] = [];
   for (const parameter of api.parameters || []) {
@@ -66,7 +160,7 @@ function requiredParams(api: PontxAPI, spec: PontxSpec): { params: Record<string
     if (value === undefined) missing.push(parameter.name);
     else params[parameter.name] = value;
   }
-  return { params, missing };
+  return { params, missing, dependencyResolved: false };
 }
 
 /** 对所有 API 构造请求，确保必填示例可以形成无占位符请求。 */
@@ -76,19 +170,26 @@ export async function validatePontxCliCompatibility(spec: PontxSpec): Promise<{
 }> {
   const findings: QualityFinding[] = [];
   const entries = Object.entries(spec.apis || {});
+  const operationIds = new Set(entries
+    .map(([, api]) => api.operationId)
+    .filter((operationId): operationId is string => typeof operationId === "string" && operationId.length > 0));
   let passed = 0;
   const baseURL = spec.servers?.[0]?.url || "https://pontx-eval.invalid";
   for (const [apiKey, api] of entries) {
-    const { params, missing } = requiredParams(api, spec);
+    const { params, missing, dependencyResolved } = requiredParams(api, spec, operationIds);
     if (missing.length) {
       findings.push({
         ruleId: "deterministic.required-examples",
         severity: QualitySeverity.Error,
         path: `$.apis[${JSON.stringify(apiKey)}].parameters`,
         message: `必填参数无法从叶子 examples 构造：${missing.join(", ")}。`,
-        remediation: "补齐所有必填参数 Schema 的叶子 examples。",
+        remediation: "用完整 requestExamples、有效的 operation 依赖或叶子 examples 覆盖所有必填输入。",
         affectedApis: [apiKey],
       });
+      continue;
+    }
+    if (dependencyResolved) {
+      passed++;
       continue;
     }
     const [tagName, apiName] = apiKey.includes("/") ? apiKey.split("/") : ["", apiKey];
