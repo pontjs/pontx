@@ -144,4 +144,50 @@ describe("parseOAS3", () => {
     const bodyParam = updateUserApi.parameters.find((p) => p.in === "body");
     expect(bodyParam).toBeDefined();
   });
+
+  it("应保留响应描述并归一化 OAS Schema 方言", () => {
+    const document = {
+      openapi: "3.1.0",
+      info: { title: "测试", version: "1.0.0" },
+      servers: [{ url: "https://api.example.com" }],
+      tags: [{ name: "test" }],
+      components: {
+        responses: {
+          BadRequest: { description: "请求错误" },
+        },
+      },
+      paths: {
+        "/items": {
+          get: {
+            operationId: "getItems",
+            tags: ["test"],
+            parameters: [{
+              name: "currency", in: "query", required: true,
+              schema: {
+                type: ["string", "null"], example: "USD", enum: ["USD"],
+                "x-enum-descriptions": ["美元"],
+              },
+            }],
+            responses: {
+              200: {
+                description: "成功",
+                content: { "application/json": { schema: { type: "number", minimum: 0, exclusiveMinimum: true, example: 1 } } },
+              },
+              400: { $ref: "#/components/responses/BadRequest" },
+            },
+          },
+        },
+      },
+    } as any;
+    const result = parseOAS3(document, "test");
+    const api = result.apis["test/getItems"];
+
+    expect(api.responses["200"].description).toBe("成功");
+    expect(api.responses["400"].description).toBe("请求错误");
+    expect(api.responses["200"].schema?.examples).toEqual([1]);
+    expect(api.responses["200"].schema?.exclusiveMinimum).toBe(0);
+    expect(api.parameters?.[0].schema.type).toBe("string");
+    expect(api.parameters?.[0].schema.examples).toEqual(["USD"]);
+    expect(api.parameters?.[0].schema.enumValueTitles).toEqual({ USD: "美元" });
+  });
 });

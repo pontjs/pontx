@@ -68,6 +68,28 @@ describe("quality dynamic runner", () => {
     expect(result.findings[0].ruleId).toBe("deterministic.required-examples");
   });
 
+  it("builds required request bodies composed with allOf", async () => {
+    const spec = specFixture();
+    spec.components!.schemas.PetInput = {
+      type: "object", description: "宠物输入", required: ["name"],
+      properties: { name: { type: "string", description: "名称", examples: ["Milo"] } },
+    };
+    spec.apis["pets/getPet"].parameters = [{
+      name: "body", in: "body", required: true,
+      schema: {
+        description: "组合输入",
+        allOf: [
+          { $ref: "#/components/schemas/PetInput" },
+          { type: "object", required: ["name"] },
+        ],
+      } as any,
+    }];
+    spec.apis["pets/getPet"].path = "/pets";
+    const result = await validatePontxCliCompatibility(spec);
+    expect(result.coverage).toBe(1);
+    expect(result.findings).toEqual([]);
+  });
+
   it("scores a safe successful Agent trace and merges a 100 point report", async () => {
     const adapter: AgentAdapter = {
       name: "fake",

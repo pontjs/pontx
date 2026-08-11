@@ -17,6 +17,11 @@ export function round(value: number): number {
 }
 
 export function isExampleValid(schema: PontxJsonSchema, value: unknown): boolean {
+  const schemaRecord = schema as PontxJsonSchema & { nullable?: boolean; type?: unknown };
+  if (value === null) {
+    return schemaRecord.nullable === true
+      || (Array.isArray(schemaRecord.type) && schemaRecord.type.includes("null"));
+  }
   if (schema.enum?.length && !schema.enum.some((item) => JSON.stringify(item) === JSON.stringify(value))) return false;
   if (schema.const !== undefined && JSON.stringify(schema.const) !== JSON.stringify(value)) return false;
   if (schema.type === "string") {
@@ -33,20 +38,21 @@ export function isExampleValid(schema: PontxJsonSchema, value: unknown): boolean
   if (typeof value === "number") {
     if (schema.minimum !== undefined && value < schema.minimum) return false;
     if (schema.maximum !== undefined && value > schema.maximum) return false;
-    if (schema.exclusiveMinimum !== undefined && value <= schema.exclusiveMinimum) return false;
-    if (schema.exclusiveMaximum !== undefined && value >= schema.exclusiveMaximum) return false;
+    if (typeof schema.exclusiveMinimum === "number" && value <= schema.exclusiveMinimum) return false;
+    if (typeof schema.exclusiveMaximum === "number" && value >= schema.exclusiveMaximum) return false;
   }
   return true;
 }
 
 export function constraintsAreConsistent(schema: PontxJsonSchema): boolean {
   if (schema.minimum !== undefined && schema.maximum !== undefined && schema.minimum > schema.maximum) return false;
-  if (schema.exclusiveMinimum !== undefined && schema.exclusiveMaximum !== undefined
+  if (typeof schema.exclusiveMinimum === "number" && typeof schema.exclusiveMaximum === "number"
     && schema.exclusiveMinimum >= schema.exclusiveMaximum) return false;
   if (schema.minLength !== undefined && schema.maxLength !== undefined && schema.minLength > schema.maxLength) return false;
   if (schema.minItems !== undefined && schema.maxItems !== undefined && schema.minItems > schema.maxItems) return false;
   if (schema.enum && new Set(schema.enum.map((value) => JSON.stringify(value))).size !== schema.enum.length) return false;
-  if (schema.required?.some((name) => !schema.properties?.[name])) return false;
+  if (schema.required?.length && schema.properties
+    && schema.required.some((name) => !schema.properties?.[name])) return false;
   return true;
 }
 
@@ -77,8 +83,10 @@ export function stripProse(value: unknown): unknown {
   const result: Record<string, unknown> = {};
   for (const key of Object.keys(record).sort()) {
     if (PROSE_KEYS.has(key)) continue;
-    if (key === "enumValueTitles") {
+    if (key === "enumValueTitles" || key === "scopes") {
       result[key] = Object.keys((record[key] || {}) as Record<string, unknown>).sort();
+    } else if (key === "x-enum-descriptions") {
+      result[key] = Array.isArray(record[key]) ? record[key].map(() => null) : [];
     } else {
       result[key] = stripProse(record[key]);
     }
@@ -98,10 +106,14 @@ export function collectProse(value: unknown, dataPath = "$"): Map<string, string
   for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
     const childPath = `${dataPath}.${key}`;
     if (PROSE_KEYS.has(key) && isText(child)) result.set(childPath, child);
-    if (key === "enumValueTitles" && child && typeof child === "object") {
+    if ((key === "enumValueTitles" || key === "scopes") && child && typeof child === "object") {
       for (const [enumKey, title] of Object.entries(child as Record<string, unknown>)) {
         if (isText(title)) result.set(`${childPath}.${enumKey}`, title);
       }
+    } else if (key === "x-enum-descriptions" && Array.isArray(child)) {
+      child.forEach((title, index) => {
+        if (isText(title)) result.set(`${childPath}[${index}]`, title);
+      });
     } else if (!PROSE_KEYS.has(key)) {
       for (const [nestedPath, text] of collectProse(child, childPath)) result.set(nestedPath, text);
     }

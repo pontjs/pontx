@@ -85,6 +85,33 @@ describe("evaluatePontxQuality", () => {
     expect(report.findings.some((finding) => finding.ruleId === "examples.valid")).toBe(true);
   });
 
+  it("accepts nullable examples and traverses composition branches", () => {
+    const spec = goodSpec();
+    spec.components!.schemas.NullableName = {
+      type: "string", description: "可空名称", examples: [null], nullable: true,
+    } as any;
+    spec.components!.schemas.ComposedUser = {
+      description: "组合用户",
+      allOf: [{ $ref: "#/components/schemas/User" }],
+    } as any;
+    const report = evaluatePontxQuality({ spec });
+    expect(report.findings.some((finding) => finding.path.includes("NullableName")
+      && finding.ruleId === "examples.valid")).toBe(false);
+    expect(report.findings.some((finding) => finding.path.includes("ComposedUser.type")
+      && finding.ruleId === "structure.schema-type")).toBe(false);
+  });
+
+  it("accepts a described referenced Schema as the parameter description", () => {
+    const spec = goodSpec();
+    spec.apis["users/getUser"].parameters = [{
+      name: "body", in: "body", required: true,
+      schema: { $ref: "#/components/schemas/User" } as any,
+    }];
+    spec.apis["users/getUser"].path = "/users";
+    const report = evaluatePontxQuality({ spec });
+    expect(report.findings.some((finding) => finding.ruleId === "description.parameter")).toBe(false);
+  });
+
   it("detects locale structural drift and missing prose", () => {
     const source = goodSpec();
     const localized = structuredClone(source);
@@ -93,6 +120,18 @@ describe("evaluatePontxQuality", () => {
     const report = evaluatePontxQuality({ spec: source, locales: { "en-US": localized } });
     expect(report.findings.some((finding) => finding.ruleId === "i18n.structure")).toBe(true);
     expect(report.findings.some((finding) => finding.ruleId === "i18n.prose")).toBe(true);
+  });
+
+  it("treats enum extension text and OAuth scopes as localizable prose", () => {
+    const source = goodSpec();
+    const localized = structuredClone(source);
+    (source.components!.schemas.User.properties!.id as any)["x-enum-descriptions"] = ["标识"];
+    (localized.components!.schemas.User.properties!.id as any)["x-enum-descriptions"] = ["Identifier"];
+    (source.components!.securitySchemes!.apiKey as any).scopes = { read: "读取" };
+    (localized.components!.securitySchemes!.apiKey as any).scopes = { read: "Read" };
+    const report = evaluatePontxQuality({ spec: source, locales: { "en-US": localized } });
+    expect(report.findings.some((finding) => finding.ruleId === "i18n.structure")).toBe(false);
+    expect(report.findings.some((finding) => finding.ruleId === "i18n.prose")).toBe(false);
   });
 
   it("reports a non-PontxSpec input as Invalid", () => {

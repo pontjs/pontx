@@ -25,6 +25,19 @@ export function exampleForSchema(
   if (!(["object", "array", "generic"] as unknown[]).includes(schema.type) && schema.examples?.length) {
     return schema.examples[0];
   }
+  const allOf = (schema as PontxJsonSchema & { allOf?: PontxJsonSchema[] }).allOf;
+  if (allOf?.length) {
+    const result: Record<string, unknown> = {};
+    const required = new Set<string>();
+    for (const branch of allOf) {
+      for (const name of branch.required || []) required.add(name);
+      const branchValue = exampleForSchema(branch, spec, new Set(seen));
+      if (branchValue && typeof branchValue === "object" && !Array.isArray(branchValue)) {
+        Object.assign(result, branchValue);
+      }
+    }
+    return Array.from(required).every((name) => result[name] !== undefined) ? result : undefined;
+  }
   if (schema.type === "array") {
     const item = exampleForSchema(schema.items, spec, new Set(seen));
     return item === undefined ? undefined : [item];

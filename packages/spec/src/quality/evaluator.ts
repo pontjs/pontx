@@ -169,9 +169,18 @@ export function evaluatePontxQuality(input: PontxQualityInput): PontxQualityRepo
     seenSchemas.add(schema);
 
     const type = schema.type;
-    record("structure", entity, isText(type), {
+    const schemaRecord = schema as PontxJsonSchema & {
+      allOf?: PontxJsonSchema[];
+      anyOf?: PontxJsonSchema[];
+      oneOf?: PontxJsonSchema[];
+      not?: PontxJsonSchema;
+    };
+    const compositions = [schemaRecord.allOf, schemaRecord.anyOf, schemaRecord.oneOf]
+      .filter(Array.isArray) as PontxJsonSchema[][];
+    const hasComposition = compositions.some((items) => items.length > 0) || !!schemaRecord.not;
+    record("structure", entity, isText(type) || hasComposition, {
       ruleId: "structure.schema-type", path: `${path}.type`, message: "Schema 缺少 type。",
-      remediation: "为 Schema 声明 PontxSpec 支持的明确 type。", affectedApis: apiKey ? [apiKey] : undefined,
+      remediation: "为 Schema 声明 PontxSpec 支持的明确 type 或有效组合结构。", affectedApis: apiKey ? [apiKey] : undefined,
     });
     record("description", entity, isText(schema.description) || isText(schema.title), {
       ruleId: "description.schema", path, message: "Schema 或字段缺少描述。",
@@ -183,7 +192,7 @@ export function evaluatePontxQuality(input: PontxQualityInput): PontxQualityRepo
     });
 
     const isContainer = type === "object" || type === "array" || type === "generic"
-      || !!schema.properties || !!schema.items || !!schema.genericRef;
+      || !!schema.properties || !!schema.items || !!schema.genericRef || hasComposition;
     if (!isContainer) {
       const hasExamples = Array.isArray(schema.examples) && schema.examples.length > 0;
       record("examples", entity, hasExamples, {
@@ -216,6 +225,12 @@ export function evaluatePontxQuality(input: PontxQualityInput): PontxQualityRepo
     for (const [index, argument] of (schema.genericRef?.typeArguments || []).entries()) {
       visitSchema(argument, `${path}.genericRef.typeArguments[${index}]`, entity, apiKey);
     }
+    for (const keyword of ["allOf", "anyOf", "oneOf"] as const) {
+      for (const [index, branch] of (schemaRecord[keyword] || []).entries()) {
+        visitSchema(branch, `${path}.${keyword}[${index}]`, entity, apiKey);
+      }
+    }
+    if (schemaRecord.not) visitSchema(schemaRecord.not, `${path}.not`, entity, apiKey);
     if (schema.enum?.length) {
       const titles = schema.enumValueTitles || {};
       record("description", entity, schema.enum.every((value) => isText(titles[String(value)])), {
@@ -265,7 +280,10 @@ export function evaluatePontxQuality(input: PontxQualityInput): PontxQualityRepo
         remediation: "同一 API 中保持 in/name 组合唯一。", affectedApis: [apiKey],
       });
       parameterKeys.add(parameterKey);
-      record("description", `api:${apiKey}`, isText(parameter.schema?.description), {
+      const parameterRefName = parameter.schema?.$ref?.split("/").pop() || "";
+      const parameterRefTarget = parameterRefName ? schemas[parameterRefName] : undefined;
+      record("description", `api:${apiKey}`, isText(parameter.schema?.description)
+        || isText(parameterRefTarget?.description) || isText(parameterRefTarget?.title), {
         ruleId: "description.parameter", path: `${paramPath}.schema.description`, message: `参数 ${parameter.name} 缺少描述。`,
         remediation: "在 parameter.schema.description 中说明语义、格式和限制。", affectedApis: [apiKey],
       });
