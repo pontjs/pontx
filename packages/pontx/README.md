@@ -94,8 +94,43 @@ pontx call <tag> <api> -p key=val  # Execute call
 | `pontx completion install` | Install shell completions |
 | `pontx skill` | Install AI Skill |
 | `pontx cache:clean` | Clear build cache |
+| `pontx quality --spec <file>` | Score PontxSpec static metadata quality |
+| `pontx eval --spec <file> --cases <path>` | Evaluate whether an Agent can call APIs through the CLI |
 
 > Use `-h` at any level to discover subcommands and parameters: `pontx call -h`, `pontx call pet -h`, `pontx call pet getPetById -h`
+
+## Metadata Quality Evaluation
+
+Static evaluation scores PontxSpec structure, directory reachability, API contracts, descriptions, explicit leaf examples, runtime metadata, and locale alignment. Complex object/array/reference nodes do not need examples; their resolved leaf fields do.
+
+```bash
+pontx quality --spec ./api-lock.json --json
+pontx quality --spec ./zh-CN.json --locales ./locales
+```
+
+Dynamic evaluation gives an Agent only the generated CLI and metadata-derived help. Calls run against an isolated `executeApi` fixture and never reach the real API:
+
+```bash
+pontx eval --spec ./api-lock.json --cases ./eval-cases --agent codex --json
+pontx eval --spec ./api-lock.json --cases ./eval-cases --runs 3 --json
+```
+
+Each case is independent of the metadata being tested:
+
+```json
+{
+  "id": "get-pet",
+  "task": "Find the name of pet p-1",
+  "expected": {
+    "api": "pet/getPet",
+    "request": { "method": "GET", "path": "/pets/p-1" },
+    "answerContains": ["Milo"]
+  },
+  "fixture": { "status": 200, "data": { "name": "Milo" } }
+}
+```
+
+Quality findings do not change the process exit code. Invalid command configuration or evaluator failures still return non-zero, so CI can distinguish metadata scores from broken evaluation infrastructure.
 
 ## Build SDK CLI
 

@@ -31,6 +31,7 @@ import { registerCliCommands } from "./commands/cli-commands";
 import { listSpecsCommand } from "./commands/list-specs";
 import { loadSpecInfos, registerSpecCommands } from "./spec-commands";
 import { registerSpecListCommands } from "./commands/spec/list-commands";
+import { registerQualityCommands } from "../quality/commands";
 
 /* 兼容 ESM 和 CJS 的 __dirname */
 const getPackageDir = () => {
@@ -343,6 +344,9 @@ function registerGlobalCommands(
   /* SDK CLI 管理命令 */
   const cliCmd = program.command("cli").description("SDK CLI 管理命令");
   registerCliCommands(cliCmd);
+
+  /* PontxSpec Metadata 静态与动态质量评估 */
+  registerQualityCommands(program);
 }
 
 /**
