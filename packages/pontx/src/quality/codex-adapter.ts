@@ -10,6 +10,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { resolveConfig } from "../config";
 import type { AgentAdapter, AgentRunInput, AgentRunOutput, PontxEvalCase } from "./types";
 
 /** Codex adapter 配置。 */
@@ -100,10 +101,8 @@ export default {
       }
       if (Object.prototype.hasOwnProperty.call(expected, "body") && !equal(parseBody(request.init.body), expected.body)) errors.push("body");
       if (errors.length) throw new Error("PONTX_EVAL_REQUEST_MISMATCH:" + errors.join(","));
-      const data = fixture.data && typeof fixture.data === "object" && !Array.isArray(fixture.data)
-        ? { ...fixture.data, __pontxEvalMarker: ${JSON.stringify(marker)} }
-        : { value: fixture.data, __pontxEvalMarker: ${JSON.stringify(marker)} };
-      return { status: fixture.status || 200, data, headers: fixture.headers || {} };
+      process.stdout.write(${JSON.stringify(`${marker}\n`)});
+      return { status: fixture.status || 200, data: fixture.data, headers: fixture.headers || {} };
     }
   }]
 };
@@ -112,12 +111,16 @@ export default {
 
 async function createEvalWorkspace(input: AgentRunInput, marker: string): Promise<string> {
   const workspace = await fsp.mkdtemp(path.join(os.tmpdir(), "pontx-quality-"));
+  await fsp.mkdir(path.join(workspace, "node_modules"));
   await fsp.copyFile(input.specPath, path.join(workspace, "pontx-spec.json"));
+  const configPath = path.join(workspace, "pontx.config.ts");
   await fsp.writeFile(
-    path.join(workspace, "pontx.config.ts"),
+    configPath,
     fixtureConfig(input.case, input.specName, marker),
     "utf-8",
   );
+  // Agent 保持只读；在进入 sandbox 前由受信任进程生成 Pontx 配置缓存。
+  await resolveConfig(configPath, { rootDir: workspace });
   return workspace;
 }
 
@@ -184,7 +187,7 @@ export class CodexAgentAdapter implements AgentAdapter {
       "exec", "--model", this.options.model,
       "-c", `model_reasoning_effort=${JSON.stringify(this.options.reasoning)}`,
       "--sandbox", "read-only", "--ephemeral", "--ignore-user-config", "--ignore-rules",
-      "--json", "-C", workspace, prompt,
+      "--skip-git-repo-check", "--json", "-C", workspace, prompt,
     ];
     let stdout = "";
     let stderr = "";
@@ -192,16 +195,39 @@ export class CodexAgentAdapter implements AgentAdapter {
     let exitCode: number | null = null;
     try {
       exitCode = await new Promise<number | null>((resolve, reject) => {
-        const child = spawn(this.options.binary, args, { cwd: workspace, env: safeAgentEnvironment() });
+        const useProcessGroup = process.platform !== "win32";
+        const child = spawn(this.options.binary, args, {
+          cwd: workspace,
+          env: safeAgentEnvironment(),
+          detached: useProcessGroup,
+          stdio: ["ignore", "pipe", "pipe"],
+        });
         child.stdout.on("data", (chunk) => { stdout += chunk.toString(); });
         child.stderr.on("data", (chunk) => { stderr += chunk.toString(); });
         child.on("error", reject);
         child.on("close", resolve);
+        const terminate = (signal: NodeJS.Signals) => {
+          if (!child.pid) return;
+          try {
+            if (useProcessGroup) process.kill(-child.pid, signal);
+            else child.kill(signal);
+          } catch (error) {
+            if ((error as NodeJS.ErrnoException)?.code !== "ESRCH") {
+              stderr += `Codex adapter could not send ${signal}: ${error instanceof Error ? error.message : String(error)}\n`;
+            }
+          }
+        };
+        let forceTimer: NodeJS.Timeout | undefined;
         const timer = setTimeout(() => {
           timedOut = true;
-          child.kill("SIGTERM");
+          terminate("SIGTERM");
+          forceTimer = setTimeout(() => terminate("SIGKILL"), 2_000);
+          forceTimer.unref();
         }, input.timeoutMs);
-        child.on("close", () => clearTimeout(timer));
+        child.on("close", () => {
+          clearTimeout(timer);
+          if (forceTimer) clearTimeout(forceTimer);
+        });
       });
     } catch (error) {
       stderr += `Codex adapter failed: ${error instanceof Error ? error.message : String(error)}\n`;

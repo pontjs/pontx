@@ -196,6 +196,14 @@ describe("quality dynamic runner", () => {
     await fs.writeFile(specPath, JSON.stringify(specFixture()), "utf-8");
     await fs.writeFile(fakeCodex, `#!/usr/bin/env node
 import { spawnSync } from "node:child_process";
+import { existsSync } from "node:fs";
+if (!process.argv.includes("--skip-git-repo-check")) process.exit(64);
+if (process.argv[process.argv.indexOf("--sandbox") + 1] !== "read-only") process.exit(65);
+if (!existsSync("node_modules/.pontx-cache")) process.exit(66);
+await new Promise((resolve) => {
+  process.stdin.resume();
+  process.stdin.once("end", resolve);
+});
 const prompt = process.argv.at(-1);
 const cli = prompt.match(/CLI 命令前缀：(.+)/)[1];
 const commands = [
@@ -217,7 +225,7 @@ process.stdout.write(JSON.stringify({ type: "item.completed", item: { type: "age
         case: evalCase, specPath, specName: "pets", timeoutMs: 60_000,
       });
       expect(output.exitCode, `${output.stdout}\n${output.stderr}`).toBe(0);
-      expect(output.stdout).toContain("__pontxEvalMarker");
+      expect(output.stdout).toMatch(/case-get-pet-/);
       expect(output.stdout).toContain("Dry run - request not sent");
       expect(output.finalText).toContain("Milo");
       expect(output.commandCount).toBe(3);
