@@ -8,8 +8,79 @@ import {
 } from "./utils.js";
 import _ from "lodash";
 import { Parameter, PontxAPI } from "../api.js";
+import { PontxJsonSchema } from "../schema.js";
 import { PontxSpec } from "../spec.js";
 import { fixOASTags } from "./parseOASTags.js";
+
+/**
+ * 将 OAS 3.0/3.1 Schema 归一化为 PontxJsonSchema。
+ *
+ * OAS 使用单值 example、布尔 exclusiveMinimum/Maximum 以及 nullable type
+ * union，PontxSpec 则使用 examples、数值排他边界和单一主类型。统一在解析
+ * 边界转换，避免生成器、CLI 和质量评估各自解释一遍。
+ */
+function normalizeOAS3Schema(schema: unknown): PontxJsonSchema | undefined {
+  if (!schema || typeof schema !== "object") return schema as PontxJsonSchema | undefined;
+
+  const source = schema as Record<string, any>;
+  const normalized = { ...source } as Record<string, any>;
+  const hasSchemaShape = source.type || source.$ref || source.properties || source.items
+    || source.allOf || source.anyOf || source.oneOf || source.not
+    || source.enum || Object.prototype.hasOwnProperty.call(source, "const");
+  if (!hasSchemaShape) {
+    normalized.type = "generic";
+    normalized.genericRef = { name: "unknown" };
+  }
+  const sourceType = source.type;
+  if (Array.isArray(sourceType)) {
+    const nonNullTypes = sourceType.filter((type) => type !== "null");
+    if (nonNullTypes.length === 1 && nonNullTypes.length !== sourceType.length) {
+      normalized.type = nonNullTypes[0];
+      normalized.nullable = true;
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(source, "example")
+    && (!Array.isArray(source.examples) || source.examples.length === 0)) {
+    normalized.examples = [source.example];
+  }
+  delete normalized.example;
+
+  if (source.exclusiveMinimum === true && typeof source.minimum === "number") {
+    normalized.exclusiveMinimum = source.minimum;
+  } else if (source.exclusiveMinimum === false) {
+    delete normalized.exclusiveMinimum;
+  }
+  if (source.exclusiveMaximum === true && typeof source.maximum === "number") {
+    normalized.exclusiveMaximum = source.maximum;
+  } else if (source.exclusiveMaximum === false) {
+    delete normalized.exclusiveMaximum;
+  }
+
+  const enumDescriptions = source["x-enum-descriptions"];
+  if (Array.isArray(source.enum) && Array.isArray(enumDescriptions)) {
+    normalized.enumValueTitles = Object.fromEntries(source.enum
+      .map((value, index) => [String(value), enumDescriptions[index]])
+      .filter((entry) => typeof entry[1] === "string" && entry[1].trim().length > 0));
+  }
+
+  if (source.properties) {
+    normalized.properties = Object.fromEntries(Object.entries(source.properties)
+      .map(([name, property]) => [name, normalizeOAS3Schema(property)]));
+  }
+  if (source.items) normalized.items = normalizeOAS3Schema(source.items);
+  if (source.additionalProperties && typeof source.additionalProperties === "object") {
+    normalized.additionalProperties = normalizeOAS3Schema(source.additionalProperties);
+  }
+  for (const keyword of ["allOf", "anyOf", "oneOf"] as const) {
+    if (Array.isArray(source[keyword])) {
+      normalized[keyword] = source[keyword].map(normalizeOAS3Schema);
+    }
+  }
+  if (source.not) normalized.not = normalizeOAS3Schema(source.not);
+
+  return normalized as PontxJsonSchema;
+}
 
 export function parseOAS3Interface(
   inter: OAS3.OperationObject & { path: string; method: string },
@@ -18,19 +89,20 @@ export function parseOAS3Interface(
   const { path, method } = inter;
   let produces = [];
   const responses = _.mapValues(inter.responses, (response) => {
-    const { content, headers, description, ...rest } = response || {};
+    const finalResponse = resolveRef<OAS3.ResponseObject>(response, swagger) || response;
+    const { content, headers, description, ...rest } = finalResponse || {};
     const responseProduces = Object.keys(content || {});
     const onlyKey = responseProduces[0];
     const schema = content?.[onlyKey]?.schema;
-    const responseSchema = schema;
+    const responseSchema = normalizeOAS3Schema(schema);
     produces = _.union(produces, responseProduces);
-    return { ...rest, schema: responseSchema, headers: headers as any };
+    return { ...rest, description, schema: responseSchema, headers: headers as any };
   });
 
   const parameters = (inter.parameters || []).map((param) => {
     const finalParam = resolveRef(param, swagger) || param;
     const { required, name, schema, in: paramIn, ...rest } = finalParam;
-    const paramSchema = { ...rest, ...(schema || {}) };
+    const paramSchema = normalizeOAS3Schema({ ...rest, ...(schema || {}) });
 
     return {
       in: paramIn as any,
@@ -56,8 +128,8 @@ export function parseOAS3Interface(
         const bodyParma = {
           name: "body",
           in: "body" as any,
-          required: true,
-          schema: consumeContent[consume]?.schema,
+          required: requestBody.required === true,
+          schema: normalizeOAS3Schema(consumeContent[consume]?.schema),
         } as Parameter;
         parameters.push(bodyParma);
       }
@@ -66,6 +138,7 @@ export function parseOAS3Interface(
 
   const pontAPI = {
     summary: inter.summary,
+    operationId: inter.operationId,
     consumes,
     description: inter.description,
     method,
@@ -75,6 +148,7 @@ export function parseOAS3Interface(
     parameters: _.unionBy(parameters, "name"),
     produces: produces,
     security: inter.security,
+    requestExamples: inter["x-pontx-request-examples"],
   } as PontxAPI;
 
   return pontAPI;
@@ -197,8 +271,14 @@ export function parseOAS3(
 ): PontxSpec {
   const { apis, tags } = parseSwagger2APIs(swagger);
 
+  const components = swagger?.components ? {
+    ...swagger.components,
+    schemas: Object.fromEntries(Object.entries(swagger.components.schemas || {})
+      .map(([schemaName, schema]) => [schemaName, normalizeOAS3Schema(schema)])),
+  } : undefined;
+
   const pontDs = {
-    components: swagger?.components,
+    components,
     apis,
     name,
     servers: swagger?.servers,

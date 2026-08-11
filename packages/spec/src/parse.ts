@@ -33,9 +33,12 @@ export function parsePontxSpec2OAS2(spec: PontxSpec): OAS2.SwaggerObject {
         tags: [preSep],
         summary: api.summary,
         description: api.description,
-        operationId: api.name,
+        operationId: api.operationId || api.name,
         parameters: api.parameters,
         responses: api.responses,
+        ...(api.requestExamples
+          ? { "x-pontx-request-examples": api.requestExamples }
+          : {}),
       } as OAS2.OperationObject;
       if (api.deprecated) {
         oasApi.deprecated = api.deprecated;
@@ -105,7 +108,7 @@ export function parsePontSpec2OAS3(spec: PontxSpec) {
         tags: [preSep],
         summary: api.summary || api.title,
         description: api.description,
-        operationId: apiName || api.name,
+        operationId: api.operationId || apiName || api.name,
         parameters: (api.parameters || [])
           .filter((param) => param.in !== "body")
           .map((param) => {
@@ -126,6 +129,9 @@ export function parsePontSpec2OAS3(spec: PontxSpec) {
             },
           } as OAS3.ResponseObject;
         }),
+        ...(api.requestExamples
+          ? { "x-pontx-request-examples": api.requestExamples }
+          : {}),
       } as OAS3.OperationObject;
 
       if (api.security) {
@@ -140,6 +146,7 @@ export function parsePontSpec2OAS3(spec: PontxSpec) {
       if (bodyParam) {
         const consumeType = api?.consumes?.[0] || "application/json";
         oas3Api.requestBody = {
+          required: bodyParam.required,
           content: {
             [consumeType]: {
               schema: bodyParam.schema || {},

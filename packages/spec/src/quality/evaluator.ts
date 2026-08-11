@@ -4,7 +4,12 @@
  */
 
 import { PontxDirectoryNode, PontxDirectoryNodeType } from "../dir.js";
-import type { Parameter, PontxAPI } from "../api.js";
+import {
+  PontxRequestInputSourceKind,
+  type Parameter,
+  type PontxAPI,
+  type PontxRequestExample,
+} from "../api.js";
 import type { PontxJsonSchema } from "../schema.js";
 import type { PontxSpec } from "../spec.js";
 import {
@@ -20,6 +25,7 @@ import {
   collectProse,
   constraintsAreConsistent,
   getQualityGrade,
+  isExampleMeaningful,
   isExampleValid,
   isText,
   round,
@@ -56,7 +62,8 @@ const DIMENSIONS: DimensionDefinition[] = [
   { id: "directory", title: "目录与可发现性", weight: 6 },
   { id: "contract", title: "Endpoint 调用契约", weight: 8 },
   { id: "description", title: "描述与约束", weight: 10 },
-  { id: "examples", title: "叶子字段示例", weight: 10 },
+  { id: "examples", title: "叶子字段示例", weight: 6 },
+  { id: "requestExamples", title: "整体请求示例", weight: 4 },
   { id: "runtime", title: "响应、鉴权与环境", weight: 5 },
   { id: "i18n", title: "国际化对齐", weight: 5 },
 ];
@@ -65,6 +72,52 @@ const VALID_METHODS = new Set([
   "GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE",
 ]);
 const VALID_PARAM_LOCATIONS = new Set(["query", "body", "path", "formData", "header"]);
+
+const STRUCTURAL_ALLOF_BRANCH_KEYS = new Set([
+  "type", "required", "multipleOf", "maximum", "exclusiveMaximum", "minimum",
+  "exclusiveMinimum", "maxLength", "minLength", "pattern", "format",
+  "contentMediaType", "contentEncoding", "maxItems", "minItems", "uniqueItems",
+  "maxProperties", "minProperties", "additionalProperties", "nullable",
+]);
+
+/** 判断字段是否已在父 Schema 或其 allOf 引用链中获得面向用户的说明。 */
+function hasDocumentedProperty(
+  schema: PontxJsonSchema,
+  propertyName: string,
+  schemas: Record<string, PontxJsonSchema>,
+  seen = new Set<PontxJsonSchema>(),
+): boolean {
+  if (seen.has(schema)) return false;
+  seen.add(schema);
+  if (schema.$ref?.startsWith("#/components/schemas/")) {
+    const name = schema.$ref.split("/").pop() || "";
+    return !!schemas[name] && hasDocumentedProperty(schemas[name], propertyName, schemas, seen);
+  }
+  const property = schema.properties?.[propertyName];
+  if (property && (isText(property.description) || isText(property.title))) return true;
+  const allOf = (schema as PontxJsonSchema & { allOf?: PontxJsonSchema[] }).allOf || [];
+  return allOf.some((branch) => hasDocumentedProperty(branch, propertyName, schemas, seen));
+}
+
+/**
+ * 匿名 allOf 分支若只收紧已描述字段的结构约束，可继承父 Schema 的说明。
+ * 含属性、枚举、常量或嵌套 Schema 的分支仍需独立说明，避免隐藏新的业务语义。
+ */
+function canInheritAllOfBranchDescription(
+  branch: PontxJsonSchema,
+  parent: PontxJsonSchema,
+  schemas: Record<string, PontxJsonSchema>,
+): boolean {
+  if (!isText(parent.description) && !isText(parent.title)) return false;
+  if (isText(branch.description) || isText(branch.title)) return false;
+  const keys = Object.keys(branch);
+  if (!keys.length || !keys.every((key) => STRUCTURAL_ALLOF_BRANCH_KEYS.has(key))) return false;
+  if (branch.required !== undefined && !Array.isArray(branch.required)) return false;
+  if (branch.additionalProperties !== undefined
+    && typeof branch.additionalProperties !== "boolean") return false;
+  return (branch.required || []).every((propertyName) =>
+    hasDocumentedProperty(parent, propertyName, schemas));
+}
 
 /** 评估 PontxSpec 静态质量并返回可机器消费的报告。 */
 export function evaluatePontxQuality(input: PontxQualityInput): PontxQualityReport {
@@ -118,6 +171,8 @@ export function evaluatePontxQuality(input: PontxQualityInput): PontxQualityRepo
 
   const apis = spec.apis || {};
   const schemas = spec.components?.schemas || {};
+  const operationIds = new Set(Object.entries(apis).map(([apiKey, api]) =>
+    api.operationId || apiKey.split("/").pop() || apiKey));
   record("structure", "spec", isText(spec.name), {
     ruleId: "structure.spec-name", path: "$.name", message: "PontxSpec 缺少 name。",
     remediation: "填写稳定且非空的 PontxSpec name。",
@@ -141,7 +196,13 @@ export function evaluatePontxQuality(input: PontxQualityInput): PontxQualityRepo
   const seenSchemas = new Set<PontxJsonSchema>();
   const checkedRefs = new Set<string>();
 
-  const visitSchema = (schema: PontxJsonSchema | undefined, path: string, entity: string, apiKey?: string) => {
+  const visitSchema = (
+    schema: PontxJsonSchema | undefined,
+    path: string,
+    entity: string,
+    apiKey?: string,
+    descriptionOptional = false,
+  ) => {
     if (!schema || typeof schema !== "object") {
       record("structure", entity, false, {
         ruleId: "structure.schema", path, message: "Schema 缺失或不是对象。",
@@ -169,11 +230,20 @@ export function evaluatePontxQuality(input: PontxQualityInput): PontxQualityRepo
     seenSchemas.add(schema);
 
     const type = schema.type;
-    record("structure", entity, isText(type), {
+    const schemaRecord = schema as PontxJsonSchema & {
+      allOf?: PontxJsonSchema[];
+      anyOf?: PontxJsonSchema[];
+      oneOf?: PontxJsonSchema[];
+      not?: PontxJsonSchema;
+    };
+    const compositions = [schemaRecord.allOf, schemaRecord.anyOf, schemaRecord.oneOf]
+      .filter(Array.isArray) as PontxJsonSchema[][];
+    const hasComposition = compositions.some((items) => items.length > 0) || !!schemaRecord.not;
+    record("structure", entity, isText(type) || hasComposition, {
       ruleId: "structure.schema-type", path: `${path}.type`, message: "Schema 缺少 type。",
-      remediation: "为 Schema 声明 PontxSpec 支持的明确 type。", affectedApis: apiKey ? [apiKey] : undefined,
+      remediation: "为 Schema 声明 PontxSpec 支持的明确 type 或有效组合结构。", affectedApis: apiKey ? [apiKey] : undefined,
     });
-    record("description", entity, isText(schema.description) || isText(schema.title), {
+    record("description", entity, descriptionOptional || isText(schema.description) || isText(schema.title), {
       ruleId: "description.schema", path, message: "Schema 或字段缺少描述。",
       remediation: "填写面向使用者的 title 或 description。", affectedApis: apiKey ? [apiKey] : undefined,
     });
@@ -183,7 +253,7 @@ export function evaluatePontxQuality(input: PontxQualityInput): PontxQualityRepo
     });
 
     const isContainer = type === "object" || type === "array" || type === "generic"
-      || !!schema.properties || !!schema.items || !!schema.genericRef;
+      || !!schema.properties || !!schema.items || !!schema.genericRef || hasComposition;
     if (!isContainer) {
       const hasExamples = Array.isArray(schema.examples) && schema.examples.length > 0;
       record("examples", entity, hasExamples, {
@@ -192,8 +262,9 @@ export function evaluatePontxQuality(input: PontxQualityInput): PontxQualityRepo
         affectedApis: apiKey ? [apiKey] : undefined,
       });
       if (hasExamples) {
-        record("examples", entity, schema.examples!.every((value) => isExampleValid(schema, value)), {
-          ruleId: "examples.valid", path: `${path}.examples`, message: "示例值不符合字段类型、枚举或约束。",
+        record("examples", entity, schema.examples!.every((value) =>
+          isExampleValid(schema, value) && isExampleMeaningful(schema, value)), {
+          ruleId: "examples.valid", path: `${path}.examples`, message: "示例值不符合字段类型、枚举或约束，或为明显占位值。",
           remediation: "将 examples 修正为能通过当前 Schema 约束的真实值。",
           affectedApis: apiKey ? [apiKey] : undefined,
         });
@@ -216,6 +287,14 @@ export function evaluatePontxQuality(input: PontxQualityInput): PontxQualityRepo
     for (const [index, argument] of (schema.genericRef?.typeArguments || []).entries()) {
       visitSchema(argument, `${path}.genericRef.typeArguments[${index}]`, entity, apiKey);
     }
+    for (const keyword of ["allOf", "anyOf", "oneOf"] as const) {
+      for (const [index, branch] of (schemaRecord[keyword] || []).entries()) {
+        const isStructuralAllOfBranch = keyword === "allOf"
+          && canInheritAllOfBranchDescription(branch, schema, schemas);
+        visitSchema(branch, `${path}.${keyword}[${index}]`, entity, apiKey, isStructuralAllOfBranch);
+      }
+    }
+    if (schemaRecord.not) visitSchema(schemaRecord.not, `${path}.not`, entity, apiKey);
     if (schema.enum?.length) {
       const titles = schema.enumValueTitles || {};
       record("description", entity, schema.enum.every((value) => isText(titles[String(value)])), {
@@ -265,7 +344,10 @@ export function evaluatePontxQuality(input: PontxQualityInput): PontxQualityRepo
         remediation: "同一 API 中保持 in/name 组合唯一。", affectedApis: [apiKey],
       });
       parameterKeys.add(parameterKey);
-      record("description", `api:${apiKey}`, isText(parameter.schema?.description), {
+      const parameterRefName = parameter.schema?.$ref?.split("/").pop() || "";
+      const parameterRefTarget = parameterRefName ? schemas[parameterRefName] : undefined;
+      record("description", `api:${apiKey}`, isText(parameter.schema?.description)
+        || isText(parameterRefTarget?.description) || isText(parameterRefTarget?.title), {
         ruleId: "description.parameter", path: `${paramPath}.schema.description`, message: `参数 ${parameter.name} 缺少描述。`,
         remediation: "在 parameter.schema.description 中说明语义、格式和限制。", affectedApis: [apiKey],
       });
@@ -285,6 +367,7 @@ export function evaluatePontxQuality(input: PontxQualityInput): PontxQualityRepo
       ruleId: "contract.body-count", path: `${apiPath}.parameters`, message: "一个 API 声明了多个 body 参数。",
       remediation: "合并为一个 object body Schema。", affectedApis: [apiKey],
     });
+    checkRequestExamples(api, apiKey, apiPath, spec, operationIds, record);
     checkRuntime(api, apiKey, apiPath, spec, record, visitSchema);
   }
 
@@ -325,6 +408,230 @@ export function evaluatePontxQuality(input: PontxQualityInput): PontxQualityRepo
       generatedAt: new Date().toISOString(),
     },
   };
+}
+
+const REQUEST_EXAMPLE_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const FORBIDDEN_EXAMPLE_HEADERS = new Set([
+  "authorization", "cookie", "host", "proxy-authorization", "x-api-key",
+]);
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
+function hasOwn(value: unknown, key: string): boolean {
+  return isRecord(value) && Object.prototype.hasOwnProperty.call(value, key);
+}
+
+function isRequestScalar(value: unknown): value is string | number | boolean {
+  return ["string", "number", "boolean"].includes(typeof value)
+    && (typeof value !== "number" || Number.isFinite(value));
+}
+
+function requestValues(request: Record<string, unknown>, location: string): Record<string, unknown> {
+  const key = location === "header" ? "headers" : location;
+  return isRecord(request[key]) ? request[key] as Record<string, unknown> : {};
+}
+
+function escapeJsonPointer(value: string): string {
+  return value.replace(/~/g, "~0").replace(/\//g, "~1");
+}
+
+function isRequestBodyValid(
+  schema: PontxJsonSchema,
+  value: unknown,
+  schemas: Record<string, PontxJsonSchema>,
+  unresolved: Set<string>,
+  pointer = "",
+  seen = new Set<PontxJsonSchema>(),
+): boolean {
+  if (value === null) return isExampleValid(schema, value);
+  if (schema.$ref) {
+    const name = schema.$ref.startsWith("#/components/schemas/")
+      ? schema.$ref.split("/").pop() || ""
+      : "";
+    return !!schemas[name] && isRequestBodyValid(schemas[name], value, schemas, unresolved, pointer, seen);
+  }
+  if (seen.has(schema)) return true;
+  const nextSeen = new Set(seen).add(schema);
+  const composed = schema as PontxJsonSchema & {
+    allOf?: PontxJsonSchema[];
+    anyOf?: PontxJsonSchema[];
+    oneOf?: PontxJsonSchema[];
+  };
+  if (composed.allOf?.length && !composed.allOf.every((item) =>
+    isRequestBodyValid(item, value, schemas, unresolved, pointer, nextSeen))) return false;
+  if (composed.anyOf?.length && !composed.anyOf.some((item) =>
+    isRequestBodyValid(item, value, schemas, unresolved, pointer, nextSeen))) return false;
+  if (composed.oneOf?.length && composed.oneOf.filter((item) =>
+    isRequestBodyValid(item, value, schemas, unresolved, pointer, nextSeen)).length !== 1) return false;
+
+  if (schema.type === "array" || schema.items) {
+    return Array.isArray(value) && (!schema.items || value.every((item, index) =>
+      isRequestBodyValid(schema.items!, item, schemas, unresolved, `${pointer}/${index}`, nextSeen)));
+  }
+  if (schema.type === "object" || schema.properties) {
+    if (!isRecord(value)) return false;
+    for (const name of schema.required || []) {
+      const childPointer = `${pointer}/${escapeJsonPointer(name)}`;
+      if (!hasOwn(value, name) && !unresolved.has(childPointer)) return false;
+    }
+    for (const [name, child] of Object.entries(schema.properties || {})) {
+      if (hasOwn(value, name) && !isRequestBodyValid(
+        child, value[name], schemas, unresolved,
+        `${pointer}/${escapeJsonPointer(name)}`, nextSeen,
+      )) return false;
+    }
+    return true;
+  }
+  return isExampleValid(schema, value);
+}
+
+/** 校验一个 Endpoint 的整体请求示例是否完整、可寻址且不携带凭证。 */
+function checkRequestExamples(
+  api: PontxAPI,
+  apiKey: string,
+  apiPath: string,
+  spec: PontxSpec,
+  operationIds: Set<string>,
+  record: RecordCheck,
+) {
+  const examples = api.requestExamples as unknown;
+  const validCollection = isRecord(examples) && Object.keys(examples).length > 0;
+  record("requestExamples", `api:${apiKey}`, validCollection, {
+    ruleId: "request-examples.required",
+    path: `${apiPath}.requestExamples`,
+    message: "Endpoint 缺少整体请求示例。",
+    remediation: "至少添加一个 requestExamples 条目；从 OAS 导入时使用 x-pontx-request-examples。",
+    affectedApis: [apiKey],
+  });
+  if (!validCollection) return;
+
+  const parameters = api.parameters || [];
+  const parameterMap = new Map(parameters.map((parameter) =>
+    [`${parameter.in}:${parameter.name}`, parameter]));
+  const bodyParameter = parameters.find((parameter) => parameter.in === "body");
+  const securitySchemes = spec.components?.securitySchemes || {};
+  const apiKeyParameters = Object.values(securitySchemes)
+    .filter((scheme) => scheme?.type === "apiKey")
+    .map((scheme) => ({
+      location: scheme.in === "header" ? "header" : "query",
+      name: scheme.name?.toLowerCase(),
+    }));
+  const approvedServers = new Set([
+    ...(spec.servers || []).map((server) => server?.url),
+    ...Object.values(spec.envs || {}).flatMap((env) => (env.servers || []).map((server) => server?.url)),
+  ].filter(isText).map((url) => url.replace(/\/$/, "")));
+
+  for (const [id, rawExample] of Object.entries(examples)) {
+    const examplePath = `${apiPath}.requestExamples[${JSON.stringify(id)}]`;
+    const example = rawExample as PontxRequestExample;
+    record("requestExamples", `api:${apiKey}`, REQUEST_EXAMPLE_ID.test(id), {
+      ruleId: "request-examples.id", path: examplePath,
+      message: `整体请求示例 ID ${id} 不稳定。`,
+      remediation: "使用小写字母、数字和单连字符组成稳定 ID。", affectedApis: [apiKey],
+    });
+
+    const request = isRecord(example) && isRecord(example.request) ? example.request : {};
+    const unresolved = isRecord(example) && Array.isArray(example.unresolved) ? example.unresolved : [];
+    const shapeValid = isRecord(example) && isRecord(example.request)
+      && ["path", "query", "headers"].every((location) =>
+        example.request?.[location] === undefined || isRecord(example.request[location]))
+      && (example.unresolved === undefined || Array.isArray(example.unresolved));
+    record("requestExamples", `api:${apiKey}`, shapeValid, {
+      ruleId: "request-examples.shape", path: examplePath,
+      message: "整体请求示例的 request 或 unresolved 结构非法。",
+      remediation: "request 使用 path/query/headers 对象和可选 body；unresolved 使用数组。", affectedApis: [apiKey],
+    });
+
+    const unresolvedKeys = new Set<string>();
+    let unresolvedValid = shapeValid;
+    for (const input of unresolved) {
+      if (!isRecord(input) || !isText(input.in) || !isText(input.name) || !isRecord(input.source)) {
+        unresolvedValid = false;
+        continue;
+      }
+      const key = `${input.in}:${input.name}`;
+      const declared = input.in === "body"
+        ? !!bodyParameter && (input.name === "body" || input.name === "/" || input.name.startsWith("/"))
+        : parameterMap.has(key);
+      const sourceValid = input.source.kind === PontxRequestInputSourceKind.Operation
+        ? isText(input.source.operationId) && operationIds.has(input.source.operationId)
+        : input.source.kind === PontxRequestInputSourceKind.Runtime && isText(input.source.reason);
+      if (!declared || !sourceValid || unresolvedKeys.has(key)) unresolvedValid = false;
+      unresolvedKeys.add(key);
+    }
+    record("requestExamples", `api:${apiKey}`, unresolvedValid, {
+      ruleId: "request-examples.unresolved", path: `${examplePath}.unresolved`,
+      message: "动态输入未声明、重复，或引用了无效的来源 Endpoint/运行时原因。",
+      remediation: "让每个动态输入对应已声明参数，并填写有效 operationId 或 runtime reason。", affectedApis: [apiKey],
+    });
+
+    let valuesValid = shapeValid;
+    for (const location of ["path", "query", "header"] as const) {
+      for (const [name, value] of Object.entries(requestValues(request, location))) {
+        const parameter = parameterMap.get(`${location}:${name}`);
+        if (!parameter || !parameter.schema || !isRequestScalar(value)
+          || unresolvedKeys.has(`${location}:${name}`)
+          || !isExampleValid(parameter.schema, value)
+          || (location === "header" && typeof value !== "string")) {
+          valuesValid = false;
+        }
+      }
+    }
+    if (hasOwn(request, "body") && !bodyParameter) valuesValid = false;
+    if (hasOwn(request, "body") && bodyParameter?.schema) {
+      const unresolvedBodyPointers = new Set(Array.from(unresolvedKeys)
+        .filter((key) => key.startsWith("body:"))
+        .map((key) => key.slice("body:".length)));
+      if (!isRequestBodyValid(
+        bodyParameter.schema,
+        request.body,
+        spec.components?.schemas || {},
+        unresolvedBodyPointers,
+      )) valuesValid = false;
+    }
+    record("requestExamples", `api:${apiKey}`, valuesValid, {
+      ruleId: "request-examples.values", path: `${examplePath}.request`,
+      message: "整体请求示例包含未声明、类型不匹配或同时标记为动态的输入。",
+      remediation: "只填写当前 Endpoint 声明的输入，并让值符合参数 Schema。", affectedApis: [apiKey],
+    });
+
+    const requiredComplete = parameters.filter((parameter) => parameter.required).every((parameter) => {
+      if (parameter.in === "body") return hasOwn(request, "body") || unresolvedKeys.has("body:body");
+      return hasOwn(requestValues(request, parameter.in), parameter.name)
+        || unresolvedKeys.has(`${parameter.in}:${parameter.name}`);
+    });
+    record("requestExamples", `api:${apiKey}`, requiredComplete, {
+      ruleId: "request-examples.required-inputs", path: examplePath,
+      message: "整体请求示例没有覆盖全部必填输入。",
+      remediation: "为每个必填输入提供稳定值，或在 unresolved 中声明动态来源。", affectedApis: [apiKey],
+    });
+
+    const expectedStatus = isRecord(example) ? String(example.expectedStatus ?? "") : "";
+    const statusValid = /^2(?:\d\d|[xX]{2})$/.test(expectedStatus)
+      && Object.prototype.hasOwnProperty.call(api.responses || {}, expectedStatus);
+    record("requestExamples", `api:${apiKey}`, statusValid, {
+      ruleId: "request-examples.success-status", path: `${examplePath}.expectedStatus`,
+      message: "expectedStatus 不是 Endpoint 已声明的 2xx 响应。",
+      remediation: "填写 responses 中实际声明的成功状态码。", affectedApis: [apiKey],
+    });
+
+    const headers = requestValues(request, "header");
+    const hasForbiddenHeader = Object.keys(headers)
+      .some((name) => FORBIDDEN_EXAMPLE_HEADERS.has(name.toLowerCase()));
+    const hasApiKey = apiKeyParameters.some(({ location, name }) => name
+      && Object.keys(requestValues(request, location)).some((inputName) => inputName.toLowerCase() === name));
+    const serverUrl = isRecord(example) && example.serverUrl;
+    const serverValid = serverUrl === undefined
+      || (isText(serverUrl) && approvedServers.has(serverUrl.replace(/\/$/, "")));
+    record("requestExamples", `api:${apiKey}`, !hasForbiddenHeader && !hasApiKey && serverValid, {
+      ruleId: "request-examples.safety", path: examplePath,
+      message: "整体请求示例包含凭证字段或未经声明的 serverUrl。",
+      remediation: "移除凭证值，并只引用 PontxSpec 中批准的 server URL。", affectedApis: [apiKey],
+      severity: QualitySeverity.Critical,
+    });
+  }
 }
 
 function checkRuntime(

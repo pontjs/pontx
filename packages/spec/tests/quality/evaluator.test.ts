@@ -32,7 +32,8 @@ function goodSpec(): PontxSpec {
     },
     apis: {
       "users/getUser": {
-        path: "/users/{id}", method: "GET", title: "查询用户", description: "按 ID 查询用户",
+        path: "/users/{id}", method: "GET", operationId: "getUser",
+        title: "查询用户", description: "按 ID 查询用户",
         parameters: [{
           name: "id", in: "path", required: true,
           schema: { type: "string", description: "用户 ID", examples: ["u-1"] },
@@ -40,6 +41,12 @@ function goodSpec(): PontxSpec {
         responses: {
           "200": { description: "用户详情", schema: { type: "object", $ref: "#/components/schemas/User" } },
           default: { description: "请求错误" },
+        },
+        requestExamples: {
+          default: {
+            request: { path: { id: "u-1" }, query: {}, headers: {} },
+            expectedStatus: "200",
+          },
         },
         security: [{ apiKey: [] }],
       },
@@ -69,6 +76,71 @@ describe("evaluatePontxQuality", () => {
     expect(report.findings.some((finding) => finding.path.endsWith("User.examples"))).toBe(false);
   });
 
+  it("requires an overall request example for every Endpoint", () => {
+    const spec = goodSpec();
+    delete spec.apis["users/getUser"].requestExamples;
+    const report = evaluatePontxQuality({ spec });
+    expect(report.findings.some((finding) =>
+      finding.ruleId === "request-examples.required")).toBe(true);
+    expect(report.dimensions.find((dimension) => dimension.id === "requestExamples")?.score).toBe(0);
+  });
+
+  it("validates required inputs, success status, and dynamic input sources", () => {
+    const spec = goodSpec();
+    spec.apis["users/getUser"].requestExamples = {
+      invalid: {
+        request: { path: {}, query: {}, headers: {} },
+        expectedStatus: "404",
+        unresolved: [{
+          in: "path",
+          name: "id",
+          source: { kind: "operation", operationId: "missingOperation" },
+        } as any],
+      },
+    };
+    const report = evaluatePontxQuality({ spec });
+    expect(report.findings.some((finding) =>
+      finding.ruleId === "request-examples.unresolved")).toBe(true);
+    expect(report.findings.some((finding) =>
+      finding.ruleId === "request-examples.success-status")).toBe(true);
+  });
+
+  it("rejects credentials embedded in overall request examples", () => {
+    const spec = goodSpec();
+    spec.apis["users/getUser"].requestExamples!.default.request!.headers = {
+      "X-API-Key": "secret",
+    };
+    const report = evaluatePontxQuality({ spec });
+    expect(report.criticals.some((finding) =>
+      finding.ruleId === "request-examples.safety")).toBe(true);
+  });
+
+  it("validates required body fields and accepts unresolved JSON Pointers", () => {
+    const spec = goodSpec();
+    spec.apis["users/getUser"].parameters!.push({
+      name: "body", in: "body", required: true,
+      schema: {
+        type: "object", description: "查询配置", required: ["region"],
+        properties: {
+          region: { type: "string", description: "区域", examples: ["cn"] },
+        },
+      },
+    });
+    spec.apis["users/getUser"].requestExamples!.default.request!.body = {};
+    let report = evaluatePontxQuality({ spec });
+    expect(report.findings.some((finding) =>
+      finding.ruleId === "request-examples.values")).toBe(true);
+
+    spec.apis["users/getUser"].requestExamples!.default.unresolved = [{
+      in: "body",
+      name: "/region",
+      source: { kind: "runtime", reason: "user-selection" },
+    } as any];
+    report = evaluatePontxQuality({ spec });
+    expect(report.findings.some((finding) =>
+      finding.ruleId === "request-examples.values")).toBe(false);
+  });
+
   it("marks path parameter mismatches as critical", () => {
     const spec = goodSpec();
     spec.apis["users/getUser"].parameters![0].name = "userId";
@@ -85,6 +157,129 @@ describe("evaluatePontxQuality", () => {
     expect(report.findings.some((finding) => finding.ruleId === "examples.valid")).toBe(true);
   });
 
+  it("rejects generic placeholder strings but preserves meaningful and constrained literals", () => {
+    for (const placeholder of ["example", "Example", "string", "test", "sample-value", "your_value"]) {
+      const spec = goodSpec();
+      spec.components!.schemas.User.properties!.id.examples = [placeholder];
+      const report = evaluatePontxQuality({ spec });
+      expect(report.findings.some((finding) => finding.ruleId === "examples.valid"
+        && finding.path.includes('properties["id"]')), placeholder).toBe(true);
+    }
+
+    const spec = goodSpec();
+    spec.components!.schemas.User.properties!.name.examples = [
+      "https://example.com/users/Alice",
+      "test@example.com",
+    ];
+    spec.components!.schemas.Environment = {
+      type: "string",
+      description: "部署环境",
+      enum: ["test", "production"],
+      enumValueTitles: { test: "测试环境", production: "生产环境" },
+      examples: ["test"],
+    };
+
+    const report = evaluatePontxQuality({ spec });
+    const invalidExamples = report.findings.filter((finding) => finding.ruleId === "examples.valid");
+    expect(invalidExamples.some((finding) => finding.path.includes('properties["name"]'))).toBe(false);
+    expect(invalidExamples.some((finding) => finding.path.includes("Environment"))).toBe(false);
+  });
+
+  it("accepts nullable examples and traverses composition branches", () => {
+    const spec = goodSpec();
+    spec.components!.schemas.NullableName = {
+      type: "string", description: "可空名称", examples: [null], nullable: true,
+    } as any;
+    spec.components!.schemas.ComposedUser = {
+      description: "组合用户",
+      allOf: [{ $ref: "#/components/schemas/User" }],
+    } as any;
+    const report = evaluatePontxQuality({ spec });
+    expect(report.findings.some((finding) => finding.path.includes("NullableName")
+      && finding.ruleId === "examples.valid")).toBe(false);
+    expect(report.findings.some((finding) => finding.path.includes("ComposedUser.type")
+      && finding.ruleId === "structure.schema-type")).toBe(false);
+  });
+
+  it("does not require duplicate prose on an anonymous allOf constraint branch", () => {
+    const spec = goodSpec();
+    spec.components!.schemas.CreateUser = {
+      type: "object",
+      title: "创建用户",
+      description: "创建用户请求。",
+      allOf: [
+        { $ref: "#/components/schemas/User" },
+        { type: "object", required: ["name"] },
+        { type: "object", minProperties: 1, additionalProperties: false },
+      ],
+    } as any;
+
+    const report = evaluatePontxQuality({ spec });
+
+    expect(report.findings.some((finding) => finding.ruleId === "description.schema"
+      && finding.path.endsWith(".allOf[1]"))).toBe(false);
+    expect(report.findings.some((finding) => finding.ruleId === "description.schema"
+      && finding.path.endsWith(".allOf[2]"))).toBe(false);
+  });
+
+  it("still requires prose on semantic allOf branches", () => {
+    const spec = goodSpec();
+    spec.components!.schemas.CreateUser = {
+      type: "object",
+      description: "创建用户请求。",
+      allOf: [
+        { $ref: "#/components/schemas/User" },
+        {
+          type: "object",
+          properties: {
+            invitationCode: {
+              type: "string",
+              description: "邀请码",
+              examples: ["invite-123"],
+            },
+          },
+        },
+        { type: "string", enum: ["invited"] },
+      ],
+    } as any;
+
+    const report = evaluatePontxQuality({ spec });
+    const descriptionPaths = report.findings
+      .filter((finding) => finding.ruleId === "description.schema")
+      .map((finding) => finding.path);
+
+    expect(descriptionPaths).toContain('$.components.schemas["CreateUser"].allOf[1]');
+    expect(descriptionPaths).toContain('$.components.schemas["CreateUser"].allOf[2]');
+  });
+
+  it("does not exempt an allOf required constraint for an undocumented field", () => {
+    const spec = goodSpec();
+    spec.components!.schemas.CreateUser = {
+      type: "object",
+      description: "创建用户请求。",
+      allOf: [
+        { $ref: "#/components/schemas/User" },
+        { type: "object", required: ["invitationCode"] },
+      ],
+    } as any;
+
+    const report = evaluatePontxQuality({ spec });
+
+    expect(report.findings.some((finding) => finding.ruleId === "description.schema"
+      && finding.path.endsWith(".allOf[1]"))).toBe(true);
+  });
+
+  it("accepts a described referenced Schema as the parameter description", () => {
+    const spec = goodSpec();
+    spec.apis["users/getUser"].parameters = [{
+      name: "body", in: "body", required: true,
+      schema: { $ref: "#/components/schemas/User" } as any,
+    }];
+    spec.apis["users/getUser"].path = "/users";
+    const report = evaluatePontxQuality({ spec });
+    expect(report.findings.some((finding) => finding.ruleId === "description.parameter")).toBe(false);
+  });
+
   it("detects locale structural drift and missing prose", () => {
     const source = goodSpec();
     const localized = structuredClone(source);
@@ -93,6 +288,18 @@ describe("evaluatePontxQuality", () => {
     const report = evaluatePontxQuality({ spec: source, locales: { "en-US": localized } });
     expect(report.findings.some((finding) => finding.ruleId === "i18n.structure")).toBe(true);
     expect(report.findings.some((finding) => finding.ruleId === "i18n.prose")).toBe(true);
+  });
+
+  it("treats enum extension text and OAuth scopes as localizable prose", () => {
+    const source = goodSpec();
+    const localized = structuredClone(source);
+    (source.components!.schemas.User.properties!.id as any)["x-enum-descriptions"] = ["标识"];
+    (localized.components!.schemas.User.properties!.id as any)["x-enum-descriptions"] = ["Identifier"];
+    (source.components!.securitySchemes!.apiKey as any).scopes = { read: "读取" };
+    (localized.components!.securitySchemes!.apiKey as any).scopes = { read: "Read" };
+    const report = evaluatePontxQuality({ spec: source, locales: { "en-US": localized } });
+    expect(report.findings.some((finding) => finding.ruleId === "i18n.structure")).toBe(false);
+    expect(report.findings.some((finding) => finding.ruleId === "i18n.prose")).toBe(false);
   });
 
   it("reports a non-PontxSpec input as Invalid", () => {

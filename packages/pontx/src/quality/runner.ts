@@ -12,6 +12,7 @@ import {
   type PontxSpec,
 } from "@pontx/spec";
 import { validatePontxCliCompatibility } from "./deterministic";
+import { validateFixtureResponse } from "./response-conformance";
 import { EvalAttribution } from "./types";
 import type {
   AgentAdapter,
@@ -95,7 +96,12 @@ export async function runDynamicEvaluation(options: {
       continue;
     }
     const scores: number[] = [];
-    const findings: QualityFinding[] = [];
+    const responseFindings = validateFixtureResponse(
+      options.spec,
+      options.spec.apis[item.expected.api],
+      item,
+    );
+    const findings: QualityFinding[] = [...responseFindings];
     const traces: EvalCaseResult["traces"] = [];
     let calledAtLeastOnce = false;
     for (let attempt = 0; attempt < runs; attempt++) {
@@ -127,10 +133,13 @@ export async function runDynamicEvaluation(options: {
         attribution = EvalAttribution.AgentOrCase;
       }
     }
-    const score = scores.reduce((sum, value) => sum + value, 0) / scores.length;
+    let score = scores.reduce((sum, value) => sum + value, 0) / scores.length;
+    if (responseFindings.length) score = Math.min(score, 35);
+    if (responseFindings.length) attribution = EvalAttribution.MetadataOrContract;
     caseResults.push({
       id: item.id, api: item.expected.api, score, attempts: runs,
-      variance: variance(scores), passed: score >= 40, attribution, findings, traces,
+      variance: variance(scores), passed: score >= 40 && !responseFindings.length,
+      attribution, findings, traces,
     });
   }
   return {
