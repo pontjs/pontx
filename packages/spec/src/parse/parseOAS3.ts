@@ -128,7 +128,7 @@ export function parseOAS3Interface(
         const bodyParma = {
           name: "body",
           in: "body" as any,
-          required: true,
+          required: requestBody.required === true,
           schema: normalizeOAS3Schema(consumeContent[consume]?.schema),
         } as Parameter;
         parameters.push(bodyParma);
@@ -138,6 +138,7 @@ export function parseOAS3Interface(
 
   const pontAPI = {
     summary: inter.summary,
+    operationId: inter.operationId,
     consumes,
     description: inter.description,
     method,
@@ -147,6 +148,7 @@ export function parseOAS3Interface(
     parameters: _.unionBy(parameters, "name"),
     produces: produces,
     security: inter.security,
+    requestExamples: inter["x-pontx-request-examples"],
   } as PontxAPI;
 
   return pontAPI;

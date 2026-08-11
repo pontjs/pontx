@@ -4,6 +4,54 @@ import { OAS3 } from "oas-spec-ts";
 
 export type OAS3API = OAS3.OperationObject;
 
+/** 整体请求示例中的输入位置。 */
+export enum PontxRequestInputLocation {
+  Path = "path",
+  Query = "query",
+  Header = "header",
+  Body = "body",
+}
+
+/** 动态输入的取值来源。 */
+export enum PontxRequestInputSourceKind {
+  Operation = "operation",
+  Runtime = "runtime",
+}
+
+/** 无法安全固化在示例中的动态输入。 */
+export type PontxUnresolvedRequestInput = {
+  in: PontxRequestInputLocation;
+  name: string;
+  source:
+    | {
+        kind: PontxRequestInputSourceKind.Operation;
+        operationId: string;
+      }
+    | {
+        kind: PontxRequestInputSourceKind.Runtime;
+        reason: string;
+      };
+};
+
+/** 一次完整请求所需的稳定输入。 */
+export type PontxRequestExampleValue = string | number | boolean;
+export type PontxRequestExampleRequest = {
+  path?: Record<string, PontxRequestExampleValue>;
+  query?: Record<string, PontxRequestExampleValue>;
+  headers?: Record<string, string>;
+  body?: unknown;
+};
+
+/** OAS `x-pontx-request-examples` 对应的 PontxSpec 请求示例。 */
+export type PontxRequestExample = {
+  summary?: string;
+  request?: PontxRequestExampleRequest;
+  expectedStatus: string;
+  unresolved?: PontxUnresolvedRequestInput[];
+  serverUrl?: string;
+  verifiedAt?: string;
+};
+
 export class Parameter {
   schema: PontxJsonSchema;
   name: string;
@@ -42,6 +90,8 @@ export class PontxAPI {
     | "TRACE";
   /** 标题 */
   title?: string;
+  /** OpenAPI operationId；用于跨 Endpoint 的请求示例依赖。 */
+  operationId?: string;
   /** 摘要 */
   summary?: string;
   /** 描述 */
@@ -63,6 +113,8 @@ export class PontxAPI {
   deprecated?: boolean;
   /** 扩展 */
   ext?: any;
+  /** 每个条目是一组可以整体使用的请求输入。 */
+  requestExamples?: Record<string, PontxRequestExample>;
   /** 安全 */
   security?: Array<OAS3.SecurityRequirementObject>;
   /** 外部文档 */

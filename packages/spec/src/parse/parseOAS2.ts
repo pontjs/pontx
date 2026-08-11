@@ -42,6 +42,7 @@ export function parseOAS2Interface(
 
   const pontAPI = {
     summary: inter.summary,
+    operationId: inter.operationId,
     consumes: inter.consumes,
     produces: inter.produces,
     description: inter.description,
@@ -50,6 +51,7 @@ export function parseOAS2Interface(
     responses,
     deprecated: inter.deprecated,
     parameters: unionBy(parameters, "name"),
+    requestExamples: inter["x-pontx-request-examples"],
   } as PontxAPI;
 
   return pontAPI;

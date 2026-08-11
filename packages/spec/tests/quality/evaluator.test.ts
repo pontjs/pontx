@@ -32,7 +32,8 @@ function goodSpec(): PontxSpec {
     },
     apis: {
       "users/getUser": {
-        path: "/users/{id}", method: "GET", title: "查询用户", description: "按 ID 查询用户",
+        path: "/users/{id}", method: "GET", operationId: "getUser",
+        title: "查询用户", description: "按 ID 查询用户",
         parameters: [{
           name: "id", in: "path", required: true,
           schema: { type: "string", description: "用户 ID", examples: ["u-1"] },
@@ -40,6 +41,12 @@ function goodSpec(): PontxSpec {
         responses: {
           "200": { description: "用户详情", schema: { type: "object", $ref: "#/components/schemas/User" } },
           default: { description: "请求错误" },
+        },
+        requestExamples: {
+          default: {
+            request: { path: { id: "u-1" }, query: {}, headers: {} },
+            expectedStatus: "200",
+          },
         },
         security: [{ apiKey: [] }],
       },
@@ -67,6 +74,71 @@ describe("evaluatePontxQuality", () => {
     expect(exampleFindings).toHaveLength(1);
     expect(exampleFindings[0].path).toContain("properties[\"name\"].examples");
     expect(report.findings.some((finding) => finding.path.endsWith("User.examples"))).toBe(false);
+  });
+
+  it("requires an overall request example for every Endpoint", () => {
+    const spec = goodSpec();
+    delete spec.apis["users/getUser"].requestExamples;
+    const report = evaluatePontxQuality({ spec });
+    expect(report.findings.some((finding) =>
+      finding.ruleId === "request-examples.required")).toBe(true);
+    expect(report.dimensions.find((dimension) => dimension.id === "requestExamples")?.score).toBe(0);
+  });
+
+  it("validates required inputs, success status, and dynamic input sources", () => {
+    const spec = goodSpec();
+    spec.apis["users/getUser"].requestExamples = {
+      invalid: {
+        request: { path: {}, query: {}, headers: {} },
+        expectedStatus: "404",
+        unresolved: [{
+          in: "path",
+          name: "id",
+          source: { kind: "operation", operationId: "missingOperation" },
+        } as any],
+      },
+    };
+    const report = evaluatePontxQuality({ spec });
+    expect(report.findings.some((finding) =>
+      finding.ruleId === "request-examples.unresolved")).toBe(true);
+    expect(report.findings.some((finding) =>
+      finding.ruleId === "request-examples.success-status")).toBe(true);
+  });
+
+  it("rejects credentials embedded in overall request examples", () => {
+    const spec = goodSpec();
+    spec.apis["users/getUser"].requestExamples!.default.request!.headers = {
+      "X-API-Key": "secret",
+    };
+    const report = evaluatePontxQuality({ spec });
+    expect(report.criticals.some((finding) =>
+      finding.ruleId === "request-examples.safety")).toBe(true);
+  });
+
+  it("validates required body fields and accepts unresolved JSON Pointers", () => {
+    const spec = goodSpec();
+    spec.apis["users/getUser"].parameters!.push({
+      name: "body", in: "body", required: true,
+      schema: {
+        type: "object", description: "查询配置", required: ["region"],
+        properties: {
+          region: { type: "string", description: "区域", examples: ["cn"] },
+        },
+      },
+    });
+    spec.apis["users/getUser"].requestExamples!.default.request!.body = {};
+    let report = evaluatePontxQuality({ spec });
+    expect(report.findings.some((finding) =>
+      finding.ruleId === "request-examples.values")).toBe(true);
+
+    spec.apis["users/getUser"].requestExamples!.default.unresolved = [{
+      in: "body",
+      name: "/region",
+      source: { kind: "runtime", reason: "user-selection" },
+    } as any];
+    report = evaluatePontxQuality({ spec });
+    expect(report.findings.some((finding) =>
+      finding.ruleId === "request-examples.values")).toBe(false);
   });
 
   it("marks path parameter mismatches as critical", () => {

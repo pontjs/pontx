@@ -22,7 +22,8 @@ function specFixture(): PontxSpec {
     components: { schemas: {} },
     apis: {
       "pets/getPet": {
-        path: "/pets/{id}", method: "GET", title: "查询宠物", description: "按 ID 查询宠物",
+        path: "/pets/{id}", method: "GET", operationId: "getPet",
+        title: "查询宠物", description: "按 ID 查询宠物",
         parameters: [{
           name: "id", in: "path", required: true,
           schema: { type: "string", description: "宠物 ID", examples: ["p-1"] },
@@ -36,6 +37,12 @@ function specFixture(): PontxSpec {
             },
           },
           default: { description: "请求错误" },
+        },
+        requestExamples: {
+          default: {
+            request: { path: { id: "p-1" }, query: {}, headers: {} },
+            expectedStatus: "200",
+          },
         },
       },
     },
