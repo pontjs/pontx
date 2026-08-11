@@ -122,6 +122,38 @@ describe("quality dynamic runner", () => {
     expect(merged.provisional).toBe(false);
   });
 
+  it("rejects a successful fixture response outside the declared enum", async () => {
+    const spec = specFixture();
+    spec.apis["pets/getPet"].responses["200"].schema = {
+      type: "object",
+      properties: {
+        phase: { type: "string", enum: ["PRE_MKT", "POST_MKT"] },
+      },
+    };
+    const invalidCase = structuredClone(evalCase);
+    invalidCase.fixture.data = { phase: "POST_MKT_PREV" };
+    const adapter: AgentAdapter = {
+      name: "fake",
+      async run() {
+        return {
+          exitCode: 0, timedOut: false, stderr: "", commandCount: 3,
+          stdout: "show-api pets getPet\nDry run - request not sent\ncase-get-pet-marker",
+          finalText: "宠物名称是 Milo",
+        };
+      },
+    };
+    const dynamic = await runDynamicEvaluation({
+      spec, specPath: "/tmp/pontx-spec.json", cases: [invalidCase], adapter,
+    });
+    expect(dynamic.score).toBe(35);
+    expect(dynamic.caseResults[0].passed).toBe(false);
+    expect(dynamic.caseResults[0].attribution).toBe(EvalAttribution.MetadataOrContract);
+    expect(dynamic.caseResults[0].findings).toContainEqual(expect.objectContaining({
+      ruleId: "dynamic.response-schema-conformance",
+      path: "eval:get-pet#/fixture/data/phase",
+    }));
+  });
+
   it("uses raw PontxSpec only to attribute CLI discovery failures", async () => {
     const adapter: AgentAdapter = {
       name: "diagnostic-fake",

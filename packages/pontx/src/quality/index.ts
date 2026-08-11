@@ -6,6 +6,7 @@
 export * from "./types";
 export * from "./io";
 export * from "./deterministic";
+export * from "./response-conformance";
 export * from "./codex-adapter";
 export * from "./runner";
 export * from "./commands";

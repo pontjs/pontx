@@ -108,7 +108,7 @@ pontx quality --spec ./api-lock.json --json
 pontx quality --spec ./zh-CN.json --locales ./locales
 ```
 
-Dynamic evaluation gives an Agent only the generated CLI and metadata-derived help. Calls run against an isolated `executeApi` fixture and never reach the real API:
+Dynamic evaluation gives an Agent only the generated CLI and metadata-derived help. Calls run against an isolated `executeApi` fixture and never reach the real API. Successful fixture responses are also checked offline against the declared Pontx response schema; enum, type, required-field, object, array, local-reference, and common scalar-constraint mismatches fail the case, cap it at 35/50, and emit a machine-readable fixture JSON Pointer:
 
 ```bash
 pontx eval --spec ./api-lock.json --cases ./eval-cases --agent codex --json
