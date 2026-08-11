@@ -157,6 +157,34 @@ describe("evaluatePontxQuality", () => {
     expect(report.findings.some((finding) => finding.ruleId === "examples.valid")).toBe(true);
   });
 
+  it("rejects generic placeholder strings but preserves meaningful and constrained literals", () => {
+    for (const placeholder of ["example", "Example", "string", "test", "sample-value", "your_value"]) {
+      const spec = goodSpec();
+      spec.components!.schemas.User.properties!.id.examples = [placeholder];
+      const report = evaluatePontxQuality({ spec });
+      expect(report.findings.some((finding) => finding.ruleId === "examples.valid"
+        && finding.path.includes('properties["id"]')), placeholder).toBe(true);
+    }
+
+    const spec = goodSpec();
+    spec.components!.schemas.User.properties!.name.examples = [
+      "https://example.com/users/Alice",
+      "test@example.com",
+    ];
+    spec.components!.schemas.Environment = {
+      type: "string",
+      description: "部署环境",
+      enum: ["test", "production"],
+      enumValueTitles: { test: "测试环境", production: "生产环境" },
+      examples: ["test"],
+    };
+
+    const report = evaluatePontxQuality({ spec });
+    const invalidExamples = report.findings.filter((finding) => finding.ruleId === "examples.valid");
+    expect(invalidExamples.some((finding) => finding.path.includes('properties["name"]'))).toBe(false);
+    expect(invalidExamples.some((finding) => finding.path.includes("Environment"))).toBe(false);
+  });
+
   it("accepts nullable examples and traverses composition branches", () => {
     const spec = goodSpec();
     spec.components!.schemas.NullableName = {

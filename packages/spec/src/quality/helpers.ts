@@ -7,6 +7,20 @@ import type { PontxJsonSchema } from "../schema.js";
 import { QualityGrade } from "./types.js";
 
 const PROSE_KEYS = new Set(["title", "summary", "description", "$comment"]);
+const GENERIC_EXAMPLE_PLACEHOLDERS = new Set([
+  "example",
+  "example value",
+  "placeholder",
+  "sample",
+  "sample value",
+  "string",
+  "test",
+  "test value",
+  "todo",
+  "tbd",
+  "value",
+  "your value",
+]);
 
 export function isText(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
@@ -42,6 +56,15 @@ export function isExampleValid(schema: PontxJsonSchema, value: unknown): boolean
     if (typeof schema.exclusiveMaximum === "number" && value >= schema.exclusiveMaximum) return false;
   }
   return true;
+}
+
+/** 判断叶子字段示例是否提供了比通用占位词更多的调用信息。 */
+export function isExampleMeaningful(schema: PontxJsonSchema, value: unknown): boolean {
+  if (typeof value !== "string") return true;
+  if (schema.enum?.some((item) => JSON.stringify(item) === JSON.stringify(value))) return true;
+  if (schema.const !== undefined && JSON.stringify(schema.const) === JSON.stringify(value)) return true;
+  const normalized = value.trim().toLowerCase().replace(/[-_]+/g, " ").replace(/\s+/g, " ");
+  return !GENERIC_EXAMPLE_PLACEHOLDERS.has(normalized);
 }
 
 export function constraintsAreConsistent(schema: PontxJsonSchema): boolean {

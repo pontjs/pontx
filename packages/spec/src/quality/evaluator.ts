@@ -25,6 +25,7 @@ import {
   collectProse,
   constraintsAreConsistent,
   getQualityGrade,
+  isExampleMeaningful,
   isExampleValid,
   isText,
   round,
@@ -209,8 +210,9 @@ export function evaluatePontxQuality(input: PontxQualityInput): PontxQualityRepo
         affectedApis: apiKey ? [apiKey] : undefined,
       });
       if (hasExamples) {
-        record("examples", entity, schema.examples!.every((value) => isExampleValid(schema, value)), {
-          ruleId: "examples.valid", path: `${path}.examples`, message: "示例值不符合字段类型、枚举或约束。",
+        record("examples", entity, schema.examples!.every((value) =>
+          isExampleValid(schema, value) && isExampleMeaningful(schema, value)), {
+          ruleId: "examples.valid", path: `${path}.examples`, message: "示例值不符合字段类型、枚举或约束，或为明显占位值。",
           remediation: "将 examples 修正为能通过当前 Schema 约束的真实值。",
           affectedApis: apiKey ? [apiKey] : undefined,
         });
