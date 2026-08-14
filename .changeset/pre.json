@@ -19,6 +19,7 @@
     "fresh-curl-2xx-beta",
     "mcp-major-release",
     "metadata-quality-evaluator",
+    "node18-file-guard",
     "opencli-refactor",
     "pontx-ai-discovery-metadata",
     "sdk-cli-multi-origin-fix",
