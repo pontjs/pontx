@@ -14,10 +14,13 @@
   },
   "changesets": [
     "config-loader-improvement",
+    "dropbox-sign-oas-compatibility",
     "fix-spec-resolve-ref",
     "fresh-curl-2xx-beta",
     "mcp-major-release",
+    "metadata-quality-evaluator",
     "opencli-refactor",
+    "pontx-ai-discovery-metadata",
     "sdk-cli-multi-origin-fix",
     "sdk-cli-multi-origin",
     "sdk-major-release",

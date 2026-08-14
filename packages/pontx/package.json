@@ -1,6 +1,6 @@
 {
   "name": "pontx",
-  "version": "1.0.0-beta.10",
+  "version": "1.0.0-beta.11",
   "description": "OpenAPI lifecycle CLI for API discovery, documentation, type-safe code generation, SDK management, and Agent workflows",
   "main": "./cjs/index.cjs",
   "module": "./lib/index.js",
@@ -60,7 +60,15 @@
     "package.json",
     "*.md"
   ],
-  "keywords": ["openapi", "api-discovery", "api-lifecycle", "code-generation", "typescript-sdk", "agent-skill", "api-cli"],
+  "keywords": [
+    "openapi",
+    "api-discovery",
+    "api-lifecycle",
+    "code-generation",
+    "typescript-sdk",
+    "agent-skill",
+    "api-cli"
+  ],
   "author": "jasonHzq",
   "license": "MIT",
   "publishConfig": {
@@ -78,5 +86,7 @@
     "directory": "packages/pontx"
   },
   "homepage": "https://pontx.dev/en",
-  "bugs": { "url": "https://github.com/pontjs/pontx/issues" }
+  "bugs": {
+    "url": "https://github.com/pontjs/pontx/issues"
+  }
 }

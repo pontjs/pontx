@@ -1,6 +1,6 @@
 {
   "name": "@pontx/sdk",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0-beta.3",
   "description": "Shared core utilities for Pontx SDK (Browser & Node.js)",
   "keywords": [
     "pontx",
@@ -125,7 +125,9 @@
     "directory": "sdk/core"
   },
   "homepage": "https://pontx.dev/en",
-  "bugs": { "url": "https://github.com/pontjs/pontx/issues" },
+  "bugs": {
+    "url": "https://github.com/pontjs/pontx/issues"
+  },
   "publishConfig": {
     "access": "public"
   }
