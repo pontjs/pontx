@@ -23,6 +23,7 @@ const CLI_OPTIONS = new Set([
   "header", "H",
   "output", "o",
   "query", "q",
+  "confirm",
   "debug",
   "curl",
   "dry-run",
@@ -195,10 +196,11 @@ export class ParamProvider implements CompletionProvider {
     const options: Array<{ name: string; description: string }> = [
       { name: "env", description: "[CLI] Specify environment/baseUrl" },
       { name: "debug", description: "[CLI] Show detailed request/response" },
-      { name: "curl", description: "[CLI] Output equivalent cURL command" },
+      { name: "curl", description: "[CLI] Output a redacted cURL request preview" },
       { name: "dry-run", description: "[CLI] Show request without executing" },
       { name: "output", description: "[CLI] Output result to file" },
       { name: "query", description: "[CLI] JMESPath query expression" },
+      { name: "confirm", description: "[CLI] Confirm the exact dry-run mutation request" },
       { name: "header", description: "[CLI] Add request header" },
     ];
 

@@ -42,6 +42,19 @@ node "$PONTX_REPO/.agents/skills/pontx-metadata-quality-loop/scripts/score-metad
   --output "$RUN_DIR/baseline.json"
 ```
 
+候选注册表评估是独立的 50 分模式，不得与正式 OAS 静态分混算：
+
+```bash
+node "$PONTX_REPO/.agents/skills/pontx-metadata-quality-loop/scripts/score-metadata.mjs" \
+  --metadata-repo "$METADATA_WORKTREE" \
+  --candidate-registry-only \
+  --output "$RUN_DIR/candidate-baseline.json"
+```
+
+普通静态/动态报告在注册表存在时会附带只读 `candidateRegistry` 诊断，但既有
+`staticScore`、`dynamicScore`、`score` 和正式 OAS `findings` 语义不变。只有显式
+`--candidate-registry-only` 报告可作为 `candidate-registry` score mode 进入状态机比较。
+
 正式动态评估入口（100 分制）：
 
 ```bash

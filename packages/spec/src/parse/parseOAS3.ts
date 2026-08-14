@@ -91,12 +91,18 @@ export function parseOAS3Interface(
   const responses = _.mapValues(inter.responses, (response) => {
     const finalResponse = resolveRef<OAS3.ResponseObject>(response, swagger) || response;
     const { content, headers, description, ...rest } = finalResponse || {};
+    const resolvedHeaders = headers
+      ? Object.fromEntries(Object.entries(headers).map(([name, header]) => [
+          name,
+          resolveRef(header, swagger) || header,
+        ]))
+      : headers;
     const responseProduces = Object.keys(content || {});
     const onlyKey = responseProduces[0];
     const schema = content?.[onlyKey]?.schema;
     const responseSchema = normalizeOAS3Schema(schema);
     produces = _.union(produces, responseProduces);
-    return { ...rest, description, schema: responseSchema, headers: headers as any };
+    return { ...rest, description, schema: responseSchema, headers: resolvedHeaders as any };
   });
 
   const parameters = (inter.parameters || []).map((param) => {
@@ -120,10 +126,12 @@ export function parseOAS3Interface(
 
     if (requestBody) {
       const consumeContent = requestBody.content;
-      const consume = consumeContent ? Object.keys(consumeContent)[0] : null;
+      const declaredConsumes = consumeContent ? Object.keys(consumeContent) : [];
+      const consume = declaredConsumes[0];
       if (consume) {
-        const stardardConsume = consume?.split(";")?.[0] || consume;
-        consumes = [stardardConsume];
+        consumes = _.uniq(declaredConsumes.map((contentType) =>
+          contentType.split(";")[0] || contentType
+        ));
 
         const bodyParma = {
           name: "body",

@@ -165,6 +165,12 @@ describe("parseOAS3", () => {
         responses: {
           BadRequest: { description: "请求错误" },
         },
+        headers: {
+          RateLimit: {
+            description: "当前时间窗允许的最大请求数。",
+            schema: { type: "integer", example: 100 },
+          },
+        },
       },
       paths: {
         "/items": {
@@ -187,6 +193,7 @@ describe("parseOAS3", () => {
             responses: {
               200: {
                 description: "成功",
+                headers: { "X-RateLimit-Limit": { $ref: "#/components/headers/RateLimit" } },
                 content: { "application/json": { schema: { type: "number", minimum: 0, exclusiveMinimum: true, example: 1 } } },
               },
               400: { $ref: "#/components/responses/BadRequest" },
@@ -199,6 +206,8 @@ describe("parseOAS3", () => {
     const api = result.apis["test/getItems"];
 
     expect(api.responses["200"].description).toBe("成功");
+    expect(api.responses["200"].headers?.["X-RateLimit-Limit"]?.description)
+      .toBe("当前时间窗允许的最大请求数。");
     expect(api.operationId).toBe("getItems");
     expect(api.requestExamples?.default.request?.query).toEqual({ currency: "USD" });
     expect(api.responses["400"].description).toBe("请求错误");
@@ -211,5 +220,54 @@ describe("parseOAS3", () => {
     expect(roundTrip.paths["/items"].GET.operationId).toBe("getItems");
     expect(roundTrip.paths["/items"].GET["x-pontx-request-examples"])
       .toEqual(document.paths["/items"].get["x-pontx-request-examples"]);
+  });
+
+  it("应容忍外部引用形式的 tag 描述并保留全部请求媒体类型", () => {
+    const document = {
+      openapi: "3.0.3",
+      info: { title: "Dropbox Sign API", version: "3.0.0" },
+      servers: [{ url: "https://api.hellosign.com/v3" }],
+      tags: [{ name: "Api App", description: { $ref: "./markdown/en/tags/api-app.md" } }],
+      paths: {
+        "/api_app": {
+          post: {
+            operationId: "apiAppCreate",
+            tags: ["Api App"],
+            requestBody: {
+              required: true,
+              content: {
+                "application/json": { schema: { $ref: "#/components/schemas/ApiAppCreateRequest" } },
+                "multipart/form-data": { schema: { $ref: "#/components/schemas/ApiAppCreateRequest" } },
+              },
+            },
+            responses: {
+              201: {
+                description: "created",
+                content: { "application/json": { schema: { type: "object" } } },
+              },
+            },
+          },
+        },
+      },
+      components: {
+        schemas: {
+          ApiAppCreateRequest: {
+            type: "object",
+            properties: { name: { type: "string" } },
+          },
+        },
+      },
+    } as any;
+
+    const result = parseOAS3(document, "dropbox-sign");
+    const api = result.apis["apiApp/apiAppCreate"];
+
+    expect(api).toBeDefined();
+    expect(api.consumes).toEqual(["application/json", "multipart/form-data"]);
+    expect(result.tags).toEqual([{ name: "apiApp", description: undefined }]);
+
+    const roundTrip = parsePontSpec2OAS3(result) as any;
+    expect(Object.keys(roundTrip.paths["/api_app"].POST.requestBody.content))
+      .toEqual(["application/json", "multipart/form-data"]);
   });
 });

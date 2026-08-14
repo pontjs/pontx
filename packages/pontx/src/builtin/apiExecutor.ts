@@ -12,6 +12,11 @@ import type {
   ExecuteApiConfig
 } from "../types";
 import type { Parameter } from "@pontx/spec";
+import {
+  redactBodyForPreview,
+  redactSensitiveValue,
+  redactUrlForPreview,
+} from "./cliSafety";
 
 interface ParsedParams {
   pathParams: Record<string, unknown>;
@@ -250,7 +255,7 @@ export function buildRequestConfig(
 /**
  * 处理响应
  */
-async function handleResponse(response: Response): Promise<unknown> {
+export async function handleResponse(response: Response): Promise<unknown> {
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(
@@ -258,10 +263,35 @@ async function handleResponse(response: Response): Promise<unknown> {
     );
   }
 
-  const contentType = response.headers.get("content-type");
-  return contentType?.includes("application/json")
-    ? response.json()
-    : response.text();
+  const contentType = response.headers
+    .get("content-type")
+    ?.split(";", 1)[0]
+    ?.trim()
+    ?.toLowerCase();
+
+  if (contentType === "application/json" || contentType?.endsWith("+json")) {
+    return response.json();
+  }
+
+  const textualApplicationTypes = new Set([
+    "application/ecmascript",
+    "application/graphql",
+    "application/javascript",
+    "application/json-seq",
+    "application/x-ndjson",
+    "application/x-www-form-urlencoded",
+    "application/xml",
+  ]);
+  if (
+    !contentType
+    || contentType.startsWith("text/")
+    || contentType.endsWith("+xml")
+    || textualApplicationTypes.has(contentType)
+  ) {
+    return response.text();
+  }
+
+  return response.arrayBuffer();
 }
 
 /**
@@ -414,43 +444,24 @@ function headersToEntries(
   return Object.entries(headers).map(([key, value]) => [key, String(value)]);
 }
 
-function bodyToCurlData(body: BodyInit): string {
-  if (typeof body === "string") {
-    return body;
-  }
-
-  if (body instanceof URLSearchParams) {
-    return body.toString();
-  }
-
-  if (body instanceof FormData) {
-    return "[FormData body omitted]";
-  }
-
-  if (body instanceof Blob) {
-    return `[Blob body: ${body.size} bytes]`;
-  }
-
-  return String(body);
-}
-
 /**
- * 将 ApiRequest 转换为可复制执行的 cURL 命令。
+ * 将 ApiRequest 转换为脱敏后的 cURL 预览。
+ * 敏感值会被替换，因此该输出不能作为带凭据的可执行命令。
  */
 export function requestToCurl(request: ApiRequest): string {
   const method = String(
     request.init.method || request.meta.method || "GET"
   ).toUpperCase();
-  const parts = ["curl", "-X", shellQuote(method), shellQuote(request.url)];
+  const parts = ["curl", "-X", shellQuote(method), shellQuote(redactUrlForPreview(request.url))];
 
   for (const [key, value] of headersToEntries(request.init.headers)) {
-    parts.push("-H", shellQuote(`${key}: ${value}`));
+    parts.push("-H", shellQuote(`${key}: ${redactSensitiveValue(key, value)}`));
   }
 
   if (request.init.body !== undefined && request.init.body !== null) {
     parts.push(
       "--data-raw",
-      shellQuote(bodyToCurlData(request.init.body as BodyInit))
+      shellQuote(redactBodyForPreview(request.init.body as BodyInit))
     );
   }
 

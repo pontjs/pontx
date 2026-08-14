@@ -13,6 +13,14 @@ import type { ApiExecutionContext } from "../../../types";
 import { getApiMeta } from "./show-api";
 import { createLogger } from "../../../logger/logger";
 import { buildApiRequest, requestToCurl } from "../../../builtin/apiExecutor";
+import {
+  createMutationConfirmation,
+  isMutationMethod,
+  redactForPreview,
+  redactSensitiveValue,
+  serializeCliResponse,
+  verifyMutationConfirmation,
+} from "../../../builtin/cliSafety";
 
 export interface CallCommandOptions {
   env?: string;
@@ -23,6 +31,7 @@ export interface CallCommandOptions {
   dryRun?: boolean;
   useRemote?: boolean;
   query?: string;
+  confirm?: string;
 }
 
 /* 已知 CLI 选项，不应被当作 API 参数 */
@@ -39,6 +48,7 @@ export const CLI_OPTIONS = new Set([
   "use-remote",
   "query",
   "q",
+  "confirm",
   "help",
   "h",
 ]);
@@ -188,14 +198,14 @@ function formatRequestInfo(
   if (Object.keys(params).length > 0) {
     lines.push("Parameters:");
     for (const [key, value] of Object.entries(params)) {
-      lines.push(`  ${key}: ${JSON.stringify(value)}`);
+      lines.push(`  ${key}: ${JSON.stringify(redactForPreview(key, value))}`);
     }
   }
 
   if (Object.keys(extraHeaders).length > 0) {
     lines.push("Extra Headers:");
     for (const [key, value] of Object.entries(extraHeaders)) {
-      lines.push(`  ${key}: ${value}`);
+      lines.push(`  ${key}: ${redactSensitiveValue(key, value)}`);
     }
   }
 
@@ -420,18 +430,39 @@ export async function callCommand(
     logger: logger || createLogger('info'),
   };
 
+  const mutation = isMutationMethod(apiMetaForContext.method);
+  const preparedRequest = options.dryRun || options.curl || mutation
+    ? await buildApiRequest(context)
+    : undefined;
+
   if (options.debug || options.dryRun) {
     const requestInfo = formatRequestInfo(context, extraHeaders);
     process.stderr.write(requestInfo + '\n');
   }
 
   if (options.curl) {
-    process.stderr.write(requestToCurl(await buildApiRequest(context)) + '\n');
+    process.stderr.write(requestToCurl(preparedRequest!) + '\n');
   }
 
   if (options.dryRun) {
+    if (mutation) {
+      const confirmation = await createMutationConfirmation(preparedRequest!);
+      process.stderr.write(
+        `Mutation confirmation (valid for 5 minutes and bound to this exact request): ${confirmation}\n`
+      );
+    }
     process.stderr.write("(Dry run - request not sent)\n");
     return;
+  }
+
+  if (mutation && (
+    !options.confirm ||
+    !await verifyMutationConfirmation(preparedRequest!, options.confirm)
+  )) {
+    throw new Error(
+      "Mutation blocked: run the same command with --dry-run, review the redacted request, " +
+      "then repeat it with --confirm <token> within 5 minutes."
+    );
   }
 
   if (!plugin?.executeApi) {
@@ -448,6 +479,10 @@ export async function callCommand(
     let result = response.data;
 
     if (options.query) {
+      const serialized = await serializeCliResponse(result);
+      if (serialized.binary) {
+        throw new Error("JMESPath queries cannot be applied to binary responses");
+      }
       try {
         const data = typeof result === "string" ? JSON.parse(result as string) : result;
         result = jmespath.search(data, options.query);
@@ -458,17 +493,19 @@ export async function callCommand(
       }
     }
 
-    const output =
-      typeof result === "string" ? result : JSON.stringify(result, null, 2);
+    const output = await serializeCliResponse(result);
 
     if (options.output) {
       const outputPath = path.isAbsolute(options.output)
         ? options.output
         : path.resolve(process.cwd(), options.output);
-      fs.writeFileSync(outputPath, output, "utf-8");
+      fs.writeFileSync(outputPath, output.data);
       process.stderr.write(`Response saved to: ${outputPath}\n`);
     } else {
-      console.log(output);
+      if (output.binary) {
+        throw new Error("Binary response not printed to the terminal; use --output <path>");
+      }
+      console.log(output.data);
     }
 
     if (options.debug) {

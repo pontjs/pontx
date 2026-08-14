@@ -23,9 +23,12 @@ export function fixOASTags<
 
   const tagItems = (swagger.tags || [])
     .map((tag) => {
+      const description = typeof tag.description === "string"
+        ? tag.description
+        : undefined;
       return {
         tagNameLikes: _.union(
-          [tag.name || "", tag.description || ""].filter((id) => id)
+          [tag.name || "", description || ""].filter((id) => id)
         ),
       };
     })

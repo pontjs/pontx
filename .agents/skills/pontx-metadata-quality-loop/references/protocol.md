@@ -12,6 +12,13 @@ Static-only reports compare `staticScore` on a 50-point scale. Reports with a
 dynamic score compare `score` on a 100-point scale. Never compare a provisional
 static projection with a completed dynamic score.
 
+Candidate-registry reports are an explicit third mode. They compare
+`candidateScore` on a 50-point scale only when the scorer was invoked with
+`--candidate-registry-only`; they are incomparable with both formal OAS modes.
+The score mode is part of the state fingerprint. A formal report may carry a
+nested `candidateRegistry` diagnostic, but it does not alter the formal score or
+formal findings.
+
 A dynamic report is comparable only when the scorer actually executed the
 independent benchmark with the Pontx Codex adapter. The report must be
 non-provisional, contain at least three traces for every executable case, and
@@ -44,6 +51,12 @@ The scorer is read-only and reports:
 - findings with paths, affected Endpoints and remediation;
 - commands, exit codes and whether generated output reproduced cleanly;
 - evaluator concerns with a minimal fixture when applicable.
+
+In candidate-registry mode it reports separate dimensions and actionable
+findings for product boundary, bilingual content, evidence reproducibility,
+immutable contract snapshots, gate/blocker consistency, freshness, and
+isolation from `catalog/source.json`. The rules must be generic: current product
+slugs, roadmap ranks, and expected scores are not evaluator constants.
 
 In dynamic mode the scorer also reports the benchmark path and content hash,
 adapter identity, runs per case, per-case traces/pass state, and deterministic
@@ -91,7 +104,7 @@ Allowed types are `false-positive`, `false-negative`, `parse-loss`,
 
 An evaluator change needs a minimal regression fixture, calibration against
 good and bad examples, full evaluator tests, package builds and a decision-log
-entry. Security boundaries cannot be relaxed only because current Metadata
+entry in [evaluator-decisions.md](evaluator-decisions.md). Security boundaries cannot be relaxed only because current Metadata
 contains a violation.
 
 ## 6. Merge and disposal

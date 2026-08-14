@@ -4,12 +4,18 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import {
+  CANDIDATE_DIMENSIONS,
+  scoreCandidateRegistry,
+} from "./candidate-registry-quality.mjs";
 
 const ALLOWED_ARGS = new Set([
   "metadata-repo", "spec-module", "pontx-module", "dynamic-benchmark",
   "dynamic-adapter", "runs-per-case", "timeout-ms", "agent-binary",
   "agent-model", "agent-reasoning", "output",
+  "candidate-registry-only",
 ]);
+const BOOLEAN_ARGS = new Set(["candidate-registry-only"]);
 
 function parseArgs(argv) {
   const result = {};
@@ -18,6 +24,10 @@ function parseArgs(argv) {
     if (!key.startsWith("--")) throw new Error(`Unexpected argument: ${key}`);
     const name = key.slice(2);
     if (!ALLOWED_ARGS.has(name)) throw new Error(`Unknown argument: ${key}`);
+    if (BOOLEAN_ARGS.has(name)) {
+      result[name] = true;
+      continue;
+    }
     const value = argv[index + 1];
     if (!value || value.startsWith("--")) throw new Error(`${key} requires a value`);
     result[name] = value;
@@ -252,6 +262,7 @@ function aggregate(collections, dynamic) {
   const provisional = dynamic === null || dynamic.deterministicCoverage < 1
     || dynamic.collectionResults.some((item) => item.merged.provisional);
   return {
+    scoreMode: dynamic ? "dynamic" : "static",
     score,
     grade: grade(score, criticals.length > 0),
     staticScore,
@@ -300,9 +311,54 @@ function aggregate(collections, dynamic) {
 
 export async function scoreMetadata(args) {
   const metadataRepo = path.resolve(args["metadata-repo"] || process.cwd());
+  const candidateRegistry = await scoreCandidateRegistry(metadataRepo);
+  if (args["candidate-registry-only"]) {
+    if (args["dynamic-benchmark"] || args["pontx-module"] || args["dynamic-adapter"]
+      || args["runs-per-case"] || args["agent-binary"] || args["agent-model"]
+      || args["agent-reasoning"]) {
+      throw new Error("Candidate registry scoring cannot be combined with dynamic scoring arguments");
+    }
+    if (!candidateRegistry.present) {
+      const missing = {
+        ruleId: "candidate.registry.missing",
+        severity: "critical",
+        path: candidateRegistry.path,
+        message: "Metadata 仓库没有候选 API 注册表。",
+        remediation: "创建 catalog/api-collection-candidates.json，或使用正式 OAS 评分模式。",
+      };
+      return {
+        scoreMode: "candidate-registry",
+        score: 0,
+        candidateScore: 0,
+        maxScore: 50,
+        provisional: false,
+        grade: "E",
+        dimensions: CANDIDATE_DIMENSIONS.map((item) => ({
+          ...item, score: 0, coverage: 0, checked: 0, passed: 0,
+        })),
+        criticals: [missing],
+        findings: [missing],
+        candidateRegistry,
+        metadata: { productCount: 0, generatedAt: new Date().toISOString() },
+      };
+    }
+    return {
+      scoreMode: "candidate-registry",
+      score: candidateRegistry.candidateScore,
+      candidateScore: candidateRegistry.candidateScore,
+      maxScore: candidateRegistry.maxScore,
+      grade: grade(candidateRegistry.candidateScore * 2, candidateRegistry.criticals.length > 0),
+      provisional: false,
+      dimensions: candidateRegistry.dimensions,
+      criticals: candidateRegistry.criticals,
+      findings: candidateRegistry.findings,
+      candidateRegistry,
+      metadata: candidateRegistry.metadata,
+    };
+  }
   const specModule = path.resolve(args["spec-module"] || await discoverSpecModule(metadataRepo));
   const collections = await scoreCollections(metadataRepo, specModule);
-  return aggregate(collections, await runDynamic(collections, args));
+  return { ...aggregate(collections, await runDynamic(collections, args)), candidateRegistry };
 }
 
 export async function main(argv = process.argv.slice(2)) {

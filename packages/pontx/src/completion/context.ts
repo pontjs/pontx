@@ -27,6 +27,7 @@ const OPTIONS_WITH_VALUES = new Set([
   "o",
   "query",
   "q",
+  "confirm",
   "case",
   "params",
   "body",

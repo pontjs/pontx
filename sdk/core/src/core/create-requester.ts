@@ -177,15 +177,28 @@ export function createFetchRequester(
      */
     const requester = async (params: any, init?: any) => {
       /* 1. 创建基础请求配置 */
-      const requestInit = createBaseRequestInit(requesterConfig);
+      const requestInit = createBaseRequestInit(requesterConfig, init);
 
       /* 2. 序列化请求体 */
       if (apiMeta.hasBody && init?.body) {
+        const contentType = Object.entries(requestInit.headers || {}).reduce(
+          (selected, [name, value]) =>
+            name.toLowerCase() === "content-type" ? String(value) : selected,
+          "application/json"
+        );
         requestInit.body = serializeRequestBody(
           init.body,
-          requestInit?.headers?.["Content-Type"] || "application/json",
+          contentType,
           config.bodySerializers
         );
+
+        if (requestInit.body instanceof FormData) {
+          for (const headerName of Object.keys(requestInit.headers || {})) {
+            if (headerName.toLowerCase() === "content-type") {
+              delete requestInit.headers[headerName];
+            }
+          }
+        }
       }
 
       /* 3. 构建完整 URL */

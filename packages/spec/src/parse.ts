@@ -144,14 +144,17 @@ export function parsePontSpec2OAS3(spec: PontxSpec) {
 
       const bodyParam = api.parameters?.find((param) => param.in === "body");
       if (bodyParam) {
-        const consumeType = api?.consumes?.[0] || "application/json";
+        const consumeTypes = api?.consumes?.length
+          ? api.consumes
+          : ["application/json"];
         oas3Api.requestBody = {
           required: bodyParam.required,
-          content: {
-            [consumeType]: {
+          content: Object.fromEntries(consumeTypes.map((consumeType) => [
+            consumeType,
+            {
               schema: bodyParam.schema || {},
             },
-          },
+          ])),
         } as OAS3.RequestBodyObject;
       }
 

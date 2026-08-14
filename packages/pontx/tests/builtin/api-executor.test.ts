@@ -10,6 +10,7 @@ import {
   buildUrl,
   buildRequestConfig,
   buildApiRequest,
+  handleResponse,
   requestToCurl,
 } from '../../src/builtin/apiExecutor';
 
@@ -366,7 +367,21 @@ describe('requestToCurl', () => {
     });
 
     expect(requestToCurl(request)).toBe(
-      'curl -X \'POST\' \'https://api.example.com/users\' -H \'Accept: application/json\' -H \'Authorization: Bearer token\' -H \'Content-Type: application/json\' --data-raw \'{"name":"John"}\''
+      'curl -X \'POST\' \'https://api.example.com/users\' -H \'Accept: application/json\' -H \'Authorization: <redacted>\' -H \'Content-Type: application/json\' --data-raw \'{"name":"John"}\''
+    );
+  });
+
+  it('redacts credentials from URL, headers, and JSON bodies in cURL previews', () => {
+    expect(requestToCurl({
+      url: 'https://api.example.com/users?api_key=secret&visible=yes',
+      init: {
+        method: 'POST',
+        headers: { 'X-Api-Key': 'secret' },
+        body: JSON.stringify({ accessToken: 'secret', nested: { password: 'secret' }, name: 'John' }),
+      },
+      meta: { specName: 'test', tagName: 'users', apiName: 'create', method: 'POST', path: '/users' },
+    })).toBe(
+      'curl -X \'POST\' \'https://api.example.com/users?api_key=%3Credacted%3E&visible=yes\' -H \'X-Api-Key: <redacted>\' --data-raw \'{"accessToken":"<redacted>","nested":{"password":"<redacted>"},"name":"John"}\''
     );
   });
 });
@@ -469,5 +484,35 @@ describe('buildRequestConfig', () => {
 
     expect(result.method).toBe('POST');
     expect(result.body).toBeUndefined();
+  });
+});
+
+describe('handleResponse', () => {
+  it('should preserve PDF responses as binary data', async () => {
+    const bytes = new Uint8Array([0x25, 0x50, 0x44, 0x46]);
+    const response = new Response(bytes, {
+      headers: { 'Content-Type': 'application/pdf' },
+    });
+
+    const result = await handleResponse(response);
+
+    expect(result).toBeInstanceOf(ArrayBuffer);
+    expect(Array.from(new Uint8Array(result as ArrayBuffer))).toEqual(Array.from(bytes));
+  });
+
+  it('should keep NDJSON responses as text', async () => {
+    const response = new Response('{"id":1}\n{"id":2}\n', {
+      headers: { 'Content-Type': 'application/x-ndjson' },
+    });
+
+    await expect(handleResponse(response)).resolves.toBe('{"id":1}\n{"id":2}\n');
+  });
+
+  it('should parse structured JSON media types', async () => {
+    const response = new Response('{"title":"invalid request"}', {
+      headers: { 'Content-Type': 'application/problem+json' },
+    });
+
+    await expect(handleResponse(response)).resolves.toEqual({ title: 'invalid request' });
   });
 });

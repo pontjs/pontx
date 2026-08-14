@@ -81,6 +81,81 @@ export function mergeEvaluationReport(report, dynamic) {
   return { directory, metadata, specModule, pontxModule, benchmark };
 }
 
+function candidateRegistry(options = {}) {
+  const revision = "a".repeat(40);
+  const product = {
+    slug: "example-cloud",
+    name: { zh: "示例云 API", en: "Example Cloud API" },
+    provider: "Example Cloud",
+    category: "Cloud",
+    priority: { group: "eligible-review", rank: 1, score: 80 },
+    boundary: {
+      zh: "示例云公开管理 API 的完整产品边界，不包含独立计费产品。",
+      en: "The complete public administration API boundary, excluding the separately defined billing product.",
+    },
+    stage: "audit-required",
+    admissionDecision: "not-approved",
+    gateStatus: {
+      authority: "passed",
+      redistribution: "passed",
+      contract: "passed",
+      transport: "passed",
+      risk: "pending",
+      sdkCli: "pending",
+    },
+    contractSource: {
+      kind: "openapi",
+      url: `https://raw.githubusercontent.com/example/api/${revision}/openapi.json`,
+      revision,
+      observedAt: "2026-08-01",
+      license: "Apache-2.0",
+      observedOperations: 12,
+    },
+    evidence: [
+      { kind: "docs", url: "https://docs.example.com/api/reference" },
+      { kind: "spec", url: `https://raw.githubusercontent.com/example/api/${revision}/openapi.json` },
+      { kind: "license", url: `https://github.com/example/api/blob/${revision}/LICENSE` },
+    ],
+    blockers: [
+      {
+        gate: "risk",
+        zh: "仍需完成高影响写接口的执行风险分级。",
+        en: "Execution-risk classification is still required for high-impact mutations.",
+      },
+      {
+        gate: "sdkCli",
+        zh: "仍需构建、测试并发布声明版本的 SDK 与 CLI。",
+        en: "The declared SDK and CLI versions still need to be built, tested, and published.",
+      },
+    ],
+    nextAction: {
+      zh: "完成写接口风险审查，并发布经过验证的 SDK 与 CLI。",
+      en: "Complete mutation risk review and publish the verified SDK and CLI.",
+    },
+    verifiedAt: "2026-08-01",
+    ...options.product,
+  };
+  return {
+    version: 1,
+    snapshotDate: "2026-08-14",
+    sourceRoadmap: "catalog/api-collection-growth-priority.md",
+    admissionPolicy: {
+      zh: "候选记录只有在全部准入门槛通过后才可进入正式目录。",
+      en: "Candidate records enter the formal catalog only after every admission gate passes.",
+    },
+    products: [product],
+    ...options.registry,
+  };
+}
+
+function writeCandidateRegistry(fixture, registry = candidateRegistry(), sourceSlugs = []) {
+  write(path.join(fixture.metadata, "catalog/api-collection-candidates.json"),
+    `${JSON.stringify(registry, null, 2)}\n`);
+  write(path.join(fixture.metadata, "catalog/api-collection-growth-priority.md"), "# Growth roadmap\n");
+  write(path.join(fixture.metadata, "catalog/source.json"),
+    `${JSON.stringify({ apis: sourceSlugs.map((slug) => ({ slug })) }, null, 2)}\n`);
+}
+
 function resolveSchema(spec, schema) {
   if (!schema?.$ref?.startsWith("#/")) return schema;
   return schema.$ref.slice(2).split("/").reduce((value, segment) => value?.[segment], spec);
@@ -174,4 +249,107 @@ test("requires at least three runs and an explicit supported adapter", () => {
   ], { encoding: "utf8" });
   assert.notEqual(tooFewRuns.status, 0);
   assert.match(tooFewRuns.stderr, /at least 3 runs per case/);
+});
+
+test("reports a high-quality candidate registry independently without changing formal OAS scoring", () => {
+  const fixture = fixtureWorkspace();
+  writeCandidateRegistry(fixture);
+  const formal = JSON.parse(execFileSync(process.execPath, [script,
+    "--metadata-repo", fixture.metadata,
+    "--spec-module", fixture.specModule,
+  ], { encoding: "utf8" }));
+  assert.equal(formal.scoreMode, "static");
+  assert.equal(formal.staticScore, 45);
+  assert.equal(formal.score, 90);
+  assert.equal(formal.findings.length, 0);
+  assert.equal(formal.candidateRegistry.present, true);
+  assert.equal(formal.candidateRegistry.candidateScore, 50);
+  assert.equal(formal.candidateRegistry.findings.length, 0);
+
+  const candidate = JSON.parse(execFileSync(process.execPath, [script,
+    "--metadata-repo", fixture.metadata,
+    "--candidate-registry-only",
+  ], { encoding: "utf8" }));
+  assert.equal(candidate.scoreMode, "candidate-registry");
+  assert.equal(candidate.score, 50);
+  assert.equal(candidate.candidateScore, 50);
+  assert.equal(candidate.maxScore, 50);
+  assert.equal(candidate.dimensions.reduce((sum, item) => sum + item.weight, 0), 50);
+  assert.equal(candidate.findings.length, 0);
+});
+
+test("candidate registry findings expose reproducibility, consistency, localization, freshness, and isolation defects", () => {
+  const fixture = fixtureWorkspace();
+  const registry = candidateRegistry({
+    product: {
+      boundary: { zh: "API", en: "" },
+      stage: "audit-required",
+      admissionDecision: "approved",
+      gateStatus: {
+        authority: "passed",
+        redistribution: "passed",
+        contract: "passed",
+        transport: "blocked",
+        risk: "pending",
+        sdkCli: "pending",
+      },
+      contractSource: {
+        kind: "openapi",
+        url: "https://api.example.com/openapi.json",
+        mutableSource: true,
+        observedAt: "2025-01-01",
+        license: "review-required",
+        observedOperations: 0,
+      },
+      evidence: [
+        { kind: "docs", url: "https://explinks.com/example" },
+        { kind: "docs", url: "https://explinks.com/example" },
+      ],
+      blockers: [],
+      nextAction: { zh: "待定", en: "TBD" },
+      verifiedAt: "2025-01-01",
+    },
+  });
+  writeCandidateRegistry(fixture, registry, ["example-cloud"]);
+  const report = JSON.parse(execFileSync(process.execPath, [script,
+    "--metadata-repo", fixture.metadata,
+    "--candidate-registry-only",
+  ], { encoding: "utf8" }));
+  const ruleIds = new Set(report.findings.map((finding) => finding.ruleId));
+  assert.ok(report.candidateScore < 50);
+  assert.ok(ruleIds.has("candidate.boundary.localized"));
+  assert.ok(ruleIds.has("candidate.action.localized"));
+  assert.ok(ruleIds.has("candidate.evidence.authoritative"));
+  assert.ok(ruleIds.has("candidate.evidence.diversity"));
+  assert.ok(ruleIds.has("candidate.contract.immutable"));
+  assert.ok(ruleIds.has("candidate.gate.stage"));
+  assert.ok(ruleIds.has("candidate.gate.blocker"));
+  assert.ok(ruleIds.has("candidate.freshness.verified"));
+  assert.ok(ruleIds.has("candidate.admission.decision"));
+  assert.ok(ruleIds.has("candidate.admission.overlap"));
+  assert.ok(report.criticals.some((finding) => finding.ruleId === "candidate.admission.overlap"));
+});
+
+test("metadata repositories without a candidate registry remain valid historical formal-score inputs", () => {
+  const fixture = fixtureWorkspace();
+  const formal = JSON.parse(execFileSync(process.execPath, [script,
+    "--metadata-repo", fixture.metadata,
+    "--spec-module", fixture.specModule,
+  ], { encoding: "utf8" }));
+  assert.equal(formal.scoreMode, "static");
+  assert.equal(formal.staticScore, 45);
+  assert.equal(formal.score, 90);
+  assert.deepEqual(formal.candidateRegistry, {
+    present: false,
+    path: path.join(fixture.metadata, "catalog/api-collection-candidates.json"),
+  });
+
+  const candidate = JSON.parse(execFileSync(process.execPath, [script,
+    "--metadata-repo", fixture.metadata,
+    "--candidate-registry-only",
+  ], { encoding: "utf8" }));
+  assert.equal(candidate.scoreMode, "candidate-registry");
+  assert.equal(candidate.candidateScore, 0);
+  assert.equal(candidate.dimensions.reduce((sum, item) => sum + item.weight, 0), 50);
+  assert.ok(candidate.criticals.some((item) => item.ruleId === "candidate.registry.missing"));
 });

@@ -185,6 +185,31 @@ describe("evaluatePontxQuality", () => {
     expect(invalidExamples.some((finding) => finding.path.includes("Environment"))).toBe(false);
   });
 
+  it("does not reward an invalid placeholder over safely omitting an unsupported example", () => {
+    const missingSpec = goodSpec();
+    delete missingSpec.components!.schemas.User.properties!.id.examples;
+    const invalidSpec = goodSpec();
+    invalidSpec.components!.schemas.User.properties!.id.examples = ["example"];
+    const meaningfulSpec = goodSpec();
+    meaningfulSpec.components!.schemas.User.properties!.id.examples = ["user-42"];
+
+    const missing = evaluatePontxQuality({ spec: missingSpec });
+    const invalid = evaluatePontxQuality({ spec: invalidSpec });
+    const meaningful = evaluatePontxQuality({ spec: meaningfulSpec });
+    const exampleScore = (report: ReturnType<typeof evaluatePontxQuality>) =>
+      report.dimensions.find((dimension) => dimension.id === "examples")!.score;
+
+    expect(missing.findings.some((finding) => finding.ruleId === "examples.leaf"
+      && finding.path.includes('properties["id"]'))).toBe(true);
+    expect(invalid.findings.some((finding) => finding.ruleId === "examples.valid"
+      && finding.path.includes('properties["id"]'))).toBe(true);
+    expect(invalid.findings.some((finding) => finding.ruleId === "examples.leaf"
+      && finding.path.includes('properties["id"]'))).toBe(false);
+    expect(exampleScore(invalid)).toBeLessThanOrEqual(exampleScore(missing));
+    expect(exampleScore(meaningful)).toBeGreaterThan(exampleScore(missing));
+    expect(exampleScore(meaningful)).toBeGreaterThan(exampleScore(invalid));
+  });
+
   it("accepts nullable examples and traverses composition branches", () => {
     const spec = goodSpec();
     spec.components!.schemas.NullableName = {
