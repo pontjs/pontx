@@ -212,4 +212,53 @@ describe("parseOAS3", () => {
     expect(roundTrip.paths["/items"].GET["x-pontx-request-examples"])
       .toEqual(document.paths["/items"].get["x-pontx-request-examples"]);
   });
+
+  it("应容忍外部引用形式的 tag 描述并保留全部请求媒体类型", () => {
+    const document = {
+      openapi: "3.0.3",
+      info: { title: "Dropbox Sign API", version: "3.0.0" },
+      servers: [{ url: "https://api.hellosign.com/v3" }],
+      tags: [{ name: "Api App", description: { $ref: "./markdown/en/tags/api-app.md" } }],
+      paths: {
+        "/api_app": {
+          post: {
+            operationId: "apiAppCreate",
+            tags: ["Api App"],
+            requestBody: {
+              required: true,
+              content: {
+                "application/json": { schema: { $ref: "#/components/schemas/ApiAppCreateRequest" } },
+                "multipart/form-data": { schema: { $ref: "#/components/schemas/ApiAppCreateRequest" } },
+              },
+            },
+            responses: {
+              201: {
+                description: "created",
+                content: { "application/json": { schema: { type: "object" } } },
+              },
+            },
+          },
+        },
+      },
+      components: {
+        schemas: {
+          ApiAppCreateRequest: {
+            type: "object",
+            properties: { name: { type: "string" } },
+          },
+        },
+      },
+    } as any;
+
+    const result = parseOAS3(document, "dropbox-sign");
+    const api = result.apis["apiApp/apiAppCreate"];
+
+    expect(api).toBeDefined();
+    expect(api.consumes).toEqual(["application/json", "multipart/form-data"]);
+    expect(result.tags).toEqual([{ name: "apiApp", description: undefined }]);
+
+    const roundTrip = parsePontSpec2OAS3(result) as any;
+    expect(Object.keys(roundTrip.paths["/api_app"].POST.requestBody.content))
+      .toEqual(["application/json", "multipart/form-data"]);
+  });
 });

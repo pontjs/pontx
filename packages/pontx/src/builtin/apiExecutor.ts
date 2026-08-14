@@ -250,7 +250,7 @@ export function buildRequestConfig(
 /**
  * 处理响应
  */
-async function handleResponse(response: Response): Promise<unknown> {
+export async function handleResponse(response: Response): Promise<unknown> {
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(
@@ -258,10 +258,35 @@ async function handleResponse(response: Response): Promise<unknown> {
     );
   }
 
-  const contentType = response.headers.get("content-type");
-  return contentType?.includes("application/json")
-    ? response.json()
-    : response.text();
+  const contentType = response.headers
+    .get("content-type")
+    ?.split(";", 1)[0]
+    ?.trim()
+    ?.toLowerCase();
+
+  if (contentType === "application/json" || contentType?.endsWith("+json")) {
+    return response.json();
+  }
+
+  const textualApplicationTypes = new Set([
+    "application/ecmascript",
+    "application/graphql",
+    "application/javascript",
+    "application/json-seq",
+    "application/x-ndjson",
+    "application/x-www-form-urlencoded",
+    "application/xml",
+  ]);
+  if (
+    !contentType
+    || contentType.startsWith("text/")
+    || contentType.endsWith("+xml")
+    || textualApplicationTypes.has(contentType)
+  ) {
+    return response.text();
+  }
+
+  return response.arrayBuffer();
 }
 
 /**

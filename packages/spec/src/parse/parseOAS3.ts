@@ -120,10 +120,12 @@ export function parseOAS3Interface(
 
     if (requestBody) {
       const consumeContent = requestBody.content;
-      const consume = consumeContent ? Object.keys(consumeContent)[0] : null;
+      const declaredConsumes = consumeContent ? Object.keys(consumeContent) : [];
+      const consume = declaredConsumes[0];
       if (consume) {
-        const stardardConsume = consume?.split(";")?.[0] || consume;
-        consumes = [stardardConsume];
+        consumes = _.uniq(declaredConsumes.map((contentType) =>
+          contentType.split(";")[0] || contentType
+        ));
 
         const bodyParma = {
           name: "body",

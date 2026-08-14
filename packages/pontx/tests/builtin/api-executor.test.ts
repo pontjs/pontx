@@ -10,6 +10,7 @@ import {
   buildUrl,
   buildRequestConfig,
   buildApiRequest,
+  handleResponse,
   requestToCurl,
 } from '../../src/builtin/apiExecutor';
 
@@ -469,5 +470,35 @@ describe('buildRequestConfig', () => {
 
     expect(result.method).toBe('POST');
     expect(result.body).toBeUndefined();
+  });
+});
+
+describe('handleResponse', () => {
+  it('should preserve PDF responses as binary data', async () => {
+    const bytes = new Uint8Array([0x25, 0x50, 0x44, 0x46]);
+    const response = new Response(bytes, {
+      headers: { 'Content-Type': 'application/pdf' },
+    });
+
+    const result = await handleResponse(response);
+
+    expect(result).toBeInstanceOf(ArrayBuffer);
+    expect(Array.from(new Uint8Array(result as ArrayBuffer))).toEqual(Array.from(bytes));
+  });
+
+  it('should keep NDJSON responses as text', async () => {
+    const response = new Response('{"id":1}\n{"id":2}\n', {
+      headers: { 'Content-Type': 'application/x-ndjson' },
+    });
+
+    await expect(handleResponse(response)).resolves.toBe('{"id":1}\n{"id":2}\n');
+  });
+
+  it('should parse structured JSON media types', async () => {
+    const response = new Response('{"title":"invalid request"}', {
+      headers: { 'Content-Type': 'application/problem+json' },
+    });
+
+    await expect(handleResponse(response)).resolves.toEqual({ title: 'invalid request' });
   });
 });
