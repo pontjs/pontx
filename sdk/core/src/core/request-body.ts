@@ -195,13 +195,13 @@ function appendToFormData(
   value: unknown,
 ): void {
   // Handle File objects
-  if (value instanceof File) {
+  if (typeof File !== 'undefined' && value instanceof File) {
     formData.append(key, value);
     return;
   }
 
   // Handle Blob objects
-  if (value instanceof Blob) {
+  if (typeof Blob !== 'undefined' && value instanceof Blob) {
     formData.append(key, value);
     return;
   }

@@ -38,6 +38,26 @@ function requester(baseRequestFn: ReturnType<typeof vi.fn>) {
 }
 
 describe("graceful requester media types", () => {
+  it("serializes multipart bodies when the Node.js runtime has no File global", async () => {
+    vi.stubGlobal("File", undefined);
+
+    try {
+      const baseRequestFn = vi.fn(async () => ({ ok: true }));
+      const send = requester(baseRequestFn);
+
+      await send(
+        { title: "NDA", file: new Blob(["contract"], { type: "text/plain" }) },
+        { headers: { "content-type": "multipart/form-data" } },
+      );
+
+      const [, init] = baseRequestFn.mock.calls[0];
+      expect(init.body).toBeInstanceOf(FormData);
+      expect(Array.from((init.body as FormData).keys())).toEqual(["title", "file"]);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("lets fetch add the multipart boundary when a caller selects multipart", async () => {
     const baseRequestFn = vi.fn(async () => ({ ok: true }));
     const send = requester(baseRequestFn);
