@@ -53,6 +53,23 @@ function dynamicReport(score, caseResults) {
   };
 }
 
+function candidateReport(score, options = {}) {
+  const evidence = options.evidence ?? Math.round(score * 60) / 100;
+  const gates = options.gates ?? Math.round((score - evidence) * 100) / 100;
+  return {
+    scoreMode: "candidate-registry",
+    score,
+    candidateScore: score,
+    maxScore: 50,
+    dimensions: [
+      { id: "candidate.evidence", weight: 30, score: evidence },
+      { id: "candidate.gates", weight: 20, score: gates },
+    ],
+    criticals: Array.from({ length: options.criticals || 0 }, () => ({})),
+    findings: Array.from({ length: options.findings || 0 }, () => ({})),
+  };
+}
+
 function run(cwd, ...args) {
   return JSON.parse(execFileSync(process.execPath, [script, ...args], {
     cwd,
@@ -233,4 +250,35 @@ test("rejects evaluator concerns without a concrete minimal reproduction", () =>
     [script, "concern", "--state", statePath, "--input", concern],
     { cwd: directory, encoding: "utf8", stdio: "pipe" }),
   );
+});
+
+test("tracks candidate-registry score as an explicit comparable fingerprint mode", () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "pontx-quality-loop-"));
+  const baseline = path.join(directory, "baseline.json");
+  const statePath = path.join(directory, "state.json");
+  writeJson(baseline, candidateReport(35));
+  const initialized = run(directory, "init", "--state", statePath, "--baseline", baseline,
+    "--metadata-commit", "base", "--evaluator-commit", "eval-1",
+    "--benchmark-hash", "bench-1", "--runtime-hash", "node-22");
+  assert.equal(initialized.baseline.mode, "candidate-registry");
+  assert.equal(initialized.baseline.score, 35);
+  assert.equal(initialized.baseline.maxScore, 50);
+  assert.equal(initialized.fingerprints.scoreMode, "candidate-registry");
+
+  const decision = assess(directory, statePath, candidateReport(35.5));
+  assert.equal(decision.decision, "accept");
+  assert.equal(decision.snapshot.mode, "candidate-registry");
+});
+
+test("does not compare candidate-registry scores with historical formal static scores", () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "pontx-quality-loop-"));
+  const baseline = path.join(directory, "baseline.json");
+  const statePath = path.join(directory, "state.json");
+  writeJson(baseline, candidateReport(35));
+  run(directory, "init", "--state", statePath, "--baseline", baseline,
+    "--metadata-commit", "base", "--evaluator-commit", "eval-1",
+    "--benchmark-hash", "bench-1", "--runtime-hash", "node-22");
+  const decision = assess(directory, statePath, report(40));
+  assert.equal(decision.decision, "incomparable");
+  assert.ok(decision.reasons.includes("score-mode-mismatch"));
 });

@@ -42,6 +42,39 @@ function required(options, key) {
 }
 
 function snapshot(report, benchmarkHash) {
+  if (report.scoreMode === "candidate-registry") {
+    const dimensions = report.dimensions;
+    const validDimensions = Array.isArray(dimensions) && dimensions.length > 0
+      && new Set(dimensions.map((item) => item.id)).size === dimensions.length
+      && dimensions.every((item) => typeof item.id === "string" && item.id
+        && typeof item.score === "number" && Number.isFinite(item.score) && item.score >= 0
+        && typeof item.weight === "number" && Number.isFinite(item.weight) && item.weight > 0
+        && item.score <= item.weight);
+    const dimensionScore = validDimensions
+      ? Math.round(dimensions.reduce((sum, item) => sum + item.score, 0) * 100) / 100
+      : null;
+    const dimensionWeight = validDimensions
+      ? dimensions.reduce((sum, item) => sum + item.weight, 0)
+      : null;
+    if (typeof report.candidateScore !== "number" || !Number.isFinite(report.candidateScore)
+      || report.candidateScore < 0 || report.candidateScore > 50
+      || report.score !== report.candidateScore || report.maxScore !== 50
+      || dimensionWeight !== 50 || dimensionScore !== report.candidateScore) {
+      throw new Error("Candidate registry report has no comparable 50-point score");
+    }
+    return {
+      mode: "candidate-registry",
+      score: report.candidateScore,
+      maxScore: 50,
+      staticScore: null,
+      dynamicScore: null,
+      criticals: Array.isArray(report.criticals) ? report.criticals.length : 0,
+      dimensions: Object.fromEntries(dimensions.map((item) => [item.id, item.score])),
+      deterministicCoverage: null,
+      passingCases: {},
+      findingCount: Array.isArray(report.findings) ? report.findings.length : 0,
+    };
+  }
   const dynamic = typeof report.dynamicScore === "number";
   if (dynamic) {
     const evidence = report.dynamic?.evidence;
@@ -77,18 +110,20 @@ function snapshot(report, benchmarkHash) {
   };
 }
 
-function fingerprints(options) {
+function fingerprints(options, scoreMode) {
   return {
     evaluatorCommit: required(options, "evaluator-commit"),
     benchmarkHash: required(options, "benchmark-hash"),
     runtimeHash: required(options, "runtime-hash"),
+    scoreMode,
   };
 }
 
 function sameFingerprints(left, right) {
   return left.evaluatorCommit === right.evaluatorCommit
     && left.benchmarkHash === right.benchmarkHash
-    && left.runtimeHash === right.runtimeHash;
+    && left.runtimeHash === right.runtimeHash
+    && (!left.scoreMode || !right.scoreMode || left.scoreMode === right.scoreMode);
 }
 
 function now() {
@@ -102,11 +137,11 @@ function isNonEmptyObject(value) {
 
 function assessCandidate(state, candidate, candidateFingerprints, gates, options) {
   const baseline = state.baseline;
-  if (!sameFingerprints(state.fingerprints, candidateFingerprints)) {
-    return { decision: "incomparable", reasons: ["fingerprint-mismatch"], delta: null };
-  }
   if (baseline.mode !== candidate.mode) {
     return { decision: "incomparable", reasons: ["score-mode-mismatch"], delta: null };
+  }
+  if (!sameFingerprints(state.fingerprints, candidateFingerprints)) {
+    return { decision: "incomparable", reasons: ["fingerprint-mismatch"], delta: null };
   }
   const delta = Math.round((candidate.score - baseline.score) * 100) / 100;
   const minimumGain = Number(options["minimum-gain"] || (baseline.mode === "dynamic" ? 0.5 : 0.01));
@@ -145,8 +180,8 @@ async function run() {
   const { command, options } = parseArgs(process.argv.slice(2));
   if (command === "init") {
     const report = await readJson(required(options, "baseline"));
-    const reportFingerprints = fingerprints(options);
-    const baseline = snapshot(report, reportFingerprints.benchmarkHash);
+    const baseline = snapshot(report, required(options, "benchmark-hash"));
+    const reportFingerprints = fingerprints(options, baseline.mode);
     const state = {
       version: STATE_VERSION,
       status: baseline.score >= baseline.maxScore ? "stopped" : "ready",
@@ -174,8 +209,8 @@ async function run() {
     if (state.status === "stopped") throw new Error("The loop is stopped; start a new epoch to continue");
     const report = await readJson(required(options, "candidate"));
     const gates = await readJson(required(options, "gates"));
-    const candidateFingerprints = fingerprints(options);
-    const candidate = snapshot(report, candidateFingerprints.benchmarkHash);
+    const candidate = snapshot(report, required(options, "benchmark-hash"));
+    const candidateFingerprints = fingerprints(options, candidate.mode);
     const result = assessCandidate(state, candidate, candidateFingerprints, gates, options);
     state.cycle += 1;
     state.pendingCandidate = {
@@ -259,8 +294,8 @@ async function run() {
   if (command === "new-epoch") {
     if (state.pendingCandidate) throw new Error("Finalize the pending candidate before starting a new epoch");
     const report = await readJson(required(options, "baseline"));
-    const reportFingerprints = fingerprints(options);
-    const baseline = snapshot(report, reportFingerprints.benchmarkHash);
+    const baseline = snapshot(report, required(options, "benchmark-hash"));
+    const reportFingerprints = fingerprints(options, baseline.mode);
     state.epoch += 1;
     state.status = baseline.score >= baseline.maxScore ? "stopped" : "ready";
     state.stopReason = state.status === "stopped" ? "max-score" : null;
