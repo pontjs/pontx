@@ -1,7 +1,7 @@
 {
   "name": "vscode-pontx-v2",
   "displayName": "Pontx API Manager",
-  "description": "基于 Pontx 协议的 API 生命周期管理扩展，提供 API 搜索、文档查阅、代码生成等强大功能",
+  "description": "OpenAPI lifecycle manager with API search, documentation, Schema inspection, and type-safe code generation powered by Pontx",
   "version": "2.0.8",
   "publisher": "hzongquan",
   "private": true,
@@ -25,9 +25,11 @@
   "icon": "resources/pontx.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jasonHzq/pontx.git",
+    "url": "https://github.com/pontjs/pontx.git",
     "directory": "packages/vscode"
   },
+  "homepage": "https://pontx.dev/en",
+  "bugs": { "url": "https://github.com/pontjs/pontx/issues" },
   "license": "MIT",
   "activationEvents": [
     "workspaceContains:**/pontx.config.ts",

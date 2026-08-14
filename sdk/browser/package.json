@@ -1,6 +1,10 @@
 {
   "name": "@pontx/sdk-browser-client",
   "version": "0.0.11",
+  "description": "Type-safe browser API client runtime for SDKs generated from OpenAPI with Pontx",
+  "keywords": ["openapi", "browser-sdk", "api-client", "typescript", "code-generation", "pontx"],
+  "author": "Pontx Team",
+  "license": "MIT",
   "type": "module",
   "main": "./cjs/index.cjs",
   "module": "./lib/index.js",
@@ -28,6 +32,14 @@
   "peerDependencies": {
     "react": "*"
   },
+  "engines": { "node": ">=18.0.0" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pontjs/pontx.git",
+    "directory": "sdk/browser"
+  },
+  "homepage": "https://pontx.dev/en",
+  "bugs": { "url": "https://github.com/pontjs/pontx/issues" },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
   },

@@ -119,6 +119,13 @@
   "engines": {
     "node": ">=18.0.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pontjs/pontx.git",
+    "directory": "sdk/core"
+  },
+  "homepage": "https://pontx.dev/en",
+  "bugs": { "url": "https://github.com/pontjs/pontx/issues" },
   "publishConfig": {
     "access": "public"
   }

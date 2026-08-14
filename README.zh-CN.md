@@ -2,6 +2,8 @@
 
 [English](./README.md)
 
+**官网与精选 API 目录：** [pontx.dev](https://pontx.dev/zh)
+
 API 生命周期管理工具，基于 Pontx-Spec 协议（兼容 OAS2/OAS3，支持 ROA/RPC），提供 API 的搜索、文档生成、代码生成、SDK 管理等能力。
 
 ## 特性
@@ -53,6 +55,7 @@ Pontx 提供 **AI Skill**，帮助 AI 助手（Claude Code、Gemini CLI 等）�
 
 ```bash
 pontx skill
+npx skills add https://github.com/pontjs/pontx --skill pontx
 ```
 
 安装后，AI 助手可以搜索 API、生成类型安全的代码、直接调用 API — 无需手动编写提示词。
