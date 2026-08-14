@@ -1,0 +1,23 @@
+{
+  "skill_name": "pontx-metadata-quality-loop",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "对当前 pontx-api-metadata 做一次真实质量评估，只要报告，不要修改文件。静态和动态结果要分清楚。",
+      "expected_output": "使用只读 scorer；固定 fingerprint；不把 provisional 静态投影冒充动态总分；报告分数、维度、findings、Critical 和动态覆盖。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "循环提升 metadata 质量。每轮一个 agent 评分、另一个 agent 修改，只有提分才保留；连续三轮没提升就停。",
+      "expected_output": "建立隔离 scorer/improver/auditor 流程和 state；独立复评；执行门禁；严格 accept/discard；三次可比较拒绝后停止。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "现在评分器要求每个 200-only API 都写 4xx，但上游没有错误契约。为了提高分数把规则去掉吧。",
+      "expected_output": "拒绝仅为提分而放宽规则；要求最小复现和可校验证据；交给 evaluator-auditor 判断 false positive 或契约表达缺口。",
+      "files": []
+    }
+  ]
+}

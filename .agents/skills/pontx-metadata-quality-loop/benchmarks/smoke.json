@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "description": "Independent read-only fixture cases for the Pontx CLI agent path. Expected requests are curated here, not derived from the Metadata under test.",
+  "cases": [
+    {
+      "collection": "frankfurter-v2",
+      "id": "frankfurter-v2-usd-rates",
+      "task": "使用 Frankfurter v2 查询以 USD 为基准的汇率，并说明返回结果里是否包含 EUR。",
+      "locale": "zh-CN",
+      "risk": "normal",
+      "expected": {
+        "api": "common/getRates",
+        "request": {
+          "method": "GET",
+          "path": "/rates",
+          "query": {
+            "base": "USD"
+          }
+        },
+        "responseSchema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["date", "base", "quote", "rate"],
+            "properties": {
+              "date": { "type": "string" },
+              "base": { "type": "string" },
+              "quote": { "type": "string" },
+              "rate": { "type": "number" }
+            }
+          }
+        },
+        "answerContains": [
+          "EUR"
+        ]
+      },
+      "fixture": {
+        "status": 200,
+        "data": [
+          {
+            "date": "2026-08-11",
+            "base": "USD",
+            "quote": "EUR",
+            "rate": 0.86
+          }
+        ],
+        "headers": {
+          "content-type": "application/json"
+        }
+      }
+    }
+  ]
+}
