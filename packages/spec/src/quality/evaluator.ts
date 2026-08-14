@@ -256,14 +256,15 @@ export function evaluatePontxQuality(input: PontxQualityInput): PontxQualityRepo
       || !!schema.properties || !!schema.items || !!schema.genericRef || hasComposition;
     if (!isContainer) {
       const hasExamples = Array.isArray(schema.examples) && schema.examples.length > 0;
-      record("examples", entity, hasExamples, {
+      const hasUsableExamples = hasExamples && schema.examples!.every((value) =>
+        isExampleValid(schema, value) && isExampleMeaningful(schema, value));
+      record("examples", entity, hasUsableExamples, hasExamples ? undefined : {
         ruleId: "examples.leaf", path: `${path}.examples`, message: "叶子字段缺少显式 examples。",
         remediation: "添加至少一个符合类型和约束的 examples 值；default、const、enum 不替代示例。",
         affectedApis: apiKey ? [apiKey] : undefined,
       });
       if (hasExamples) {
-        record("examples", entity, schema.examples!.every((value) =>
-          isExampleValid(schema, value) && isExampleMeaningful(schema, value)), {
+        record("examples", entity, hasUsableExamples, {
           ruleId: "examples.valid", path: `${path}.examples`, message: "示例值不符合字段类型、枚举或约束，或为明显占位值。",
           remediation: "将 examples 修正为能通过当前 Schema 约束的真实值。",
           affectedApis: apiKey ? [apiKey] : undefined,
