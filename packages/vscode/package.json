@@ -29,7 +29,9 @@
     "directory": "packages/vscode"
   },
   "homepage": "https://pontx.dev/en",
-  "bugs": { "url": "https://github.com/pontjs/pontx/issues" },
+  "bugs": {
+    "url": "https://github.com/pontjs/pontx/issues"
+  },
   "license": "MIT",
   "activationEvents": [
     "workspaceContains:**/pontx.config.ts",

@@ -1,5 +1,12 @@
 # react-app
 
+## 0.0.7-beta.0
+
+### Patch Changes
+
+- Updated dependencies [71474ae]
+  - @pontx/sdk-browser-client@0.0.12-beta.0
+
 ## 0.0.6
 
 ### Patch Changes

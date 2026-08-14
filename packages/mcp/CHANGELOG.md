@@ -1,5 +1,16 @@
 # @pontx/mcp
 
+## 1.0.0-beta.1
+
+### Patch Changes
+
+- 71474ae: Align public package metadata, repository links, and Agent Skill discovery terms with the canonical Pontx API site at pontx.dev.
+- Updated dependencies [0d853d7]
+- Updated dependencies [d6c3619]
+- Updated dependencies [71474ae]
+  - pontx@1.0.0-beta.11
+  - @pontx/sdk-browser-client@0.0.12-beta.0
+
 ## 1.0.0-beta.0
 
 ### Major Changes

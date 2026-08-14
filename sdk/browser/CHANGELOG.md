@@ -1,5 +1,11 @@
 # @pontx/sdk-browser-client
 
+## 0.0.12-beta.0
+
+### Patch Changes
+
+- 71474ae: Align public package metadata, repository links, and Agent Skill discovery terms with the canonical Pontx API site at pontx.dev.
+
 ## 0.0.11
 
 ### Patch Changes
