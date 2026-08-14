@@ -1,5 +1,11 @@
 # @pontx/sdk
 
+## 1.0.0-beta.4
+
+### Patch Changes
+
+- 7e8a4ef: Guard browser-only `File` and `Blob` globals while serializing multipart requests so generated SDKs work on Node.js 18.
+
 ## 1.0.0-beta.3
 
 ### Patch Changes
