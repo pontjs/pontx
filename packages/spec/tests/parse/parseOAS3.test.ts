@@ -165,6 +165,12 @@ describe("parseOAS3", () => {
         responses: {
           BadRequest: { description: "请求错误" },
         },
+        headers: {
+          RateLimit: {
+            description: "当前时间窗允许的最大请求数。",
+            schema: { type: "integer", example: 100 },
+          },
+        },
       },
       paths: {
         "/items": {
@@ -187,6 +193,7 @@ describe("parseOAS3", () => {
             responses: {
               200: {
                 description: "成功",
+                headers: { "X-RateLimit-Limit": { $ref: "#/components/headers/RateLimit" } },
                 content: { "application/json": { schema: { type: "number", minimum: 0, exclusiveMinimum: true, example: 1 } } },
               },
               400: { $ref: "#/components/responses/BadRequest" },
@@ -199,6 +206,8 @@ describe("parseOAS3", () => {
     const api = result.apis["test/getItems"];
 
     expect(api.responses["200"].description).toBe("成功");
+    expect(api.responses["200"].headers?.["X-RateLimit-Limit"]?.description)
+      .toBe("当前时间窗允许的最大请求数。");
     expect(api.operationId).toBe("getItems");
     expect(api.requestExamples?.default.request?.query).toEqual({ currency: "USD" });
     expect(api.responses["400"].description).toBe("请求错误");

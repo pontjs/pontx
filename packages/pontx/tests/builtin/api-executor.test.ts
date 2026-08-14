@@ -367,7 +367,21 @@ describe('requestToCurl', () => {
     });
 
     expect(requestToCurl(request)).toBe(
-      'curl -X \'POST\' \'https://api.example.com/users\' -H \'Accept: application/json\' -H \'Authorization: Bearer token\' -H \'Content-Type: application/json\' --data-raw \'{"name":"John"}\''
+      'curl -X \'POST\' \'https://api.example.com/users\' -H \'Accept: application/json\' -H \'Authorization: <redacted>\' -H \'Content-Type: application/json\' --data-raw \'{"name":"John"}\''
+    );
+  });
+
+  it('redacts credentials from URL, headers, and JSON bodies in cURL previews', () => {
+    expect(requestToCurl({
+      url: 'https://api.example.com/users?api_key=secret&visible=yes',
+      init: {
+        method: 'POST',
+        headers: { 'X-Api-Key': 'secret' },
+        body: JSON.stringify({ accessToken: 'secret', nested: { password: 'secret' }, name: 'John' }),
+      },
+      meta: { specName: 'test', tagName: 'users', apiName: 'create', method: 'POST', path: '/users' },
+    })).toBe(
+      'curl -X \'POST\' \'https://api.example.com/users?api_key=%3Credacted%3E&visible=yes\' -H \'X-Api-Key: <redacted>\' --data-raw \'{"accessToken":"<redacted>","nested":{"password":"<redacted>"},"name":"John"}\''
     );
   });
 });

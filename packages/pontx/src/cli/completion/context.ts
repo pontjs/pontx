@@ -33,6 +33,7 @@ const OPTIONS_WITH_VALUES = new Set([
   "header", "H",
   "output", "o",
   "query", "q",
+  "confirm",
   "case",
   "params",
   "body",

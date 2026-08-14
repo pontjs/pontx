@@ -91,12 +91,18 @@ export function parseOAS3Interface(
   const responses = _.mapValues(inter.responses, (response) => {
     const finalResponse = resolveRef<OAS3.ResponseObject>(response, swagger) || response;
     const { content, headers, description, ...rest } = finalResponse || {};
+    const resolvedHeaders = headers
+      ? Object.fromEntries(Object.entries(headers).map(([name, header]) => [
+          name,
+          resolveRef(header, swagger) || header,
+        ]))
+      : headers;
     const responseProduces = Object.keys(content || {});
     const onlyKey = responseProduces[0];
     const schema = content?.[onlyKey]?.schema;
     const responseSchema = normalizeOAS3Schema(schema);
     produces = _.union(produces, responseProduces);
-    return { ...rest, description, schema: responseSchema, headers: headers as any };
+    return { ...rest, description, schema: responseSchema, headers: resolvedHeaders as any };
   });
 
   const parameters = (inter.parameters || []).map((param) => {

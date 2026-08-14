@@ -625,6 +625,7 @@ describe("CLI_OPTIONS", () => {
       "use-remote",
       "query",
       "q",
+      "confirm",
       "help",
       "h",
     ];

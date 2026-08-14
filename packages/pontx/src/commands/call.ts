@@ -8,6 +8,14 @@ import type { ApiExecutionContext } from "../types";
 import { parseApiPath, getApiMeta, specHasTags } from "./show-api";
 import { createLogger } from "../logger/logger";
 import { buildApiRequest, requestToCurl } from "../builtin/apiExecutor";
+import {
+  createMutationConfirmation,
+  isMutationMethod,
+  redactForPreview,
+  redactSensitiveValue,
+  serializeCliResponse,
+  verifyMutationConfirmation,
+} from "../builtin/cliSafety";
 
 export interface CallCommandOptions {
   env?: string;
@@ -18,6 +26,7 @@ export interface CallCommandOptions {
   dryRun?: boolean;
   useRemote?: boolean;
   query?: string;
+  confirm?: string;
 }
 
 // Known CLI options that should not be treated as API parameters
@@ -34,6 +43,7 @@ export const CLI_OPTIONS = new Set([
   "use-remote",
   "query",
   "q",
+  "confirm",
   "help",
   "h",
 ]);
@@ -224,14 +234,14 @@ function formatRequestInfo(
   if (Object.keys(params).length > 0) {
     lines.push("Parameters:");
     for (const [key, value] of Object.entries(params)) {
-      lines.push(`  ${key}: ${JSON.stringify(value)}`);
+      lines.push(`  ${key}: ${JSON.stringify(redactForPreview(key, value))}`);
     }
   }
 
   if (Object.keys(extraHeaders).length > 0) {
     lines.push("Extra Headers:");
     for (const [key, value] of Object.entries(extraHeaders)) {
-      lines.push(`  ${key}: ${value}`);
+      lines.push(`  ${key}: ${redactSensitiveValue(key, value)}`);
     }
   }
 
@@ -506,6 +516,11 @@ export async function callCommand(
     logger: logger || createLogger('info'),
   };
 
+  const mutation = isMutationMethod(apiMetaForContext.method);
+  const preparedRequest = options.dryRun || options.curl || mutation
+    ? await buildApiRequest(context)
+    : undefined;
+
   // Debug/dry-run: show request info
   if (options.debug || options.dryRun) {
     const requestInfo = formatRequestInfo(context, extraHeaders);
@@ -517,7 +532,7 @@ export async function callCommand(
   }
 
   if (options.curl) {
-    const curlCommand = requestToCurl(await buildApiRequest(context));
+    const curlCommand = requestToCurl(preparedRequest!);
     if (logger) {
       logger.info(curlCommand);
     } else {
@@ -527,6 +542,13 @@ export async function callCommand(
 
   // Dry-run: exit without executing
   if (options.dryRun) {
+    if (mutation) {
+      const confirmation = await createMutationConfirmation(preparedRequest!);
+      const confirmationMsg =
+        `Mutation confirmation (valid for 5 minutes and bound to this exact request): ${confirmation}`;
+      if (logger) logger.info(confirmationMsg);
+      else process.stderr.write(confirmationMsg + "\n");
+    }
     const dryRunMsg = "(Dry run - request not sent)";
     if (logger) {
       logger.info(dryRunMsg);
@@ -534,6 +556,16 @@ export async function callCommand(
       process.stderr.write(dryRunMsg + '\n');
     }
     return;
+  }
+
+  if (mutation && (
+    !options.confirm ||
+    !await verifyMutationConfirmation(preparedRequest!, options.confirm)
+  )) {
+    throw new Error(
+      "Mutation blocked: run the same command with --dry-run, review the redacted request, " +
+      "then repeat it with --confirm <token> within 5 minutes."
+    );
   }
 
   // Execute API call
@@ -553,6 +585,10 @@ export async function callCommand(
 
     // Apply JMESPath query if specified
     if (options.query) {
+      const serialized = await serializeCliResponse(result);
+      if (serialized.binary) {
+        throw new Error("JMESPath queries cannot be applied to binary responses");
+      }
       try {
         // Ensure result is an object for JMESPath query
         const data = typeof result === "string" ? JSON.parse(result as string) : result;
@@ -564,16 +600,14 @@ export async function callCommand(
       }
     }
 
-    // Format output
-    const output =
-      typeof result === "string" ? result : JSON.stringify(result, null, 2);
+    const output = await serializeCliResponse(result);
 
     // Write to file or stdout
     if (options.output) {
       const outputPath = path.isAbsolute(options.output)
         ? options.output
         : path.resolve(process.cwd(), options.output);
-      fs.writeFileSync(outputPath, output, "utf-8");
+      fs.writeFileSync(outputPath, output.data);
       // Log to stderr
       const savedMsg = `Response saved to: ${outputPath}`;
       if (logger) {
@@ -582,8 +616,11 @@ export async function callCommand(
         process.stderr.write(savedMsg + '\n');
       }
     } else {
+      if (output.binary) {
+        throw new Error("Binary response not printed to the terminal; use --output <path>");
+      }
       // Output JSON to stdout (clean output for piping)
-      console.log(output);
+      console.log(output.data);
     }
 
     if (options.debug) {
