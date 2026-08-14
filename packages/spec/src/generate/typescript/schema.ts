@@ -8,6 +8,10 @@ export const generateSchemaCode = (
   schema: PontxJsonSchema,
   schemaPrefix?: string
 ) => {
+  if (schema?.type === "string" && schema.format === "binary") {
+    return "Blob";
+  }
+
   switch (schema?.type) {
     case "array": {
       if (schema.items) {

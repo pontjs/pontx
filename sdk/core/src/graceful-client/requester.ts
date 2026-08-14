@@ -174,11 +174,24 @@ export function createGracefulRequester(
 
       /* 3. 序列化请求体 */
       if (pontxApiMeta.hasBody && bodyParams) {
+        const contentType = Object.entries(requestInit.headers || {}).reduce(
+          (selected, [name, value]) =>
+            name.toLowerCase() === "content-type" ? String(value) : selected,
+          "application/json"
+        );
         requestInit.body = serializeRequestBody(
           bodyParams,
-          requestInit?.headers?.["Content-Type"] || "application/json",
+          contentType,
           config.bodySerializers
         );
+
+        if (requestInit.body instanceof FormData) {
+          for (const headerName of Object.keys(requestInit.headers || {})) {
+            if (headerName.toLowerCase() === "content-type") {
+              delete requestInit.headers[headerName];
+            }
+          }
+        }
       }
 
       /* 4. 构建完整 URL */
