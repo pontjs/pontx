@@ -1,12 +1,13 @@
 ---
 name: pontx
-description: "Pontx CLI and SDK - API lifecycle management including searching, exploring, and calling APIs with type-safe code generation. Use this skill whenever the user mentions pontx, pontx.config.ts, pontx CLI commands (pontx init/generate/call/search/list/service/skill), API spec management, SDK code generation from OpenAPI/OAS specs, or wants to set up, configure, or troubleshoot a pontx project."
-author: pontx
-tags:
-  - api
-  - openapi
-  - sdk
-  - code-generation
+description: "Manage OpenAPI API lifecycles with the Pontx CLI and SDK: discover and inspect APIs, configure pontx.config.ts, preview or call Endpoints, and generate type-safe TypeScript clients. Use this skill whenever the user mentions Pontx, pontx.config.ts, Pontx CLI commands, OpenAPI/OAS project setup, API search, Schema inspection, SDK code generation, or troubleshooting a Pontx project."
+metadata:
+  author: pontx
+  tags:
+    - api
+    - openapi
+    - sdk
+    - code-generation
 ---
 
 # Pontx AI Skill

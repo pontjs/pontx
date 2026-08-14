@@ -2,7 +2,7 @@
   "name": "@pontx/spec",
   "version": "1.0.0-beta.2",
   "type": "module",
-  "description": "pontx spec",
+  "description": "TypeScript model and parser foundation for Pontx API metadata, OpenAPI 2.0, and OpenAPI 3.x",
   "exports": {
     ".": {
       "import": {
@@ -42,7 +42,7 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
   },
-  "keywords": [],
+  "keywords": ["openapi", "swagger", "oas", "api-schema", "typescript", "pontx"],
   "author": "jasonHzq",
   "license": "MIT",
   "devDependencies": {
@@ -51,5 +51,11 @@
     "typedoc": "^0.24.0",
     "typedoc-plugin-markdown": "^3.13.3"
   },
-  "repository": "git@github.com:pontjs/pontx-pro.git"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pontjs/pontx.git",
+    "directory": "packages/spec"
+  },
+  "homepage": "https://pontx.dev/en",
+  "bugs": { "url": "https://github.com/pontjs/pontx/issues" }
 }

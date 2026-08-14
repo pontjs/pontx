@@ -2,6 +2,8 @@
 
 [中文文档](./README.zh-CN.md)
 
+**Website and curated API catalog:** [pontx.dev](https://pontx.dev/en)
+
 API lifecycle management tool built on the Pontx-Spec protocol (compatible with OAS2/OAS3, supporting ROA/RPC). Provides API search, documentation generation, code generation, and SDK management.
 
 ## Features
@@ -53,6 +55,7 @@ Pontx provides an **AI Skill** that helps AI assistants (Claude Code, Gemini CLI
 
 ```bash
 pontx skill
+npx skills add https://github.com/pontjs/pontx --skill pontx
 ```
 
 This installs a structured workflow guide into your project, enabling AI assistants to search APIs, generate type-safe code, and call APIs with full context — no manual prompting needed.
