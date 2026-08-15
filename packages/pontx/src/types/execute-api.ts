@@ -94,6 +94,13 @@ export interface ExecuteApiConfig {
   headers?: Record<string, string>;
 
   /**
+   * Additional exact field names to redact from CLI request summaries and
+   * cURL previews. The underlying request and mutation confirmation digest
+   * remain unchanged.
+   */
+  previewSensitiveFields?: string[];
+
+  /**
    * 自定义请求函数
    *
    * 当提供时，builtinExecuteApi 直接调用此函数，其返回值作为最终结果，

@@ -116,33 +116,56 @@ function normalizedName(name: string): string {
   return name.replace(/[-_\s]/g, "");
 }
 
-export function isSensitiveName(name: string): boolean {
-  return SENSITIVE_NAME_PATTERN.test(normalizedName(name));
+function isAdditionalSensitiveName(name: string, additionalNames?: readonly string[]): boolean {
+  if (!additionalNames) return false;
+  const normalized = normalizedName(name).toLowerCase();
+  return additionalNames.some(
+    (candidate) => normalizedName(candidate).toLowerCase() === normalized,
+  );
 }
 
-export function redactSensitiveValue(name: string, value: unknown): string {
-  return isSensitiveName(name) ? "<redacted>" : String(value);
+export function isSensitiveName(name: string, additionalNames?: readonly string[]): boolean {
+  return SENSITIVE_NAME_PATTERN.test(normalizedName(name))
+    || isAdditionalSensitiveName(name, additionalNames);
 }
 
-export function redactForPreview(name: string, value: unknown): unknown {
-  if (isSensitiveName(name)) return "<redacted>";
+export function redactSensitiveValue(
+  name: string,
+  value: unknown,
+  additionalNames?: readonly string[],
+): string {
+  return isSensitiveName(name, additionalNames) ? "<redacted>" : String(value);
+}
+
+export function redactForPreview(
+  name: string,
+  value: unknown,
+  additionalNames?: readonly string[],
+): unknown {
+  if (isSensitiveName(name, additionalNames)) return "<redacted>";
   if (Array.isArray(value)) {
-    return value.map((item) => redactForPreview("", item));
+    return value.map((item) => redactForPreview("", item, additionalNames));
   }
   if (value && typeof value === "object") {
     return Object.fromEntries(
-      Object.entries(value).map(([key, item]) => [key, redactForPreview(key, item)])
+      Object.entries(value).map(([key, item]) => [
+        key,
+        redactForPreview(key, item, additionalNames),
+      ])
     );
   }
   return value;
 }
 
-export function redactUrlForPreview(value: string): string {
+export function redactUrlForPreview(
+  value: string,
+  additionalNames?: readonly string[],
+): string {
   try {
     const relative = value.startsWith("/");
     const url = new URL(value, "https://pontx.invalid");
     for (const name of Array.from(url.searchParams.keys())) {
-      if (isSensitiveName(name)) url.searchParams.set(name, "<redacted>");
+      if (isSensitiveName(name, additionalNames)) url.searchParams.set(name, "<redacted>");
     }
     return relative ? `${url.pathname}${url.search}${url.hash}` : url.toString();
   } catch {
@@ -150,15 +173,18 @@ export function redactUrlForPreview(value: string): string {
   }
 }
 
-export function redactBodyForPreview(body: BodyInit): string {
+export function redactBodyForPreview(
+  body: BodyInit,
+  additionalNames?: readonly string[],
+): string {
   if (typeof body === "string") {
     try {
-      return JSON.stringify(redactForPreview("", JSON.parse(body)));
+      return JSON.stringify(redactForPreview("", JSON.parse(body), additionalNames));
     } catch {
       if (/^[^=&]+=[^&]*(?:&|$)/.test(body)) {
         const redacted = new URLSearchParams(body);
         for (const name of Array.from(redacted.keys())) {
-          if (isSensitiveName(name)) redacted.set(name, "<redacted>");
+          if (isSensitiveName(name, additionalNames)) redacted.set(name, "<redacted>");
         }
         return redacted.toString();
       }
@@ -168,7 +194,7 @@ export function redactBodyForPreview(body: BodyInit): string {
   if (body instanceof URLSearchParams) {
     const redacted = new URLSearchParams(body);
     for (const name of Array.from(redacted.keys())) {
-      if (isSensitiveName(name)) redacted.set(name, "<redacted>");
+      if (isSensitiveName(name, additionalNames)) redacted.set(name, "<redacted>");
     }
     return redacted.toString();
   }

@@ -69,9 +69,28 @@ describe("CLI mutation safety", () => {
     });
   });
 
+  it("redacts exact product-specific preview fields without changing visible fields", () => {
+    expect(redactForPreview("", {
+      description: "private issue text",
+      dom: { outerHTML: "<button>private</button>" },
+      name: "visible project name",
+    }, ["description", "dom"])).toEqual({
+      description: "<redacted>",
+      dom: "<redacted>",
+      name: "visible project name",
+    });
+  });
+
   it("redacts credentials from form-encoded previews", () => {
     expect(redactBodyForPreview("api_key=secret&name=Alice"))
       .toBe("api_key=%3Credacted%3E&name=Alice");
+  });
+
+  it("applies product-specific redaction to JSON and form previews", () => {
+    expect(redactBodyForPreview(JSON.stringify({ base64: "private bytes", name: "visible" }), ["base64"]))
+      .toBe('{"base64":"<redacted>","name":"visible"}');
+    expect(redactBodyForPreview("base64=private&name=visible", ["base64"]))
+      .toBe("base64=%3Credacted%3E&name=visible");
   });
 
   it("preserves binary response bytes", async () => {

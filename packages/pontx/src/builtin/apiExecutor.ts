@@ -448,20 +448,31 @@ function headersToEntries(
  * 将 ApiRequest 转换为脱敏后的 cURL 预览。
  * 敏感值会被替换，因此该输出不能作为带凭据的可执行命令。
  */
-export function requestToCurl(request: ApiRequest): string {
+export function requestToCurl(
+  request: ApiRequest,
+  previewSensitiveFields?: readonly string[],
+): string {
   const method = String(
     request.init.method || request.meta.method || "GET"
   ).toUpperCase();
-  const parts = ["curl", "-X", shellQuote(method), shellQuote(redactUrlForPreview(request.url))];
+  const parts = [
+    "curl",
+    "-X",
+    shellQuote(method),
+    shellQuote(redactUrlForPreview(request.url, previewSensitiveFields)),
+  ];
 
   for (const [key, value] of headersToEntries(request.init.headers)) {
-    parts.push("-H", shellQuote(`${key}: ${redactSensitiveValue(key, value)}`));
+    parts.push(
+      "-H",
+      shellQuote(`${key}: ${redactSensitiveValue(key, value, previewSensitiveFields)}`),
+    );
   }
 
   if (request.init.body !== undefined && request.init.body !== null) {
     parts.push(
       "--data-raw",
-      shellQuote(redactBodyForPreview(request.init.body as BodyInit))
+      shellQuote(redactBodyForPreview(request.init.body as BodyInit, previewSensitiveFields))
     );
   }
 

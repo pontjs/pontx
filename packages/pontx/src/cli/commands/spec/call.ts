@@ -167,7 +167,8 @@ export function tryParseJson(value: string): unknown {
 
 function formatRequestInfo(
   context: ApiExecutionContext,
-  extraHeaders: Record<string, string>
+  extraHeaders: Record<string, string>,
+  previewSensitiveFields?: readonly string[],
 ): string {
   const { api, meta, params, env } = context;
   const lines: string[] = [];
@@ -198,14 +199,14 @@ function formatRequestInfo(
   if (Object.keys(params).length > 0) {
     lines.push("Parameters:");
     for (const [key, value] of Object.entries(params)) {
-      lines.push(`  ${key}: ${JSON.stringify(redactForPreview(key, value))}`);
+      lines.push(`  ${key}: ${JSON.stringify(redactForPreview(key, value, previewSensitiveFields))}`);
     }
   }
 
   if (Object.keys(extraHeaders).length > 0) {
     lines.push("Extra Headers:");
     for (const [key, value] of Object.entries(extraHeaders)) {
-      lines.push(`  ${key}: ${redactSensitiveValue(key, value)}`);
+      lines.push(`  ${key}: ${redactSensitiveValue(key, value, previewSensitiveFields)}`);
     }
   }
 
@@ -436,12 +437,19 @@ export async function callCommand(
     : undefined;
 
   if (options.debug || options.dryRun) {
-    const requestInfo = formatRequestInfo(context, extraHeaders);
+    const requestInfo = formatRequestInfo(
+      context,
+      extraHeaders,
+      context.executeApiConfig?.previewSensitiveFields,
+    );
     process.stderr.write(requestInfo + '\n');
   }
 
   if (options.curl) {
-    process.stderr.write(requestToCurl(preparedRequest!) + '\n');
+    process.stderr.write(requestToCurl(
+      preparedRequest!,
+      context.executeApiConfig?.previewSensitiveFields,
+    ) + '\n');
   }
 
   if (options.dryRun) {

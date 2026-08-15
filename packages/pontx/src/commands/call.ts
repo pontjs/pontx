@@ -202,7 +202,8 @@ export function tryParseJson(value: string): unknown {
  */
 function formatRequestInfo(
   context: ApiExecutionContext,
-  extraHeaders: Record<string, string>
+  extraHeaders: Record<string, string>,
+  previewSensitiveFields?: readonly string[],
 ): string {
   const { api, meta, params, env } = context;
   const lines: string[] = [];
@@ -234,14 +235,14 @@ function formatRequestInfo(
   if (Object.keys(params).length > 0) {
     lines.push("Parameters:");
     for (const [key, value] of Object.entries(params)) {
-      lines.push(`  ${key}: ${JSON.stringify(redactForPreview(key, value))}`);
+      lines.push(`  ${key}: ${JSON.stringify(redactForPreview(key, value, previewSensitiveFields))}`);
     }
   }
 
   if (Object.keys(extraHeaders).length > 0) {
     lines.push("Extra Headers:");
     for (const [key, value] of Object.entries(extraHeaders)) {
-      lines.push(`  ${key}: ${redactSensitiveValue(key, value)}`);
+      lines.push(`  ${key}: ${redactSensitiveValue(key, value, previewSensitiveFields)}`);
     }
   }
 
@@ -523,7 +524,11 @@ export async function callCommand(
 
   // Debug/dry-run: show request info
   if (options.debug || options.dryRun) {
-    const requestInfo = formatRequestInfo(context, extraHeaders);
+    const requestInfo = formatRequestInfo(
+      context,
+      extraHeaders,
+      context.executeApiConfig?.previewSensitiveFields,
+    );
     if (logger) {
       logger.info(requestInfo);
     } else {
@@ -532,7 +537,10 @@ export async function callCommand(
   }
 
   if (options.curl) {
-    const curlCommand = requestToCurl(preparedRequest!);
+    const curlCommand = requestToCurl(
+      preparedRequest!,
+      context.executeApiConfig?.previewSensitiveFields,
+    );
     if (logger) {
       logger.info(curlCommand);
     } else {

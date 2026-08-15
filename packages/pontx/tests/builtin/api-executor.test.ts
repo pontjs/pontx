@@ -384,6 +384,19 @@ describe('requestToCurl', () => {
       'curl -X \'POST\' \'https://api.example.com/users?api_key=%3Credacted%3E&visible=yes\' -H \'X-Api-Key: <redacted>\' --data-raw \'{"accessToken":"<redacted>","nested":{"password":"<redacted>"},"name":"John"}\''
     );
   });
+
+  it('redacts product-specific fields from cURL previews', () => {
+    expect(requestToCurl({
+      url: 'https://api.example.com/issues',
+      init: {
+        method: 'POST',
+        body: JSON.stringify({ description: 'private issue text', title: 'visible title' }),
+      },
+      meta: { specName: 'test', tagName: 'issues', apiName: 'create', method: 'POST', path: '/issues' },
+    }, ['description'])).toBe(
+      'curl -X \'POST\' \'https://api.example.com/issues\' --data-raw \'{"description":"<redacted>","title":"visible title"}\''
+    );
+  });
 });
 
 describe('buildRequestConfig', () => {
