@@ -50,6 +50,18 @@ describe("PontxSpec", () => {
       } as PontxSpec;
       expect(PontxSpec.checkHasMods(spec)).toBe(false);
     });
+
+    it("should return true when any API name contains a namespace, even if the first key is untagged", () => {
+      const spec = {
+        name: "test",
+        apis: {
+          // Sorts first alphabetically and carries no tag namespace.
+          ZetaRoot: {} as PontxAPI,
+          "assistants/listAssistants": {} as PontxAPI,
+        },
+      } as PontxSpec;
+      expect(PontxSpec.checkHasMods(spec)).toBe(true);
+    });
   });
 
   describe("getNamespaceNames", () => {
