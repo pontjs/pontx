@@ -15,5 +15,7 @@ export type ExtractApiMethods<T> = {
  * 支持 namespace 和 Record 类型
  */
 export type GracefulClient<T> = {
-  [Controller in keyof T]: ExtractApiMethods<T[Controller]>;
+  [Controller in keyof T]: T[Controller] extends (...args: any[]) => any
+    ? T[Controller]
+    : ExtractApiMethods<T[Controller]>;
 };
