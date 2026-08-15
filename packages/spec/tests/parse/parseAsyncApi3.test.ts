@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+import ts from "typescript";
 import { generateAsyncApiTypes } from "../../src/generate/typescript/stream";
+import { generateAsyncApiClient } from "../../src/generate/typescript/stream-client";
 import { checkIsAsyncApi3, parseAsyncApi3 } from "../../src/parse/parseAsyncApi3";
 
 const document = {
@@ -26,6 +28,11 @@ const document = {
     },
   },
   operations: {
+    sendSubscribe: {
+      action: "send",
+      channel: { $ref: "#/channels/quotes" },
+      messages: [{ $ref: "#/components/messages/subscribe" }],
+    },
     receivePrice: {
       action: "receive",
       channel: { $ref: "#/channels/quotes" },
@@ -34,6 +41,21 @@ const document = {
   },
   components: {
     messages: {
+      subscribe: {
+        title: "Subscribe",
+        payload: {
+          type: "object",
+          required: ["action", "params"],
+          properties: {
+            action: { type: "string", enum: ["subscribe"] },
+            params: {
+              type: "object",
+              required: ["symbols"],
+              properties: { symbols: { type: "string" } },
+            },
+          },
+        },
+      },
       price: {
         title: "Price update",
         contentType: "application/json",
@@ -89,9 +111,39 @@ describe("parseAsyncApi3", () => {
     const code = generateAsyncApiTypes(spec.asyncapi!);
 
     expect(code).toContain("export type StreamOperations");
+    expect(code).toContain("export type StreamSendMessage");
+    expect(code).toContain("export type StreamReceivedMessage");
+    expect(code).toContain("sendSubscribe");
     expect(code).toContain("receivePrice");
     expect(code).toContain('action: "receive"');
     expect(code).not.toContain("method:");
+  });
+
+  it("generates an explicit runtime binding that never embeds credentials", () => {
+    const spec = parseAsyncApi3(document, "fx-prices");
+    const code = generateAsyncApiClient(spec.asyncapi!);
+
+    expect(code).toContain('import { createWebSocketClient } from "@pontx/sdk"');
+    expect(code).toContain("CreateWebSocketClientOptions");
+    expect(code).toContain("createStreamClient");
+    expect(code).not.toContain("apikey");
+  });
+
+  it("emits syntactically valid TypeScript for the generated stream SDK files", () => {
+    const spec = parseAsyncApi3(document, "fx-prices");
+    const output = `${generateAsyncApiTypes(spec.asyncapi!)}\n${generateAsyncApiClient(
+      spec.asyncapi!
+    )}`;
+    const diagnostics = ts
+      .transpileModule(output, {
+        compilerOptions: { target: ts.ScriptTarget.ES2020 },
+        reportDiagnostics: true,
+      })
+      .diagnostics?.filter(
+        (diagnostic) => diagnostic.category === ts.DiagnosticCategory.Error
+      );
+
+    expect(diagnostics).toEqual([]);
   });
 
   it("retains an inline channel message when components do not declare it", () => {
