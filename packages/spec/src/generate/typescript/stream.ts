@@ -13,6 +13,22 @@ function messagePayloadType(asyncapi: PontxAsyncApiSpec, messageName: string) {
     : "unknown";
 }
 
+function actionMessageType(
+  asyncapi: PontxAsyncApiSpec,
+  action: "send" | "receive"
+) {
+  const messageNames = new Set(
+    Object.values(asyncapi.operations)
+      .filter((operation) => operation.action === action)
+      .flatMap((operation) => operation.messages)
+  );
+  const types = [...messageNames].map((messageName) =>
+    messagePayloadType(asyncapi, messageName)
+  );
+
+  return types.length ? [...new Set(types)].join(" | ") : "never";
+}
+
 /**
  * Generates type-only definitions for AsyncAPI operations. Runtime connection
  * creation remains explicit, so a generated SDK never opens a stream or reads
@@ -45,5 +61,11 @@ export function generateAsyncApiTypes(asyncapi: PontxAsyncApiSpec) {
 
   return `${prefix}export type StreamOperations = {\n${indentation(2)(
     operations || "[operation: string]: never;"
-  )}\n};\n`;
+  )}\n};\n\nexport type StreamSendMessage = ${actionMessageType(
+    asyncapi,
+    "send"
+  )};\n\nexport type StreamReceivedMessage = ${actionMessageType(
+    asyncapi,
+    "receive"
+  )};\n`;
 }

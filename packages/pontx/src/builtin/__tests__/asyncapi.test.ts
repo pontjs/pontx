@@ -49,6 +49,7 @@ describe("built-in AsyncAPI support", () => {
     expect(spec.apis).toEqual({});
     expect(spec.asyncapi?.operations.receivePrice.messages).toEqual(["price"]);
     expect(generated["streams.ts"]).toContain("StreamOperations");
+    expect(generated["stream-client.ts"]).toContain("createStreamClient");
     expect(generated["apis.ts"]).toContain("export type APIs =");
   });
 });

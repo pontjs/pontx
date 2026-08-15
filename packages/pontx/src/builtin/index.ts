@@ -18,6 +18,7 @@ import {
   generateSchemas,
   generateSpecMeta,
   generateAsyncApiTypes,
+  generateAsyncApiClient,
   PontxSpec,
   fixOASTagsByTranslate,
 } from "@pontx/spec";
@@ -213,6 +214,7 @@ export function getBuiltinPlugin(): Plugin {
       }
       if (spec.asyncapi) {
         fileStructure["streams.ts"] = generateAsyncApiTypes(spec.asyncapi);
+        fileStructure["stream-client.ts"] = generateAsyncApiClient(spec.asyncapi);
       }
 
       return fileStructure;
