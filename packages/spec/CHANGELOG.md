@@ -1,5 +1,11 @@
 # @pontx/spec
 
+## 1.0.0-beta.9
+
+### Patch Changes
+
+- Publish installable dependency manifests by replacing workspace and catalog protocol ranges with registry-compatible versions.
+
 ## 1.0.0-beta.8
 
 ### Minor Changes

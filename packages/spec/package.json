@@ -1,6 +1,6 @@
 {
   "name": "@pontx/spec",
-  "version": "1.0.0-beta.8",
+  "version": "1.0.0-beta.9",
   "type": "module",
   "description": "TypeScript model and parser foundation for Pontx API metadata, OpenAPI 2.0, and OpenAPI 3.x",
   "exports": {
@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "immer": "^10.1.1",
-    "lodash": "catalog:",
+    "lodash": "^4.17.21",
     "oas-spec-ts": "^0.6.4"
   },
   "files": [

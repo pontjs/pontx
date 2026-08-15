@@ -18,6 +18,7 @@
     "clean-rice-listen",
     "config-loader-improvement",
     "dropbox-sign-oas-compatibility",
+    "fix-published-package-manifests",
     "fix-self-referential-schema-codegen",
     "fix-spec-resolve-ref",
     "fresh-curl-2xx-beta",

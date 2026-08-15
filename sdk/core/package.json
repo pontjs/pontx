@@ -1,6 +1,6 @@
 {
   "name": "@pontx/sdk",
-  "version": "1.0.0-beta.10",
+  "version": "1.0.0-beta.11",
   "description": "Shared core utilities for Pontx SDK (Browser & Node.js)",
   "keywords": [
     "pontx",
@@ -94,7 +94,7 @@
     "clean": "rm -rf lib"
   },
   "dependencies": {
-    "@pontx/spec": "workspace:*"
+    "@pontx/spec": "^1.0.0-beta.9"
   },
   "devDependencies": {
     "@types/node": "catalog:",
