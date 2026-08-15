@@ -476,6 +476,7 @@ export async function callCommand(
     responses: apiMeta.responses,
     consumes: apiMeta.consumes,
     produces: apiMeta.produces,
+    sse: apiMeta.sse,
   };
 
   // Validate required parameters

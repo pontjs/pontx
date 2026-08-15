@@ -70,3 +70,23 @@ export type WebSocketStreamClient<TSentMessage, TReceivedMessage> = {
   onClose(listener: (info: StreamCloseInfo) => void): () => void;
   close(code?: number, reason?: string): void;
 };
+
+/** One decoded Server-Sent Events frame. `data` is literal text before parsing. */
+export type SseEvent<TData = string> = {
+  event: string;
+  data: TData;
+  id?: string;
+  retry?: number;
+};
+
+/**
+ * Options for an explicitly opened SSE stream. The caller supplies request
+ * headers and credentials at runtime; generated SDK source never embeds them.
+ */
+export type CreateSseStreamOptions<TEvent> = {
+  url: string;
+  init?: RequestInit;
+  fetch?: typeof fetch;
+  /** Converts a raw SSE frame into a provider-specific, typed event union. */
+  parse?: (event: SseEvent<string>) => TEvent;
+};

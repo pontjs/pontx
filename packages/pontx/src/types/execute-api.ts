@@ -4,7 +4,7 @@
  * 用于 API 调用配置和执行上下文
  */
 
-import type { Parameter } from "@pontx/spec";
+import type { Parameter, PontxAPI } from "@pontx/spec";
 import type { Logger } from "../logger/types";
 import type { ResolvedConfig } from "../type";
 
@@ -173,6 +173,8 @@ export interface ApiExecutionContext {
     consumes?: string[];
     /** 支持的响应内容类型 */
     produces?: string[];
+    /** Typed SSE metadata. One-shot CLI execution must not consume this as text. */
+    sse?: PontxAPI["sse"];
   };
 
   /**

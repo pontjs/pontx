@@ -78,6 +78,35 @@ console.log(user);
   - [Retry 功能](#retry-功能)
 - [自定义配置](#自定义配置)
 - [类型定义](#类型定义)
+- [Server-Sent Events](#server-sent-events)
+
+---
+
+## Server-Sent Events
+
+`createSseStream` opens an explicitly authorized `text/event-stream` response
+as an async iterable. It handles SSE comments, CRLF framing, multi-line
+`data:`, event IDs, retry values, and a final frame without a blank line. It
+does not reconnect, persist credentials, or log a URL, header, or event payload.
+
+```ts
+import { createSseStream } from "@pontx/sdk";
+
+const stream = await createSseStream({
+  url: "https://api.example.com/v1/events",
+  init: { headers: { Authorization: `Bearer ${token}` } },
+});
+
+for await (const event of stream) {
+  console.log(event.event, event.data);
+}
+```
+
+For a PontxSpec Endpoint with an `sse` contract, generated `sse.ts` and
+`sse-client.ts` provide typed known events while preserving new, unknown vendor
+events as literal text. Use the generated `openSseStream` function rather than
+a one-shot API call; the CLI deliberately refuses to buffer an unbounded SSE
+response as ordinary text.
 
 ---
 

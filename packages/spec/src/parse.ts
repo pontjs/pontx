@@ -39,6 +39,7 @@ export function parsePontxSpec2OAS2(spec: PontxSpec): OAS2.SwaggerObject {
         ...(api.requestExamples
           ? { "x-pontx-request-examples": api.requestExamples }
           : {}),
+        ...(api.sse ? { "x-pontx-sse": api.sse } : {}),
       } as OAS2.OperationObject;
       if (api.deprecated) {
         oasApi.deprecated = api.deprecated;
@@ -47,7 +48,7 @@ export function parsePontxSpec2OAS2(spec: PontxSpec): OAS2.SwaggerObject {
         oasApi.consumes = api.consumes;
       }
 
-      if (api.consumes?.length) {
+      if (api.produces?.length) {
         oasApi.produces = api.produces;
       }
 
@@ -118,20 +119,26 @@ export function parsePontSpec2OAS3(spec: PontxSpec) {
             };
           }),
         responses: _.mapValues(api.responses, (response) => {
-          const produce = api?.produces?.[0] || "application/json";
+          const content = response.content && Object.keys(response.content).length
+            ? Object.fromEntries(Object.entries(response.content).map(([mediaType, media]) => [
+                mediaType,
+                { schema: media.schema },
+              ]))
+            : {
+                [api?.produces?.[0] || "application/json"]: {
+                  schema: response.schema,
+                },
+              };
           return {
             description: response.description,
             headers: response.headers,
-            content: {
-              [produce]: {
-                schema: response.schema,
-              },
-            },
+            content,
           } as OAS3.ResponseObject;
         }),
         ...(api.requestExamples
           ? { "x-pontx-request-examples": api.requestExamples }
           : {}),
+        ...(api.sse ? { "x-pontx-sse": api.sse } : {}),
       } as OAS3.OperationObject;
 
       if (api.security) {

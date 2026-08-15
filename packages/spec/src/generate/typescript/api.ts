@@ -147,6 +147,7 @@ function generateApiMeta(
     hasParams: !!api.parameters?.find((param) => param?.in !== "body"),
     consumes: api?.consumes,
     produces: api?.produces,
+    sse: api?.sse,
     path: api.path,
     // tag,
   };

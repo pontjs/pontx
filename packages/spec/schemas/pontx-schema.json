@@ -170,6 +170,7 @@
           "items": { "type": "object" }
         },
         "callbacks": { "type": "object" },
+        "sse": { "$ref": "#/definitions/sse" },
         "externalDocs": { "type": "object" },
         "ext": { "type": "object" }
       },
@@ -196,6 +197,29 @@
         "headers": { "type": "object" }
       },
       "additionalProperties": true
+    },
+    "sse": {
+      "type": "object",
+      "required": ["events", "unknownEventPolicy"],
+      "properties": {
+        "events": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "required": ["dataFormat"],
+            "properties": {
+              "description": { "type": "string" },
+              "schema": { "$ref": "#/definitions/schema" },
+              "terminal": { "type": "boolean" },
+              "dataFormat": { "enum": ["json", "text"] }
+            },
+            "additionalProperties": false
+          }
+        },
+        "unknownEventPolicy": { "const": "preserve" }
+      },
+      "additionalProperties": false
     },
     "content": {
       "type": "object",

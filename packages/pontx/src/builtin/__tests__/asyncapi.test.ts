@@ -52,4 +52,32 @@ describe("built-in AsyncAPI support", () => {
     expect(generated["stream-client.ts"]).toContain("createStreamClient");
     expect(generated["apis.ts"]).toContain("export type APIs =");
   });
+
+  it("generates typed SSE files for HTTP endpoints without opening a stream", async () => {
+    const plugin = getBuiltinPlugin();
+    const options = { originConfig: { name: "sse" }, resolvedConfig: { origins: [] } } as any;
+    const spec = await plugin.parseMeta!(JSON.stringify({
+      openapi: "3.1.0",
+      info: { title: "SSE", version: "1" },
+      tags: [{ name: "events" }],
+      paths: {
+        "/events": {
+          get: {
+            operationId: "listEvents",
+            tags: ["events"],
+            responses: { 200: { description: "stream", content: { "text/event-stream": {} } } },
+            "x-pontx-sse": {
+              events: { message: { dataFormat: "text" } },
+              unknownEventPolicy: "preserve",
+            },
+          },
+        },
+      },
+      components: { schemas: {} },
+    }), options);
+    const generated = await plugin.generate!(spec, options);
+
+    expect(generated["sse.ts"]).toContain("SseStreams");
+    expect(generated["sse-client.ts"]).toContain("openSseStream");
+  });
 });

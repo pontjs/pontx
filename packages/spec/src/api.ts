@@ -57,6 +57,30 @@ export type PontxMediaTypeObject = {
   encoding?: Record<string, unknown>;
 };
 
+/** A named event carried by a Server-Sent Events Endpoint. */
+export type PontxSseEvent = {
+  /** Human-readable event documentation. */
+  description?: string;
+  /** The decoded `data:` payload schema for JSON events. */
+  schema?: PontxJsonSchema;
+  /** Whether this event marks a normal, provider-defined stream terminal. */
+  terminal?: boolean;
+  /** Whether `data:` is JSON or must remain literal text. */
+  dataFormat: "json" | "text";
+};
+
+/**
+ * A typed Server-Sent Events contract attached to an ordinary HTTP Endpoint.
+ *
+ * SSE remains an HTTP request (and therefore keeps its real path and method),
+ * but its response is an unbounded event sequence rather than a one-shot text
+ * response. Unknown events are deliberately preserved for forward compatibility.
+ */
+export type PontxSseStream = {
+  events: Record<string, PontxSseEvent>;
+  unknownEventPolicy: "preserve";
+};
+
 /** 整体请求示例中的输入位置。 */
 export enum PontxRequestInputLocation {
   Path = "path",
@@ -185,6 +209,8 @@ export class PontxAPI {
   callbacks?: Record<string, unknown>;
   /** RPC 传输绑定；RPC Endpoint 不声明 REST path 或 method。 */
   rpc?: PontxRpcOperation;
+  /** Typed Server-Sent Events response contract for this HTTP Endpoint. */
+  sse?: PontxSseStream;
 
   static getUsedStructNames(api: PontxAPI) {
     const structs = [] as string[];
@@ -201,6 +227,12 @@ export class PontxAPI {
       if (res) {
         const structNames = PontxJsonSchema.getUsedStructNames(res.schema);
         structs.push(...structNames);
+      }
+    });
+
+    Object.values(api.sse?.events || {}).forEach((event) => {
+      if (event.schema) {
+        structs.push(...PontxJsonSchema.getUsedStructNames(event.schema));
       }
     });
 

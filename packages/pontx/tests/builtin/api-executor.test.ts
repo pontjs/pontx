@@ -521,6 +521,14 @@ describe('handleResponse', () => {
     await expect(handleResponse(response)).resolves.toBe('{"id":1}\n{"id":2}\n');
   });
 
+  it('should refuse to buffer a Server-Sent Events response as one-shot text', async () => {
+    const response = new Response('data: hello\n\n', {
+      headers: { 'Content-Type': 'text/event-stream' },
+    });
+
+    await expect(handleResponse(response)).rejects.toThrow('generated SSE SDK stream client');
+  });
+
   it('should parse structured JSON media types', async () => {
     const response = new Response('{"title":"invalid request"}', {
       headers: { 'Content-Type': 'application/problem+json' },

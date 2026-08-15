@@ -45,6 +45,8 @@ export interface ApiExecutorContext {
     consumes?: string[];
     /** MIME types the API can produce (for Accept header) */
     produces?: string[];
+    /** Typed SSE metadata, if this Endpoint has an event-stream response. */
+    sse?: PontxAPI["sse"];
   };
 
   /** key: param name, value: param value */

@@ -394,6 +394,7 @@ export async function callCommand(
     responses: apiMeta.responses,
     consumes: apiMeta.consumes,
     produces: apiMeta.produces,
+    sse: apiMeta.sse,
   };
 
   /* 校验必填参数 */

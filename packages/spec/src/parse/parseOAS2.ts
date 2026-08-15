@@ -17,6 +17,7 @@ import {
   PontxDocumentationStatus,
   PontxEndpointMetadata,
   PontxExecutionPermission,
+  PontxSseStream,
 } from "../api.js";
 import { PontxJsonSchema } from "../schema.js";
 import { PontxSpec } from "../spec.js";
@@ -62,10 +63,25 @@ function getExtensions(value: Record<string, any>): Record<string, unknown> | un
     "x-pontx-execution-permission",
     "x-pontx-execution-disabled-reason",
     "x-pontx-request-examples",
+    "x-pontx-sse",
   ]);
   const extensions = Object.fromEntries(Object.entries(value)
     .filter(([key]) => key.startsWith("x-") && !migratedExtensions.has(key)));
   return Object.keys(extensions).length ? extensions : undefined;
+}
+
+function parseSseContract(inter: Record<string, any>): PontxSseStream | undefined {
+  const declared = inter["x-pontx-sse"];
+  if (declared && typeof declared === "object" && !Array.isArray(declared)) {
+    return declared as PontxSseStream;
+  }
+  const hasSse = (inter.produces || []).some((mediaType: unknown) =>
+    typeof mediaType === "string"
+      && mediaType.split(";", 1)[0]?.trim().toLowerCase() === "text/event-stream"
+  );
+  return hasSse
+    ? { events: { message: { dataFormat: "text" } }, unknownEventPolicy: "preserve" }
+    : undefined;
 }
 
 export function parseOAS2Interface(
@@ -107,6 +123,7 @@ export function parseOAS2Interface(
     security: inter.security,
     externalDocs: inter.externalDocs,
     metadata: parseEndpointMetadata(inter),
+    sse: parseSseContract(inter),
     ext: getExtensions(inter),
   } as PontxAPI;
 

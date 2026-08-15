@@ -91,6 +91,66 @@ function validateApi(
     issue(issues, `${path}.tags`, "invalid_tags", "tags 必须是非空字符串数组");
   }
 
+  const declaresSseMediaType = Object.values(api.responses || {}).some((response) =>
+    Object.keys(response?.content || {}).some((mediaType) =>
+      mediaType.split(";", 1)[0]?.trim().toLowerCase() === "text/event-stream"
+    )
+  ) || (api.produces || []).some((mediaType) =>
+    mediaType.split(";", 1)[0]?.trim().toLowerCase() === "text/event-stream"
+  );
+  if (declaresSseMediaType && !api.sse) {
+    issue(
+      issues,
+      `${path}.sse`,
+      "missing_sse_contract",
+      "text/event-stream Endpoint 必须声明 sse 事件契约"
+    );
+  }
+  if (api.sse) {
+    if (!declaresSseMediaType) {
+      issue(
+        issues,
+        `${path}.sse`,
+        "sse_without_media_type",
+        "sse 契约必须对应 text/event-stream 响应"
+      );
+    }
+    if (!isRecord(api.sse.events) || Object.keys(api.sse.events).length === 0) {
+      issue(issues, `${path}.sse.events`, "invalid_sse_events", "sse 必须声明至少一个事件");
+    } else {
+      for (const [eventName, event] of Object.entries(api.sse.events)) {
+        if (!eventName.trim() || !isRecord(event)) {
+          issue(issues, `${path}.sse.events`, "invalid_sse_event", "sse 事件必须有稳定名称和对象定义");
+          continue;
+        }
+        if (event.dataFormat !== "json" && event.dataFormat !== "text") {
+          issue(
+            issues,
+            `${path}.sse.events.${eventName}.dataFormat`,
+            "invalid_sse_data_format",
+            "sse 事件 dataFormat 必须为 json 或 text"
+          );
+        }
+        if (event.terminal !== undefined && typeof event.terminal !== "boolean") {
+          issue(
+            issues,
+            `${path}.sse.events.${eventName}.terminal`,
+            "invalid_sse_terminal",
+            "sse 事件 terminal 必须为布尔值"
+          );
+        }
+      }
+    }
+    if (api.sse.unknownEventPolicy !== "preserve") {
+      issue(
+        issues,
+        `${path}.sse.unknownEventPolicy`,
+        "invalid_sse_unknown_event_policy",
+        "sse 必须保留未知事件，以兼容供应商新增事件"
+      );
+    }
+  }
+
   if (style === PontxStyle.RPC) {
     if (!isRecord(api.rpc) || typeof api.rpc.action !== "string" || !api.rpc.action.trim()) {
       issue(issues, `${path}.rpc.action`, "missing_rpc_action", "RPC Endpoint 必须声明稳定的 rpc.action");

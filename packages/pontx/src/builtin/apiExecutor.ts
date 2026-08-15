@@ -269,6 +269,12 @@ export async function handleResponse(response: Response): Promise<unknown> {
     ?.trim()
     ?.toLowerCase();
 
+  if (contentType === "text/event-stream") {
+    throw new Error(
+      "Server-Sent Events responses cannot be consumed as a one-shot text response. Use the generated SSE SDK stream client."
+    );
+  }
+
   if (contentType === "application/json" || contentType?.endsWith("+json")) {
     return response.json();
   }
@@ -548,6 +554,14 @@ export async function builtinExecuteApi(
   context: ApiExecutionContext
 ): Promise<ApiResponse> {
   const { api, executeApiConfig, logger } = context;
+
+  if (context.meta.sse || context.meta.produces?.some((mediaType) =>
+    mediaType.split(";", 1)[0]?.trim().toLowerCase() === "text/event-stream"
+  )) {
+    throw new Error(
+      "This Endpoint returns Server-Sent Events. Use the generated SSE SDK stream client; the one-shot executor will not buffer an unbounded stream."
+    );
+  }
 
   // 1. 解析配置
   const hasFetchFn = !!executeApiConfig?.fetchFn;

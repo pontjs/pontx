@@ -19,6 +19,8 @@ import {
   generateSpecMeta,
   generateAsyncApiTypes,
   generateAsyncApiClient,
+  generateSseClient,
+  generateSseTypes,
   PontxSpec,
   fixOASTagsByTranslate,
 } from "@pontx/spec";
@@ -215,6 +217,10 @@ export function getBuiltinPlugin(): Plugin {
       if (spec.asyncapi) {
         fileStructure["streams.ts"] = generateAsyncApiTypes(spec.asyncapi);
         fileStructure["stream-client.ts"] = generateAsyncApiClient(spec.asyncapi);
+      }
+      if (Object.values(spec.apis).some((api) => api.sse)) {
+        fileStructure["sse.ts"] = generateSseTypes(spec);
+        fileStructure["sse-client.ts"] = generateSseClient();
       }
 
       return fileStructure;

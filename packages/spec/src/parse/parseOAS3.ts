@@ -14,6 +14,7 @@ import {
   PontxEndpointMetadata,
   PontxExecutionPermission,
   PontxMediaTypeObject,
+  PontxSseStream,
 } from "../api.js";
 import { PontxJsonSchema } from "../schema.js";
 import { PontxSpec } from "../spec.js";
@@ -105,6 +106,38 @@ function normalizeMediaTypes(
   ]));
 }
 
+function isSseMediaType(mediaType: string) {
+  return mediaType.split(";", 1)[0]?.trim().toLowerCase() === "text/event-stream";
+}
+
+/**
+ * OAS does not define a standard schema for named SSE events. A source can use
+ * x-pontx-sse for that explicit contract. When an OAS only says
+ * text/event-stream, retain a conservative literal `message` event instead of
+ * pretending its frames are JSON.
+ */
+function parseSseContract(
+  inter: Record<string, any>,
+  responses: Record<string, { content?: Record<string, PontxMediaTypeObject> }>
+): PontxSseStream | undefined {
+  const declared = inter["x-pontx-sse"];
+  if (declared && typeof declared === "object" && !Array.isArray(declared)) {
+    return declared as PontxSseStream;
+  }
+
+  const hasSse = Object.values(responses).some((response) =>
+    Object.keys(response.content || {}).some(isSseMediaType)
+  );
+  if (!hasSse) return undefined;
+
+  return {
+    events: {
+      message: { dataFormat: "text" },
+    },
+    unknownEventPolicy: "preserve",
+  };
+}
+
 /** 将受支持的 x-pontx-* 字段迁移到类型化元数据。 */
 function parseEndpointMetadata(inter: Record<string, any>): PontxEndpointMetadata | undefined {
   const documentation = inter["x-pontx-documentation-status"]
@@ -147,6 +180,7 @@ function getExtensions(value: Record<string, any>): Record<string, unknown> | un
     "x-pontx-execution-permission",
     "x-pontx-execution-disabled-reason",
     "x-pontx-request-examples",
+    "x-pontx-sse",
   ]);
   const extensions = Object.fromEntries(Object.entries(value)
     .filter(([key]) => key.startsWith("x-") && !migratedExtensions.has(key)));
@@ -240,6 +274,7 @@ export function parseOAS3Interface(
     externalDocs: inter.externalDocs,
     servers: inter.servers,
     callbacks: inter.callbacks as unknown as Record<string, unknown>,
+    sse: parseSseContract(inter, responses),
     metadata: parseEndpointMetadata(inter),
     ext: getExtensions(inter),
   } as PontxAPI;
