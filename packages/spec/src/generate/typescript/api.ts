@@ -98,6 +98,7 @@ export function generatePureApis(apis: Record<string, PontxAPI>) {
 
 export function generateSpecApis(spec: PontxSpec) {
   const tagGroups = PontxSpec.getTagGroups(spec);
+  const untaggedApis = _.pickBy(spec.apis, (_api, name) => !name.includes("/"));
   let prefix = `import type * as schemas from "./schemas";\n\n`;
 
   if (
@@ -126,9 +127,13 @@ export function generateSpecApis(spec: PontxSpec) {
       return tagComment + tagGroupCode;
     })
     .join("\n\n");
+  const rootApis = Object.keys(untaggedApis).length
+    ? generatePureApis(untaggedApis)
+    : "";
+  const apiTypes = [rootApis, tagGroupsTypes].filter(Boolean).join("\n\n");
 
   return (
-    prefix + `export type APIs = {\n${indentation(2)(tagGroupsTypes)}\n};\n`
+    prefix + `export type APIs = {\n${indentation(2)(apiTypes)}\n};\n`
   );
 }
 

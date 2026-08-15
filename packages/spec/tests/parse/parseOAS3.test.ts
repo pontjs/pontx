@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { parseOAS3 } from "../../src/parse/parseOAS3";
+import { parseOAS2 } from "../../src/parse/parseOAS2";
 import { parsePontSpec2OAS3 } from "../../src/parse";
 import { resolveRef } from "../../src/parse/utils";
 import * as fs from "fs";
@@ -269,5 +270,49 @@ describe("parseOAS3", () => {
     const roundTrip = parsePontSpec2OAS3(result) as any;
     expect(Object.keys(roundTrip.paths["/api_app"].POST.requestBody.content))
       .toEqual(["application/json", "multipart/form-data"]);
+  });
+
+  it("将没有显式 tag 的 OAS 3 Endpoint 保持在根级", () => {
+    const document = {
+      openapi: "3.0.3",
+      info: { title: "Untyped API", version: "1.0.0" },
+      tags: [{ name: "common" }],
+      paths: {
+        "/rates": {
+          get: {
+            operationId: "getRates",
+            responses: { 200: { description: "ok" } },
+          },
+        },
+      },
+    } as any;
+
+    const result = parseOAS3(document, "untagged");
+
+    expect(result.tags).toEqual([]);
+    expect(result.apis.getRates).toBeDefined();
+    expect(result.apis["common/getRates"]).toBeUndefined();
+  });
+
+  it("将没有显式 tag 的 Swagger 2 Endpoint 保持在根级", () => {
+    const document = {
+      swagger: "2.0",
+      info: { title: "Untyped API", version: "1.0.0" },
+      tags: [{ name: "common" }],
+      paths: {
+        "/rates": {
+          get: {
+            operationId: "getRates",
+            responses: { 200: { description: "ok" } },
+          },
+        },
+      },
+    } as any;
+
+    const result = parseOAS2(document, "untagged");
+
+    expect(result.tags).toEqual([]);
+    expect(result.apis.getRates).toBeDefined();
+    expect(result.apis["common/getRates"]).toBeUndefined();
   });
 });

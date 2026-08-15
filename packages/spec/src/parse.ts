@@ -30,7 +30,7 @@ export function parsePontxSpec2OAS2(spec: PontxSpec): OAS2.SwaggerObject {
       const seps = key?.split("/") || [];
       const preSep = seps.slice(0, -1)?.join("/");
       const oasApi = {
-        tags: [preSep],
+        ...(preSep ? { tags: [preSep] } : {}),
         summary: api.summary,
         description: api.description,
         operationId: api.operationId || api.name,
@@ -105,7 +105,7 @@ export function parsePontSpec2OAS3(spec: PontxSpec) {
       const apiName = key.split("/").pop();
 
       const oas3Api = {
-        tags: [preSep],
+        ...(preSep ? { tags: [preSep] } : {}),
         summary: api.summary || api.title,
         description: api.description,
         operationId: api.operationId || apiName || api.name,

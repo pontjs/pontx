@@ -233,10 +233,18 @@ function generateApiMethodType(
  */
 export function generateApis(spec: PontxSpec): string {
   const controllers: Record<string, any[]> = {};
+  const untaggedApis: any[] = [];
 
-  // 按 controller 分组
+  // Only an explicit OpenAPI operation tag creates a Controller. Endpoints
+  // without a tag remain client-root methods.
   Object.entries(spec.apis || {}).forEach(([apiKey, api]) => {
-    const [controller, apiName] = apiKey.split("/");
+    const [controller, apiName] = apiKey.includes("/")
+      ? apiKey.split("/", 2)
+      : [undefined, apiKey];
+    if (!controller) {
+      untaggedApis.push({ apiKey, apiName, api });
+      return;
+    }
     if (!controllers[controller]) {
       controllers[controller] = [];
     }
@@ -251,6 +259,32 @@ export function generateApis(spec: PontxSpec): string {
 import type * as schemas from './schemas';
 
 `;
+
+  const rootParamsTypes: string[] = [];
+  const rootBodyTypes: string[] = [];
+  untaggedApis.forEach(({ apiName, api }) => {
+    const capitalizedApiName =
+      apiName.charAt(0).toUpperCase() + apiName.slice(1);
+    const paramsType = generateParamsType(api, `${capitalizedApiName}Params`);
+    if (paramsType) {
+      rootParamsTypes.push(paramsType);
+    }
+    const bodyType = generateBodyType(api, `${capitalizedApiName}Body`);
+    if (bodyType) {
+      rootBodyTypes.push(bodyType);
+    }
+  });
+
+  if (rootParamsTypes.length > 0 || rootBodyTypes.length > 0) {
+    code += `export declare namespace APIs {\n`;
+    rootParamsTypes.forEach((paramsType) => {
+      code += indentation(2)(paramsType) + "\n\n";
+    });
+    rootBodyTypes.forEach((bodyType) => {
+      code += indentation(2)(bodyType) + "\n\n";
+    });
+    code += `}\n\n`;
+  }
 
   // 生成每个 controller 的参数类型和方法类型
   Object.entries(controllers).forEach(([controller, apis]) => {
@@ -305,6 +339,11 @@ import type * as schemas from './schemas';
   code += `// ============ API 集合类型 ============\n\n`;
   code += `/**\n * API 类型定义\n */\n`;
   code += `export type APIs = {\n`;
+
+  untaggedApis.forEach(({ apiName, api }) => {
+    const { methodCode } = generateApiMethodType(api, apiName, "APIs");
+    code += methodCode;
+  });
 
   Object.keys(controllers).forEach((controller) => {
     code += `  /** ${controller} 模块 */\n`;

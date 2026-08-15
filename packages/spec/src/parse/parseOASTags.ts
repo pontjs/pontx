@@ -31,9 +31,6 @@ export function fixOASTags<
           [tag.name || "", description || ""].filter((id) => id)
         ),
       };
-    })
-    .concat({
-      tagNameLikes: ["common"],
     });
 
   const processedTagItems = tagItems.map((tag) => {
@@ -132,14 +129,6 @@ export function fixOASTags<
             addApiTagLink(newTag.uuid, method, path);
           }
         });
-      } else {
-        const commonTagItem = processedTagItems.find((item) => {
-          return item.tagNameLikes.includes("common");
-        });
-
-        if (commonTagItem) {
-          addApiTagLink(commonTagItem.uuid, method, path);
-        }
       }
     });
   });

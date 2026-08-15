@@ -6,6 +6,7 @@ import {
   extractQueryParams,
   detectBodyType,
   generateGracefulApiMeta,
+  generateGracefulApis,
 } from "../../../src/plugin/graceful-codegen";
 
 describe("Graceful Codegen Plugin", () => {
@@ -230,6 +231,24 @@ describe("Graceful Codegen Plugin", () => {
       expect(result).toContain('"include"');
       expect(result).toContain('"bodyType": "none"');
       expect(result).toContain('"bodyType": "object"');
+    });
+  });
+
+  describe("generateGracefulApis", () => {
+    it("keeps untagged Endpoints at the client root alongside tagged Controllers", () => {
+      const result = generateGracefulApis({
+        name: "mixed-api",
+        apis: {
+          getRates: { path: "/rates", method: "GET", parameters: [], responses: {} },
+          "markets/getQuote": { path: "/quote", method: "GET", parameters: [], responses: {} },
+        },
+        tags: [{ name: "markets" }],
+      });
+
+      expect(result).toContain("getRates: {");
+      expect(result).toContain("markets: {");
+      expect(result).toContain("getQuote: {");
+      expect(result).not.toContain("common: {");
     });
   });
 

@@ -144,6 +144,30 @@ describe("Graceful Client Generator", () => {
     expect(apisCode).not.toMatch(/postId:\s*string,[\s\S]*userId:\s*string,/);
   });
 
+  it("keeps untagged Endpoints at the client root without a common Controller", () => {
+    const files = generateGracefulClient({
+      apis: {
+        getRates: {
+          path: "/rates",
+          method: "GET",
+          parameters: [{ name: "base", in: "query", schema: { type: "string" } }],
+          responses: {},
+        },
+        "markets/getQuote": {
+          path: "/quote",
+          method: "GET",
+          parameters: [],
+          responses: {},
+        },
+      },
+    } as any);
+    const apisCode = files["apis.ts"] as string;
+
+    expect(apisCode).toContain("getRates:");
+    expect(apisCode).toContain("markets: markets;");
+    expect(apisCode).not.toContain("common: common;");
+  });
+
   it("should handle path with three or more parameters", () => {
     const spec = {
       openapi: "3.0.0",

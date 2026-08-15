@@ -96,7 +96,7 @@ export function parseSwagger2APIs(
         ...inter,
         path,
         method: method?.toUpperCase(),
-        tags: inter.tags || ["common"],
+        tags: inter.tags || [],
         parameters: unionBy(
           inter.parameters,
           methodInters.parameters || [],
@@ -160,6 +160,26 @@ export function parseSwagger2APIs(
       apiNames: uniqueApiNames,
     };
   });
+
+  const untaggedApis = allSwaggerInterfaces.filter(
+    (inter) => !inter.tags.length
+  );
+  if (untaggedApis.length) {
+    const apiNames = makeNamesUnique(untaggedApis.map((inter) => {
+      return inter.operationId
+        ? getIdentifierFromOperatorId(inter.operationId)
+        : getIdentifierFromUrl(inter.path, (inter.method || "").toLowerCase());
+    }));
+    apiGroups.push({
+      name: "",
+      apis: untaggedApis.map((api) => parseOAS2Interface(api, {
+        schemaNames: defNames,
+        classTemplateArgCodes: [],
+        isSchemaNameAst: false,
+      })),
+      apiNames,
+    });
+  }
 
   const apis = apiGroups.reduce(
     (result: Record<string, PontxAPI>, apiGroup) => {

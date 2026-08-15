@@ -197,7 +197,7 @@ export function parseSwagger2APIs(originSwagger: OAS3.OpenAPIObject) {
         ...inter,
         path,
         method: method?.toUpperCase(),
-        tags: inter.tags || ["common"],
+        tags: inter.tags || [],
         parameters: _.unionWith(
           inter.parameters,
           methodInters.parameters || [],
@@ -257,6 +257,18 @@ export function parseSwagger2APIs(originSwagger: OAS3.OpenAPIObject) {
       apiNames: uniqueApiNames,
     };
   });
+
+  const untaggedApis = allSwaggerInterfaces.filter(
+    (inter) => !inter.tags.length
+  );
+  if (untaggedApis.length) {
+    const apiNames = makeNamesUnique(untaggedApis.map((inter) => {
+      return inter.operationId
+        ? getIdentifierFromOperatorId(inter.operationId)
+        : getIdentifierFromUrl(inter.path, (inter.method || "").toLowerCase());
+    }));
+    apiGroups.push({ name: "", apis: untaggedApis, apiNames });
+  }
 
   const apis = apiGroups.reduce(
     (result: Record<string, PontxAPI>, apiGroup) => {
