@@ -9,6 +9,7 @@ export default defineConfig([
       "types/index": "src/types/index.ts",
       "features/index": "src/features/index.ts",
       "graceful-client/index": "src/graceful-client/index.ts",
+      "streaming/index": "src/streaming/index.ts",
     },
     format: ["esm", "cjs"],
     dts: true,
