@@ -17,6 +17,9 @@ export * from "./features";
 // Graceful Client
 export * from "./graceful-client";
 
+// Streaming Client - transport-neutral WebSocket runtime for generated SDKs
+export * from "./streaming";
+
 // Graceful Client 标准别名 - 推荐使用的客户端
 export { createGracefulClient as createClient } from "./graceful-client";
 export { createGracefulRequester as createRequester } from "./graceful-client/requester";
