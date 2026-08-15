@@ -15,7 +15,7 @@
  *     ├── show-schema <schema>
  *     ├── search <keyword>
  *     ├── list-cases
- *     └── list (tags / apis / schemas)
+ *     └── list (tags / apis / schemas / streams)
  */
 
 import { Command } from "commander";
@@ -105,7 +105,7 @@ export async function createCli(options: CreateCliOptions): Promise<Command> {
   if (specInfos.length === 1) {
     /* 单 spec：在根级别注册 spec 命令（跳过 list 避免冲突）+ 在全局 list 中追加 spec list 子命令 */
     registerSpecCommands(program, specInfos[0], ctx, { skipList: true });
-    /* 在全局 list 上追加 tags/apis/schemas 子命令 */
+    /* 在全局 list 上追加 tags/apis/schemas/streams 子命令 */
     const globalListCmd = program.commands.find((c) => c.name() === "list");
     if (globalListCmd) {
       registerSpecListCommands(globalListCmd, specInfos[0].name, ctx);

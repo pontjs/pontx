@@ -10,11 +10,14 @@ import { LOCK_FILENAME } from "../const";
 import {
   parseOAS2,
   parseOAS3,
+  parseAsyncApi3,
   checkIsOas2,
   checkIsOas3,
+  checkIsAsyncApi3,
   generateSpecApis,
   generateSchemas,
   generateSpecMeta,
+  generateAsyncApiTypes,
   PontxSpec,
   fixOASTagsByTranslate,
 } from "@pontx/spec";
@@ -139,6 +142,8 @@ export function getBuiltinPlugin(): Plugin {
         spec = parseOAS2(json, options.originConfig.name);
       } else if (checkIsOas3(json)) {
         spec = parseOAS3(json, options.originConfig.name);
+      } else if (checkIsAsyncApi3(json)) {
+        spec = parseAsyncApi3(json, options.originConfig.name);
       } else {
         // 已经是 PontxSpec 或其他对象，直接返回
         return json as PontxSpec;
@@ -205,6 +210,9 @@ export function getBuiltinPlugin(): Plugin {
         Object.keys(spec.components.schemas).length
       ) {
         fileStructure["schemas.ts"] = generateSchemas(spec);
+      }
+      if (spec.asyncapi) {
+        fileStructure["streams.ts"] = generateAsyncApiTypes(spec.asyncapi);
       }
 
       return fileStructure;

@@ -4,6 +4,7 @@ import { OAS3 } from "oas-spec-ts";
 import _ from "lodash";
 import { sortObjectFields } from "./utils.js";
 import { produce } from "immer";
+import type { PontxAsyncApiSpec } from "./asyncapi.js";
 
 export type PontxComponents = {
   schemas: Record<string, PontxJsonSchema>;
@@ -39,13 +40,15 @@ export class PontxSpec {
   tags?: OAS3.TagObject[];
   servers?: OAS3.ServerObject[];
   externalDocs?: ExternalDocumentationObject;
+  /** AsyncAPI 3.x contract, kept separate so streams are never treated as HTTP Endpoints. */
+  asyncapi?: PontxAsyncApiSpec;
   envs?: {
     [x: string]: Partial<PontxSpec>;
   };
   security? = [] as Array<{
     [x: string]: string[];
   }>;
-  style?: "RPC" | "RESTFul" | "GraphQL" = "RESTFul";
+  style?: "RPC" | "RESTFul" | "GraphQL" | "AsyncAPI" = "RESTFul";
 
   /** 扩展字段 */
   ext?: any;
