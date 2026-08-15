@@ -1,5 +1,11 @@
 # @pontx/spec
 
+## 1.0.0-beta.5
+
+### Minor Changes
+
+- 9a29cbc: Make PontxSpec the canonical protocol boundary with explicit style-aware validation, locale structural checks, and lossless OAS2/OAS3 import. RESTFul specs require HTTP method/path while RPC and GraphQL specs remain loadable and indexable without an HTTP executor.
+
 ## 1.0.0-beta.4
 
 ### Patch Changes

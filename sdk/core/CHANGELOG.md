@@ -1,5 +1,12 @@
 # @pontx/sdk
 
+## 1.0.0-beta.7
+
+### Patch Changes
+
+- Updated dependencies [9a29cbc]
+  - @pontx/spec@1.0.0-beta.5
+
 ## 1.0.0-beta.6
 
 ### Patch Changes

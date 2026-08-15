@@ -35,8 +35,10 @@ describe("buildBaseProxyClient", () => {
     };
 
     const mockCreateRequester = vi.fn((config: any) => {
-      const apiMeta = mockSpecMeta.apis[config.apiKey];
-      return vi.fn();
+      return Object.assign(vi.fn(), {
+        apiKey: config.apiKey,
+        apiMeta: config.apiMeta,
+      });
     });
 
     it("should support client.tagName.apiName access pattern", () => {
@@ -162,8 +164,10 @@ describe("buildBaseProxyClient", () => {
     };
 
     const mockCreateRequester = vi.fn((config: any) => {
-      const apiMeta = mockSpecMeta.apis[config.apiKey];
-      return vi.fn();
+      return Object.assign(vi.fn(), {
+        apiKey: config.apiKey,
+        apiMeta: config.apiMeta,
+      });
     });
 
     it("should support direct API access only", () => {

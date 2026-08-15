@@ -87,7 +87,6 @@ function parseMessage(
   const headers = normalizeSchema(message.headers);
 
   return {
-    pontx: "2.1",
     name,
     ...(typeof message.title === "string" ? { title: message.title } : {}),
     ...(typeof message.summary === "string" ? { summary: message.summary } : {}),
@@ -254,6 +253,7 @@ export function parseAsyncApi3(source: JsonRecord, name = ""): PontxSpec {
   };
 
   return {
+    pontx: "2.1",
     name,
     info: asyncapi.info as PontxSpec["info"],
     style: PontxStyle.AsyncAPI,
