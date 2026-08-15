@@ -1,5 +1,11 @@
 # @pontx/sdk
 
+## 1.0.0-beta.6
+
+### Patch Changes
+
+- 3aa5943: Preserve callable TypeScript types for untagged SDK Endpoint methods exposed at the client root.
+
 ## 1.0.0-beta.5
 
 ### Patch Changes

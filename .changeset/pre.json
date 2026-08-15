@@ -13,6 +13,7 @@
     "@pontx/nodejs-sdk": "0.1.0"
   },
   "changesets": [
+    "bright-root-methods",
     "config-loader-improvement",
     "dropbox-sign-oas-compatibility",
     "fix-spec-resolve-ref",
