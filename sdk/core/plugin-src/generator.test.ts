@@ -168,6 +168,44 @@ describe("Graceful Client Generator", () => {
     expect(apisCode).not.toContain("common: common;");
   });
 
+  it("emits compilable dynamic-map schemas with local schema references", () => {
+    const files = generateGracefulClient({
+      components: {
+        schemas: {
+          Currency: {
+            type: "object",
+            properties: { code: { type: "string" } },
+          },
+          CurrencyMap: {
+            type: "object",
+            additionalProperties: { $ref: "#/components/schemas/Currency" },
+          },
+        },
+      },
+      apis: {},
+    } as any);
+
+    const schemasCode = files["schemas.ts"] as string;
+    expect(schemasCode).toContain("Record<any, Currency>");
+    expect(schemasCode).not.toContain("schemas.Currency");
+  });
+
+  it("does not emit an unused schema import when API signatures use only primitives", () => {
+    const files = generateGracefulClient({
+      components: { schemas: { Metadata: { type: "object", properties: {} } } },
+      apis: {
+        getStatus: {
+          path: "/status",
+          method: "GET",
+          parameters: [{ name: "verbose", in: "query", schema: { type: "boolean" } }],
+          responses: {},
+        },
+      },
+    } as any);
+
+    expect(files["apis.ts"] as string).not.toContain("import type * as schemas");
+  });
+
   it("should handle path with three or more parameters", () => {
     const spec = {
       openapi: "3.0.0",

@@ -126,8 +126,7 @@ export function generateSchemas(spec: PontxSpec) {
 
     const genericParamsCode = generateGenericTypeParameters(schema);
     return `${schemaComment}export type ${name}${genericParamsCode} = ${generateSchemaCode(
-      schema,
-      "schemas."
+      schema
     )}`;
   }).join("\n\n");
 
