@@ -1,5 +1,13 @@
 # pontx
 
+## 1.0.0-beta.16
+
+### Patch Changes
+
+- 060da89: Allow SDK CLIs to declare additional exact request field names that must be
+  redacted from dry-run summaries and cURL previews without changing the request
+  or mutation confirmation digest.
+
 ## 1.0.0-beta.15
 
 ### Patch Changes

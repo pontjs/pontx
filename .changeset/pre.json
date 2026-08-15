@@ -25,6 +25,7 @@
     "node18-file-guard",
     "opencli-refactor",
     "pontx-ai-discovery-metadata",
+    "redact-product-preview-fields",
     "sdk-cli-multi-origin-fix",
     "sdk-cli-multi-origin",
     "sdk-major-release",
