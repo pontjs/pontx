@@ -1,6 +1,6 @@
 {
   "name": "pontx",
-  "version": "1.0.0-beta.11",
+  "version": "1.0.0-beta.12",
   "description": "OpenAPI lifecycle CLI for API discovery, documentation, type-safe code generation, SDK management, and Agent workflows",
   "main": "./cjs/index.cjs",
   "module": "./lib/index.js",

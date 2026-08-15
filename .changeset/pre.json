@@ -25,6 +25,7 @@
     "sdk-cli-multi-origin-fix",
     "sdk-cli-multi-origin",
     "sdk-major-release",
-    "spec-major-release"
+    "spec-major-release",
+    "untagged-sdk-root-methods"
   ]
 }

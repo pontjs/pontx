@@ -1,7 +1,6 @@
 ---
 "@pontx/spec": patch
 "@pontx/sdk": patch
-"@pontx/nodejs-sdk": patch
 "pontx": patch
 ---
 

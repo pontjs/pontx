@@ -1,5 +1,11 @@
 # @pontx/spec
 
+## 1.0.0-beta.4
+
+### Patch Changes
+
+- 9294ed5: Keep OpenAPI Endpoints without explicit operation tags at the generated client root. Do not synthesize `common` or `default` Controllers, including for mixed tagged and untagged APIs.
+
 ## 1.0.0-beta.3
 
 ### Minor Changes

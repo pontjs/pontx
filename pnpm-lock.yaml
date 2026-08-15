@@ -136,14 +136,14 @@ importers:
         specifier: ^1.18.0
         version: 1.18.0
       '@pontx/sdk-browser-client':
-        specifier: ^0.0.11
-        version: 0.0.11(react@19.1.1)
+        specifier: ^0.0.12-beta.0
+        version: 0.0.12-beta.0(react@19.1.1)
       fuse.js:
         specifier: ^7.1.0
         version: 7.1.0
       pontx:
-        specifier: ^1.0.0-beta.8
-        version: 1.0.0-beta.10(encoding@0.1.13)
+        specifier: ^1.0.0-beta.11
+        version: 1.0.0-beta.11(encoding@0.1.13)
       zod:
         specifier: ^3.24.1
         version: 3.24.2
@@ -1659,12 +1659,9 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
-  '@pontx/e2e@0.1.0-beta.0':
-    resolution: {integrity: sha512-xyXfVPrJfCuXorlZIVPSRt9uId14cR39iF5NMQL3p9ZSqEJ0S1zktlf4KqRbJeEXzyB91WinhpvXf9IFaRWT8A==}
+  '@pontx/sdk-browser-client@0.0.12-beta.0':
+    resolution: {integrity: sha512-JDTFtjK+GQVkjdMg75ka888WHAN4JLUthYtrplLQ6CCMxmYmX4WkjDBXSCxQ+EGQMvEWiW8E6GOz7UnxNxlWgQ==}
     engines: {node: '>=18.0.0'}
-
-  '@pontx/sdk-browser-client@0.0.11':
-    resolution: {integrity: sha512-3F9zukbd/CvoLJ+ip7tFW7P/nDDCuw0lgE2JvwU5Qwu1c2q6bNWKR5qO0K81DcFHE0GOQhuhxu2iBJc1do0xLw==}
     peerDependencies:
       react: '*'
 
@@ -1678,8 +1675,8 @@ packages:
   '@pontx/spec@0.1.15':
     resolution: {integrity: sha512-wwSZmWIzoSTGEfCwtwtaEner3HezkdZ0BxLDugLcxeTC83gf4nutLEfsaFmT05lue03q5cytu0l43M7idMJf7w==}
 
-  '@pontx/spec@1.0.0-beta.2':
-    resolution: {integrity: sha512-Z2q/DS9gGF9NVu8fBmD5HScQwWed6C8xOgw9Jr9T3YJM/wHw+eoO9rbKkhlAJQxnkUnA2gil8Z8y/ASBJP8qrw==}
+  '@pontx/spec@1.0.0-beta.3':
+    resolution: {integrity: sha512-Atpf/Dw6uX/cjmAfHzrW7UDDtGTub0gqCk1QMKnMORHyUdh1d2iBdHg9Zcj2KZo0LlG//MUbqJGBwbie4rnvaA==}
 
   '@radix-ui/number@1.1.1':
     resolution: {integrity: sha512-MkKCwxlXTgz6CFoJx3pCwn07GKp36+aZyu/u2Ln2VrA5DcdyCZkASEDBTd8x5whTQQL5CiYf4prXKLcgQdv29g==}
@@ -4800,8 +4797,8 @@ packages:
     resolution: {integrity: sha512-OBatVyC/N7SCW/FaDHrSd+vn0o5cS855TOmYi4OkdWUMSJCET/xip//ch8xGUvtr3i44X9LVyWwQlRMTN3pwSA==}
     engines: {node: '>=10'}
 
-  pontx@1.0.0-beta.10:
-    resolution: {integrity: sha512-rUGCx/sbwEAs1Ij0bAtMZRQKXCjlesuTxWCpuE7MhmkQa/tE271IOV2pmoxtoE8DYBDyd2X80Uhmv5hr1Y4lsg==}
+  pontx@1.0.0-beta.11:
+    resolution: {integrity: sha512-t9wncmiuYpa4gC2r8mTSrAeAaWRFYSLbJRUvX8dL2FaZnYoFyHT3czXC9zB3SQZhGEhYovlaJkfEaY7RSTRlfw==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -7303,13 +7300,7 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@pontx/e2e@0.1.0-beta.0':
-    dependencies:
-      js-yaml: 4.1.0
-      tslib: 2.8.1
-      zod: 3.24.2
-
-  '@pontx/sdk-browser-client@0.0.11(react@19.1.1)':
+  '@pontx/sdk-browser-client@0.0.12-beta.0(react@19.1.1)':
     dependencies:
       react: 19.1.1
 
@@ -7347,7 +7338,7 @@ snapshots:
       lodash: 4.17.21
       oas-spec-ts: 0.6.4
 
-  '@pontx/spec@1.0.0-beta.2':
+  '@pontx/spec@1.0.0-beta.3':
     dependencies:
       immer: 10.1.1
       lodash: 4.17.21
@@ -10799,10 +10790,9 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.27.0
 
-  pontx@1.0.0-beta.10(encoding@0.1.13):
+  pontx@1.0.0-beta.11(encoding@0.1.13):
     dependencies:
-      '@pontx/e2e': 0.1.0-beta.0
-      '@pontx/spec': 1.0.0-beta.2
+      '@pontx/spec': 1.0.0-beta.3
       baidu-translate-service: 2.2.4(encoding@0.1.13)
       commander: 13.1.0
       esbuild: 0.20.2
