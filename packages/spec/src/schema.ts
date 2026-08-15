@@ -209,6 +209,12 @@ export interface GenericRef {
 }
 
 export interface PontxJsonSchema extends PontxCoreSchemaMetaSchema {
+  /** 所有分支均需满足。 */
+  allOf?: PontxJsonSchema[];
+  /** 至少满足一个分支。 */
+  anyOf?: PontxJsonSchema[];
+  /** 只满足一个分支。 */
+  oneOf?: PontxJsonSchema[];
   /** 必填的属性名列表 */
   required?: string[];
   /** 数组元素的 schema */

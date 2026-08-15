@@ -19,6 +19,21 @@ export type PontxServer = OAS3.ServerObject & {
   id?: string;
 };
 
+/** RPC 服务的传输边界；规则保持为上游契约数据，不在 OAS 中伪造。 */
+export type PontxRpcService = {
+  /** 稳定协议标识，例如 aws-query。 */
+  protocol: string;
+  /** 供应商服务版本，例如 2012-11-05。 */
+  version?: string;
+  /** 签名机制及其服务名；绝不包含凭证。 */
+  signing?: {
+    scheme: string;
+    service?: string;
+  };
+  /** 上游端点规则，供协议运行时按原样解释。 */
+  endpointRuleSet?: unknown;
+};
+
 export type PontxComponents = {
   schemas: Record<string, PontxJsonSchema>;
   responses?: Record<string, unknown>;
@@ -55,6 +70,8 @@ export class PontxSpec {
   externalDocs?: ExternalDocumentationObject;
   /** AsyncAPI 3.x contract, kept separate so streams are never treated as HTTP Endpoints. */
   asyncapi?: PontxAsyncApiSpec;
+  /** RPC 服务协议；与 RESTFul 的 servers/path/method 模型分开。 */
+  rpc?: PontxRpcService;
   /** 异步回调定义；它不是 HTTP paths 的替代真源。 */
   webhooks?: Record<string, unknown>;
   envs?: {

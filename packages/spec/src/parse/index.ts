@@ -20,6 +20,8 @@ export {
 } from "./parseOAS2.js";
 
 export { checkIsAsyncApi3, parseAsyncApi3 } from "./parseAsyncApi3.js";
+export { importSmithy } from "./parseSmithy.js";
+export type { ImportSmithyOptions, SmithyJsonAst } from "./parseSmithy.js";
 
 // 从 utils.ts 导出
 export {

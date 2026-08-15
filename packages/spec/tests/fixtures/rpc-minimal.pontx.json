@@ -6,9 +6,15 @@
     "title": "Minimal RPC contract",
     "version": "1.0.0"
   },
+  "rpc": {
+    "protocol": "example-rpc"
+  },
   "apis": {
     "inventory/getItem": {
       "operationId": "getItem",
+      "rpc": {
+        "action": "GetItem"
+      },
       "summary": "Get an inventory item",
       "tags": ["inventory"],
       "parameters": [
