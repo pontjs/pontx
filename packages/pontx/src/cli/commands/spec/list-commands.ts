@@ -8,6 +8,7 @@ import type { CliContext } from "../../context";
 import { listTagsCommand } from "./list-tags";
 import { listApisCommand } from "./list-apis";
 import { listSchemasCommand } from "./list-schemas";
+import { listStreamsCommand } from "./list-streams";
 
 /**
  * 注册 spec 作用域 list 子命令
@@ -45,5 +46,15 @@ export function registerSpecListCommands(listCmd: Command, specName: string, ctx
     .option("--json", "以 JSON 格式输出")
     .action(async (options) => {
       await listSchemasCommand(ctx, specName, options);
+    });
+
+  /* pontx <spec> list streams */
+  listCmd
+    .command("streams")
+    .description("列举流式接口 / AsyncAPI operations（不会建立连接）")
+    .option("--use-remote", "使用远程元数据")
+    .option("--json", "以 JSON 格式输出")
+    .action(async (options) => {
+      await listStreamsCommand(ctx, specName, options);
     });
 }

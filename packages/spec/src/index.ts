@@ -23,6 +23,14 @@ export type {
   PontxUnresolvedRequestInput,
 } from "./api";
 export { PontxSpec, PontxSpecs, TagGroup } from "./spec";
+export type {
+  PontxAsyncApiChannel,
+  PontxAsyncApiInfo,
+  PontxAsyncApiMessage,
+  PontxAsyncApiOperation,
+  PontxAsyncApiServer,
+  PontxAsyncApiSpec,
+} from "./asyncapi";
 export {
   parsePontxSpec2OAS2 as parsePontSpec2OAS2,
   parsePontSpec2OAS3,
