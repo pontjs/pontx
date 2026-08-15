@@ -23,6 +23,8 @@ export type PontxServer = OAS3.ServerObject & {
 export type PontxRpcService = {
   /** 稳定协议标识，例如 aws-query。 */
   protocol: string;
+  /** 同一服务声明的其他兼容协议；主协议仍由 protocol 明确指定。 */
+  compatibleProtocols?: string[];
   /** 供应商服务版本，例如 2012-11-05。 */
   version?: string;
   /** 签名机制及其服务名；绝不包含凭证。 */

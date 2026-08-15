@@ -151,12 +151,13 @@ function findService(
   return services[0];
 }
 
-function detectedProtocol(service: SmithyShape): string | undefined {
+function detectedProtocols(service: SmithyShape): string[] {
   const traits = service.traits || {};
-  if (Object.prototype.hasOwnProperty.call(traits, "aws.protocols#awsQuery")) return "aws-query";
-  if (Object.prototype.hasOwnProperty.call(traits, "aws.protocols#awsQueryCompatible")) return "aws-query";
-  if (Object.prototype.hasOwnProperty.call(traits, "aws.protocols#awsJson1_0")) return "aws-json-1.0";
-  return undefined;
+  const protocols = [] as string[];
+  if (Object.prototype.hasOwnProperty.call(traits, "aws.protocols#awsQuery")) protocols.push("aws-query");
+  if (Object.prototype.hasOwnProperty.call(traits, "aws.protocols#awsQueryCompatible")) protocols.push("aws-query");
+  if (Object.prototype.hasOwnProperty.call(traits, "aws.protocols#awsJson1_0")) protocols.push("aws-json-1.0");
+  return [...new Set(protocols)];
 }
 
 function responseSchema(
@@ -181,8 +182,15 @@ export function importSmithy(
   if (source.smithy !== "2.0") throw new TypeError("Only Smithy 2.0 JSON AST documents can be imported");
   const shapes = source.shapes as Record<string, SmithyShape>;
   const [serviceId, service] = findService(shapes, options.serviceId);
-  const protocol = options.protocol || detectedProtocol(service);
-  if (!protocol) throw new TypeError("Smithy service does not declare a supported protocol");
+  const protocols = detectedProtocols(service);
+  if (!protocols.length) throw new TypeError("Smithy service does not declare a supported protocol");
+  if (!options.protocol && protocols.length > 1) {
+    throw new TypeError(`Smithy service declares multiple protocols; select one explicitly: ${protocols.join(", ")}`);
+  }
+  const protocol = options.protocol || protocols[0];
+  if (!protocols.includes(protocol)) {
+    throw new TypeError(`Requested Smithy protocol is not declared by the service: ${protocol}`);
+  }
   const tagName = options.tagName || localName(serviceId);
   const serviceDocs = documentation(service);
   const sigv4 = getTrait(service, "aws.auth#sigv4");
@@ -228,6 +236,7 @@ export function importSmithy(
         action,
         method: "POST",
         ...(protocol === "aws-query" ? { contentType: "application/x-www-form-urlencoded" } : {}),
+        ...(protocol === "aws-json-1.0" ? { contentType: "application/x-amz-json-1.0" } : {}),
       },
     };
   }
@@ -243,6 +252,7 @@ export function importSmithy(
     style: PontxStyle.RPC,
     rpc: {
       protocol,
+      ...(protocols.length > 1 ? { compatibleProtocols: protocols.filter((item) => item !== protocol) } : {}),
       version: service.version,
       signing,
       endpointRuleSet: getTrait(service, "smithy.rules#endpointRuleSet"),
