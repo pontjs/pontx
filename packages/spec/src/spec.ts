@@ -96,18 +96,15 @@ export class PontxSpec {
     if (!spec) {
       return false;
     }
-    let hasMocs = false;
 
     const apiNames = Object.keys(spec.apis || {});
     if (!apiNames?.length) {
       return false;
     }
-    const firstApiName = apiNames[0];
-
-    if (firstApiName.includes("/")) {
-      return true;
-    }
-    return false;
+    // A spec has Controllers (tag namespaces) when ANY Endpoint key carries
+    // the `tag/operationId` shape. Checking only the first key is wrong for
+    // mixed specs whose alphabetically-first Endpoint is untagged.
+    return apiNames.some((apiName) => apiName.includes("/"));
   }
 
   /** 获取所有命名空间名称 */
