@@ -1,5 +1,12 @@
 # pontx
 
+## 1.0.0-beta.14
+
+### Patch Changes
+
+- Updated dependencies
+  - @pontx/spec@1.0.0-beta.6
+
 ## 1.0.0-beta.13
 
 ### Patch Changes

@@ -27,6 +27,7 @@
     "sdk-cli-multi-origin-fix",
     "sdk-cli-multi-origin",
     "sdk-major-release",
+    "smithy-rpc-import",
     "spec-major-release",
     "untagged-sdk-root-methods"
   ]

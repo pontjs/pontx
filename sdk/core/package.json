@@ -1,6 +1,6 @@
 {
   "name": "@pontx/sdk",
-  "version": "1.0.0-beta.7",
+  "version": "1.0.0-beta.8",
   "description": "Shared core utilities for Pontx SDK (Browser & Node.js)",
   "keywords": [
     "pontx",
