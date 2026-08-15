@@ -1,5 +1,18 @@
 # pontx
 
+## 1.0.0-beta.17
+
+### Minor Changes
+
+- c4bb4ce: Add typed Server-Sent Events contracts, an SSE stream runtime, generated typed
+  SSE SDK bindings, and a CLI guard that prevents one-shot execution from
+  buffering an unbounded event stream.
+
+### Patch Changes
+
+- Updated dependencies [c4bb4ce]
+  - @pontx/spec@1.0.0-beta.8
+
 ## 1.0.0-beta.16
 
 ### Patch Changes

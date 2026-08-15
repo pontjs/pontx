@@ -1,6 +1,6 @@
 {
   "name": "@pontx/spec",
-  "version": "1.0.0-beta.7",
+  "version": "1.0.0-beta.8",
   "type": "module",
   "description": "TypeScript model and parser foundation for Pontx API metadata, OpenAPI 2.0, and OpenAPI 3.x",
   "exports": {
