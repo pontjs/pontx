@@ -91,6 +91,24 @@ describe("importSmithy", () => {
       .toThrow("does not declare a supported protocol");
   });
 
+  it("requires an explicit primary protocol when Smithy declares alternatives", () => {
+    const multiProtocol = structuredClone(source);
+    multiProtocol.shapes["example.queue#QueueService"].traits["aws.protocols#awsJson1_0"] = {};
+
+    expect(() => importSmithy(multiProtocol, { name: "example-queue" }))
+      .toThrow("declares multiple protocols");
+    const spec = importSmithy(multiProtocol, {
+      name: "example-queue",
+      protocol: "aws-json-1.0",
+    });
+    expect(spec.rpc).toMatchObject({
+      protocol: "aws-json-1.0",
+      compatibleProtocols: ["aws-query"],
+    });
+    expect(spec.apis["QueueService/SendMessage"].rpc?.contentType)
+      .toBe("application/x-amz-json-1.0");
+  });
+
   it("requires RPC protocol and action fields in loaded contracts", () => {
     expect(() => loadPontxSpec({
       pontx: "2.1",
