@@ -20,6 +20,8 @@ import { EvalAttribution, type AgentAdapter, type PontxEvalCase } from "../types
 
 function specFixture(): PontxSpec {
   return {
+    pontx: "2.1",
+    style: "RESTFul",
     name: "pets",
     info: { title: "宠物 API", description: "宠物查询服务" },
     servers: [{ url: "https://api.example.com" }],

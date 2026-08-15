@@ -5,6 +5,8 @@ import {
   PontxAPI,
   PontxRequestInputLocation,
   PontxRequestInputSourceKind,
+  PontxDocumentationStatus,
+  PontxExecutionPermission,
 } from "./api";
 
 export {
@@ -21,8 +23,13 @@ export type {
   PontxRequestExampleRequest,
   PontxRequestExampleValue,
   PontxUnresolvedRequestInput,
+  PontxEndpointDocumentation,
+  PontxEndpointExecution,
+  PontxEndpointMetadata,
+  PontxMediaTypeObject,
 } from "./api";
-export { PontxSpec, PontxSpecs, TagGroup } from "./spec";
+export { PontxSpec, PontxSpecs, PontxStyle, TagGroup } from "./spec";
+export type { PontxServer } from "./spec";
 export type {
   PontxAsyncApiChannel,
   PontxAsyncApiInfo,
@@ -41,4 +48,5 @@ export * from "./parse/index";
 export * from "./parse/parseOASTags";
 export * from "./generic";
 export { validateFlatApiKey, ValidationResult } from "./validation";
+export * from "./pontxSpec";
 export * from "./quality/index";

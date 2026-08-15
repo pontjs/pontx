@@ -187,6 +187,7 @@ describe("GenericHelper.resolveGenericSchema", () => {
         },
       ],
       genericTypeArguments: [{ type: "string" }],
+      originalRef: "#/components/schemas/Result",
       required: [],
     });
   });
@@ -218,6 +219,7 @@ describe("GenericHelper.resolveGenericSchema", () => {
         { name: "T1", default: { type: "number" } },
       ],
       genericTypeArguments: [{ type: "number" }, { type: "boolean" }],
+      originalRef: "#/components/schemas/Pair",
       required: [],
     });
   });
@@ -291,6 +293,7 @@ describe("GenericHelper.resolveGenericSchema", () => {
           },
         },
       ],
+      originalRef: "#/components/schemas/Result",
     });
   });
 
@@ -381,6 +384,7 @@ describe("GenericHelper.resolveGenericSchema", () => {
           },
         },
       ],
+      originalRef: "#/components/schemas/Result",
       required: [],
     });
   });
@@ -466,6 +470,7 @@ describe("GenericHelper.resolveGenericSchema", () => {
         { name: "T1", default: { type: "number" } },
       ],
       genericTypeArguments: [{ type: "string" }],
+      originalRef: "#/components/schemas/Pair",
       required: [],
     });
   });
@@ -504,6 +509,7 @@ describe("GenericHelper.resolveGenericSchema", () => {
         },
       ],
       genericTypeArguments: [{ type: "number" }],
+      originalRef: "#/components/schemas/Result",
       required: [],
     });
   });
@@ -567,6 +573,7 @@ describe("GenericHelper.resolveGenericSchema", () => {
           type: "string",
         },
       ],
+      originalRef: "#/components/schemas/Container",
     });
   });
 });

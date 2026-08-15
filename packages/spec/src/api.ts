@@ -4,6 +4,49 @@ import { OAS3 } from "oas-spec-ts";
 
 export type OAS3API = OAS3.OperationObject;
 
+/** Endpoint 文档证据的审核状态。 */
+export enum PontxDocumentationStatus {
+  Official = "official",
+  Verified = "verified",
+  Community = "community",
+  Unknown = "unknown",
+}
+
+/** Endpoint 的执行类别；执行器可据此实施审批策略。 */
+export enum PontxExecutionPermission {
+  Read = "read",
+  Mutation = "mutation",
+}
+
+/** Endpoint 的来源证据和审核信息。 */
+export type PontxEndpointDocumentation = {
+  status?: PontxDocumentationStatus | string;
+  evidence?: string[];
+  verifiedAt?: string;
+  stabilityNote?: string;
+};
+
+/** Endpoint 是否允许由某个消费方执行。 */
+export type PontxEndpointExecution = {
+  enabled: boolean;
+  permission?: PontxExecutionPermission;
+  disabledReason?: string;
+};
+
+/** 不依赖传输协议的 Endpoint 元数据。 */
+export type PontxEndpointMetadata = {
+  documentation?: PontxEndpointDocumentation;
+  execution?: PontxEndpointExecution;
+};
+
+/** 媒体类型对应的消息定义。 */
+export type PontxMediaTypeObject = {
+  schema?: PontxJsonSchema;
+  example?: unknown;
+  examples?: Record<string, unknown>;
+  encoding?: Record<string, unknown>;
+};
+
 /** 整体请求示例中的输入位置。 */
 export enum PontxRequestInputLocation {
   Path = "path",
@@ -57,6 +100,9 @@ export class Parameter {
   name: string;
   required: boolean;
   in: "query" | "body" | "path" | "formData" | "header";
+  description?: string;
+  /** OAS3 requestBody 的完整媒体类型映射。 */
+  content?: Record<string, PontxMediaTypeObject>;
 }
 
 export type HeaderObject = {
@@ -67,6 +113,8 @@ export type HeaderObject = {
 
 export type ResponseObject = {
   schema?: PontxJsonSchema;
+  /** 响应的完整媒体类型映射；`schema` 保留为首选媒体类型兼容字段。 */
+  content?: Record<string, PontxMediaTypeObject>;
   headers?: {
     [key: string]: HeaderObject;
   };
@@ -77,9 +125,9 @@ export class PontxAPI {
   /** @deprecated */
   name?: string;
   /** 路径,路径参数用 {} 包裹，如 /api/user/{id} */
-  path: string;
+  path?: string;
   /** 方法 */
-  method:
+  method?:
     | "GET"
     | "POST"
     | "PUT"
@@ -113,12 +161,18 @@ export class PontxAPI {
   deprecated?: boolean;
   /** 扩展 */
   ext?: any;
+  /** 文档证据和执行策略；不依赖 OAS 扩展字段。 */
+  metadata?: PontxEndpointMetadata;
   /** 每个条目是一组可以整体使用的请求输入。 */
   requestExamples?: Record<string, PontxRequestExample>;
   /** 安全 */
   security?: Array<OAS3.SecurityRequirementObject>;
   /** 外部文档 */
   externalDocs?: ExternalDocumentationObject;
+  /** Endpoint 级服务器覆盖。 */
+  servers?: OAS3.ServerObject[];
+  /** 回调契约；由生成器按能力决定是否执行。 */
+  callbacks?: Record<string, unknown>;
 
   static getUsedStructNames(api: PontxAPI) {
     const structs = [] as string[];

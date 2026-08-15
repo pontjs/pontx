@@ -171,5 +171,5 @@ export function parsePontSpec2OAS3(spec: PontxSpec) {
     security: spec.security,
     tags,
     externalDocs: spec.externalDocs,
-  } as OAS3.OpenAPIObject;
+  } as unknown as OAS3.OpenAPIObject;
 }

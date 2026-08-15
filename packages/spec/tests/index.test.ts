@@ -1,14 +1,19 @@
-import { test, expect } from "vitest";
+import { expect, test } from "vitest";
 import { parseOAS3 } from "../src/index";
-import * as fse from "fs-extra";
-import * as path from "path";
-import * as YAML from "js-yaml";
 
-const swaggerPath = path.join(__dirname, "./yamls/openapi.yaml");
-const swaggerYaml = fse.readFileSync(swaggerPath, "utf-8");
-const swagger = YAML.load(swaggerYaml);
+test("parseOAS3 public entrypoint", () => {
+  const spec = parseOAS3({
+    openapi: "3.0.3",
+    info: { title: "Fixture", version: "1.0.0" },
+    paths: {
+      "/health": {
+        get: {
+          operationId: "getHealth",
+          responses: { "200": { description: "ok" } }
+        }
+      }
+    }
+  }, "api-meta-v2");
 
-test("parseOAS3", () => {
-  const spec = parseOAS3(swagger, "api-meta-v2");
-  expect(spec).toBeDefined();
+  expect(spec.apis.getHealth.operationId).toBe("getHealth");
 });

@@ -7,7 +7,14 @@ import {
   resolveRef,
 } from "./utils.js";
 import _ from "lodash";
-import { Parameter, PontxAPI } from "../api.js";
+import {
+  Parameter,
+  PontxAPI,
+  PontxDocumentationStatus,
+  PontxEndpointMetadata,
+  PontxExecutionPermission,
+  PontxMediaTypeObject,
+} from "../api.js";
 import { PontxJsonSchema } from "../schema.js";
 import { PontxSpec } from "../spec.js";
 import { fixOASTags } from "./parseOASTags.js";
@@ -63,6 +70,7 @@ function normalizeOAS3Schema(schema: unknown): PontxJsonSchema | undefined {
       .map((value, index) => [String(value), enumDescriptions[index]])
       .filter((entry) => typeof entry[1] === "string" && entry[1].trim().length > 0));
   }
+  delete normalized["x-enum-descriptions"];
 
   if (source.properties) {
     normalized.properties = Object.fromEntries(Object.entries(source.properties)
@@ -82,8 +90,71 @@ function normalizeOAS3Schema(schema: unknown): PontxJsonSchema | undefined {
   return normalized as PontxJsonSchema;
 }
 
+/** 保留 OAS 媒体类型，而不是只取第一个 content 条目。 */
+function normalizeMediaTypes(
+  content: Record<string, any> | undefined
+): Record<string, PontxMediaTypeObject> | undefined {
+  if (!content) return undefined;
+
+  return Object.fromEntries(Object.entries(content).map(([mediaType, media]) => [
+    mediaType,
+    {
+      ...media,
+      schema: normalizeOAS3Schema(media?.schema),
+    },
+  ]));
+}
+
+/** 将受支持的 x-pontx-* 字段迁移到类型化元数据。 */
+function parseEndpointMetadata(inter: Record<string, any>): PontxEndpointMetadata | undefined {
+  const documentation = inter["x-pontx-documentation-status"]
+    || inter["x-pontx-evidence"]
+    || inter["x-pontx-verified-at"]
+    || inter["x-pontx-stability-note"]
+    ? {
+        status: inter["x-pontx-documentation-status"] as PontxDocumentationStatus | string,
+        evidence: inter["x-pontx-evidence"],
+        verifiedAt: inter["x-pontx-verified-at"],
+        stabilityNote: inter["x-pontx-stability-note"],
+      }
+    : undefined;
+  const hasExecution = typeof inter["x-pontx-proxy-enabled"] === "boolean"
+    || typeof inter["x-pontx-execution-enabled"] === "boolean";
+  const enabled = inter["x-pontx-execution-enabled"]
+    ?? inter["x-pontx-proxy-enabled"];
+  const execution = hasExecution
+    ? {
+        enabled,
+        permission: inter["x-pontx-execution-permission"] as PontxExecutionPermission,
+        disabledReason: inter["x-pontx-execution-disabled-reason"]
+          ?? inter["x-pontx-proxy-disabled-reason"],
+      }
+    : undefined;
+
+  return documentation || execution ? { documentation, execution } : undefined;
+}
+
+/** 保留未知扩展，便于导入器无损转交未来的 x-pontx-* 字段。 */
+function getExtensions(value: Record<string, any>): Record<string, unknown> | undefined {
+  const migratedExtensions = new Set([
+    "x-pontx-documentation-status",
+    "x-pontx-evidence",
+    "x-pontx-verified-at",
+    "x-pontx-stability-note",
+    "x-pontx-proxy-enabled",
+    "x-pontx-proxy-disabled-reason",
+    "x-pontx-execution-enabled",
+    "x-pontx-execution-permission",
+    "x-pontx-execution-disabled-reason",
+    "x-pontx-request-examples",
+  ]);
+  const extensions = Object.fromEntries(Object.entries(value)
+    .filter(([key]) => key.startsWith("x-") && !migratedExtensions.has(key)));
+  return Object.keys(extensions).length ? extensions : undefined;
+}
+
 export function parseOAS3Interface(
-  inter: OAS3.OperationObject & { path: string; method: string },
+  inter: OAS3.OperationObject & { path: string; method: string; sourceTags?: string[] },
   swagger: OAS3.OpenAPIObject
 ) {
   const { path, method } = inter;
@@ -97,12 +168,18 @@ export function parseOAS3Interface(
           resolveRef(header, swagger) || header,
         ]))
       : headers;
-    const responseProduces = Object.keys(content || {});
+    const normalizedContent = normalizeMediaTypes(content);
+    const responseProduces = Object.keys(normalizedContent || {});
     const onlyKey = responseProduces[0];
-    const schema = content?.[onlyKey]?.schema;
-    const responseSchema = normalizeOAS3Schema(schema);
+    const responseSchema = normalizedContent?.[onlyKey]?.schema;
     produces = _.union(produces, responseProduces);
-    return { ...rest, description, schema: responseSchema, headers: resolvedHeaders as any };
+    return {
+      ...rest,
+      description,
+      schema: responseSchema,
+      content: normalizedContent,
+      headers: resolvedHeaders as any,
+    };
   });
 
   const parameters = (inter.parameters || []).map((param) => {
@@ -138,6 +215,8 @@ export function parseOAS3Interface(
           in: "body" as any,
           required: requestBody.required === true,
           schema: normalizeOAS3Schema(consumeContent[consume]?.schema),
+          content: normalizeMediaTypes(consumeContent),
+          description: requestBody.description,
         } as Parameter;
         parameters.push(bodyParma);
       }
@@ -149,6 +228,7 @@ export function parseOAS3Interface(
     operationId: inter.operationId,
     consumes,
     description: inter.description,
+    tags: inter.sourceTags ?? inter.tags,
     method,
     path,
     responses,
@@ -157,6 +237,11 @@ export function parseOAS3Interface(
     produces: produces,
     security: inter.security,
     requestExamples: inter["x-pontx-request-examples"],
+    externalDocs: inter.externalDocs,
+    servers: inter.servers,
+    callbacks: inter.callbacks as unknown as Record<string, unknown>,
+    metadata: parseEndpointMetadata(inter),
+    ext: getExtensions(inter),
   } as PontxAPI;
 
   return pontAPI;
@@ -165,7 +250,7 @@ export function parseOAS3Interface(
 export function parseSwagger2APIs(originSwagger: OAS3.OpenAPIObject) {
   const swagger = fixOASTags(originSwagger);
   const allSwaggerInterfaces = [] as Array<
-    OAS3.OperationObject & { path: string; method: string }
+    OAS3.OperationObject & { path: string; method: string; sourceTags?: string[] }
   >;
 
   if (!swagger.paths) {
@@ -197,6 +282,7 @@ export function parseSwagger2APIs(originSwagger: OAS3.OpenAPIObject) {
         ...inter,
         path,
         method: method?.toUpperCase(),
+        sourceTags: (originSwagger.paths?.[path]?.[method] as OAS3.OperationObject)?.tags ?? [],
         tags: inter.tags || [],
         parameters: _.unionWith(
           inter.parameters,
@@ -214,7 +300,7 @@ export function parseSwagger2APIs(originSwagger: OAS3.OpenAPIObject) {
 
   const apiGroups = (swagger.tags || []).map((tag) => {
     const tagApis = allSwaggerInterfaces.filter((inter) => {
-      return inter.tags.includes(tag.name);
+      return inter.tags[0] === tag.name;
     });
 
     const samePath = getMaxSamePath(
@@ -298,20 +384,27 @@ export function parseOAS3(
   } : undefined;
 
   const pontDs = {
+    pontx: new PontxSpec().pontx,
+    style: new PontxSpec().style,
     components,
     apis,
     name,
-    servers: swagger?.servers,
+    servers: swagger?.servers?.map((server) => ({
+      ...server,
+      ...((server as any)["x-pontx-id"] ? { id: (server as any)["x-pontx-id"] } : {}),
+    })),
     info: {
+      ...swagger?.info,
       description: swagger?.info?.description || swagger?.info?.title || "",
       version: swagger?.info?.version || "1.0.0",
       title: swagger?.info?.title || "",
     },
     security: swagger?.security,
     externalDocs: swagger?.externalDocs,
-    ext: {},
+    webhooks: (swagger as any)?.webhooks as Record<string, unknown>,
+    ext: getExtensions(swagger as any),
     tags,
-  } as PontxSpec;
+  } as unknown as PontxSpec;
 
   return pontDs;
 }

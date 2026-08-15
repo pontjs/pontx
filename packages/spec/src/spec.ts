@@ -6,18 +6,31 @@ import { sortObjectFields } from "./utils.js";
 import { produce } from "immer";
 import type { PontxAsyncApiSpec } from "./asyncapi.js";
 
+/** PontxSpec 支持的 API 风格。 */
+export enum PontxStyle {
+  RPC = "RPC",
+  RESTFul = "RESTFul",
+  GraphQL = "GraphQL",
+  AsyncAPI = "AsyncAPI",
+}
+
+/** PontxSpec 服务器；`id` 是跨 locale 和消费者稳定的本地身份。 */
+export type PontxServer = OAS3.ServerObject & {
+  id?: string;
+};
+
 export type PontxComponents = {
   schemas: Record<string, PontxJsonSchema>;
-  responses?: string;
-  parameters?: string;
-  examples?: string;
-  requestBodies?: string;
-  headers?: string;
+  responses?: Record<string, unknown>;
+  parameters?: Record<string, unknown>;
+  examples?: Record<string, unknown>;
+  requestBodies?: Record<string, unknown>;
+  headers?: Record<string, unknown>;
   securitySchemes?: {
     [x: string]: OAS3.SecuritySchemeObject;
   };
-  links?: string;
-  callbacks?: string;
+  links?: Record<string, unknown>;
+  callbacks?: Record<string, unknown>;
 };
 
 export type TagGroup = {
@@ -30,7 +43,7 @@ export class PontxSpec {
   name: string;
   info?: OAS3.InfoObject = {};
   /** pontx 协议版本 */
-  pontx? = "2.1";
+  pontx = "2.1";
   components?: PontxComponents = {
     schemas: {},
   };
@@ -38,17 +51,19 @@ export class PontxSpec {
   apis: Record<string, PontxAPI>;
   /** 命名空间描述，在 pontx 中，tag.name 即为命名空间。一个 API 仅有一个 tag。 */
   tags?: OAS3.TagObject[];
-  servers?: OAS3.ServerObject[];
+  servers?: PontxServer[];
   externalDocs?: ExternalDocumentationObject;
   /** AsyncAPI 3.x contract, kept separate so streams are never treated as HTTP Endpoints. */
   asyncapi?: PontxAsyncApiSpec;
+  /** 异步回调定义；它不是 HTTP paths 的替代真源。 */
+  webhooks?: Record<string, unknown>;
   envs?: {
     [x: string]: Partial<PontxSpec>;
   };
   security? = [] as Array<{
     [x: string]: string[];
   }>;
-  style?: "RPC" | "RESTFul" | "GraphQL" | "AsyncAPI" = "RESTFul";
+  style: PontxStyle = PontxStyle.RESTFul;
 
   /** 扩展字段 */
   ext?: any;

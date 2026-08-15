@@ -5,7 +5,7 @@ import type {
   PontxAsyncApiServer,
   PontxAsyncApiSpec,
 } from "../asyncapi.js";
-import { PontxSpec } from "../spec.js";
+import { PontxSpec, PontxStyle } from "../spec.js";
 import type { PontxJsonSchema } from "../schema.js";
 
 type JsonRecord = Record<string, any>;
@@ -87,6 +87,7 @@ function parseMessage(
   const headers = normalizeSchema(message.headers);
 
   return {
+    pontx: "2.1",
     name,
     ...(typeof message.title === "string" ? { title: message.title } : {}),
     ...(typeof message.summary === "string" ? { summary: message.summary } : {}),
@@ -255,7 +256,7 @@ export function parseAsyncApi3(source: JsonRecord, name = ""): PontxSpec {
   return {
     name,
     info: asyncapi.info as PontxSpec["info"],
-    style: "AsyncAPI",
+    style: PontxStyle.AsyncAPI,
     apis: {},
     components: {
       schemas: asyncapi.components.schemas,

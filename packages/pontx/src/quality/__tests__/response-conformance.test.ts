@@ -23,6 +23,8 @@ function fixtures(schema: PontxJsonSchema, data: unknown): {
     fixture: { status: 200, data },
   };
   const spec = {
+    pontx: "2.1",
+    style: "RESTFul",
     name: "quotes", apis: { "quotes/get": api }, components: { schemas: {} },
   } as PontxSpec;
   return { spec, api, item };

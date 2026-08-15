@@ -11,14 +11,65 @@ import {
 import { OAS2JsonSchemaContext, parseOAS2JsonSchema } from "./schema.js";
 import _ from "lodash";
 const { mapValues, unionBy, union } = _;
-import { Parameter, PontxAPI } from "../api.js";
+import {
+  Parameter,
+  PontxAPI,
+  PontxDocumentationStatus,
+  PontxEndpointMetadata,
+  PontxExecutionPermission,
+} from "../api.js";
 import { PontxJsonSchema } from "../schema.js";
 import { PontxSpec } from "../spec.js";
 import { parseOAS2Schemas } from "./schemas.js";
 import { fixOASTags } from "./parseOASTags.js";
 
+/** 将 OAS 扩展迁移为 PontxSpec 的类型化 Endpoint 元数据。 */
+function parseEndpointMetadata(inter: Record<string, any>): PontxEndpointMetadata | undefined {
+  const documentation = inter["x-pontx-documentation-status"]
+    || inter["x-pontx-evidence"]
+    || inter["x-pontx-verified-at"]
+    || inter["x-pontx-stability-note"]
+    ? {
+        status: inter["x-pontx-documentation-status"] as PontxDocumentationStatus | string,
+        evidence: inter["x-pontx-evidence"],
+        verifiedAt: inter["x-pontx-verified-at"],
+        stabilityNote: inter["x-pontx-stability-note"],
+      }
+    : undefined;
+  const hasExecution = typeof inter["x-pontx-proxy-enabled"] === "boolean"
+    || typeof inter["x-pontx-execution-enabled"] === "boolean";
+  const execution = hasExecution
+    ? {
+        enabled: inter["x-pontx-execution-enabled"] ?? inter["x-pontx-proxy-enabled"],
+        permission: inter["x-pontx-execution-permission"] as PontxExecutionPermission,
+        disabledReason: inter["x-pontx-execution-disabled-reason"]
+          ?? inter["x-pontx-proxy-disabled-reason"],
+      }
+    : undefined;
+  return documentation || execution ? { documentation, execution } : undefined;
+}
+
+/** 保留导入器尚未识别的 OAS 扩展字段。 */
+function getExtensions(value: Record<string, any>): Record<string, unknown> | undefined {
+  const migratedExtensions = new Set([
+    "x-pontx-documentation-status",
+    "x-pontx-evidence",
+    "x-pontx-verified-at",
+    "x-pontx-stability-note",
+    "x-pontx-proxy-enabled",
+    "x-pontx-proxy-disabled-reason",
+    "x-pontx-execution-enabled",
+    "x-pontx-execution-permission",
+    "x-pontx-execution-disabled-reason",
+    "x-pontx-request-examples",
+  ]);
+  const extensions = Object.fromEntries(Object.entries(value)
+    .filter(([key]) => key.startsWith("x-") && !migratedExtensions.has(key)));
+  return Object.keys(extensions).length ? extensions : undefined;
+}
+
 export function parseOAS2Interface(
-  inter: OAS2.OperationObject & { path: string; method: string },
+  inter: OAS2.OperationObject & { path: string; method: string; sourceTags?: string[] },
   context: OAS2JsonSchemaContext
 ) {
   const responses = mapValues(inter.responses, (response) => {
@@ -46,12 +97,17 @@ export function parseOAS2Interface(
     consumes: inter.consumes,
     produces: inter.produces,
     description: inter.description,
+    tags: inter.sourceTags ?? inter.tags,
     method: inter.method?.toUpperCase(),
     path: inter.path,
     responses,
     deprecated: inter.deprecated,
     parameters: unionBy(parameters, "name"),
     requestExamples: inter["x-pontx-request-examples"],
+    security: inter.security,
+    externalDocs: inter.externalDocs,
+    metadata: parseEndpointMetadata(inter),
+    ext: getExtensions(inter),
   } as PontxAPI;
 
   return pontAPI;
@@ -63,7 +119,7 @@ export function parseSwagger2APIs(
 ) {
   const swagger = fixOASTags(originSwagger);
   const allSwaggerInterfaces = [] as Array<
-    OAS2.OperationObject & { path: string; method: string }
+    OAS2.OperationObject & { path: string; method: string; sourceTags?: string[] }
   >;
 
   if (!swagger.paths) {
@@ -96,6 +152,7 @@ export function parseSwagger2APIs(
         ...inter,
         path,
         method: method?.toUpperCase(),
+        sourceTags: (originSwagger.paths?.[path]?.[method] as OAS2.OperationObject)?.tags ?? [],
         tags: inter.tags || [],
         parameters: unionBy(
           inter.parameters,
@@ -109,7 +166,7 @@ export function parseSwagger2APIs(
   const apiGroups = (swagger.tags || []).map((tag) => {
     const tagApis = allSwaggerInterfaces.filter((inter) => {
       return (
-        inter.tags.includes(tag.name) || inter.tags.includes(tag.description)
+        inter.tags[0] === tag.name || inter.tags[0] === tag.description
       );
     });
 
@@ -216,6 +273,7 @@ export function parseOAS2(swagger: OAS2.SwaggerObject, name = ""): PontxSpec {
 
   const pontDs = {
     pontx: new PontxSpec().pontx,
+    style: new PontxSpec().style,
     components: {
       schemas: definitions,
     },
@@ -223,6 +281,7 @@ export function parseOAS2(swagger: OAS2.SwaggerObject, name = ""): PontxSpec {
     tags,
     name,
     info: {
+      ...swagger.info,
       version: swagger.info?.version,
       title: swagger.info?.title,
       description: swagger.info?.description,
@@ -234,6 +293,7 @@ export function parseOAS2(swagger: OAS2.SwaggerObject, name = ""): PontxSpec {
     ],
     security: swagger.security,
     externalDocs: swagger.externalDocs,
+    ext: getExtensions(swagger as any),
   } as PontxSpec;
 
   return pontDs;

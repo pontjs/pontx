@@ -1,0 +1,44 @@
+{
+  "pontx": "2.1",
+  "style": "RPC",
+  "name": "rpc-minimal",
+  "info": {
+    "title": "Minimal RPC contract",
+    "version": "1.0.0"
+  },
+  "apis": {
+    "inventory/getItem": {
+      "operationId": "getItem",
+      "summary": "Get an inventory item",
+      "tags": ["inventory"],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "body",
+          "required": true,
+          "schema": { "type": "string" }
+        }
+      ],
+      "responses": {
+        "success": {
+          "description": "Item result",
+          "schema": { "$ref": "#/components/schemas/Item" }
+        }
+      }
+    }
+  },
+  "tags": [
+    { "name": "inventory", "description": "Inventory methods" }
+  ],
+  "components": {
+    "schemas": {
+      "Item": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "type": "string" }
+        }
+      }
+    }
+  }
+}

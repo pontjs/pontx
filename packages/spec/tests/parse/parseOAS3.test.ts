@@ -264,6 +264,7 @@ describe("parseOAS3", () => {
     const api = result.apis["apiApp/apiAppCreate"];
 
     expect(api).toBeDefined();
+    expect(api.tags).toEqual(["Api App"]);
     expect(api.consumes).toEqual(["application/json", "multipart/form-data"]);
     expect(result.tags).toEqual([{ name: "apiApp", description: undefined }]);
 

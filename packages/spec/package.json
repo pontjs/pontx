@@ -20,6 +20,7 @@
   "typings": "lib/index.d.ts",
   "scripts": {
     "build": "rollup -c",
+    "test": "vitest run",
     "watch": "rollup -c --watch",
     "build:doc": "typedoc --plugin typedoc-plugin-markdown --out docs src/index.ts"
   },
