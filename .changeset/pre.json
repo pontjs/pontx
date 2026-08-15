@@ -15,6 +15,7 @@
   "changesets": [
     "blue-dolphins-stream",
     "bright-root-methods",
+    "check-has-mods-mixed-specs",
     "clean-rice-listen",
     "config-loader-improvement",
     "dropbox-sign-oas-compatibility",

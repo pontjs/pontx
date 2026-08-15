@@ -1,5 +1,15 @@
 # @pontx/spec
 
+## 1.0.0-beta.10
+
+### Patch Changes
+
+- 541ecd2: Fix `PontxSpec.checkHasMods` so a spec whose alphabetically-first Endpoint is
+  untagged but that still contains tagged `tag/operationId` keys is reported as
+  having Controllers. Previously only the first API key was inspected, which
+  broke generated SDK controllers for mixed tagged/untagged specs such as the
+  OpenAI API.
+
 ## 1.0.0-beta.9
 
 ### Patch Changes
