@@ -2,6 +2,8 @@
 
 本文档是 AI Agent 执行项目初始化时的操作指南，包含明确的询问流程和分支执行步骤。
 
+> 输入规范可以是 PontxSpec，或一次性导入的 OAS2/OAS3。若任务是维护 `pontx-api-metadata`，不要按本指南将上游 OAS 留作持续输入；应使用该产品固定的 `spec.pontx.json`，并遵循 metadata collection skill 的分级目录与 hash 门禁。
+
 ---
 
 ## 第一步：询问用户

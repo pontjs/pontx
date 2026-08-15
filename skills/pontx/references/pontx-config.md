@@ -2,6 +2,8 @@
 
 本文档详细介绍 `pontx.config.ts` 配置文件的所有选项。
 
+> 协议边界：`specs` 可以指向 PontxSpec 或用于一次性导入的 OAS2/OAS3。对于 `pontx-api-metadata`，配置/生成输入必须是固定 commit 的 `products/<slug>/spec.pontx.json`；上游 OAS 仅保存在同产品 `sources/` 作证据，不能成为 metadata、Hub 或 SDK 的运行时真源。
+
 ## 配置文件格式
 
 Pontx 支持以下配置文件格式（按优先级排序）：
@@ -24,7 +26,7 @@ export default defineConfig({
   specs: [
     {
       name: "my-api",
-      url: "https://api.example.com/swagger.json",
+      localPath: "./products/my-api/spec.pontx.json",
     },
   ],
 
@@ -87,8 +89,8 @@ API 数据源配置数组。`specs` 是推荐的写法，`origins` 是兼容旧�
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | `name` | `string` | ✅ | 数据源名称，用于 API 路径前缀 |
-| `url` | `string` | - | 远程 OpenAPI/Swagger 规范 URL |
-| `localPath` | `string` | - | 本地规范文件路径（相对于配置文件） |
+| `url` | `string` | - | 远程 PontxSpec 或一次性导入的 OpenAPI/Swagger 规范 URL |
+| `localPath` | `string` | - | 本地 PontxSpec 或 OpenAPI/Swagger 文件路径（相对于配置文件） |
 | `env` | `string` | - | 当前使用的环境名称 |
 | `envs` | `object` | - | 环境配置映射 |
 | `includeTags` | `boolean` | - | 是否在 Spec 中包含 Tag，默认 `true` |
