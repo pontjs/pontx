@@ -1,5 +1,12 @@
 # @pontx/spec
 
+## 1.0.0-beta.7
+
+### Patch Changes
+
+- Generate references inside `schemas.ts` as local type names so dynamic object
+  maps compile instead of referring to a non-existent `schemas` namespace.
+
 ## 1.0.0-beta.6
 
 ### Patch Changes

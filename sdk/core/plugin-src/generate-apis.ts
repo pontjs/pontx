@@ -359,5 +359,7 @@ import type * as schemas from './schemas';
   });
   code += `}\n`;
 
-  return code;
+  return code.includes("schemas.")
+    ? code
+    : code.replace("import type * as schemas from './schemas';\n\n", "");
 }
