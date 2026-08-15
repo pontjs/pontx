@@ -27,9 +27,10 @@ export type {
   PontxEndpointExecution,
   PontxEndpointMetadata,
   PontxMediaTypeObject,
+  PontxRpcOperation,
 } from "./api";
 export { PontxSpec, PontxSpecs, PontxStyle, TagGroup } from "./spec";
-export type { PontxServer } from "./spec";
+export type { PontxServer, PontxRpcService } from "./spec";
 export type {
   PontxAsyncApiChannel,
   PontxAsyncApiInfo,

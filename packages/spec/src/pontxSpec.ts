@@ -91,6 +91,13 @@ function validateApi(
     issue(issues, `${path}.tags`, "invalid_tags", "tags 必须是非空字符串数组");
   }
 
+  if (style === PontxStyle.RPC) {
+    if (!isRecord(api.rpc) || typeof api.rpc.action !== "string" || !api.rpc.action.trim()) {
+      issue(issues, `${path}.rpc.action`, "missing_rpc_action", "RPC Endpoint 必须声明稳定的 rpc.action");
+    }
+    return;
+  }
+
   if (style !== PontxStyle.RESTFul) return;
 
   if (typeof api.path !== "string" || !api.path.startsWith("/")) {
@@ -124,6 +131,10 @@ export function validatePontxSpec(
   }
   if (!Object.values(PontxStyle).includes(input.style)) {
     issue(issues, "$.style", "invalid_style", "style 必须显式声明为 RPC、RESTFul 或 GraphQL");
+  }
+  if (input.style === PontxStyle.RPC
+    && (!isRecord(input.rpc) || typeof input.rpc.protocol !== "string" || !input.rpc.protocol.trim())) {
+    issue(issues, "$.rpc.protocol", "missing_rpc_protocol", "RPC 契约必须声明稳定的 rpc.protocol");
   }
   if (typeof input.name !== "string" || !input.name.trim()) {
     issue(issues, "$.name", "invalid_name", "name 必须是非空字符串");

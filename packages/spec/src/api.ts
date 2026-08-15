@@ -39,6 +39,16 @@ export type PontxEndpointMetadata = {
   execution?: PontxEndpointExecution;
 };
 
+/** RPC Endpoint 的逻辑 action 与真实传输映射；不使用伪造的 REST path。 */
+export type PontxRpcOperation = {
+  /** 供应商协议内稳定的 action 名称，例如 AWS Query 的 SendMessage。 */
+  action: string;
+  /** 真实 HTTP 方法；省略时由协议运行时决定。 */
+  method?: "GET" | "POST";
+  /** 请求体媒体类型，例如 application/x-www-form-urlencoded。 */
+  contentType?: string;
+};
+
 /** 媒体类型对应的消息定义。 */
 export type PontxMediaTypeObject = {
   schema?: PontxJsonSchema;
@@ -173,6 +183,8 @@ export class PontxAPI {
   servers?: OAS3.ServerObject[];
   /** 回调契约；由生成器按能力决定是否执行。 */
   callbacks?: Record<string, unknown>;
+  /** RPC 传输绑定；RPC Endpoint 不声明 REST path 或 method。 */
+  rpc?: PontxRpcOperation;
 
   static getUsedStructNames(api: PontxAPI) {
     const structs = [] as string[];
