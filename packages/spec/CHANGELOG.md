@@ -1,5 +1,13 @@
 # @pontx/spec
 
+## 1.0.0-beta.6
+
+### Patch Changes
+
+- Publish the Smithy 2.0 RPC importer. It preserves logical action identities,
+  requires an explicit primary protocol when a service declares more than one,
+  and keeps non-REST contracts free of fabricated resource paths.
+
 ## 1.0.0-beta.5
 
 ### Minor Changes

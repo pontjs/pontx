@@ -22,6 +22,12 @@ version: {{VERSION}}
 
 版本: {{VERSION}}
 
+## 协议与规范来源
+
+本 SDK/CLI 由已审的 PontxSpec 生成。不要手改生成的 API 定义，也不要把上游 OpenAPI/OAS 副本当作它的 canonical spec；需要修复契约时，应回到产品固定 metadata commit 的 \`products/<slug>/spec.pontx.json\`，更新 SHA-256 证据后重新生成。Controller 只来自该 PontxSpec 的显式 tags；没有 tag 的 Endpoint 保持在 client 根，不会合成 \`common\` 或 \`default\` 分组。
+
+只有本产品声明并实现执行适配器的 style 才能实际执行 \`call\`。RESTFul CLI 按下面的 preview-first 工作流使用；RPC 或其他没有执行适配器的 style 仍可浏览、搜索、查看契约和生成支持它的代码，但必须把调用视为不可用，不能伪造 HTTP method/path。
+
 **核心设计**: 在任意子命令层级使用 \`-h\` 都能获取下一步可用的操作和参数。
 
 ## Quick Start
@@ -110,7 +116,7 @@ npm install -g {{SDK_NAME}}
 
 ### 4. API 调用（CLI Call）
 
-⚠️ **安全警告**: 实际调用会产生**真实的副作用**（创建、更新、删除数据）。
+⚠️ **安全警告**: 仅在 \`{{CLI_NAME}} call -h\` 明确提供执行能力时，实际调用才可能产生**真实的副作用**（创建、更新、删除数据）。没有执行适配器时不要猜测或拼接 HTTP 请求。
 
 **推荐安全流程**:
 

@@ -1,6 +1,6 @@
 ---
 name: pontx
-description: "Manage OpenAPI API lifecycles with the Pontx CLI and SDK: discover and inspect APIs, configure pontx.config.ts, preview or call Endpoints, and generate type-safe TypeScript clients. Use this skill whenever the user mentions Pontx, pontx.config.ts, Pontx CLI commands, OpenAPI/OAS project setup, API search, Schema inspection, SDK code generation, or troubleshooting a Pontx project."
+description: "Manage PontxSpec API lifecycles with the Pontx CLI and SDK: import OAS when needed, discover and inspect APIs, configure pontx.config.ts, preview or call supported Endpoints, and generate type-safe TypeScript clients. Use this skill whenever the user mentions Pontx, PontxSpec, pontx.config.ts, Pontx CLI commands, OpenAPI/OAS import or project setup, API search, Schema inspection, SDK code generation, or troubleshooting a Pontx project."
 metadata:
   author: pontx
   tags:
@@ -13,6 +13,12 @@ metadata:
 # Pontx AI Skill
 
 Pontx 是一个 API 生命周期管理工具，提供 API 搜索、探索、文档生成、SDK 代码生成和直接调用等能力。
+
+## 协议边界
+
+PontxSpec 是 Pontx 的 canonical API 规范。OAS2/OAS3 是兼容的导入格式：普通应用可以直接将上游 OAS 作为 `pontx.config.ts` 输入；但在 `pontx-api-metadata` 中，必须先一次性导入并审查为 `products/<slug>/spec.pontx.json`，之后 metadata、Hub 和 SDK 只能读取该 PontxSpec。不要把 `sources/openapi.json`、`catalog/catalog.json` 或 `catalog/source.json` 重新作为真源。
+
+`style: "RESTFul"` 才可使用 HTTP `method/path` 与 Playground/CLI 执行流程。RPC 等其他 style 仍可加载、检查、索引和生成支持它的产物；没有执行适配器时必须显示为不可执行，不能伪造 REST 请求。
 
 > **IMPORTANT**: 本文件是工作流索引。每个工作流的详细步骤、参数、分支逻辑都在 `references/` 目录下的对应文件中。**执行任何工作流之前，必须先读取对应的 reference 文件，不要仅凭本文件中的概要信息执行操作。**
 
