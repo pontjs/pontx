@@ -31,6 +31,7 @@ import { registerCliCommands } from "./commands/cli-commands";
 import { listSpecsCommand } from "./commands/list-specs";
 import { loadSpecInfos, registerSpecCommands } from "./spec-commands";
 import { registerSpecListCommands } from "./commands/spec/list-commands";
+import { registerHubCommands } from "./hub/commands";
 import { registerQualityCommands } from "../quality/commands";
 
 /* 兼容 ESM 和 CJS 的 __dirname */
@@ -347,6 +348,9 @@ function registerGlobalCommands(
 
   /* PontxSpec Metadata 静态与动态质量评估 */
   registerQualityCommands(program);
+
+  /* 远程精选 API Hub；不依赖本地 pontx.config.ts */
+  registerHubCommands(program);
 }
 
 /**
