@@ -10,8 +10,8 @@
   ],
   "dependencies": {},
   "devDependencies": {
-    "@changesets/cli": "^2.29.2",
-    "@modelcontextprotocol/inspector": "^0.1.0",
+    "@changesets/cli": "^2.29.7",
+    "@modelcontextprotocol/inspector": "^0.16.6",
     "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^16.0.1",
@@ -19,11 +19,11 @@
     "@rollup/plugin-typescript": "^12.1.2",
     "@types/lodash": "^4.14.202",
     "@types/node": "^22.13.14",
-    "glob": "^11.0.2",
+    "glob": "^11.1.0",
     "rimraf": "^3.0.2",
-    "rollup": "^4.41.1",
+    "rollup": "^4.59.0",
     "typescript": "^5.8.2",
-    "vitest": "^3.1.1"
+    "vitest": "^3.2.6"
   },
   "scripts": {
     "build:all": "pnpm -r --filter '!vscode-pontx-v2' --filter '!react-app' --filter '!@pontx/nodejs-sdk' --filter '!@pontx/plugin-eggjs' build",
@@ -31,5 +31,10 @@
     "changeset": "changeset",
     "changeset:version": "changeset version",
     "changeset:publish": "changeset publish --registry=https://registry.npmjs.org"
+  },
+  "pnpm": {
+    "overrides": {
+      "handlebars": "4.7.9"
+    }
   }
 }

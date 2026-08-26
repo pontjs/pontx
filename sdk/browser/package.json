@@ -61,11 +61,11 @@
     "@types/node": "catalog:",
     "@types/react": "^18.2.0",
     "@vitest/ui": "^4.0.6",
-    "glob": "^11.0.2",
-    "happy-dom": "^20.0.10",
+    "glob": "^11.1.0",
+    "happy-dom": "^20.8.9",
     "jsdom": "^27.0.0",
     "react": "*",
-    "rollup": "^4.41.1",
+    "rollup": "^4.59.0",
     "vitest": "^4.0.6"
   }
 }

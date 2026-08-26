@@ -98,11 +98,11 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "@vitest/coverage-v8": "^1.6.1",
+    "@vitest/coverage-v8": "^3.2.6",
     "pontx": "workspace:*",
     "tsup": "^8.0.0",
     "typescript": "catalog:",
-    "vitest": "^1.0.0"
+    "vitest": "^3.2.6"
   },
   "peerDependencies": {
     "typescript": ">=5.0.0",
