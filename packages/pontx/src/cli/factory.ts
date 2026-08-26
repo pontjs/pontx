@@ -53,13 +53,41 @@ export interface CreateCliOptions {
    * @default 'pontx'
    */
   binName?: string;
+
+  /**
+   * CLI arguments used to decide whether config-backed spec commands are needed.
+   * @default process.argv.slice(2)
+   */
+  argv?: readonly string[];
+}
+
+function isConfigIndependentInvocation(args: readonly string[]): boolean {
+  for (let index = 0; index < args.length; index++) {
+    const arg = args[index];
+    if (arg === "--") return args[index + 1] === "hub";
+    if (arg === "--debug") continue;
+    if (arg === "--format" || arg === "--get-completions") {
+      index++;
+      continue;
+    }
+    if (arg.startsWith("--format=") || arg.startsWith("--get-completions=")) {
+      continue;
+    }
+    if (arg.startsWith("-")) continue;
+    return arg === "hub";
+  }
+  return false;
 }
 
 /**
  * 创建 CLI 程序（异步，因为需要加载 spec 信息来注册动态子命令）
  */
 export async function createCli(options: CreateCliOptions): Promise<Command> {
-  const { rootDir, binName = "pontx" } = options;
+  const {
+    rootDir,
+    binName = "pontx",
+    argv = process.argv.slice(2),
+  } = options;
 
   /* 读取 package.json 版本号 */
   const packageDir = getPackageDir();
@@ -99,6 +127,9 @@ export async function createCli(options: CreateCliOptions): Promise<Command> {
 
   /* ========== 注册全局命令 ========== */
   registerGlobalCommands(program, ctx, getManager, logger, binName, rootDir);
+
+  /* Hub 命令仅依赖远程目录，避免探测或加载本地 pontx.config.ts。 */
+  if (isConfigIndependentInvocation(argv)) return program;
 
   /* ========== 动态注册 spec 子命令 ========== */
   const specInfos = await loadSpecInfos(rootDir);
